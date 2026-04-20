@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會員中心 - 二手硬體安心交易平台</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --bg-color: #f4f7f6;
+        }
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: white;
+            width: 400px;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: block;
+            text-decoration: none;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #999;
+            transition: 0.3s;
+        }
+        .tab.active {
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .footer-links {
+            margin-top: 1.5rem;
+            font-size: 13px;
+            color: #888;
+        }
+        .footer-links a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+        /* 初始隱藏註冊表單 */
+        #register-form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <a href="#" class="logo">硬體交易平台 | 會員中心</a>
+        
+        <div class="tabs">
+            <div class="tab active" id="tab-login" onclick="switchTab('login')">登入</div>
+            <div class="tab" id="tab-register" onclick="switchTab('register')">註冊</div>
+        </div>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>電子郵件 / 帳號</label>
+                <input type="text" id="login-email" placeholder="請輸入您的帳號" required>
+            </div>
+            <div class="form-group">
+                <label>密碼</label>
+                <input type="password" id="login-password" placeholder="請輸入密碼" required>
+            </div>
+            <button type="submit" class="btn">立即登入</button>
+            <div class="footer-links">
+                <a href="#">忘記密碼？</a>
+            </div>
+        </form>
+
+        <form id="register-form" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label>全名</label>
+                <input type="text" id="reg-name" placeholder="例如：王小明" required>
+            </div>
+            <div class="form-group">
+                <label>電子郵件</label>
+                <input type="email" id="reg-email" placeholder="example@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>密碼</label>
+                <input type="password" id="reg-password" placeholder="至少 8 位字元" required>
+            </div>
+            <div class="form-group">
+                <label>確認密碼</label>
+                <input type="password" id="reg-confirm" placeholder="再次輸入密碼" required>
+            </div>
+            <button type="submit" class="btn" style="background-color: var(--primary-color);">建立帳號</button>
+        </form>
+    </div>
+
+    <script>
+        // 切換登入與註冊頁籤
+        function switchTab(type) {
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const loginTab = document.getElementById('tab-login');
+            const regTab = document.getElementById('tab-register');
+
+            if (type === 'login') {
+                loginForm.style.display = 'block';
+                regForm.style.display = 'none';
+                loginTab.classList.add('active');
+                regTab.classList.remove('active');
+            } else {
+                loginForm.style.display = 'none';
+                regForm.style.display = 'block';
+                loginTab.classList.remove('active');
+                regTab.classList.add('active');
+            }
+        }
+
+        // 處理登入邏輯（模擬）
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            // 在實際開發中，這裡會發送 API 請求到後端驗證資料庫
+            alert('登入中...\n帳號：' + email + '\n\n(這目前是前端模擬，稍後我們可以串接後端資料庫)');
+        }
+
+        // 處理註冊邏輯（模擬）
+        function handleRegister(event) {
+            event.preventDefault();
+            const pass = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+
+            if (pass !== confirm) {
+                alert('兩次密碼輸入不一致！');
+                return;
+            }
+            alert('帳號建立成功！歡迎加入二手硬體平台。');
+            switchTab('login');
+        }
+    </script>
+</body>
+</html>
