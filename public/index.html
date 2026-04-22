@@ -162,7 +162,7 @@
             <div id="register-form" style="display:none;">
                 <div class="form-group">
                     <label>電子郵件</label>
-                    <input type="email" placeholder="example@email.com">
+                    <input type="email" placeholder="您的@email.com">
                 </div>
                 <div class="form-group">
                     <label>設定密碼</label>
@@ -204,17 +204,34 @@
         }
 
         // 智慧推薦邏輯
-        function runRecommend() {
+        async function runRecommend() {
             const budget = document.getElementById('budget').value;
+            const usage = document.getElementById('usage').value;
+
             if(!budget) return alert('請輸入預算');
-            const res = document.getElementById('result-display');
-            res.style.display = 'block';
-            res.innerHTML = `
-                <strong>系統分析結果：</strong><br>
-                1. 根據預算分配：顯卡佔 $${budget*0.4}，CPU 佔 $${budget*0.2}。<br>
-                2. 零件相容性：已鎖定 LGA 1700 腳位。<br>
-                3. 庫存匹配：RTX 3060 (二手) 尚有庫存 2 件。
-            `;
+
+            try {
+                const response = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ budget: parseInt(budget), usage })
+                });
+
+                const result = await response.json();
+
+                const res = document.getElementById('result-display');
+                res.style.display = 'block';
+                res.innerHTML = `
+                    <strong>系統分析結果：</strong><br>
+                    1. ${result.cpu}<br>
+                    2. ${result.gpu}<br>
+                    3. 用途：${usage === 'gaming' ? '遊戲專用' : '文書機'}<br>
+                    4. 狀態：${result.status}
+                `;
+            } catch (error) {
+                alert('推薦系統暫時無法使用，請稍後再試');
+                console.error('推薦API錯誤:', error);
+            }
         }
 
         // 點擊彈窗外部關閉

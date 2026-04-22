@@ -138,7 +138,7 @@
             </div>
             <div class="form-group">
                 <label>電子郵件</label>
-                <input type="email" id="reg-email" placeholder="example@email.com" required>
+                <input type="email" id="reg-email" placeholder="您的@email.com" required>
             </div>
             <div class="form-group">
                 <label>密碼</label>
@@ -153,6 +153,12 @@
     </div>
 
     <script>
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
+
+        function getApiUrl(path) {
+            return `${API_BASE}${path}`;
+        }
+
         // 切換登入與註冊頁籤
         function switchTab(type) {
             const loginForm = document.getElementById('login-form');
@@ -173,26 +179,69 @@
             }
         }
 
-        // 處理登入邏輯（模擬）
-        function handleLogin(event) {
+
+        // 處理註冊邏輯
+        async function handleRegister(event) {
             event.preventDefault();
-            const email = document.getElementById('login-email').value;
-            // 在實際開發中，這裡會發送 API 請求到後端驗證資料庫
-            alert('登入中...\n帳號：' + email + '\n\n(這目前是前端模擬，稍後我們可以串接後端資料庫)');
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm').value;
+
+            try {
+                console.log('📝 正在註冊帳號：', email);
+                
+                // 發送資料到後端
+                const response = await fetch(getApiUrl('/api/register'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, confirmPassword })
+                });
+
+                const result = await response.json();
+                console.log('📡 後端回應：', result);
+                
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    console.log('✅ 註冊成功，帳號已保存到資料庫');
+                    // 註冊成功後切換到登入頁籤
+                    setTimeout(() => switchTab('login'), 500);
+                } else {
+                    alert('❌ 註冊失敗：' + result.message);
+                    console.log('❌ 註冊失敗詳情：', result);
+                }
+            } catch (error) {
+                console.error('❌ 註冊請求出錯：', error);
+                alert('無法連接到服務器，請確保伺服器正在運行。');
+            }
         }
 
-        // 處理註冊邏輯（模擬）
-        function handleRegister(event) {
+        // 處理登入邏輯
+        async function handleLogin(event) {
             event.preventDefault();
-            const pass = document.getElementById('reg-password').value;
-            const confirm = document.getElementById('reg-confirm').value;
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
 
-            if (pass !== confirm) {
-                alert('兩次密碼輸入不一致！');
-                return;
+            try {
+                // 發送資料到後端
+                const response = await fetch(getApiUrl('/api/login'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    window.location.href = 'index.html'; // 登入成功跳轉
+                } else {
+                    alert('登入失敗：' + result.message);
+                    console.log('登入失敗詳情：', { email, status: response.status, result });
+                }
+            } catch (error) {
+                console.error('登入請求錯誤：', error);
+                alert('無法連接到服務器，請確保伺服器正在運行。\n\n試試看用預設帳號登入：\n帳號：test@example.com\n密碼：12345678');
             }
-            alert('帳號建立成功！歡迎加入二手硬體平台。');
-            switchTab('login');
         }
     </script>
 </body>
