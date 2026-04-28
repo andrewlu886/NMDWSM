@@ -233,10 +233,14 @@
                 const result = await response.json();
                 if (result.success) {
                     alert(result.message);
-                    window.location.href = 'index.html'; // 登入成功跳轉
+                    
+                    // 【新增】：把帳號記在瀏覽器裡，這樣回首頁才不會失憶
+                    localStorage.setItem('userEmail', email); 
+                    
+                    // 【修改】：跳轉回根目錄首頁
+                    window.location.href = '/'; 
                 } else {
                     alert('登入失敗：' + result.message);
-                    console.log('登入失敗詳情：', { email, status: response.status, result });
                 }
             } catch (error) {
                 console.error('登入請求錯誤：', error);

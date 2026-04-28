@@ -42,6 +42,8 @@
             border-radius: 20px;
             cursor: pointer;
             transition: 0.3s;
+            color: white;
+            text-decoration: none;
         }
         .auth-btn:hover { background-color: #2980b9; }
         #user-profile { display: none; align-items: center; }
@@ -70,20 +72,6 @@
         label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         .btn-action { width: 100%; background: var(--secondary-color); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-
-        /* 登入彈窗 (Modal) */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000;
-        }
-        .modal-content {
-            background: white; width: 380px; padding: 2.5rem; border-radius: 12px; position: relative; text-align: center;
-        }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #999; }
-        .modal-tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 1.5rem; }
-        .tab { flex: 1; padding: 10px; cursor: pointer; font-weight: bold; color: #999; }
-        .tab.active { color: var(--secondary-color); border-bottom: 2px solid var(--secondary-color); }
-        
         #result-display { margin-top: 20px; padding: 15px; background: #f0f7fa; border-radius: 6px; display: none; text-align: left; font-size: 0.9rem; }
     </style>
 </head>
@@ -92,15 +80,17 @@
     <header>
         <div class="logo">轉轉轉二手交易平台</div>
         <nav>
-            <a href="#">首頁</a>
+            <a href="/">首頁</a>
             <a href="#">智慧推薦</a>
-            <a href="#">討論區</a>
+            <a href="/forum">討論區</a>
+            
             <div id="auth-section">
-                <span class="auth-btn" onclick="openModal()">登入 / 註冊</span>
+                <a href="/login" class="auth-btn">登入 / 註冊</a>
             </div>
+            
             <div id="user-profile">
                 <div class="avatar"></div>
-                <span>王小明 (已認證賣家)</span>
+                <span id="user-display-name">載入中...</span>
                 <a href="#" style="margin-left:15px; font-size: 0.8rem; color: #ccc;" onclick="logout()">登出</a>
             </div>
         </nav>
@@ -139,71 +129,26 @@
         </section>
     </div>
 
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <div class="modal-tabs">
-                <div class="tab active" id="t-login" onclick="switchTab('login')">登入</div>
-                <div class="tab" id="t-reg" onclick="switchTab('register')">註冊</div>
-            </div>
-
-            <div id="login-form">
-                <div class="form-group">
-                    <label>帳號/Email</label>
-                    <input type="text" placeholder="請輸入帳號" id="user-input">
-                </div>
-                <div class="form-group">
-                    <label>密碼</label>
-                    <input type="password" placeholder="請輸入密碼">
-                </div>
-                <button class="btn-action" onclick="fakeLogin()">登入</button>
-            </div>
-
-            <div id="register-form" style="display:none;">
-                <div class="form-group">
-                    <label>電子郵件</label>
-                    <input type="email" placeholder="您的@email.com">
-                </div>
-                <div class="form-group">
-                    <label>設定密碼</label>
-                    <input type="password" placeholder="至少 8 位字元">
-                </div>
-                <button class="btn-action" style="background: var(--primary-color);">建立帳號</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // 彈窗控制
-        function openModal() { document.getElementById('loginModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
+        // --- 登入狀態檢查 ---
+        // 網頁一載入就檢查 localStorage 有沒有紀錄登入過的帳號
+        window.onload = function() {
+            const loggedInUser = localStorage.getItem('userEmail');
+            if (loggedInUser) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
+            }
+        };
 
-        // 切換登入與註冊頁籤
-        function switchTab(type) {
-            const isLogin = type === 'login';
-            document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
-            document.getElementById('register-form').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('t-login').className = isLogin ? 'tab active' : 'tab';
-            document.getElementById('t-reg').className = isLogin ? 'tab' : 'tab active';
-        }
-
-        // 模擬登入成功邏輯
-        function fakeLogin() {
-            const user = document.getElementById('user-input').value || "王小明";
-            alert('登入成功！歡迎回來，' + user);
-            closeModal();
-            // 切換主頁 UI 狀態
-            document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('user-profile').style.display = 'flex';
-        }
-
-        // 模擬登出
+        // 登出功能
         function logout() {
-            document.getElementById('auth-section').style.display = 'block';
-            document.getElementById('user-profile').style.display = 'none';
+            localStorage.removeItem('userEmail'); // 清除記憶
+            alert('已成功登出！');
+            window.location.reload(); // 重新整理網頁
         }
 
-        // 智慧推薦邏輯
+        // --- 智慧推薦邏輯 ---
         async function runRecommend() {
             const budget = document.getElementById('budget').value;
             const usage = document.getElementById('usage').value;
@@ -232,12 +177,6 @@
                 alert('推薦系統暫時無法使用，請稍後再試');
                 console.error('推薦API錯誤:', error);
             }
-        }
-
-        // 點擊彈窗外部關閉
-        window.onclick = function(event) {
-            const modal = document.getElementById('loginModal');
-            if (event.target == modal) closeModal();
         }
     </script>
 </body>

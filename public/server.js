@@ -2,10 +2,14 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+
 const PORT = 3000;
 const USERS_FILE = path.join(__dirname, 'users.json');
+const POSTS_FILE = path.join(__dirname, 'posts.json');
 
-// 從文件加載用戶數據
+// --- 資料庫與使用者資料初始化 ---
+
+// 1. 初始化使用者數據
 function loadUsers() {
     try {
         if (fs.existsSync(USERS_FILE)) {
@@ -19,30 +23,29 @@ function loadUsers() {
     }
     return { 'test@example.com': '12345678' };
 }
-
-// 初始加載用戶數據
 let registeredUsers = loadUsers();
 
-// 保存用戶數據到文件
-function saveUsers() {
-    try {
-        const jsonData = JSON.stringify(registeredUsers, null, 2);
-        fs.writeFileSync(USERS_FILE, jsonData, 'utf8');
-        console.log('✅ 已保存到 users.json：', Object.keys(registeredUsers).join(', '));
-        return true;
-    } catch (error) {
-        console.error('❌ 保存失敗:', error.message);
-        return false;
+// 2. 初始化討論區文章數據
+function initPosts() {
+    if (!fs.existsSync(POSTS_FILE)) {
+        const initialPosts = [
+            { id: 1, title: '大家覺得現在買二手 RTX 3060 划算嗎？', author: '硬體新手', content: '目前預算大約 6000 左右，主要玩特戰英豪跟一些 3A 遊戲，想請問這個價位帶收 3060 還是捏一點上 4060 比較好？', date: new Date().toISOString() },
+            { id: 2, title: '[閒聊] 關於平台的硬體驗證功能', author: '王小明', content: '覺得這個功能滿實用的，尤其是自動抓 GPU-Z 數據，可以防範不少礦卡。期待之後能加入 CPU 的壓力測試！', date: new Date(Date.now() - 86400000).toISOString() }
+        ];
+        fs.writeFileSync(POSTS_FILE, JSON.stringify(initialPosts, null, 2), 'utf8');
+        console.log('✅ 已建立預設的 posts.json');
     }
 }
+initPosts();
 
+// --- 輔助函數 ---
 function setCorsHeaders(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-// 簡單的靜態文件服務器
+// --- 建立伺服器與 API 路由 ---
 const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
@@ -55,37 +58,23 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // API路由
+    // 1. 登入 API
     if (pathname === '/api/login' && req.method === 'POST') {
         setCorsHeaders(res);
         let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
+        req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
             try {
                 const { email, password } = JSON.parse(body);
-                console.log(`\n📝 登入請求: ${email}`);
-                
-                // 直接從檔案讀取最新的用戶數據
                 let users = {};
-                try {
-                    if (fs.existsSync(USERS_FILE)) {
-                        const fileData = fs.readFileSync(USERS_FILE, 'utf8');
-                        users = JSON.parse(fileData);
-                        console.log(`📂 已讀取 users.json，共 ${Object.keys(users).length} 個帳號`);
-                    }
-                } catch (readError) {
-                    console.error('❌ 讀取 users.json 失敗:', readError.message);
+                if (fs.existsSync(USERS_FILE)) {
+                    users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
                 }
 
-                // 驗證帳號密碼
                 if (users[email] === password) {
-                    console.log(`✅ 登入成功: ${email}`);
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ success: true, message: "登入成功！", user: email }));
                 } else {
-                    console.log(`❌ 登入失敗: ${email} (帳號存在: ${!!users[email]})`);
                     res.writeHead(401, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ success: false, message: "帳號或密碼錯誤" }));
                 }
@@ -94,118 +83,57 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify({ success: false, message: "請求格式錯誤" }));
             }
         });
+
+    // 2. 註冊 API
     } else if (pathname === '/api/register' && req.method === 'POST') {
         setCorsHeaders(res);
         let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
+        req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
             try {
                 const { name, email, password, confirmPassword } = JSON.parse(body);
-                console.log(`\n📝 註冊請求: ${email}`);
-
-                // 驗證密碼確認
-                if (password !== confirmPassword) {
-                    console.log(`❌ 密碼不符`);
+                if (password !== confirmPassword || password.length < 8) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: false, message: "密碼確認不符" }));
-                    return;
+                    return res.end(JSON.stringify({ success: false, message: "密碼不符或過短" }));
                 }
 
-                // 驗證密碼長度
-                if (password.length < 8) {
-                    console.log(`❌ 密碼過短`);
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: false, message: "密碼至少需要 8 個字元" }));
-                    return;
-                }
-
-                // 從檔案讀取已註冊帳號
                 let users = {};
-                try {
-                    if (fs.existsSync(USERS_FILE)) {
-                        const fileData = fs.readFileSync(USERS_FILE, 'utf8');
-                        users = JSON.parse(fileData);
-                        console.log(`📂 已讀取 users.json，共 ${Object.keys(users).length} 個帳號`);
-                    }
-                } catch (readError) {
-                    console.error('⚠️ 讀取 users.json 失敗，使用空對象:', readError.message);
-                    users = {};
+                if (fs.existsSync(USERS_FILE)) {
+                    users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
                 }
 
-                // 檢查帳號是否已存在
                 if (users[email]) {
-                    console.log(`❌ 帳號已存在: ${email}`);
                     res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: false, message: "此帳號已被註冊" }));
-                    return;
+                    return res.end(JSON.stringify({ success: false, message: "此帳號已被註冊" }));
                 }
 
-                // 新增帳號到內存
                 users[email] = password;
                 registeredUsers = users;
-
-                // 直接寫入檔案
-                try {
-                    const jsonData = JSON.stringify(users, null, 2);
-                    fs.writeFileSync(USERS_FILE, jsonData, 'utf8');
-                    
-                    // 驗證是否成功寫入
-                    const verify = fs.readFileSync(USERS_FILE, 'utf8');
-                    const verifyData = JSON.parse(verify);
-                    
-                    if (verifyData[email] === password) {
-                        console.log(`✅ 帳號 ${email} 已成功註冊並寫入 users.json`);
-                        console.log(`📊 目前已有帳號: ${Object.keys(verifyData).join(', ')}`);
-                        
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ success: true, message: "註冊成功！請登入您的帳號。" }));
-                    } else {
-                        console.error(`❌ 寫入失敗，檔案驗證不通過`);
-                        res.writeHead(500, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ success: false, message: "帳號保存失敗，請稍後重試。" }));
-                    }
-                } catch (writeError) {
-                    console.error(`❌ 寫入 users.json 失敗:`, writeError.message);
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: false, message: "帳號保存失敗，請稍後重試。" }));
-                }
+                fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, message: "註冊成功！" }));
             } catch (error) {
-                console.error('❌ 請求格式錯誤:', error.message);
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "請求格式錯誤" }));
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: "伺服器錯誤" }));
             }
         });
+
+    // 3. 智慧推薦 API
     } else if (pathname === '/api/recommend' && req.method === 'POST') {
         setCorsHeaders(res);
         let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
+        req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
             try {
                 const { budget, usage } = JSON.parse(body);
-
-                let cpuRatio, gpuRatio;
-                if (usage === 'gaming') {
-                    cpuRatio = 0.2;
-                    gpuRatio = 0.5;
-                } else if (usage === 'office') {
-                    cpuRatio = 0.4;
-                    gpuRatio = 0.2;
-                } else {
-                    cpuRatio = 0.2;
-                    gpuRatio = 0.4;
-                }
-
-                const cpuBudget = budget * cpuRatio;
-                const gpuBudget = budget * gpuRatio;
+                let cpuRatio = (usage === 'gaming') ? 0.2 : (usage === 'office' ? 0.4 : 0.2);
+                let gpuRatio = (usage === 'gaming') ? 0.5 : (usage === 'office' ? 0.2 : 0.4);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
-                    cpu: `預算約 ${cpuBudget} 的處理器`,
-                    gpu: `預算約 ${gpuBudget} 的顯示卡`,
+                    cpu: `預算約 ${budget * cpuRatio} 的處理器`,
+                    gpu: `預算約 ${budget * gpuRatio} 的顯示卡`,
                     usage: usage,
                     status: "success"
                 }));
@@ -214,23 +142,62 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify({ success: false, message: "請求格式錯誤" }));
             }
         });
+
+    // 4. 討論區取得文章 API (GET)
+    } else if (pathname === '/api/posts' && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const postsData = fs.readFileSync(POSTS_FILE, 'utf8');
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(postsData);
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: "無法讀取文章列表" }));
+        }
+
+    // 5. 討論區發布文章 API (POST)
+    } else if (pathname === '/api/posts' && req.method === 'POST') {
+        setCorsHeaders(res);
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', () => {
+            try {
+                const { title, content, author } = JSON.parse(body);
+                if (!title || !content) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: false, message: "標題與內容不能為空" }));
+                }
+
+                const posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8'));
+                const newPost = {
+                    id: Date.now(),
+                    title,
+                    content,
+                    author: author || '測試用戶',
+                    date: new Date().toISOString()
+                };
+                
+                posts.unshift(newPost);
+                fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2), 'utf8');
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, message: "發文成功！", post: newPost }));
+            } catch (error) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: "發文處理失敗" }));
+            }
+        });
+
     } else if (pathname === '/favicon.ico') {
-        // 處理favicon請求，避免404錯誤
         res.writeHead(204);
         res.end();
-    } else if (pathname === '/api/debug/users' && req.method === 'GET') {
-        // 調試端點：查看已註冊的帳號（僅用於開發）
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-            registeredUsers: Object.keys(registeredUsers),
-            count: Object.keys(registeredUsers).length
-        }));
+
+    // --- 靜態檔案服務 (網頁切換路由) ---
     } else {
-        // 靜態文件服務
         let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
-        if (pathname === '/login') {
-            filePath = path.join(__dirname, 'login.html');
-        }
+        
+        if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
+        else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
 
         const ext = path.extname(filePath);
         const contentType = {
@@ -251,13 +218,14 @@ const server = http.createServer((req, res) => {
     }
 });
 
-// 啟動伺服器
+// --- 啟動伺服器 ---
 server.listen(PORT, () => {
     console.log(`
     ==========================================
     🚀 伺服器已啟動！
-    🔗 測試網址: http://localhost:${PORT}
+    🔗 測試首頁: http://localhost:${PORT}
     🔗 登入頁面: http://localhost:${PORT}/login
+    🔗 討論區頁面: http://localhost:${PORT}/forum
     ==========================================
     `);
 });
