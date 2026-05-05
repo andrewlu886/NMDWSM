@@ -2,6 +2,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+// 靜態爬蟲核心套件
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const PORT = 3000;
 const USERS_FILE = path.join(__dirname, 'users.json');
@@ -38,6 +41,106 @@ function initPosts() {
 }
 initPosts();
 
+// --- 爬蟲功能實作 ---
+
+// 1. 原價屋爬蟲邏輯
+async function scrapeCoolpc(keyword) {
+    try {
+        console.log(`[原價屋] 正在真實搜尋: ${keyword}`);
+        const response = await axios.get('https://www.coolpc.com.tw/evaluate.php', {
+            // axios 不要轉碼，直接把最原始的資料 (Buffer) 抓回來
+            responseType: 'arraybuffer', 
+            headers: { 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7'
+            },
+            timeout: 5000 
+        });
+        
+        // 使用內建的 TextDecoder，將原始資料從 Big5 正確翻譯成 UTF-8
+        const html = new TextDecoder('big5').decode(response.data);
+        const $ = cheerio.load(html);
+        let results = [];
+
+        $('option').each((i, el) => {
+            const text = $(el).text();
+            if (text.toLowerCase().includes(keyword.toLowerCase())) {
+                let priceMatch = text.match(/\$(\d+)/); 
+                let price = priceMatch ? priceMatch[1] : "請至官網確認";
+                
+                results.push({
+                    platform: '原價屋',
+                    name: text.substring(0, 60) + '...', // 把字數限制放寬到 60 字
+                    price: price,
+                    url: 'https://www.coolpc.com.tw/evaluate.php'
+                });
+            }
+        });
+
+        console.log(`[原價屋] 搜尋完成，找到 ${results.length} 筆`);
+        
+        // 如果想把所有結果都吐出來，可以直接改成： return results;
+        return results.slice(0, 30); 
+    } catch (error) {
+        console.error(`❌ 原價屋爬蟲失敗: ${error.message}`);
+        return [{ platform: '原價屋', name: '⚠️ 抓取失敗 (伺服器無回應或被阻擋)', price: 'N/A', url: 'https://www.coolpc.com.tw/evaluate.php' }];
+    }
+}
+// 2. 欣亞數位爬蟲邏輯
+async function scrapeSinya(keyword) {
+    try {
+        console.log(`[欣亞] 正在透過隱藏 API 搜尋: ${keyword}`);
+        
+        const apiUrl = `https://gateway.sinya.com.tw/api/diy/search?keyword=${encodeURIComponent(keyword)}`;
+        
+        const response = await axios.get(apiUrl, {
+            headers: { 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://www.sinya.com.tw/' 
+            },
+            timeout: 5000
+        });
+
+        let results = [];
+        
+        // 資料在 response.data.data 裡面
+        const items = response.data.data || []; 
+
+        items.forEach(item => {
+            results.push({
+                platform: '欣亞',
+                // 精準對應 JSON 欄位
+                name: item.prod_name, 
+                // 將數字價格轉成有逗號的字串 (例如 39900 變成 "39,900")
+                price: item.price ? item.price.toLocaleString() : '請至官網確認',
+                url: item.prod_id ? `https://www.sinya.com.tw/prod/${item.prod_id}` : `https://www.sinya.com.tw/search?keyword=${encodeURIComponent(keyword)}`
+            });
+        });
+
+        console.log(`[欣亞] API 搜尋完成，找到 ${results.length} 筆`);
+        return results.slice(0, 12); // 回傳前 12 筆
+
+    } catch (error) {
+        console.error(`❌ 欣亞 API 爬蟲失敗: ${error.message}`);
+        return [{ platform: '欣亞', name: '⚠️ 抓取失敗 (API 無回應)', price: 'N/A', url: 'https://www.sinya.com.tw/' }];
+    }
+}
+
+// 總爬蟲控制器
+async function performScraping(platform, keyword) {
+    const tasks = [];
+    
+    // 根據參數決定要觸發哪個爬蟲，支援 all
+    if (platform === 'coolpc' || platform === 'all') tasks.push(scrapeCoolpc(keyword));
+    if (platform === 'sinya' || platform === 'all') tasks.push(scrapeSinya(keyword));
+
+    const results = await Promise.all(tasks);
+    return results.flat(); 
+}
+
+
+
 // --- 輔助函數 ---
 function setCorsHeaders(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -46,7 +149,7 @@ function setCorsHeaders(res) {
 }
 
 // --- 建立伺服器與 API 路由 ---
-const server = http.createServer((req, res) => {
+const server = http.createServer(async(req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
 
@@ -187,8 +290,34 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify({ success: false, message: "發文處理失敗" }));
             }
         });
+    }// 1. 爬蟲 API 路由
+    else if (pathname === '/api/scrape' && req.method === 'GET') {
+        setCorsHeaders(res);
+        const keyword = parsedUrl.query.keyword;
+        const platform = parsedUrl.query.platform || 'all';
 
-    } else if (pathname === '/favicon.ico') {
+        if (!keyword) {
+            res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+            return res.end(JSON.stringify({ success: false, message: "請輸入關鍵字" }));
+        }
+
+        // 執行真實爬蟲！
+        console.log(`[系統] 準備開始爬取: ${keyword}`);
+        
+        let allResults = [];
+        if (platform === 'all' || platform === 'coolpc') {
+            const coolpcData = await scrapeCoolpc(keyword);
+            allResults = allResults.concat(coolpcData);
+        }
+        if (platform === 'all' || platform === 'sinya') {
+            const sinyaData = await scrapeSinya(keyword);
+            allResults = allResults.concat(sinyaData);
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, data: allResults }));
+        return;
+    }else if (pathname === '/favicon.ico') {
         res.writeHead(204);
         res.end();
 
@@ -198,6 +327,7 @@ const server = http.createServer((req, res) => {
         
         if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
         else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
+        else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
 
         const ext = path.extname(filePath);
         const contentType = {
@@ -226,6 +356,7 @@ server.listen(PORT, () => {
     🔗 測試首頁: http://localhost:${PORT}
     🔗 登入頁面: http://localhost:${PORT}/login
     🔗 討論區頁面: http://localhost:${PORT}/forum
+    🔗 測試端點: http://localhost:3000/api/scrape?keyword=RTX4060&platform=all
     ==========================================
     `);
 });
