@@ -133,8 +133,13 @@
                 <option value="all">全部通路</option>
                 <option value="coolpc">原價屋</option>
                 <option value="sinya">欣亞數位</option>
+                <option value="ruten">露天拍賣</option>
+                <option value="shopee">蝦皮購物</option>
+                <option value="pchome">PChome 24h</option>
+                <option value="momo">Momo 購物網</option>
             </select>
             <input type="text" id="keyword-input" placeholder="請輸入硬體關鍵字 (例如: RTX 4060)" onkeypress="handleKeyPress(event)">
+            <input type="text" id="exclude-input" placeholder="排除關鍵字 (例: 筆電 主機)" onkeypress="handleKeyPress(event)" style="flex: 1;">
             <button class="btn-search" onclick="fetchPrices()">搜尋</button>
         </div>
 
@@ -152,6 +157,8 @@
             const platform = document.getElementById('platform-select').value;
             const container = document.getElementById('results-container');
             const loading = document.getElementById('loading');
+            // 取得排除關鍵字
+            const exclude = document.getElementById('exclude-input').value.trim();
 
             if (!keyword) {
                 alert('請先輸入要查詢的硬體關鍵字！');
@@ -164,8 +171,7 @@
 
             try {
                 // 1. 發送請求至後端 API
-                const response = await fetch(`http://localhost:3000/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${platform}`);
-                
+                const response = await fetch(`http://localhost:3000/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${platform}&exclude=${encodeURIComponent(exclude)}`);
                 if (!response.ok) throw new Error('網路回應不正常');
                 
                 const result = await response.json();
