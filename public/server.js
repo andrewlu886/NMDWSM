@@ -595,7 +595,7 @@ server.listen(PORT, () => {
     🔗 測試首頁: http://localhost:${PORT}
     🔗 登入頁面: http://localhost:${PORT}/login
     🔗 討論區頁面: http://localhost:${PORT}/forum
-    🔗 測試端點: http://localhost:3000/api/scrape?keyword=RTX4060&platform=all
+    🔗 測試端點: http://localhost:${PORT}/api
     ==========================================
     `);
 });
