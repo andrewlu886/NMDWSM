@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二手硬體交易平台 | 市價查詢</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* 導覽列 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        nav { display: flex; align-items: center; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: 500; }
+        
+        /* 搜尋區塊 */
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 20px; }
+        .search-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .search-box select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #fff;
+        }
+        .btn-search {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        .btn-search:hover { background: #2980b9; }
+
+        /* 結果顯示區塊 */
+        #loading { display: none; text-align: center; margin: 2rem 0; color: #666; font-weight: bold; }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .result-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--secondary-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .result-card h4 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 1.1rem; line-height: 1.4; }
+        .result-card .price { color: var(--accent-color); font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; }
+        .result-card .platform { font-size: 0.85rem; color: #7f8c8d; background: #ecf0f1; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 15px; width: fit-content; }
+        
+        /* 修正按鈕樣式與確保可點擊 */
+        .btn-link {
+            display: block;
+            text-align: center;
+            background: var(--primary-color);
+            color: white !important;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-link:hover { background: #34495e; opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">轉轉轉二手交易平台</div>
+        <nav>
+            <a href="/">首頁</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2 style="color: var(--primary-color); margin-bottom: 1rem;">全通路市價快搜</h2>
+        <p style="color: #666; margin-bottom: 2rem;">即時比對原價屋與欣亞的新品價格，作為二手定價與估價參考。</p>
+        
+        <div class="search-box">
+            <select id="platform-select">
+                <option value="all">全部通路</option>
+                <option value="coolpc">原價屋</option>
+                <option value="sinya">欣亞數位</option>
+                <option value="ruten">露天拍賣</option>
+                <option value="shopee">蝦皮購物</option>
+                <option value="pchome">PChome 24h</option>
+                <option value="momo">Momo 購物網</option>
+            </select>
+            <input type="text" id="keyword-input" placeholder="請輸入硬體關鍵字 (例如: RTX 4060)" onkeypress="handleKeyPress(event)">
+            <input type="text" id="exclude-input" placeholder="排除關鍵字 (例: 筆電 主機)" onkeypress="handleKeyPress(event)" style="flex: 1;">
+            <button class="btn-search" onclick="fetchPrices()">搜尋</button>
+        </div>
+
+        <div id="loading">🚀 正在派遺爬蟲前往各大通路抓取資料，請稍候...</div>
+        <div class="results-grid" id="results-container"></div>
+    </div>
+
+    <script>
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') fetchPrices();
+        }
+
+        async function fetchPrices() {
+            const keyword = document.getElementById('keyword-input').value.trim();
+            const platform = document.getElementById('platform-select').value;
+            const container = document.getElementById('results-container');
+            const loading = document.getElementById('loading');
+            // 取得排除關鍵字
+            const exclude = document.getElementById('exclude-input').value.trim();
+
+            if (!keyword) {
+                alert('請先輸入要查詢的硬體關鍵字！');
+                return;
+            }
+
+            // 初始化介面
+            container.innerHTML = '';
+            loading.style.display = 'block';
+
+            try {
+                // 1. 發送請求至後端 API
+                const response = await fetch(`http://localhost:3000/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${platform}&exclude=${encodeURIComponent(exclude)}`);
+                if (!response.ok) throw new Error('網路回應不正常');
+                
+                const result = await response.json();
+                console.log("收到後端回傳資料:", result);
+
+                loading.style.display = 'none';
+
+                // 2. 渲染結果
+                if (result.success && result.data && result.data.length > 0) {
+                    result.data.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'result-card';
+                        
+                        // 處理價格顯示邏輯
+                        const displayPrice = (item.price && item.price !== "待實作 DOM 解析") ? `${item.price} 元` : "點擊查看價格";
+                        
+                        card.innerHTML = `
+                            <div>
+                                <span class="platform">${item.platform}</span>
+                                <h4>${item.name}</h4>
+                                <div class="price">${displayPrice}</div>
+                            </div>
+                            <a href="${item.url}" class="btn-link" target="_blank">前往商場確認</a>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<p style="color: #666; text-align: center; width: 100%;">目前沒有找到相關結果，請更換關鍵字再試一次。</p>';
+                }
+
+            } catch (error) {
+                loading.style.display = 'none';
+                console.error('Fetch 發生錯誤:', error);
+                container.innerHTML = '<p style="color: red; text-align: center; width: 100%;">連線失敗：請確認後端伺服器 (server.js) 是否已啟動。</p>';
+            }
+        }
+    </script>
+</body>
+</html>
