@@ -36,6 +36,15 @@
         nav { display: flex; align-items: center; }
         nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: 500; }
         
+        .auth-btn {
+            background-color: var(--secondary-color);
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: white;
+            text-decoration: none;
+        }
         #user-profile { 
             display: flex; 
             align-items: center; 
@@ -88,6 +97,9 @@
             <a href="#">智慧推薦</a>
             <a href="/forum">討論區</a>
             <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
+            <div id="auth-section" style="display: none;">
+                <a href="/login.html" class="auth-btn">登入 / 註冊</a>
+            </div>
             <div id="user-profile">
                 <div class="avatar"></div>
                 <span id="user-display-name">載入中...</span>
@@ -112,16 +124,16 @@
 
     <script>
         window.onload = function() {
-            // 頁面載入時，檢查使用者是否已經登入 (驗證 localStorage)
             const loggedInUser = localStorage.getItem('userEmail');
             if (!loggedInUser) {
-                // 防護機制：若未登入紀錄，則阻擋並跳轉回登入頁面
-                alert('請先登入會員！');
-                window.location.href = '/login.html';
-                return;
+                document.getElementById('user-profile').style.display = 'none';
+                document.getElementById('auth-section').style.display = 'block';
+                document.getElementById('account-email').innerText = '尚未登入';
+            } else {
+                // 已登入：顯示會員資料
+                document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
+                document.getElementById('account-email').innerText = loggedInUser;
             }
-            document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
-            document.getElementById('account-email').innerText = loggedInUser;
         };
 
         function logout() {
