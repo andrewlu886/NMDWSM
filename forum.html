@@ -38,6 +38,21 @@
         nav { display: flex; align-items: center; }
         nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: 500; }
         
+        /* 搜尋框樣式 */
+        .nav-search {
+            padding: 6px 15px;
+            border: none;
+            border-radius: 20px;
+            margin: 0 15px;
+            outline: none;
+            font-size: 0.9rem;
+            width: 200px;
+            transition: box-shadow 0.3s;
+        }
+        .nav-search:focus {
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
         /* 討論區主體 */
         .container { max-width: 900px; margin: 2rem auto; padding: 0 20px; }
         .forum-header {
@@ -98,6 +113,7 @@
             <a href="index.html">首頁</a>
             <a href="#">智慧推薦</a>
             <a href="forum.html" style="color: var(--secondary-color);">討論區</a>
+            <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
             <a href="login.html" id="auth-link">會員登入</a>
         </nav>
     </header>
@@ -143,6 +159,7 @@
                 const posts = await response.json();
                 const container = document.getElementById('posts-container');
                 
+                // 如果目前沒有任何文章，顯示提示訊息
                 if (posts.length === 0) {
                     container.innerHTML = '<p style="text-align: center; color: #999;">目前還沒有文章，來當第一個發文的人吧！</p>';
                     return;
@@ -203,6 +220,17 @@
             } catch (error) {
                 console.error('發文錯誤:', error);
                 alert('發文發生錯誤，請檢查網路連線。');
+            }
+        }
+
+        // --- 搜尋功能 ---
+        // 攔截輸入框的 Enter 按鍵事件
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = event.target.value.trim();
+                if (query) {
+                    alert('執行搜尋：' + query + '\n(此處可串接後端 API 或進行頁面跳轉)');
+                }
             }
         }
 
