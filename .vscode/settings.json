@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^\\$path='package-lock\\.json'; if\\(-not\\(Test-Path 'package-lock\\.json\\.bak'\\)\\) \\{ Copy-Item \\$path 'package-lock\\.json\\.bak' \\}; \\$lines=Get-Content \\$path; \\$out=@\\(\\); \\$state='normal'; \\$left=@\\(\\); \\$right=@\\(\\); foreach\\(\\$line in \\$lines\\)\\{ if\\(\\$state -eq 'normal'\\)\\{ if\\(\\$line -like '<<<<<<<\\*'\\)\\{ \\$state='left'; \\$left=@\\(\\); \\$right=@\\(\\); continue \\}; \\$out \\+= \\$line \\} elseif\\(\\$state -eq 'left'\\)\\{ if\\(\\$line -eq '======='\\)\\{ \\$state='right'; continue \\}; \\$left \\+= \\$line \\} elseif\\(\\$state -eq 'right'\\)\\{ if\\(\\$line -like '>>>>>>>\\*'\\)\\{ \\$out \\+= \\$left; \\$out \\+= \\$right; \\$state='normal'; continue \\}; \\$right \\+= \\$line \\} \\}; if\\(\\$state -ne 'normal'\\)\\{ throw 'incomplete conflict markers' \\}; \\$out \\| Set-Content \\$path -Encoding utf8; 'fixed'$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
