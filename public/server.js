@@ -9,7 +9,14 @@ const cheerio = require('cheerio');
 const PORT = 3000;
 const USERS_FILE = path.join(__dirname, 'users.json');
 const POSTS_FILE = path.join(__dirname, 'posts.json');
-
+const PRODUCTS_FILE = path.join(__dirname, 'products.json');
+// 初始化商品資料庫
+function initProducts() {
+    if (!fs.existsSync(PRODUCTS_FILE)) {
+        fs.writeFileSync(PRODUCTS_FILE, JSON.stringify([]), 'utf8');
+    }
+}
+initProducts();
 // --- 資料庫與使用者資料初始化 ---
 
 // 1. 初始化使用者數據
@@ -40,6 +47,59 @@ function initPosts() {
     }
 }
 initPosts();
+
+function readJsonFile(filePath, fallbackValue) {
+    try {
+        if (!fs.existsSync(filePath)) {
+            return fallbackValue;
+        }
+
+        const raw = fs.readFileSync(filePath, 'utf8').trim();
+        if (!raw) {
+            return fallbackValue;
+        }
+
+        return JSON.parse(raw);
+    } catch (error) {
+        console.error(`❌ 讀取 ${path.basename(filePath)} 失敗:`, error.message);
+        return fallbackValue;
+    }
+}
+
+function writeJsonFile(filePath, data) {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+}
+
+function normalizeAttachmentList(items) {
+    if (Array.isArray(items)) {
+        return items.filter(Boolean);
+    }
+
+    return items ? [items] : [];
+}
+
+function normalizeReply(reply) {
+    return {
+        ...reply,
+        images: normalizeAttachmentList(reply.images || reply.image),
+    };
+}
+
+function normalizePost(post) {
+    return {
+        ...post,
+        images: normalizeAttachmentList(post.images || post.image),
+        replies: Array.isArray(post.replies) ? post.replies.map(normalizeReply) : [],
+    };
+}
+
+function loadPostsData() {
+    return readJsonFile(POSTS_FILE, []).map(normalizePost);
+}
+
+function savePostsData(posts) {
+    writeJsonFile(POSTS_FILE, posts);
+}
 
 // --- 爬蟲功能實作 ---
 
@@ -459,7 +519,7 @@ const server = http.createServer(async(req, res) => {
     } else if (pathname === '/api/posts' && req.method === 'GET') {
         setCorsHeaders(res);
         try {
-            const postsData = fs.readFileSync(POSTS_FILE, 'utf8');
+            const postsData = JSON.stringify(loadPostsData());
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(postsData);
         } catch (error) {
@@ -474,23 +534,25 @@ const server = http.createServer(async(req, res) => {
         req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
             try {
-                const { title, content, author } = JSON.parse(body);
+                const { title, content, author, images } = JSON.parse(body);
                 if (!title || !content) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                     return res.end(JSON.stringify({ success: false, message: "標題與內容不能為空" }));
                 }
 
-                const posts = JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8'));
+                const posts = loadPostsData();
                 const newPost = {
                     id: Date.now(),
                     title,
                     content,
                     author: author || '測試用戶',
-                    date: new Date().toISOString()
+                    date: new Date().toISOString(),
+                    images: normalizeAttachmentList(images),
+                    replies: []
                 };
                 
                 posts.unshift(newPost);
-                fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2), 'utf8');
+                savePostsData(posts);
                 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true, message: "發文成功！", post: newPost }));
@@ -499,6 +561,121 @@ const server = http.createServer(async(req, res) => {
                 res.end(JSON.stringify({ success: false, message: "發文處理失敗" }));
             }
         });
+        } else if (/^\/api\/posts\/\d+\/replies$/.test(pathname) && req.method === 'POST') {
+            setCorsHeaders(res);
+            const postId = parseInt(pathname.split('/')[3]);
+            let body = '';
+            req.on('data', chunk => body += chunk.toString());
+            req.on('end', () => {
+                try {
+                    const { content, author, images } = JSON.parse(body);
+                    if (!content) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        return res.end(JSON.stringify({ success: false, message: "回覆內容不能為空" }));
+                    }
+
+                    const posts = loadPostsData();
+                    const postIndex = posts.findIndex(post => post.id === postId);
+                    if (postIndex === -1) {
+                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                        return res.end(JSON.stringify({ success: false, message: "找不到文章" }));
+                    }
+
+                    const newReply = {
+                        id: Date.now(),
+                        content,
+                        author: author || '匿名使用者',
+                        date: new Date().toISOString(),
+                        images: normalizeAttachmentList(images)
+                    };
+
+                    posts[postIndex].replies = Array.isArray(posts[postIndex].replies) ? posts[postIndex].replies : [];
+                    posts[postIndex].replies.push(newReply);
+                    savePostsData(posts);
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true, message: '回覆成功', reply: newReply }));
+                } catch (error) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, message: '回覆處理失敗' }));
+                }
+            });
+
+        // --- 討論區文章修改/刪除 API ---
+} else if (pathname.startsWith('/api/posts/') && (req.method === 'PUT' || req.method === 'DELETE')) {
+    setCorsHeaders(res);
+    const postId = parseInt(pathname.split('/')[3]); // 取得 URL 中的 id
+        let posts = loadPostsData();
+
+    if (req.method === 'DELETE') {
+            const postIndex = posts.findIndex(p => p.id === postId);
+            if (postIndex === -1) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ success: false, message: '找不到文章' }));
+            }
+
+            posts = posts.filter(p => p.id !== postId);
+            savePostsData(posts);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: '文章已刪除' }));
+    } else if (req.method === 'PUT') {
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', () => {
+                const { title, content, images } = JSON.parse(body);
+            const postIndex = posts.findIndex(p => p.id === postId);
+            if(postIndex > -1) {
+                posts[postIndex].title = title;
+                posts[postIndex].content = content;
+                    if (images !== undefined) {
+                        posts[postIndex].images = normalizeAttachmentList(images);
+                    }
+                    savePostsData(posts);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, message: '文章已更新' }));
+                } else {
+                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, message: '找不到文章' }));
+            }
+        });
+    }
+
+    // --- 商品 API (新增 / 讀取) ---
+    } else if (pathname === '/api/products' && req.method === 'POST') {
+        setCorsHeaders(res);
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', () => {
+            const product = JSON.parse(body);
+            product.id = Date.now(); // 產生唯一 ID
+            let products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
+            products.push(product);
+            fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: '上架成功' }));
+        });
+
+    } else if (pathname === '/api/products' && req.method === 'GET') {
+        setCorsHeaders(res);
+        const sellerEmail = parsedUrl.query.seller;
+        let products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
+        // 只回傳該賣家的商品
+        if (sellerEmail) {
+            products = products.filter(p => p.seller === sellerEmail);
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(products));
+
+    // --- 商品 API (刪除) ---
+    } else if (pathname.startsWith('/api/products/') && req.method === 'DELETE') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3]);
+        let products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
+        products = products.filter(p => p.id !== productId);
+        fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+        
     }// 1. 爬蟲 API 路由
     else if (pathname === '/api/scrape' && req.method === 'GET') {
         setCorsHeaders(res);
@@ -561,12 +738,14 @@ const server = http.createServer(async(req, res) => {
         res.end();
 
     // --- 靜態檔案服務 (網頁切換路由) ---
+    // --- 靜態檔案服務 (網頁切換路由) ---
     } else {
         let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
         
         if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
         else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
         else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
+        else if (pathname === '/seller') filePath = path.join(__dirname, 'seller.html'); // ✨ 把這行加在這裡！
 
         const ext = path.extname(filePath);
         const contentType = {
@@ -595,6 +774,7 @@ server.listen(PORT, () => {
     🔗 測試首頁: http://localhost:${PORT}
     🔗 登入頁面: http://localhost:${PORT}/login
     🔗 討論區頁面: http://localhost:${PORT}/forum
+    🔗 賣家頁面: http://localhost:${PORT}/seller  
     🔗 測試端點: http://localhost:${PORT}/api
     ==========================================
     `);

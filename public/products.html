@@ -129,23 +129,63 @@
 
     <script>
         window.onload = function() {
-            const loggedInUser = localStorage.getItem('userEmail');
-            if (!loggedInUser) {
-                document.getElementById('user-profile').style.display = 'none';
-                document.getElementById('auth-section').style.display = 'block';
-            } else {
-                // 已登入：顯示會員名稱
-                document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
-            }
-        };
-
-        function logout() {
-            localStorage.removeItem('userEmail');
-            alert('已成功登出！');
-            window.location.href = '/';
+        const loggedInUser = localStorage.getItem('userEmail');
+        if (!loggedInUser) {
+            document.getElementById('user-profile').style.display = 'none';
+            document.getElementById('auth-section').style.display = 'block';
+        } else {
+            document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
+            fetchMyProducts(loggedInUser); // 登入後抓取商品
         }
+        
+        // 綁定右上角的新增商品按鈕
+        document.querySelector('.btn-action').onclick = function() {
+            window.location.href = '/seller.html';
+        };
+    };
 
-        function handleSearch(event) { if (event.key === 'Enter' && event.target.value.trim()) { alert('執行搜尋：' + event.target.value.trim()); } }
+    // 抓取並顯示目前登入者的商品
+    async function fetchMyProducts(email) {
+        try {
+            const res = await fetch(`/api/products?seller=${encodeURIComponent(email)}`);
+            const products = await res.json();
+            
+            if (products.length > 0) {
+                let html = `<div class="header-action">
+                                <h2>我的商品管理</h2>
+                                <button class="btn-action" onclick="window.location.href='/seller.html'">+ 新增商品</button>
+                            </div>`;
+                products.forEach(p => {
+                    html += `
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <h3>${p.title} <span style="font-size:0.9rem; color:#777;">(${p.category})</span></h3>
+                        <p style="color: var(--secondary-color); font-weight: bold;">NT$ ${p.price}</p>
+                        <p>${p.desc}</p>
+                        <button style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="deleteProduct(${p.id})">下架刪除</button>
+                    </div>
+                    `;
+                });
+                document.querySelector('.container').innerHTML = html;
+            }
+        } catch (err) {
+            console.error('抓取商品失敗', err);
+        }
+    }
+
+    // 實作刪除商品功能
+    async function deleteProduct(id) {
+        if(!confirm('確定要下架並刪除這個商品嗎？')) return;
+        try {
+            const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if(result.success) {
+                alert('商品已刪除');
+                location.reload(); // 重整頁面更新畫面
+            }
+        } catch(err) {
+            alert('刪除失敗');
+        }
+    }
     </script>
 </body>
 </html>

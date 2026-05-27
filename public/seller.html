@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>賣家中心 | 轉轉轉二手交易平台</title>
+    <style>
+        :root { --primary-color: #2c3e50; --secondary-color: #3498db; --bg-color: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); margin: 0; }
+        header { background-color: var(--primary-color); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; }
+        .container { max-width: 600px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary-color); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn { width: 100%; background: var(--secondary-color); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .verify-box { background: #e8f4f8; border: 1px dashed var(--secondary-color); padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: center; }
+        .verify-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">賣家上架中心</div>
+        <nav><a href="/">回首頁</a></nav>
+    </header>
+
+    <div class="container">
+        <h2>發佈二手硬體</h2>
+        
+        <div class="verify-box">
+            <p style="margin-top:0; font-size:0.9rem; color:#555;">平台專屬：防礦卡硬體驗證</p>
+            <button class="verify-btn" onclick="simulateVerification()" id="verify-btn">匯入 GPU-Z 數據驗證</button>
+            <div id="verify-result" style="color: green; font-weight: bold; margin-top: 10px; display: none;">✅ 已通過平台基礎驗證標章</div>
+        </div>
+
+        <form id="seller-form" onsubmit="submitProduct(event)">
+            <div class="form-group">
+                <label>商品名稱</label>
+                <input type="text" id="product-title" placeholder="例如：微星 RTX 3060 12G 顯示卡" required>
+            </div>
+            <div class="form-group">
+                <label>零件類別</label>
+                <select id="product-category" required>
+                    <option value="gpu">顯示卡 (GPU)</option>
+                    <option value="cpu">處理器 (CPU)</option>
+                    <option value="ram">記憶體 (RAM)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>預期售價 (NTD)</label>
+                <input type="number" id="product-price" placeholder="請輸入金額" required>
+            </div>
+            <div class="form-group">
+                <label>商品描述與使用狀況</label>
+                <textarea id="product-desc" rows="4" placeholder="例如：無挖礦、僅玩特戰英豪，還有半年保固..." required></textarea>
+            </div>
+            <button type="submit" class="btn">確認上架</button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
+
+        function getApiUrl(path) {
+            return `${API_BASE}${path}`;
+        }
+
+        async function submitProduct(event) {
+            event.preventDefault();
+            const seller = localStorage.getItem('userEmail');
+            if (!seller) {
+                alert('請先登入才能上架商品！');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const title = document.getElementById('product-title').value.trim();
+            const category = document.getElementById('product-category').value;
+            const price = document.getElementById('product-price').value.trim();
+            const desc = document.getElementById('product-desc').value.trim();
+
+            try {
+                const res = await fetch(getApiUrl('/api/products'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seller, title, category, price, desc })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('上架成功！');
+                    window.location.href = getApiUrl('/products.html');
+                } else {
+                    alert(result.message || '上架失敗');
+                }
+            } catch (err) {
+                console.error('上架失敗:', err);
+                alert('上架失敗，無法連接伺服器');
+            }
+        }
+    </script>
+</body>
+</html>
