@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車 | 二手硬體交易平台</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* 導覽列 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; text-decoration: none; color: white; }
+        nav { display: flex; align-items: center; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: 500; }
+        .auth-btn {
+            background-color: var(--secondary-color);
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: white;
+            text-decoration: none;
+        }
+        .auth-btn:hover { background-color: #2980b9; }
+        
+        #user-profile { 
+            display: none; 
+            align-items: center; 
+            position: relative; 
+            cursor: pointer;
+            padding: 10px 0;
+        }
+        .avatar { width: 35px; height: 35px; background: #ddd; border-radius: 50%; margin-right: 10px; }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 120px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #user-profile:hover .dropdown-menu { display: block; }
+        nav .dropdown-menu a { display: block; color: var(--text-color); margin: 0; padding: 12px 20px; font-size: 0.9rem; font-weight: normal; transition: background 0.2s; }
+        nav .dropdown-menu a:hover { background-color: #f1f1f1; color: var(--secondary-color); }
+
+        /* 購物車圖示 */
+        .cart-link { position: relative; }
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* 主內容區 */
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 20px; }
+        .page-title { color: var(--primary-color); margin-bottom: 2rem; font-size: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .item-info { flex-grow: 1; }
+        .item-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .item-seller { font-size: 0.85rem; color: #888; }
+        
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .qty-btn {
+            background: #eee;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .qty-btn:hover { background: #ddd; }
+        .item-price { font-weight: bold; color: var(--accent-color); min-width: 100px; text-align: right; }
+        
+        .remove-btn {
+            background: #ff7675;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .remove-btn:hover { background: #d63031; }
+
+        .cart-summary {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: right;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .total-price { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); margin: 10px 0; }
+        .checkout-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .checkout-btn:hover { background: #2ecc71; }
+        
+        .empty-cart { text-align: center; padding: 50px; color: #777; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="logo">轉轉轉二手交易平台</a>
+        <nav>
+            <a href="/">首頁</a>
+            <a href="/marketplace">🛒 商城</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/cart" class="cart-link" style="color: var(--secondary-color); font-weight: bold;">購物車 <span class="cart-count" id="cart-count">0</span></a>
+            
+            <div id="auth-section">
+                <a href="/login" class="auth-btn">登入 / 註冊</a>
+            </div>
+            
+            <div id="user-profile">
+                <div class="avatar"></div>
+                <span id="user-display-name">載入中...</span>
+                <div class="dropdown-menu">
+                    <a href="/account.html">我的帳戶</a>
+                    <a href="/products.html">我的商品</a>
+                    <a href="#" onclick="logout()">登出</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">我的購物車</h1>
+        <div id="cart-items-container">
+            <!-- 購物車項目會顯示在這裡 -->
+        </div>
+        
+        <div class="cart-summary" id="cart-summary" style="display: none;">
+            <div>總計數量: <span id="total-qty">0</span> 件</div>
+            <div class="total-price">總金額: NT$ <span id="total-sum">0</span></div>
+            <button class="checkout-btn" onclick="checkout()">確認結帳</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // 處理登入狀態
+            const loggedInUser = localStorage.getItem('userEmail');
+            if (loggedInUser) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
+            }
+            
+            renderCart();
+        };
+
+        function logout() {
+            localStorage.removeItem('userEmail');
+            alert('已成功登出！');
+            window.location.href = '/';
+        }
+
+        function updateCartCount(cart) {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cart-count').innerText = count;
+        }
+
+        function renderCart() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const container = document.getElementById('cart-items-container');
+            const summary = document.getElementById('cart-summary');
+            
+            updateCartCount(cart);
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🛒</div>
+                        您的購物車是空的，去<a href="/marketplace" style="color: var(--secondary-color);">商城</a>逛逛吧！
+                    </div>`;
+                summary.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            let totalSum = 0;
+            let totalQty = 0;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                totalSum += itemTotal;
+                totalQty += item.quantity;
+
+                html += `
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <div class="item-title">${item.title}</div>
+                            <div class="item-seller">賣家: ${item.seller}</div>
+                        </div>
+                        <div class="item-actions">
+                            <div>
+                                <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
+                                <span style="margin: 0 10px;">${item.quantity}</span>
+                                <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                            </div>
+                            <div class="item-price">NT$ ${itemTotal.toLocaleString()}</div>
+                            <button class="remove-btn" onclick="removeItem(${index})">刪除</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            summary.style.display = 'block';
+            document.getElementById('total-qty').innerText = totalQty;
+            document.getElementById('total-sum').innerText = totalSum.toLocaleString();
+        }
+
+        function changeQty(index, change) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart[index]) {
+                cart[index].quantity += change;
+                if (cart[index].quantity <= 0) {
+                    cart.splice(index, 1);
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }
+        }
+
+        function removeItem(index) {
+            if (confirm('確定要從購物車移除此商品嗎？')) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }
+        }
+
+        function checkout() {
+            const loggedInUser = localStorage.getItem('userEmail');
+            if (!loggedInUser) {
+                alert('請先登入後再進行結帳！');
+                window.location.href = '/login';
+                return;
+            }
+
+            // 模擬結帳流程
+            alert('感謝您的購買！訂單已成立，我們將通知賣家出貨。');
+            localStorage.removeItem('cart');
+            renderCart();
+        }
+    </script>
+</body>
+</html>
