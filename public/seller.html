@@ -4,29 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>賣家中心 | 轉轉轉二手交易平台</title>
+    <link rel="stylesheet" href="/style.css">
     <style>
-        :root { --primary-color: #2c3e50; --secondary-color: #3498db; --bg-color: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); margin: 0; }
-        header { background-color: var(--primary-color); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; }
-        nav a { color: white; text-decoration: none; margin: 0 15px; }
         .container { max-width: 600px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary-color); }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary-color); margin-top: 0; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn { width: 100%; background: var(--secondary-color); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #555; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: var(--secondary-color); outline: none; }
+        .btn { width: 100%; background: var(--secondary-color); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { background: #2980b9; }
         .verify-box { background: #e8f4f8; border: 1px dashed var(--secondary-color); padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: center; }
-        .verify-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        .verify-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
+        .verify-btn:hover { background: #34495e; }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">賣家上架中心</div>
-        <nav><a href="/">回首頁</a></nav>
+        <div class="header-main">
+            <a href="/" class="logo">轉轉轉二手平台</a>
+            
+            <div class="search-wrapper">
+                <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">🔍</button>
+            </div>
+
+            <div class="header-actions">
+                <a href="/cart" class="cart-link" title="購物車">
+                    🛒 <span id="cart-count" class="cart-count">0</span>
+                </a>
+                
+                <div id="auth-section">
+                    <a href="/login" class="auth-btn">登入 / 註冊</a>
+                </div>
+                
+                <div id="user-profile">
+                    <div class="avatar">👤</div>
+                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
+                    <div class="dropdown-menu">
+                        <a href="/account.html">我的帳戶</a>
+                        <a href="/products.html">我的商品</a>
+                        <a href="#" onclick="logout()">登出</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="main-nav">
+            <a href="/">首頁</a>
+            <a href="/marketplace">🛒 商城</a>
+            <a href="#">智慧推薦</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/seller" class="active">賣家中心</a>
+        </nav>
     </header>
 
     <div class="container">
-        <h2>發佈二手硬體</h2>
+        <h2 id="page-title">發佈二手硬體</h2>
         
         <div class="verify-box">
             <p style="margin-top:0; font-size:0.9rem; color:#555;">平台專屬：防礦卡硬體驗證</p>
@@ -44,7 +79,10 @@
                 <select id="product-category" required>
                     <option value="gpu">顯示卡 (GPU)</option>
                     <option value="cpu">處理器 (CPU)</option>
+                    <option value="mb">主機板 (MB)</option>
                     <option value="ram">記憶體 (RAM)</option>
+                    <option value="ssd">固態硬碟 (SSD)</option>
+                    <option value="hdd">傳統硬碟 (HDD)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -55,7 +93,7 @@
                 <label>商品描述與使用狀況</label>
                 <textarea id="product-desc" rows="4" placeholder="例如：無挖礦、僅玩特戰英豪，還有半年保固..." required></textarea>
             </div>
-            <button type="submit" class="btn">確認上架</button>
+            <button type="submit" id="submit-btn" class="btn">確認上架</button>
         </form>
     </div>
 
@@ -66,12 +104,82 @@
             return `${API_BASE}${path}`;
         }
 
+        let editingProductId = null;
+
+        window.onload = async function() {
+            const loggedInUser = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
+            if (loggedInUser) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
+            }
+            updateCartCount();
+
+            // 檢查是否為編輯模式
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) {
+                editingProductId = id;
+                document.getElementById('page-title').innerText = '編輯二手硬體';
+                document.getElementById('submit-btn').innerText = '確認修改';
+                
+                try {
+                    const res = await fetch(getApiUrl(`/api/products/${id}`));
+                    if (res.ok) {
+                        const product = await res.json();
+                        document.getElementById('product-title').value = product.title;
+                        document.getElementById('product-category').value = product.category;
+                        document.getElementById('product-price').value = product.price;
+                        document.getElementById('product-desc').value = product.desc;
+                    } else {
+                        alert('找不到該商品，可能已被刪除');
+                        window.location.href = '/products.html';
+                    }
+                } catch (err) {
+                    console.error('取得商品資訊失敗:', err);
+                }
+            }
+        };
+
+        function logout() {
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            alert('已成功登出！');
+            window.location.href = '/';
+        }
+
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            const cartCountEl = document.getElementById('cart-count');
+            if(cartCountEl) cartCountEl.innerText = count;
+        }
+
+        function triggerSearch() {
+            const input = document.querySelector('.nav-search');
+            if (input && input.value.trim()) {
+                alert('執行搜尋：' + input.value.trim());
+            }
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                triggerSearch();
+            }
+        }
+
+        function simulateVerification() {
+            document.getElementById('verify-btn').style.display = 'none';
+            document.getElementById('verify-result').style.display = 'block';
+        }
+
         async function submitProduct(event) {
             event.preventDefault();
             const seller = localStorage.getItem('userEmail');
             if (!seller) {
-                alert('請先登入才能上架商品！');
-                window.location.href = '/login.html';
+                alert('請先登入才能操作商品！');
+                window.location.href = '/login';
                 return;
             }
 
@@ -81,21 +189,26 @@
             const desc = document.getElementById('product-desc').value.trim();
 
             try {
-                const res = await fetch(getApiUrl('/api/products'), {
-                    method: 'POST',
+                const url = editingProductId ? getApiUrl(`/api/products/${editingProductId}`) : getApiUrl('/api/products');
+                const method = editingProductId ? 'PUT' : 'POST';
+                const successMsg = editingProductId ? '修改成功！' : '上架成功！';
+                const failureMsg = editingProductId ? '修改失敗' : '上架失敗';
+
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ seller, title, category, price, desc })
                 });
                 const result = await res.json();
                 if (result.success) {
-                    alert('上架成功！');
+                    alert(successMsg);
                     window.location.href = getApiUrl('/products.html');
                 } else {
-                    alert(result.message || '上架失敗');
+                    alert(result.message || failureMsg);
                 }
             } catch (err) {
-                console.error('上架失敗:', err);
-                alert('上架失敗，無法連接伺服器');
+                console.error('操作失敗:', err);
+                alert('操作失敗，無法連接伺服器');
             }
         }
     </script>

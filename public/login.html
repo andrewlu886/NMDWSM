@@ -4,21 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>會員中心 - 二手硬體安心交易平台</title>
+    <link rel="stylesheet" href="/style.css">
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --bg-color: #f4f7f6;
-        }
         body {
-            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            background-color: var(--bg-color);
         }
         .login-container {
             background: white;
@@ -236,6 +230,9 @@
                     
                     // 【新增】：把帳號記在瀏覽器裡，這樣回首頁才不會失憶
                     localStorage.setItem('userEmail', email); 
+                    if (result.user && result.user.username) {
+                        localStorage.setItem('userName', result.user.username);
+                    }
                     
                     // 【修改】：跳轉回根目錄首頁
                     window.location.href = '/'; 

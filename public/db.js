@@ -13,8 +13,114 @@ function initDatabase() {
         reject(err);
       } else {
         db.run('PRAGMA foreign_keys = ON');
-        console.log('✅ 數據庫連接成功');
-        resolve(db);
+        
+        // 自動建立所有需要的資料表
+        const initSql = `
+          CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            username TEXT NOT NULL,
+            real_name TEXT,
+            phone TEXT,
+            city TEXT,
+            role TEXT DEFAULT 'buyer',
+            reputation_score INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            seller_id INTEGER,
+            title TEXT NOT NULL,
+            description TEXT,
+            category TEXT,
+            price INTEGER NOT NULL,
+            condition TEXT,
+            status TEXT DEFAULT 'active',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (seller_id) REFERENCES users(id)
+          );
+
+          CREATE TABLE IF NOT EXISTS burn_in_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER,
+            tested_by INTEGER,
+            test_type TEXT DEFAULT 'unknown',
+            model TEXT,
+            serial_number TEXT,
+            test_start DATETIME,
+            test_end DATETIME,
+            duration_minutes INTEGER,
+            temperature_max REAL,
+            temperature_avg REAL,
+            power_avg REAL,
+            stability_score REAL,
+            error_count INTEGER DEFAULT 0,
+            metrics_json TEXT,
+            price_prediction REAL,
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id),
+            FOREIGN KEY (tested_by) REFERENCES users(id)
+          );
+
+          CREATE TABLE IF NOT EXISTS posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            author_id INTEGER,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            category TEXT,
+            views INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (author_id) REFERENCES users(id)
+          );
+
+          CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER,
+            buyer_id INTEGER,
+            seller_id INTEGER,
+            price INTEGER,
+            status TEXT DEFAULT 'pending',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id),
+            FOREIGN KEY (buyer_id) REFERENCES users(id),
+            FOREIGN KEY (seller_id) REFERENCES users(id)
+          );
+
+          CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER,
+            author_id INTEGER,
+            content TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (post_id) REFERENCES posts(id),
+            FOREIGN KEY (author_id) REFERENCES users(id)
+          );
+
+          CREATE TABLE IF NOT EXISTS cart_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            product_id INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+          );
+        `;
+
+        db.exec(initSql, (err) => {
+          if (err) {
+            console.error('❌ 初始化資料表失敗:', err.message);
+            reject(err);
+          } else {
+            // 自動容錯：嘗試幫舊版資料庫補上 role 欄位 (若欄位已存在會靜默忽略)
+            db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'buyer'", () => {});
+            
+            console.log('✅ 數據庫連接成功並完成資料表初始化');
+            resolve(db);
+          }
+        });
       }
     });
   });
@@ -61,9 +167,10 @@ const User = {
   },
 
   async create(data) {
-    const sql = `INSERT INTO users (email, password, username, real_name, phone, city, role) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    return runUpdate(sql, [data.email, data.password, data.username, data.real_name, data.phone, data.city, data.role || 'buyer']);
+    // 移除 role 的強制寫入，交給資料庫的 DEFAULT 'buyer' 處理，這樣能最大化相容舊版結構
+    const sql = `INSERT INTO users (email, password, username, real_name, phone, city) 
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+    return runUpdate(sql, [data.email, data.password, data.username, data.real_name, data.phone, data.city]);
   },
 
   async getAll() {
@@ -90,9 +197,9 @@ const Product = {
   },
 
   async create(data) {
-    const sql = `INSERT INTO products (seller_id, title, description, category, price, condition, status) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    return runUpdate(sql, [data.seller_id, data.title, data.description, data.category, data.price, data.condition, 'active']);
+    const sql = `INSERT INTO products (seller_id, title, description, category, price, condition, status, image_url) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    return runUpdate(sql, [data.seller_id, data.title, data.description, data.category, data.price, data.condition, 'active', data.image_url]);
   },
 
   async search(keyword) {
@@ -208,6 +315,38 @@ const Comment = {
   }
 };
 
+// 購物車相關
+const Cart = {
+  async add(userId, productId) {
+    // 避免重複將相同商品加入購物車
+    const existing = await runQueryOne('SELECT id FROM cart_items WHERE user_id = ? AND product_id = ?', [userId, productId]);
+    if (existing) return { id: existing.id, message: "已存在購物車中" };
+    
+    const sql = `INSERT INTO cart_items (user_id, product_id) VALUES (?, ?)`;
+    return runUpdate(sql, [userId, productId]);
+  },
+
+  async remove(cartItemId, userId) {
+    return runUpdate('DELETE FROM cart_items WHERE id = ? AND user_id = ?', [cartItemId, userId]);
+  },
+
+  async getByUser(userId) {
+    // JOIN products 與 users，這樣前端就能直接顯示商品名稱、價格與賣家名稱
+    return runQuery(`
+      SELECT c.id as cart_item_id, p.*, u.username as seller_name 
+      FROM cart_items c
+      JOIN products p ON c.product_id = p.id
+      JOIN users u ON p.seller_id = u.id
+      WHERE c.user_id = ?
+      ORDER BY c.created_at DESC
+    `, [userId]);
+  },
+
+  async clear(userId) {
+    return runUpdate('DELETE FROM cart_items WHERE user_id = ?', [userId]);
+  }
+};
+
 module.exports = {
   initDatabase,
   runQuery,
@@ -218,5 +357,6 @@ module.exports = {
   Post,
   Transaction,
   Comment,
-  BurnInRecord
+  BurnInRecord,
+  Cart
 };

@@ -476,7 +476,13 @@ const server = http.createServer(async(req, res) => {
         req.on('data', chunk => body += chunk.toString());
         req.on('end', async () => {
             try {
-                const { name, email, password, confirmPassword } = JSON.parse(body);
+                const parsedBody = JSON.parse(body);
+                console.log('📝 收到註冊請求資料:', parsedBody);
+                
+                // 兼容前端可能傳遞 name 或 username 的情況
+                const { name, username, email, password, confirmPassword } = parsedBody;
+                const finalName = name || username;
+                
                 if (password !== confirmPassword || password.length < 8) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ success: false, message: "密碼不一致" }));
@@ -491,8 +497,8 @@ const server = http.createServer(async(req, res) => {
                 await db.User.create({
                     email,
                     password,
-                    username: name,
-                    real_name: name,
+                    username: finalName || '未命名使用者',
+                    real_name: finalName || '',
                     phone: '',
                     city: ''
                 });
@@ -500,6 +506,7 @@ const server = http.createServer(async(req, res) => {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, message: "註冊成功" }));
             } catch (error) {
+                console.error('❌ 註冊 API 發生錯誤:', error);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: false, message: "伺服器錯誤" }));
             }
@@ -674,37 +681,194 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         let body = '';
         req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
-            const product = JSON.parse(body);
-            product.id = Date.now(); // 產生唯一 ID
-            let products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
-            products.push(product);
-            fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, message: '上架成功' }));
+        req.on('end', async () => {
+            try {
+                const { seller, title, category, price, desc, image } = JSON.parse(body);
+                console.log(`🛒 準備新增商品: ${title}, 賣家: ${seller}`);
+                
+                // 透過 email 找出對應使用者的 ID (seller_id)
+                const user = await db.User.findByEmail(seller);
+                if (!user) {
+                    console.log('❌ 新增商品失敗: 找不到賣家帳號 (可能是該信箱未在 SQLite 註冊，請先登出再重新註冊/登入)');
+                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: false, message: '找不到賣家帳號' }));
+                }
+                
+                // 寫入 SQLite 資料庫
+                const result = await db.Product.create({
+                    seller_id: user.id,
+                    title: title,
+                    description: desc || '',
+                    category: category || '未分類',
+                    price: parseInt(price, 10),
+                    condition: 'unknown',
+                    image_url: image || null
+                });
+                console.log(`✅ 商品已成功寫入 SQLite 資料庫！(商品 ID: ${result.id})`);
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, message: '上架成功' }));
+            } catch (error) {
+                console.error('❌ 新增商品錯誤:', error);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
+            }
         });
 
     } else if (pathname === '/api/products' && req.method === 'GET') {
         setCorsHeaders(res);
         const sellerEmail = parsedUrl.searchParams.get('seller');
-        let products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
-        // 若有賣家參數則過濾
-        if (sellerEmail) {
-            products = products.filter(p => p.seller === sellerEmail);
+        try {
+            let products = [];
+            if (sellerEmail) {
+                const user = await db.User.findByEmail(sellerEmail);
+                if (user) products = await db.Product.findBySeller(user.id);
+            } else {
+                products = await db.Product.getActive();
+            }
+            
+            // 為了相容前端原本預期的 JSON 屬性名稱，我們將資料庫欄位映射回原格式
+            const formattedProducts = products.map(p => ({
+                id: p.id,
+                title: p.title,
+                price: p.price,
+                category: p.category,
+                desc: p.description,
+                image: p.image_url,
+                seller: p.seller_name || sellerEmail
+            }));
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(formattedProducts));
+        } catch (error) {
+            console.error('❌ 讀取商品錯誤:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
         }
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(products));
+
+    // --- 商品 API (單一商品) ---
+    } else if (pathname.match(/^\/api\/products\/\d+$/) && req.method === 'GET') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3]);
+        try {
+            const product = await db.Product.findById(productId);
+            if (product) {
+                const formattedProduct = {
+                    id: product.id,
+                    title: product.title,
+                    price: product.price,
+                    category: product.category,
+                    desc: product.description,
+                    image: product.image_url,
+                    seller: product.seller_name || product.seller_id
+                };
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(formattedProduct));
+            } else {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: '找不到商品' }));
+            }
+        } catch (error) {
+            console.error('❌ 讀取單一商品錯誤:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
+        }
 
     // --- 商品 API (刪除) ---
     } else if (pathname.startsWith('/api/products/') && req.method === 'DELETE') {
         setCorsHeaders(res);
         const productId = parseInt(pathname.split('/')[3]);
-        let products = JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
-        products = products.filter(p => p.id !== productId);
-        fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true }));
+        try {
+            await db.runUpdate('DELETE FROM products WHERE id = ?', [productId]);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: '商品已刪除' }));
+        } catch (error) {
+            console.error('❌ 刪除商品錯誤:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: '刪除商品失敗' }));
+        }
+
+    // --- 商品 API (修改) ---
+    } else if (pathname.startsWith('/api/products/') && req.method === 'PUT') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3]);
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', async () => {
+            try {
+                const { title, category, price, desc, image } = JSON.parse(body);
+                
+                await db.runUpdate(
+                    'UPDATE products SET title = ?, category = ?, price = ?, description = ?, image_url = ? WHERE id = ?',
+                    [title, category, parseInt(price, 10), desc || '', image || null, productId]
+                );
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, message: '商品已更新' }));
+            } catch (error) {
+                console.error('❌ 更新商品錯誤:', error);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
+            }
+        });
         
+    // --- 購物車 API ---
+    } else if (pathname === '/api/cart' && req.method === 'GET') {
+        setCorsHeaders(res);
+        const userId = parsedUrl.searchParams.get('userId');
+        if (!userId) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: false, message: "缺少 userId 參數" }));
+        }
+        try {
+            const items = await db.Cart.getByUser(userId);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, data: items }));
+        } catch (error) {
+            console.error('❌ 讀取購物車錯誤:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: "讀取購物車失敗" }));
+        }
+
+    } else if (pathname === '/api/cart' && req.method === 'POST') {
+        setCorsHeaders(res);
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', async () => {
+            try {
+                const { userId, productId } = JSON.parse(body);
+                if (!userId || !productId) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: false, message: "缺少必要參數" }));
+                }
+                await db.Cart.add(userId, productId);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, message: "已加入購物車" }));
+            } catch (error) {
+                console.error('❌ 加入購物車錯誤:', error);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: "加入購物車失敗" }));
+            }
+        });
+
+    } else if (pathname.startsWith('/api/cart/') && req.method === 'DELETE') {
+        setCorsHeaders(res);
+        const cartItemId = parseInt(pathname.split('/')[3]);
+        const userId = parsedUrl.searchParams.get('userId');
+        if (!userId) {
+             res.writeHead(400, { 'Content-Type': 'application/json' });
+             return res.end(JSON.stringify({ success: false, message: "缺少 userId 參數" }));
+        }
+        try {
+            await db.Cart.remove(cartItemId, userId);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: "已從購物車中移除" }));
+        } catch (error) {
+            console.error('❌ 移除購物車商品錯誤:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: "移除商品失敗" }));
+        }
+
     }// 1. 爬蟲 API 路由
     else if (pathname === '/api/scrape' && req.method === 'GET') {
         setCorsHeaders(res);

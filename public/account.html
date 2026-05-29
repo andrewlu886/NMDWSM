@@ -4,111 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的帳戶 | 二手硬體交易平台</title>
+    <link rel="stylesheet" href="/style.css">
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-        }
-        body {
-            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        /* 導覽列 */
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .logo { font-size: 1.5rem; font-weight: bold; text-decoration: none; color: white; }
-        nav { display: flex; align-items: center; }
-        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: 500; }
-        
-        .auth-btn {
-            background-color: var(--secondary-color);
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: white;
-            text-decoration: none;
-        }
-        #user-profile { 
-            display: flex; 
-            align-items: center; 
-            position: relative; 
-            cursor: pointer;
-            padding: 10px 0;
-        }
-        .avatar { width: 35px; height: 35px; background: #ddd; border-radius: 50%; margin-right: 10px; }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            min-width: 120px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        #user-profile:hover .dropdown-menu { display: block; }
-        nav .dropdown-menu a { display: block; color: var(--text-color); margin: 0; padding: 12px 20px; font-size: 0.9rem; font-weight: normal; transition: background 0.2s; }
-        nav .dropdown-menu a:hover { background-color: #f1f1f1; color: var(--secondary-color); }
-        
-        .nav-search {
-            padding: 6px 15px;
-            border: none;
-            border-radius: 20px;
-            margin: 0 15px;
-            outline: none;
-            font-size: 0.9rem;
-            width: 200px;
-        }
-
         /* 主內容區 */
         .container { max-width: 800px; margin: 3rem auto; padding: 0 20px; }
         .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .card h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; color: var(--primary-color); }
         .info-row { margin-bottom: 15px; font-size: 1.1rem; }
         .info-row strong { display: inline-block; width: 100px; color: #555; }
-        .btn-action { background: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 20px; }
-        .btn-action:hover { background-color: #2980b9; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="/" class="logo">轉轉轉二手交易平台</a>
-        <nav>
-            <a href="/">首頁</a>
-            <a href="#">智慧推薦</a>
-            <a href="/forum">討論區</a>
-            <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
-            <div id="auth-section" style="display: none;">
-                <a href="/login.html" class="auth-btn">登入 / 註冊</a>
+        <div class="header-main">
+            <a href="/" class="logo">轉轉轉二手平台</a>
+            
+            <div class="search-wrapper">
+                <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">🔍</button>
             </div>
-            <div id="user-profile">
-                <div class="avatar"></div>
-                <span id="user-display-name">載入中...</span>
-                <div class="dropdown-menu">
-                    <a href="/account.html" style="color: var(--secondary-color); font-weight: bold;">我的帳戶</a>
-                    <a href="/products.html">我的商品</a>
-                    <a href="#" onclick="logout()">登出</a>
+
+            <div class="header-actions">
+                <a href="/cart" class="cart-link" title="購物車">
+                    🛒 <span id="cart-count" class="cart-count">0</span>
+                </a>
+                
+                <div id="auth-section">
+                    <a href="/login" class="auth-btn">登入 / 註冊</a>
+                </div>
+                
+                <div id="user-profile">
+                    <div class="avatar">👤</div>
+                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
+                    <div class="dropdown-menu">
+                        <a href="/account.html" class="active">我的帳戶</a>
+                        <a href="/products.html">我的商品</a>
+                        <a href="#" onclick="logout()">登出</a>
+                    </div>
                 </div>
             </div>
+        </div>
+        
+        <nav class="main-nav">
+            <a href="/">首頁</a>
+            <a href="/marketplace">🛒 商城</a>
+            <a href="#">智慧推薦</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/seller">賣家中心</a>
         </nav>
     </header>
 
@@ -125,24 +69,47 @@
     <script>
         window.onload = function() {
             const loggedInUser = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
             if (!loggedInUser) {
                 document.getElementById('user-profile').style.display = 'none';
                 document.getElementById('auth-section').style.display = 'block';
                 document.getElementById('account-email').innerText = '尚未登入';
             } else {
                 // 已登入：顯示會員資料
-                document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
                 document.getElementById('account-email').innerText = loggedInUser;
             }
+            updateCartCount();
         };
 
         function logout() {
             localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
             alert('已成功登出！');
             window.location.href = '/';
         }
 
-        function handleSearch(event) { if (event.key === 'Enter' && event.target.value.trim()) { alert('執行搜尋：' + event.target.value.trim()); } }
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            const cartCountEl = document.getElementById('cart-count');
+            if(cartCountEl) cartCountEl.innerText = count;
+        }
+
+        function triggerSearch() {
+            const input = document.querySelector('.nav-search');
+            if (input && input.value.trim()) {
+                alert('執行搜尋：' + input.value.trim());
+            }
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                triggerSearch();
+            }
+        }
     </script>
 </body>
 </html>

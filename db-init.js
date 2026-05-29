@@ -134,6 +134,16 @@ const createTables = () => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
       FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+    );`,
+
+    // 7. 購物車表
+    `CREATE TABLE IF NOT EXISTS cart_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     );`
   ];
 
@@ -143,7 +153,7 @@ const createTables = () => {
     });
   });
 
-  console.log('✅ 已創建 users、products、posts、transactions、burn_in_records、reviews、comments 表');
+  console.log('✅ 已創建 users、products、posts、transactions、burn_in_records、reviews、comments、cart_items 表');
 };
 
 function ensureColumn(table, column, definition) {

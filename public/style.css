@@ -1,0 +1,207 @@
+/* --- 網站共用變數與全域設定 --- */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --bg-color: #f4f7f6;
+    --text-color: #333;
+}
+
+body {
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* --- 共用導覽列 (Header) --- */
+header {
+    background-color: var(--primary-color);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 5%;
+}
+
+.logo { 
+    font-size: 1.8rem; 
+    font-weight: bold; 
+    color: white; 
+    text-decoration: none; 
+    letter-spacing: 1px; 
+}
+
+/* 寬版置中搜尋框 */
+.search-wrapper {
+    display: flex;
+    flex: 1;
+    max-width: 600px;
+    margin: 0 30px;
+    background: white;
+    border-radius: 4px;
+    padding: 3px;
+}
+
+.nav-search {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    outline: none;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.search-btn {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 1.1rem;
+}
+
+.search-btn:hover { background: #2980b9; }
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+/* 購物車連結與計數器 */
+.cart-link {
+    position: relative;
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.cart-count {
+    position: absolute;
+    top: -5px;
+    right: -12px;
+    background: var(--accent-color);
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 7px;
+    border-radius: 12px;
+    font-weight: bold;
+    border: 2px solid var(--primary-color);
+}
+
+/* 登入註冊按鈕 */
+.auth-btn {
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+.auth-btn:hover { color: #bdc3c7; background-color: transparent; }
+
+/* 登入後使用者選單 */
+#user-profile { 
+    display: none; 
+    align-items: center; 
+    position: relative; 
+    cursor: pointer;
+    padding: 15px 0; 
+    margin: -10px 0; 
+}
+
+.avatar { 
+    width: 32px; 
+    height: 32px; 
+    background: #ddd; 
+    border-radius: 50%; 
+    margin-right: 8px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: #666; 
+    font-size: 0.9rem; 
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    min-width: 130px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+#user-profile:hover .dropdown-menu { display: block; }
+
+.dropdown-menu a { 
+    display: block; 
+    color: var(--text-color); 
+    margin: 0; 
+    padding: 12px 20px; 
+    font-size: 0.95rem; 
+    font-weight: normal; 
+    transition: background 0.2s; 
+    text-decoration: none; 
+}
+
+.dropdown-menu a:hover { 
+    background-color: #f9f9f9; 
+    color: var(--secondary-color); 
+}
+
+/* 副導覽列 */
+.main-nav {
+    background-color: rgba(0, 0, 0, 0.15);
+    padding: 8px 5%;
+    display: flex;
+    gap: 25px;
+}
+
+.main-nav a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.main-nav a:hover,
+.main-nav a.active { 
+    color: white; 
+    font-weight: bold;
+}
+
+/* --- 共用按鈕風格 --- */
+.btn-action {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-action:hover {
+    background-color: #2980b9;
+}

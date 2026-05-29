@@ -4,114 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的商品 | 二手硬體交易平台</title>
+    <link rel="stylesheet" href="/style.css">
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-        }
-        body {
-            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        /* 導覽列 */
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .logo { font-size: 1.5rem; font-weight: bold; text-decoration: none; color: white; }
-        nav { display: flex; align-items: center; }
-        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: 500; }
-        
-        .auth-btn {
-            background-color: var(--secondary-color);
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: white;
-            text-decoration: none;
-        }
-        #user-profile { 
-            display: flex; 
-            align-items: center; 
-            position: relative; 
-            cursor: pointer;
-            padding: 10px 0;
-        }
-        .avatar { width: 35px; height: 35px; background: #ddd; border-radius: 50%; margin-right: 10px; }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            min-width: 120px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        #user-profile:hover .dropdown-menu { display: block; }
-        nav .dropdown-menu a { display: block; color: var(--text-color); margin: 0; padding: 12px 20px; font-size: 0.9rem; font-weight: normal; transition: background 0.2s; }
-        nav .dropdown-menu a:hover { background-color: #f1f1f1; color: var(--secondary-color); }
-        
-        .nav-search {
-            padding: 6px 15px;
-            border: none;
-            border-radius: 20px;
-            margin: 0 15px;
-            outline: none;
-            font-size: 0.9rem;
-            width: 200px;
-        }
-
         /* 主內容區 */
         .container { max-width: 900px; margin: 3rem auto; padding: 0 20px; }
         .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .header-action h2 { margin: 0; color: var(--primary-color); }
-        .btn-action { background: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-action:hover { background-color: #2980b9; }
         
         .empty-state {
             background: white; padding: 4rem 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             text-align: center; color: #999;
         }
+
+        .product-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #f9f9f9;
+        }
+        .product-list-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #eee;
+        }
+        .item-main { flex-grow: 1; margin-right: 20px; }
+        .item-title { margin: 0 0 8px 0; font-size: 1.25rem; color: var(--primary-color); }
+        .item-category { font-size: 0.9rem; color: #7f8c8d; font-weight: normal; }
+        .item-desc { margin: 0; color: #666; font-size: 0.95rem; line-height: 1.5; }
+        .item-aside { text-align: right; min-width: 120px; }
+        .item-price { font-size: 1.4rem; color: var(--accent-color); font-weight: bold; margin: 0 0 10px 0; }
+        .btn-edit {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-edit:hover { background: #2980b9; }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-delete:hover { background: #c0392b; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="/" class="logo">轉轉轉二手交易平台</a>
-        <nav>
-            <a href="/">首頁</a>
-            <a href="#">智慧推薦</a>
-            <a href="/forum">討論區</a>
-            <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
-            <div id="auth-section" style="display: none;">
-                <a href="/login.html" class="auth-btn">登入 / 註冊</a>
+        <div class="header-main">
+            <a href="/" class="logo">轉轉轉二手平台</a>
+            
+            <div class="search-wrapper">
+                <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">🔍</button>
             </div>
-            <div id="user-profile">
-                <div class="avatar"></div>
-                <span id="user-display-name">載入中...</span>
-                <div class="dropdown-menu">
-                    <a href="/account.html">我的帳戶</a>
-                    <a href="/products.html" style="color: var(--secondary-color); font-weight: bold;">我的商品</a>
-                    <a href="#" onclick="logout()">登出</a>
+
+            <div class="header-actions">
+                <a href="/cart" class="cart-link" title="購物車">
+                    🛒 <span id="cart-count" class="cart-count">0</span>
+                </a>
+                
+                <div id="auth-section">
+                    <a href="/login" class="auth-btn">登入 / 註冊</a>
+                </div>
+                
+                <div id="user-profile">
+                    <div class="avatar">👤</div>
+                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
+                    <div class="dropdown-menu">
+                        <a href="/account.html">我的帳戶</a>
+                        <a href="/products.html">我的商品</a>
+                        <a href="#" onclick="logout()">登出</a>
+                    </div>
                 </div>
             </div>
+        </div>
+        
+        <nav class="main-nav">
+            <a href="/">首頁</a>
+            <a href="/marketplace">🛒 商城</a>
+            <a href="#">智慧推薦</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/seller">賣家中心</a>
         </nav>
     </header>
 
@@ -130,11 +121,12 @@
     <script>
         window.onload = function() {
         const loggedInUser = localStorage.getItem('userEmail');
+        const userName = localStorage.getItem('userName');
         if (!loggedInUser) {
             document.getElementById('user-profile').style.display = 'none';
             document.getElementById('auth-section').style.display = 'block';
         } else {
-            document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
+            document.getElementById('user-display-name').innerText = (userName ? userName : loggedInUser.split('@')[0]) + " (會員)";
             fetchMyProducts(loggedInUser); // 登入後抓取商品
         }
         
@@ -143,6 +135,13 @@
             window.location.href = '/seller.html';
         };
     };
+
+    function logout() {
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        alert('已成功登出！');
+        window.location.href = '/';
+    }
 
     // 抓取並顯示目前登入者的商品
     async function fetchMyProducts(email) {
@@ -157,11 +156,18 @@
                             </div>`;
                 products.forEach(p => {
                     html += `
-                    <div style="background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                        <h3>${p.title} <span style="font-size:0.9rem; color:#777;">(${p.category})</span></h3>
-                        <p style="color: var(--secondary-color); font-weight: bold;">NT$ ${p.price}</p>
-                        <p>${p.desc}</p>
-                        <button style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="deleteProduct(${p.id})">下架刪除</button>
+                    <div class="product-list-item">
+                        <div class="item-main">
+                            <h3 class="item-title">${p.title} <span class="item-category">(${p.category})</span></h3>
+                            <p class="item-desc">${p.desc}</p>
+                        </div>
+                        <div class="item-aside">
+                            <p class="item-price">NT$ ${p.price}</p>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <button class="btn-edit" onclick="editProduct(${p.id})">修改</button>
+                                <button class="btn-delete" onclick="deleteProduct(${p.id})">下架刪除</button>
+                            </div>
+                        </div>
                     </div>
                     `;
                 });
@@ -170,6 +176,11 @@
         } catch (err) {
             console.error('抓取商品失敗', err);
         }
+    }
+
+    // 實作編輯商品功能
+    function editProduct(id) {
+        window.location.href = `/seller.html?id=${id}`;
     }
 
     // 實作刪除商品功能

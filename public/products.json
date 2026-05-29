@@ -6,5 +6,13 @@
     "price": "499",
     "desc": "測試用途",
     "id": 1779842231703
+  },
+  {
+    "seller": "saki@email.com",
+    "title": "KC3000 PCIe 4.0 NVMe M.2 SSD 512GB",
+    "category": "ram",
+    "price": "100000",
+    "desc": "99新",
+    "id": 1780049418456
   }
 ]

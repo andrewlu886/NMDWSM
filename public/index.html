@@ -4,147 +4,206 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>二手硬體交易平台 | 整合展示</title>
+    <link rel="stylesheet" href="/style.css">
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-        }
-        body {
-            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        /* 導覽列 */
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .logo { font-size: 1.5rem; font-weight: bold; }
-        nav { display: flex; align-items: center; }
-        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: 500; }
-        .auth-btn {
-            background-color: var(--secondary-color);
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: white;
-            text-decoration: none;
-        }
-        .auth-btn:hover { background-color: #2980b9; }
-        
-        /* 使用者選單與下拉式選單 (透過 CSS :hover 觸發顯示) */
-        #user-profile { 
-            display: none; 
-            align-items: center; 
-            position: relative; 
-            cursor: pointer;
-            padding: 10px 0; /* 增加感應區，避免滑鼠移動時下拉選單斷開 */
-        }
-        .avatar { width: 35px; height: 35px; background: #ddd; border-radius: 50%; margin-right: 10px; }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            min-width: 120px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        /* 當滑鼠移到頭像區塊時，顯示下拉選單 */
-        #user-profile:hover .dropdown-menu { display: block; }
-        nav .dropdown-menu a { display: block; color: var(--text-color); margin: 0; padding: 12px 20px; font-size: 0.9rem; font-weight: normal; transition: background 0.2s; }
-        nav .dropdown-menu a:hover { background-color: #f1f1f1; color: var(--secondary-color); }
-        
-        /* 搜尋框樣式 (包含點擊時的發光效果) */
-        .nav-search {
-            padding: 6px 15px;
-            border: none;
-            border-radius: 20px;
-            margin: 0 15px;
-            outline: none;
-            font-size: 0.9rem;
-            width: 200px;
-            transition: box-shadow 0.3s;
-        }
-        .nav-search:focus {
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-        }
-
         /* 主內容區 */
         .container { max-width: 1100px; margin: 2rem auto; padding: 0 20px; }
+        
+        /* 廣告 Banner 區塊 */
+        .ad-banners {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 2rem;
+            height: 300px;
+        }
+        .main-banner {
+            flex: 2;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .main-banner:hover { transform: translateY(-2px); }
+        .main-banner::after {
+            content: "🎮";
+            font-size: 15rem;
+            position: absolute;
+            right: -20px;
+            bottom: -50px;
+            opacity: 0.1;
+        }
+        .banner-content { z-index: 1; }
+        .banner-content h2 { font-size: 2rem; margin: 0 0 10px 0; color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+        .banner-content p { font-size: 1.1rem; margin: 0 0 20px 0; color: #e0e0e0; }
+        .banner-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 0 2px 5px rgba(231, 76, 60, 0.4);
+        }
+        .banner-btn:hover { background: #c0392b; transform: scale(1.05); }
+        
+        .side-banners {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .side-banner {
+            flex: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            line-height: 1.4;
+        }
+        .side-banner:hover { transform: translateY(-2px); }
+        .banner-1 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); color: #d63031; }
+        .banner-2 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #0984e3; }
         .hero {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             background: linear-gradient(135deg, #ffffff 0%, #eef2f3 100%);
-            border-radius: 15px;
+            border-radius: 8px;
             margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eaeaea;
         }
-        .hero h1 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 10px; }
+        .hero h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; margin-top: 0; }
         
         /* 功能卡片區 */
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .card h3 { border-left: 4px solid var(--secondary-color); padding-left: 10px; margin-top: 0; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            border: 1px solid #f0f0f0; 
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .card h3 { border-left: 4px solid var(--secondary-color); padding-left: 10px; margin-top: 0; font-size: 1.3rem;}
         
         /* 智慧推薦表單 */
         .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn-action { width: 100%; background: var(--secondary-color); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        #result-display { margin-top: 20px; padding: 15px; background: #f0f7fa; border-radius: 6px; display: none; text-align: left; font-size: 0.9rem; }
+        label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: bold; color: #555; }
+        input[type="number"], select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 0.95rem; 
+            transition: border-color 0.2s; 
+        }
+        input[type="number"]:focus, select:focus { border-color: var(--secondary-color); outline: none; }
+        
+        .btn-action.recommend {
+            width: 100%;
+            margin-top: 10px;
+            padding: 14px;
+            font-size: 1rem;
+        }
+
+        #result-display { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #f8fbff; 
+            border-radius: 4px; 
+            display: none; 
+            text-align: left; 
+            font-size: 0.95rem; 
+            border: 1px solid #cce3f0; 
+            line-height: 1.6; 
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">轉轉轉二手交易平台</div>
-        <nav>
+        <!-- 主要列：Logo + 大搜尋框 + 購物車/會員 -->
+        <div class="header-main">
+            <a href="/" class="logo">轉轉轉二手平台</a>
+            
+            <div class="search-wrapper">
+                <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">🔍</button>
+            </div>
+
+            <div class="header-actions">
+                <a href="/cart" class="cart-link" title="購物車">
+                    🛒 <span id="cart-count" class="cart-count">0</span>
+                </a>
+                
+                <div id="auth-section">
+                    <a href="/login" class="auth-btn">登入 / 註冊</a>
+                </div>
+                
+                <!-- 登入後顯示的會員頭像與下拉選單區塊 -->
+                <div id="user-profile">
+                    <div class="avatar">👤</div>
+                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
+                    <div class="dropdown-menu">
+                        <a href="/account.html">我的帳戶</a>
+                        <a href="/products.html">我的商品</a>
+                        <a href="#" onclick="logout()">登出</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 副導覽列：原有連結橫向排列 (類似蝦皮分類列) -->
+        <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/marketplace">🛒 商城</a>
             <a href="#">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
-            <a href="/cart" style="position: relative;">購物車 <span id="cart-count" style="position: absolute; top: -5px; right: -10px; background: #e74c3c; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px;">0</span></a>
             <a href="/seller">賣家中心</a>
-            <!-- 搜尋框元件：綁定 onkeydown 監聽器，當按下鍵盤時觸發 handleSearch 函數 -->
-            <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
-            <div id="auth-section">
-                <a href="/login" class="auth-btn">登入 / 註冊</a>
-            </div>
-            
-            <!-- 登入後顯示的會員頭像與下拉選單區塊 (預設為隱藏) -->
-            <div id="user-profile">
-                <div class="avatar"></div>
-                <span id="user-display-name">載入中...</span>
-                <div class="dropdown-menu">
-                    <a href="/account.html">我的帳戶</a>
-                    <a href="/products.html">我的商品</a>
-                    <a href="#" onclick="logout()">登出</a>
-                </div>
-            </div>
         </nav>
     </header>
 
     <div class="container">
+        <!-- 頂部廣告 Banner 區塊 -->
+        <section class="ad-banners">
+            <div class="main-banner" onclick="alert('導向促銷活動頁面')">
+                <div class="banner-content">
+                    <h2>🔥 週末限定 | 頂級顯卡破盤下殺</h2>
+                    <p>RTX 3080 系列最低 5 折起，平台認證有保障！</p>
+                    <button class="banner-btn">立即搶購</button>
+                </div>
+            </div>
+            <div class="side-banners">
+                <div class="side-banner banner-1" onclick="alert('導向新會員專區')">
+                    <span>新會員專屬<br>滿千折百</span>
+                </div>
+                <div class="side-banner banner-2" onclick="alert('導向出清特賣區')">
+                    <span>出清特賣<br>主機板 399 起</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 保留原本的智慧推薦與驗證功能，僅略微升級卡片陰影與輸入框質感 -->
         <section class="hero">
             <h1>讓二手硬體交易更科學</h1>
             <p>結合淡江管科所價格模型與底層數據檢測，解決「礦卡」與「亂開價」的痛點。</p>
@@ -179,36 +238,40 @@
 
     <script>
         // --- 登入狀態檢查 ---
-        // 網頁一載入就檢查 localStorage 有沒有紀錄登入過的帳號
         window.onload = function() {
             const loggedInUser = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
             if (loggedInUser) {
-                // 如果有登入紀錄，就隱藏「登入/註冊」按鈕，並顯示會員頭像與名稱
                 document.getElementById('auth-section').style.display = 'none';
                 document.getElementById('user-profile').style.display = 'flex';
-                document.getElementById('user-display-name').innerText = loggedInUser + " (會員)";
+                // 優先顯示 userName，沒有的話則顯示 @ 前面的名字讓版面更好看
+                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
             }
         };
 
         // 登出功能
         function logout() {
             localStorage.removeItem('userEmail'); // 清除記憶
+            localStorage.removeItem('userName');
             alert('已成功登出！');
             window.location.reload(); // 重新整理網頁
         }
 
         // --- 搜尋功能 ---
-        // 捕捉鍵盤事件，判斷是否按下 Enter 鍵 (代碼 'Enter')
         function handleSearch(event) {
             if (event.key === 'Enter') {
-                const query = event.target.value.trim();
-                if (query) {
-                    alert('執行搜尋：' + query + '\n(此處可串接後端 API 或進行頁面跳轉)');
-                }
+                triggerSearch();
+            }
+        }
+        
+        function triggerSearch() {
+            const input = document.querySelector('.nav-search');
+            if (input && input.value.trim()) {
+                alert('執行搜尋：' + input.value.trim() + '\n(此處可串接後端 API 或進行頁面跳轉)');
             }
         }
 
-        // --- 智慧推薦邏輯 ---
+        // --- 智慧推薦邏輯 (保留您原本的功能) ---
         async function runRecommend() {
             const budget = document.getElementById('budget').value;
             const usage = document.getElementById('usage').value;
