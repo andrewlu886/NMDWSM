@@ -96,7 +96,8 @@ function formatDbReply(reply) {
     return {
         id: reply.id,
         content: reply.content,
-        author: reply.author_email || reply.username || '匿名使用者',
+        author: reply.username || reply.author_email || '匿名使用者',
+        authorEmail: reply.author_email,
         date: reply.created_at,
         images: decodeJsonList(reply.images)
     };
@@ -109,7 +110,8 @@ async function formatDbPost(post) {
         title: post.title,
         content: post.content,
         category: post.category,
-        author: post.author_email || post.author_name || '匿名使用者',
+        author: post.author_name || post.author_email || '匿名使用者',
+        authorEmail: post.author_email,
         date: post.created_at,
         images: decodeJsonList(post.images),
         replies: replies.map(formatDbReply)
@@ -1088,6 +1090,23 @@ const server = http.createServer(async(req, res) => {
         }
 
     // --- 購物車 API ---
+    } else if (pathname === '/api/account/name' && req.method === 'PUT') {
+        setCorsHeaders(res);
+        try {
+            const body = await parseJsonBody(req);
+            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
+            const username = String(body.username || '').trim();
+            if (!user) return sendJson(res, 400, { success: false, message: '請先登入' });
+            if (!username) return sendJson(res, 400, { success: false, message: '請輸入使用者名稱' });
+            if (username.length > 30) return sendJson(res, 400, { success: false, message: '使用者名稱請勿超過 30 個字' });
+
+            await db.User.updateUsername(user.id, username);
+            sendJson(res, 200, { success: true, message: '使用者名稱已更新', username });
+        } catch (error) {
+            console.error('更新使用者名稱失敗:', error);
+            sendJson(res, 500, { success: false, message: '更新使用者名稱失敗' });
+        }
+
     } else if (pathname === '/api/cart' && req.method === 'GET') {
         setCorsHeaders(res);
         try {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的商品 | 轉轉轉二手交易平台</title>
+    <title>我的商品 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         .container { max-width: 1100px; margin: 2rem auto; padding: 0 20px; }
@@ -24,6 +24,9 @@
         .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
         .btn-small { border: 0; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-weight: 700; color: white; background: #3498db; }
         .btn-muted { background: #64748b; }
+        .seller-subnav { display: flex; gap: 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; box-shadow: 0 4px 14px rgba(15,23,42,0.05); margin-bottom: 16px; }
+        .seller-subnav a { text-decoration: none; color: #475467; font-weight: 800; padding: 9px 14px; border-radius: 6px; }
+        .seller-subnav a.active, .seller-subnav a:hover { background: var(--secondary-color); color: #fff; }
         .btn-warning { background: #f59e0b; }
         .btn-danger { background: #e74c3c; }
         .empty-state { background: white; padding: 48px 24px; text-align: center; border-radius: 8px; color: #667085; }
@@ -35,7 +38,7 @@
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手交易平台</a>
+            <a href="/" class="logo">一次買夠二手交易平台</a>
             <div class="search-wrapper">
                 <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
                 <button class="search-btn" onclick="triggerSearch()">搜尋</button>
@@ -58,6 +61,7 @@
         <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/marketplace">商城</a>
+            <a href="/#recommend">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller">賣家中心</a>
@@ -65,6 +69,11 @@
     </header>
 
     <main class="container">
+        <div class="seller-subnav">
+            <a href="/seller">新增商品</a>
+            <a href="/products.html" class="active">我的商品</a>
+            <a href="/transactions">我的交易</a>
+        </div>
         <div class="header-action">
             <h2>我的商品管理</h2>
             <button class="btn-action" onclick="window.location.href='/seller.html'">+ 新增商品</button>

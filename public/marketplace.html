@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商城 | 轉轉轉二手交易平台</title>
+    <title>商城 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         .marketplace-layout { display: grid; grid-template-columns: 260px 1fr; max-width: 1200px; margin: 2rem auto; padding: 0 20px; gap: 24px; }
@@ -16,6 +16,9 @@
         .filter-input { width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 8px; }
         .page-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--primary-color); margin: 0 0 18px; }
         .sort-select { padding: 9px 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; }
+        .search-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 18px; }
+        .search-tag { border: 1px solid #d7e3ef; background: #fff; color: #475467; border-radius: 999px; padding: 7px 12px; font-weight: 800; cursor: pointer; }
+        .search-tag.active { background: var(--secondary-color); color: #fff; border-color: var(--secondary-color); }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
         .product-card { background: white; border: 1px solid #edf0f4; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.06); display: flex; flex-direction: column; min-height: 100%; }
         .product-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #eef2f7; }
@@ -36,7 +39,7 @@
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手交易平台</a>
+            <a href="/" class="logo">一次買夠二手交易平台</a>
             <div class="search-wrapper">
                 <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
                 <button class="search-btn" onclick="triggerSearch()">搜尋</button>
@@ -59,6 +62,7 @@
         <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/marketplace" class="active">商城</a>
+            <a href="/#recommend">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller">賣家中心</a>
@@ -75,6 +79,7 @@
                     <li><a href="#" onclick="filterCategory('gpu', event)">顯示卡 GPU</a></li>
                     <li><a href="#" onclick="filterCategory('mb', event)">主機板 MB</a></li>
                     <li><a href="#" onclick="filterCategory('ram', event)">記憶體 RAM</a></li>
+                    <li><a href="#" onclick="filterCategory('cooler', event)">散熱</a></li>
                     <li><a href="#" onclick="filterCategory('ssd', event)">固態硬碟 SSD</a></li>
                     <li><a href="#" onclick="filterCategory('hdd', event)">傳統硬碟 HDD</a></li>
                 </ul>
@@ -107,6 +112,15 @@
                     <option value="views">熱門瀏覽</option>
                 </select>
             </div>
+            <div class="search-tags" aria-label="搜尋篩選標籤">
+                <button class="search-tag" type="button" data-field="category" data-value="gpu" onclick="toggleSearchTag(this)">顯示卡 GPU</button>
+                <button class="search-tag" type="button" data-field="category" data-value="cpu" onclick="toggleSearchTag(this)">處理器 CPU</button>
+                <button class="search-tag" type="button" data-field="category" data-value="cooler" onclick="toggleSearchTag(this)">散熱</button>
+                <button class="search-tag" type="button" data-field="usageTag" data-value="遊戲" onclick="toggleSearchTag(this)">遊戲</button>
+                <button class="search-tag" type="button" data-field="location" data-value="ASUS" onclick="toggleSearchTag(this)">ASUS</button>
+                <button class="search-tag" type="button" data-field="location" data-value="GIGABYTE" onclick="toggleSearchTag(this)">GIGABYTE</button>
+                <button class="search-tag" type="button" data-field="location" data-value="MSI" onclick="toggleSearchTag(this)">MSI</button>
+            </div>
             <div id="products-container" class="products-grid">
                 <div class="empty">載入商品中...</div>
             </div>
@@ -117,6 +131,7 @@
         let allProducts = [];
         let currentCategory = 'all';
         let currentKeyword = '';
+        const selectedTags = new Map();
 
         window.onload = async function() {
             const loggedInUser = localStorage.getItem('userEmail');
@@ -161,11 +176,12 @@
                         <div class="meta">
                             <span class="tag">${product.category}</span>
                             <span class="tag">${product.condition || 'used'}</span>
+                            <span class="tag">${product.location || '廠家名稱'}</span>
                             <span class="tag">${product.usageTag || '未分類'}</span>
                             <span class="tag">瀏覽 ${product.views || 0}</span>
                         </div>
                         <div class="product-desc">${product.desc || '賣家尚未填寫商品描述'}</div>
-                        <div style="font-size:0.84rem;color:#98a2b3;">賣家：${product.seller || '使用者'} ${product.negotiable ? '，可議價' : ''}</div>
+                        <div style="font-size:0.84rem;color:#98a2b3;">賣家：${product.seller || '使用者'}</div>
                         <div class="card-actions">
                             <button class="primary" onclick="addToCart(${product.id})">加入購物車</button>
                             <button class="secondary" onclick="window.location.href='/product?id=${product.id}'">詳情</button>
@@ -182,9 +198,68 @@
             currentCategory = category;
             document.querySelectorAll('.category-list a').forEach(link => link.classList.remove('active'));
             if (event) event.target.classList.add('active');
-            const titles = { all: '全部商品', cpu: '處理器 CPU', gpu: '顯示卡 GPU', mb: '主機板 MB', ram: '記憶體 RAM', ssd: '固態硬碟 SSD', hdd: '傳統硬碟 HDD' };
+            const titles = { all: '全部商品', cpu: '處理器 CPU', gpu: '顯示卡 GPU', mb: '主機板 MB', ram: '記憶體 RAM', cooler: '散熱', ssd: '固態硬碟 SSD', hdd: '傳統硬碟 HDD' };
             document.getElementById('current-category-title').innerText = titles[category] || category;
             applyFilters();
+        }
+
+        function toggleSearchTag(button) {
+            const key = `${button.dataset.field}:${button.dataset.value}`;
+            if (selectedTags.has(key)) {
+                selectedTags.delete(key);
+                button.classList.remove('active');
+            } else {
+                selectedTags.set(key, { field: button.dataset.field, value: button.dataset.value });
+                button.classList.add('active');
+            }
+            applyFilters();
+        }
+
+        function matchesSelectedTags(product) {
+            for (const tag of selectedTags.values()) {
+                const productValue = String(product[tag.field] || '').toLowerCase();
+                const tagValue = String(tag.value || '').toLowerCase();
+                if (!productValue.includes(tagValue)) return false;
+            }
+            return true;
+        }
+
+        function categorySearchText(category) {
+            const labels = {
+                cpu: 'cpu 處理器 中央處理器 processor intel amd',
+                gpu: 'gpu 顯示卡 graphics card nvidia geforce rtx amd radeon',
+                mb: 'mb 主機板 motherboard',
+                ram: 'ram 記憶體 memory ddr4 ddr5',
+                cooler: '散熱 cooler 風扇 水冷 塔散',
+                ssd: 'ssd 固態硬碟 nvme m2',
+                hdd: 'hdd 傳統硬碟 hard disk'
+            };
+            return labels[category] || category || '';
+        }
+
+        function conditionSearchText(condition) {
+            const labels = {
+                new: 'new 全新 未拆 全新未拆',
+                excellent: 'excellent 極新 近全新',
+                good: 'good 正常使用 二手',
+                used: 'used 二手 使用痕跡'
+            };
+            return labels[condition] || condition || '';
+        }
+
+        function productSearchText(product) {
+            return [
+                product.title,
+                product.desc,
+                product.category,
+                categorySearchText(product.category),
+                product.condition,
+                conditionSearchText(product.condition),
+                product.location,
+                product.usageTag,
+                product.seller,
+                '標籤 已驗證零件 參考市價 上架中'
+            ].filter(Boolean).join(' ').toLowerCase();
         }
 
         function applyFilters() {
@@ -192,14 +267,15 @@
             const maxPrice = parseInt(document.getElementById('max-price').value, 10) || Infinity;
             const usage = document.getElementById('usage-filter').value;
             const sortBy = document.getElementById('sort-select').value;
+            const keywords = currentKeyword.split(/\s+/).filter(Boolean);
 
             let filtered = allProducts.filter(product => {
                 const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
                 const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
                 const matchesUsage = usage === 'all' || product.usageTag === usage;
-                const text = `${product.title} ${product.desc || ''}`.toLowerCase();
-                const matchesKeyword = !currentKeyword || text.includes(currentKeyword);
-                return matchesCategory && matchesPrice && matchesUsage && matchesKeyword && product.status === 'active';
+                const text = productSearchText(product);
+                const matchesKeyword = !keywords.length || keywords.every(keyword => text.includes(keyword));
+                return matchesCategory && matchesPrice && matchesUsage && matchesKeyword && matchesSelectedTags(product) && product.status === 'active';
             });
 
             if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);

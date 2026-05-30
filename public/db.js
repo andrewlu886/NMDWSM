@@ -220,6 +220,10 @@ const User = {
     return runUpdate(sql, [data.email, data.password, data.username, data.real_name, data.phone, data.city]);
   },
 
+  async updateUsername(userId, username) {
+    return runUpdate('UPDATE users SET username = ? WHERE id = ?', [username, userId]);
+  },
+
   async getAll() {
     return runQuery('SELECT id, email, username, real_name, city, reputation_score, role, created_at FROM users LIMIT 50');
   }

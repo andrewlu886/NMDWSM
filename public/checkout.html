@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>訂單確認 | 轉轉轉二手交易平台</title>
+    <title>訂單確認 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         .container { max-width: 1080px; margin: 2rem auto; padding: 0 20px; }
@@ -40,7 +40,7 @@
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手交易平台</a>
+            <a href="/" class="logo">一次買夠二手交易平台</a>
             <div class="search-wrapper">
                 <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
                 <button class="search-btn" onclick="triggerSearch()">搜尋</button>
@@ -63,6 +63,7 @@
         <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/marketplace">商城</a>
+            <a href="/#recommend">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller">賣家中心</a>
@@ -140,7 +141,7 @@
                         <div class="product-title">${escapeHtml(product.title)}</div>
                         <div class="meta">
                             <span>賣家：${escapeHtml(product.seller || '使用者')}</span>
-                            <span>面交地點：${escapeHtml(product.location || '待雙方確認')}</span>
+                            <span>廠家名稱：${escapeHtml(product.location || '未填寫')}</span>
                             <span>商品狀態：${product.status === 'active' ? '可購買' : '目前不可購買'}</span>
                         </div>
                     </div>

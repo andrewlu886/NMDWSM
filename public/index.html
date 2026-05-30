@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二手硬體交易平台 | 整合展示</title>
+    <title>一次買夠二手交易平台 | 整合展示</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         /* 主內容區 */
@@ -23,6 +23,8 @@
             position: relative;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 28px;
             padding: 0 40px;
             color: white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -42,6 +44,15 @@
         .banner-content { z-index: 1; }
         .banner-content h2 { font-size: 2rem; margin: 0 0 10px 0; color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
         .banner-content p { font-size: 1.1rem; margin: 0 0 20px 0; color: #e0e0e0; }
+        .banner-gpu {
+            position: relative;
+            z-index: 1;
+            width: min(42%, 330px);
+            max-height: 245px;
+            object-fit: contain;
+            filter: drop-shadow(0 16px 22px rgba(0,0,0,0.34));
+            transform: rotate(-3deg);
+        }
         .banner-btn {
             background: var(--accent-color);
             color: white;
@@ -136,6 +147,11 @@
             border: 1px solid #cce3f0; 
             line-height: 1.6; 
         }
+        @media (max-width: 820px) {
+            .ad-banners { height: auto; flex-direction: column; }
+            .main-banner { min-height: 360px; align-items: flex-start; flex-direction: column; padding: 28px; }
+            .banner-gpu { width: 92%; max-height: 220px; align-self: center; }
+        }
     </style>
 </head>
 <body>
@@ -143,7 +159,7 @@
     <header>
         <!-- 主要列：Logo + 大搜尋框 + 購物車/會員 -->
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手平台</a>
+            <a href="/" class="logo">一次買夠二手交易平台</a>
             
             <div class="search-wrapper">
                 <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
@@ -175,8 +191,8 @@
         <!-- 副導覽列：原有連結橫向排列 (類似蝦皮分類列) -->
         <nav class="main-nav">
             <a href="/">首頁</a>
-            <a href="/marketplace">🛒 商城</a>
-            <a href="#">智慧推薦</a>
+            <a href="/marketplace">商城</a>
+            <a href="/#recommend">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller">賣家中心</a>
@@ -192,6 +208,7 @@
                     <p>RTX 3080 系列最低 5 折起，平台認證有保障！</p>
                     <button class="banner-btn">立即搶購</button>
                 </div>
+                <img class="banner-gpu" src="https://img.pchome.com.tw/cs/items/DRADL21900K224K/000001_1779949581.jpg" alt="GIGABYTE AORUS GeForce RTX 顯示卡">
             </div>
             <div class="side-banners">
                 <div class="side-banner banner-1" onclick="alert('導向新會員專區')">
@@ -209,7 +226,7 @@
             <p>結合淡江管科所價格模型與底層數據檢測，解決「礦卡」與「亂開價」的痛點。</p>
         </section>
 
-        <section class="features">
+        <section id="recommend" class="features">
             <div class="card">
                 <h3>賣家端硬體驗證</h3>
                 <p>想要商品獲得「平台認證」標章？</p>

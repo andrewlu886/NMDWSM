@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的帳戶 | 轉轉轉二手交易平台</title>
+    <title>我的帳戶 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         .container { max-width: 1000px; margin: 2rem auto; padding: 0 20px; }
@@ -16,13 +16,18 @@
         .favorite img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #eef2f7; }
         .favorite-body { padding: 12px; }
         .price { color: var(--accent-color); font-weight: 900; margin-top: 8px; }
+        .name-editor { display: grid; grid-template-columns: 1fr auto; gap: 10px; max-width: 520px; margin: 10px 0 18px; }
+        .name-editor input { border: 1px solid #d1d5db; border-radius: 6px; padding: 10px 12px; font-size: 1rem; }
+        .name-editor button { border: 0; border-radius: 6px; padding: 10px 14px; background: var(--secondary-color); color: white; font-weight: 900; cursor: pointer; }
+        .form-message { color: #667085; min-height: 20px; margin-top: -8px; margin-bottom: 12px; }
         @media (max-width: 720px) { .stats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 560px) { .name-editor { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手交易平台</a>
+            <a href="/" class="logo">一次買夠二手交易平台</a>
             <div class="search-wrapper">
                 <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
                 <button class="search-btn" onclick="triggerSearch()">搜尋</button>
@@ -45,6 +50,7 @@
         <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/marketplace">商城</a>
+            <a href="/#recommend">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller">賣家中心</a>
@@ -56,6 +62,11 @@
             <h2>我的帳戶</h2>
             <p>登入信箱：<strong id="account-email">載入中...</strong></p>
             <p>使用者名稱：<strong id="account-name">載入中...</strong></p>
+            <div class="name-editor">
+                <input type="text" id="account-name-input" maxlength="30" placeholder="輸入新的使用者名稱">
+                <button type="button" onclick="saveAccountName()">儲存名稱</button>
+            </div>
+            <div id="name-message" class="form-message"></div>
             <div class="stats">
                 <div class="stat"><strong id="active-products">0</strong><span>上架商品</span></div>
                 <div class="stat"><strong id="sold-products">0</strong><span>已售出</span></div>
@@ -85,10 +96,39 @@
             document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
             document.getElementById('account-email').innerText = userEmail;
             document.getElementById('account-name').innerText = userName || userEmail.split('@')[0];
+            document.getElementById('account-name-input').value = userName || userEmail.split('@')[0];
             await updateCartCount();
             await loadStats(userEmail);
             await loadFavorites(userEmail);
         };
+
+        async function saveAccountName() {
+            const userEmail = localStorage.getItem('userEmail');
+            const input = document.getElementById('account-name-input');
+            const message = document.getElementById('name-message');
+            const username = input.value.trim();
+
+            if (!username) {
+                message.innerText = '請輸入使用者名稱';
+                return;
+            }
+
+            const res = await fetch('/api/account/name', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail, username })
+            });
+            const result = await res.json();
+            if (!result.success) {
+                message.innerText = result.message || '更新失敗';
+                return;
+            }
+
+            localStorage.setItem('userName', result.username);
+            document.getElementById('account-name').innerText = result.username;
+            document.getElementById('user-display-name').innerText = result.username;
+            message.innerText = '使用者名稱已更新';
+        }
 
         function placeholderImage() {
             return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E';

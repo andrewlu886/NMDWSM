@@ -29,15 +29,18 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 5%;
+    gap: 24px;
+    padding: 14px 5%;
 }
 
-.logo { 
-    font-size: 1.8rem; 
-    font-weight: bold; 
-    color: white; 
-    text-decoration: none; 
-    letter-spacing: 1px; 
+.logo {
+    flex: 0 0 auto;
+    font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    letter-spacing: 1px;
+    white-space: nowrap;
 }
 
 /* 寬版置中搜尋框 */
@@ -45,7 +48,7 @@ header {
     display: flex;
     flex: 1;
     max-width: 600px;
-    margin: 0 30px;
+    margin: 0;
     background: white;
     border-radius: 4px;
     padding: 3px;
@@ -76,7 +79,8 @@ header {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 25px;
+    gap: 22px;
+    flex: 0 0 auto;
 }
 
 /* 購物車連結與計數器 */
@@ -84,22 +88,37 @@ header {
     position: relative;
     color: white;
     text-decoration: none;
-    font-size: 1.5rem;
+    font-size: 0;
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 40px;
+    line-height: 1;
+}
+
+.cart-link::before {
+    content: "🛒";
+    font-size: 1.65rem;
 }
 
 .cart-count {
     position: absolute;
-    top: -5px;
-    right: -12px;
+    top: 0;
+    right: 0;
     background: var(--accent-color);
     color: white;
     font-size: 0.75rem;
-    padding: 2px 7px;
-    border-radius: 12px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
     font-weight: bold;
     border: 2px solid var(--primary-color);
+    box-sizing: border-box;
 }
 
 /* 登入註冊按鈕 */
@@ -125,17 +144,27 @@ header {
     margin: -10px 0; 
 }
 
-.avatar { 
-    width: 32px; 
-    height: 32px; 
-    background: #ddd; 
-    border-radius: 50%; 
-    margin-right: 8px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    color: #666; 
-    font-size: 0.9rem; 
+.avatar {
+    width: 40px;
+    height: 40px;
+    background: #eef2f7;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b2e83;
+    font-size: 0;
+    font-weight: 900;
+}
+
+.avatar::before {
+    content: "👤";
+    font-size: 1.05rem;
+}
+
+#user-display-name {
+    white-space: nowrap;
 }
 
 .dropdown-menu {
@@ -188,6 +217,30 @@ header {
 .main-nav a.active { 
     color: white; 
     font-weight: bold;
+}
+
+@media (max-width: 760px) {
+    .header-main {
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .search-wrapper {
+        order: 3;
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .header-actions {
+        margin-left: auto;
+        gap: 14px;
+    }
+
+    .main-nav {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }
 
 /* --- 共用按鈕風格 --- */

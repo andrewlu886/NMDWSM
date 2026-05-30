@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的交易 | 轉轉轉二手交易平台</title>
+    <title>我的交易 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         .container { max-width: 1120px; margin: 2rem auto; padding: 0 20px; }
@@ -40,6 +40,9 @@
         .progress-step.done::before { background: var(--secondary-color); }
         .progress-step.cancelled { color: #c23a3a; }
         .progress-step.cancelled::before { background: #d95b66; }
+        .seller-subnav { display: flex; gap: 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; box-shadow: 0 4px 14px rgba(15,23,42,0.05); margin-bottom: 16px; }
+        .seller-subnav a { text-decoration: none; color: #475467; font-weight: 800; padding: 9px 14px; border-radius: 6px; }
+        .seller-subnav a.active, .seller-subnav a:hover { background: var(--secondary-color); color: #fff; }
         .empty { background: #fff; padding: 38px; text-align: center; border-radius: 8px; color: #667085; border: 1px solid #e1e7ef; }
         @media (max-width: 980px) {
             .order-body { grid-template-columns: 80px 1fr; }
@@ -58,7 +61,7 @@
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手交易平台</a>
+            <a href="/" class="logo">一次買夠二手交易平台</a>
             <div class="search-wrapper">
                 <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
                 <button class="search-btn" onclick="triggerSearch()">搜尋</button>
@@ -81,6 +84,7 @@
         <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/marketplace">商城</a>
+            <a href="/#recommend">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller">賣家中心</a>
@@ -88,6 +92,11 @@
     </header>
 
     <main class="container">
+        <div class="seller-subnav">
+            <a href="/seller">新增商品</a>
+            <a href="/products.html">我的商品</a>
+            <a href="/transactions" class="active">我的交易</a>
+        </div>
         <div class="page-head">
             <h2>我的交易</h2>
             <div id="summary" class="summary">載入中...</div>
