@@ -6,210 +6,267 @@
     <title>賣家中心 | 轉轉轉二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        .container { max-width: 600px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary-color); margin-top: 0; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #555; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
-        input:focus, select:focus, textarea:focus { border-color: var(--secondary-color); outline: none; }
-        .btn { width: 100%; background: var(--secondary-color); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .container { max-width: 980px; margin: 2rem auto; padding: 0 20px; display: grid; grid-template-columns: 1.4fr 0.9fr; gap: 24px; }
+        .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); }
+        h2 { margin: 0 0 18px; color: var(--primary-color); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { display: block; margin-bottom: 6px; color: #4b5563; font-weight: 700; font-size: 0.9rem; }
+        input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font: inherit; }
+        textarea { min-height: 120px; resize: vertical; }
+        .check-row { display: flex; align-items: center; gap: 8px; color: #4b5563; }
+        .check-row input { width: auto; }
+        .btn { width: 100%; padding: 12px; border: 0; border-radius: 6px; color: white; background: var(--secondary-color); font-weight: 700; cursor: pointer; }
         .btn:hover { background: #2980b9; }
-        .verify-box { background: #e8f4f8; border: 1px dashed var(--secondary-color); padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: center; }
-        .verify-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
-        .verify-btn:hover { background: #34495e; }
+        .preview-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: #eef2f7; border: 1px solid #e5e7eb; }
+        .preview-title { margin: 12px 0 6px; font-size: 1.2rem; font-weight: 800; color: #1f2937; }
+        .preview-price { color: var(--accent-color); font-size: 1.4rem; font-weight: 800; }
+        .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .tag { background: #eef6ff; color: #2563eb; padding: 4px 8px; border-radius: 999px; font-size: 0.82rem; font-weight: 700; }
+        @media (max-width: 820px) { .container { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手平台</a>
-            
+            <a href="/" class="logo">轉轉轉二手交易平台</a>
             <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
-                <button class="search-btn" onclick="triggerSearch()">🔍</button>
+                <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">搜尋</button>
             </div>
-
             <div class="header-actions">
-                <a href="/cart" class="cart-link" title="購物車">
-                    🛒 <span id="cart-count" class="cart-count">0</span>
-                </a>
-                
-                <div id="auth-section">
-                    <a href="/login" class="auth-btn">登入 / 註冊</a>
-                </div>
-                
+                <a href="/cart" class="cart-link" title="購物車">購物車 <span id="cart-count" class="cart-count">0</span></a>
+                <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
                 <div id="user-profile">
-                    <div class="avatar">👤</div>
+                    <div class="avatar">U</div>
                     <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
                     <div class="dropdown-menu">
                         <a href="/account.html">我的帳戶</a>
                         <a href="/products.html">我的商品</a>
+                        <a href="/transactions">我的交易</a>
                         <a href="#" onclick="logout()">登出</a>
                     </div>
                 </div>
             </div>
         </div>
-        
         <nav class="main-nav">
             <a href="/">首頁</a>
-            <a href="/marketplace">🛒 商城</a>
-            <a href="#">智慧推薦</a>
+            <a href="/marketplace">商城</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller" class="active">賣家中心</a>
         </nav>
     </header>
 
-    <div class="container">
-        <h2 id="page-title">發佈二手硬體</h2>
-        
-        <div class="verify-box">
-            <p style="margin-top:0; font-size:0.9rem; color:#555;">平台專屬：防礦卡硬體驗證</p>
-            <button class="verify-btn" onclick="simulateVerification()" id="verify-btn">匯入 GPU-Z 數據驗證</button>
-            <div id="verify-result" style="color: green; font-weight: bold; margin-top: 10px; display: none;">✅ 已通過平台基礎驗證標章</div>
-        </div>
+    <main class="container">
+        <section class="panel">
+            <h2 id="page-title">新增商品</h2>
+            <form id="seller-form" onsubmit="submitProduct(event)">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="product-title">商品名稱</label>
+                        <input type="text" id="product-title" placeholder="例如 RTX 3060 12G 顯示卡" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-category">分類</label>
+                        <select id="product-category" required>
+                            <option value="gpu">顯示卡 GPU</option>
+                            <option value="cpu">處理器 CPU</option>
+                            <option value="mb">主機板 MB</option>
+                            <option value="ram">記憶體 RAM</option>
+                            <option value="ssd">固態硬碟 SSD</option>
+                            <option value="hdd">傳統硬碟 HDD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">價格 NTD</label>
+                        <input type="number" id="product-price" min="1" placeholder="例如 4500" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-condition">商品狀況</label>
+                        <select id="product-condition">
+                            <option value="new">全新未拆</option>
+                            <option value="excellent">近全新</option>
+                            <option value="good" selected>正常使用</option>
+                            <option value="used">有使用痕跡</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-location">面交地點</label>
+                        <input type="text" id="product-location" placeholder="例如 台北車站 / 台中西屯">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-usage">推薦用途</label>
+                        <select id="product-usage">
+                            <option value="遊戲">遊戲</option>
+                            <option value="文書">文書</option>
+                            <option value="剪輯">剪輯</option>
+                            <option value="收藏/備品">收藏/備品</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-status">商品狀態</label>
+                        <select id="product-status">
+                            <option value="active">上架中</option>
+                            <option value="sold">已售出</option>
+                            <option value="inactive">已下架</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label for="product-image">商品圖片網址</label>
+                        <input type="url" id="product-image" placeholder="https://...jpg" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group full">
+                        <label for="product-desc">商品描述</label>
+                        <textarea id="product-desc" placeholder="說明使用時間、保固、測試狀況、配件..." required></textarea>
+                    </div>
+                    <div class="form-group full check-row">
+                        <input type="checkbox" id="product-negotiable">
+                        <label for="product-negotiable" style="margin: 0;">可議價</label>
+                    </div>
+                </div>
+                <button type="submit" id="submit-btn" class="btn">送出商品</button>
+            </form>
+        </section>
 
-        <form id="seller-form" onsubmit="submitProduct(event)">
-            <div class="form-group">
-                <label>商品名稱</label>
-                <input type="text" id="product-title" placeholder="例如：微星 RTX 3060 12G 顯示卡" required>
+        <aside class="panel">
+            <h2>商品預覽</h2>
+            <img id="preview-image" class="preview-image" alt="商品預覽">
+            <div class="preview-title" id="preview-title">商品名稱</div>
+            <div class="preview-price" id="preview-price">NT$ 0</div>
+            <p id="preview-desc" style="color:#667085; line-height:1.6;">商品描述會顯示在這裡。</p>
+            <div class="meta">
+                <span class="tag" id="preview-condition">正常使用</span>
+                <span class="tag" id="preview-location">面交地點</span>
+                <span class="tag" id="preview-usage">遊戲</span>
+                <span class="tag">已驗證零件</span>
             </div>
-            <div class="form-group">
-                <label>零件類別</label>
-                <select id="product-category" required>
-                    <option value="gpu">顯示卡 (GPU)</option>
-                    <option value="cpu">處理器 (CPU)</option>
-                    <option value="mb">主機板 (MB)</option>
-                    <option value="ram">記憶體 (RAM)</option>
-                    <option value="ssd">固態硬碟 (SSD)</option>
-                    <option value="hdd">傳統硬碟 (HDD)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>預期售價 (NTD)</label>
-                <input type="number" id="product-price" placeholder="請輸入金額" required>
-            </div>
-            <div class="form-group">
-                <label>商品描述與使用狀況</label>
-                <textarea id="product-desc" rows="4" placeholder="例如：無挖礦、僅玩特戰英豪，還有半年保固..." required></textarea>
-            </div>
-            <button type="submit" id="submit-btn" class="btn">確認上架</button>
-        </form>
-    </div>
+        </aside>
+    </main>
 
     <script>
         const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
-
-        function getApiUrl(path) {
-            return `${API_BASE}${path}`;
-        }
-
         let editingProductId = null;
+
+        function getApiUrl(path) { return `${API_BASE}${path}`; }
 
         window.onload = async function() {
             const loggedInUser = localStorage.getItem('userEmail');
             const userName = localStorage.getItem('userName');
-            if (loggedInUser) {
-                document.getElementById('auth-section').style.display = 'none';
-                document.getElementById('user-profile').style.display = 'flex';
-                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
+            if (!loggedInUser) {
+                alert('請先登入後再使用賣家中心');
+                window.location.href = '/login';
+                return;
             }
-            updateCartCount();
 
-            // 檢查是否為編輯模式
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-            if (id) {
-                editingProductId = id;
-                document.getElementById('page-title').innerText = '編輯二手硬體';
-                document.getElementById('submit-btn').innerText = '確認修改';
-                
-                try {
-                    const res = await fetch(getApiUrl(`/api/products/${id}`));
-                    if (res.ok) {
-                        const product = await res.json();
-                        document.getElementById('product-title').value = product.title;
-                        document.getElementById('product-category').value = product.category;
-                        document.getElementById('product-price').value = product.price;
-                        document.getElementById('product-desc').value = product.desc;
-                    } else {
-                        alert('找不到該商品，可能已被刪除');
-                        window.location.href = '/products.html';
-                    }
-                } catch (err) {
-                    console.error('取得商品資訊失敗:', err);
-                }
-            }
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('user-profile').style.display = 'flex';
+            document.getElementById('user-display-name').innerText = userName || loggedInUser.split('@')[0];
+            updateCartCount();
+            bindPreview();
+
+            const id = new URLSearchParams(window.location.search).get('id');
+            if (id) await loadProduct(id);
+            updatePreview();
         };
 
-        function logout() {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            alert('已成功登出！');
-            window.location.href = '/';
+        function bindPreview() {
+            ['product-title', 'product-price', 'product-desc', 'product-condition', 'product-location', 'product-usage'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updatePreview);
+                document.getElementById(id).addEventListener('change', updatePreview);
+            });
         }
 
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const count = cart.reduce((total, item) => total + item.quantity, 0);
-            const cartCountEl = document.getElementById('cart-count');
-            if(cartCountEl) cartCountEl.innerText = count;
-        }
-
-        function triggerSearch() {
-            const input = document.querySelector('.nav-search');
-            if (input && input.value.trim()) {
-                alert('執行搜尋：' + input.value.trim());
+        async function loadProduct(id) {
+            editingProductId = id;
+            document.getElementById('page-title').innerText = '編輯商品';
+            document.getElementById('submit-btn').innerText = '儲存修改';
+            const res = await fetch(getApiUrl(`/api/products/${id}`));
+            if (!res.ok) {
+                alert('找不到商品');
+                window.location.href = '/products.html';
+                return;
             }
+            const product = await res.json();
+            document.getElementById('product-title').value = product.title || '';
+            document.getElementById('product-category').value = product.category || 'gpu';
+            document.getElementById('product-price').value = product.price || '';
+            document.getElementById('product-desc').value = product.desc || '';
+            document.getElementById('product-image').value = product.image || '';
+            document.getElementById('product-condition').value = product.condition || 'good';
+            document.getElementById('product-location').value = product.location || '';
+            document.getElementById('product-usage').value = product.usageTag || '遊戲';
+            document.getElementById('product-status').value = product.status || 'active';
+            document.getElementById('product-negotiable').checked = Boolean(product.negotiable);
+            updatePreview();
         }
 
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                triggerSearch();
-            }
-        }
-
-        function simulateVerification() {
-            document.getElementById('verify-btn').style.display = 'none';
-            document.getElementById('verify-result').style.display = 'block';
+        function updatePreview() {
+            const image = document.getElementById('product-image').value.trim();
+            document.getElementById('preview-image').src = image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3EProduct Image%3C/text%3E%3C/svg%3E';
+            document.getElementById('preview-title').innerText = document.getElementById('product-title').value || '商品名稱';
+            document.getElementById('preview-price').innerText = `NT$ ${(parseInt(document.getElementById('product-price').value, 10) || 0).toLocaleString()}`;
+            document.getElementById('preview-desc').innerText = document.getElementById('product-desc').value || '商品描述會顯示在這裡。';
+            document.getElementById('preview-condition').innerText = document.getElementById('product-condition').selectedOptions[0].text;
+            document.getElementById('preview-location').innerText = document.getElementById('product-location').value || '面交地點';
+            document.getElementById('preview-usage').innerText = document.getElementById('product-usage').value;
         }
 
         async function submitProduct(event) {
             event.preventDefault();
             const seller = localStorage.getItem('userEmail');
-            if (!seller) {
-                alert('請先登入才能操作商品！');
-                window.location.href = '/login';
-                return;
+            const payload = {
+                seller,
+                title: document.getElementById('product-title').value.trim(),
+                category: document.getElementById('product-category').value,
+                price: document.getElementById('product-price').value.trim(),
+                desc: document.getElementById('product-desc').value.trim(),
+                image: document.getElementById('product-image').value.trim(),
+                condition: document.getElementById('product-condition').value,
+                location: document.getElementById('product-location').value.trim(),
+                usageTag: document.getElementById('product-usage').value,
+                status: document.getElementById('product-status').value,
+                negotiable: document.getElementById('product-negotiable').checked
+            };
+
+            const res = await fetch(getApiUrl(editingProductId ? `/api/products/${editingProductId}` : '/api/products'), {
+                method: editingProductId ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert(editingProductId ? '商品已更新' : '商品已上架');
+                window.location.href = '/products.html';
+            } else {
+                alert(result.message || '儲存失敗');
             }
+        }
 
-            const title = document.getElementById('product-title').value.trim();
-            const category = document.getElementById('product-category').value;
-            const price = document.getElementById('product-price').value.trim();
-            const desc = document.getElementById('product-desc').value.trim();
+        function logout() {
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            window.location.href = '/';
+        }
 
-            try {
-                const url = editingProductId ? getApiUrl(`/api/products/${editingProductId}`) : getApiUrl('/api/products');
-                const method = editingProductId ? 'PUT' : 'POST';
-                const successMsg = editingProductId ? '修改成功！' : '上架成功！';
-                const failureMsg = editingProductId ? '修改失敗' : '上架失敗';
+        async function updateCartCount() {
+            const userEmail = localStorage.getItem('userEmail');
+            const cartCountEl = document.getElementById('cart-count');
+            if (!cartCountEl || !userEmail) return;
+            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            const items = result.success ? result.data : [];
+            cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
+        }
 
-                const res = await fetch(url, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seller, title, category, price, desc })
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert(successMsg);
-                    window.location.href = getApiUrl('/products.html');
-                } else {
-                    alert(result.message || failureMsg);
-                }
-            } catch (err) {
-                console.error('操作失敗:', err);
-                alert('操作失敗，無法連接伺服器');
-            }
+        function triggerSearch() {
+            const input = document.querySelector('.nav-search');
+            if (input.value.trim()) window.location.href = `/marketplace?q=${encodeURIComponent(input.value.trim())}`;
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') triggerSearch();
         }
     </script>
 </body>

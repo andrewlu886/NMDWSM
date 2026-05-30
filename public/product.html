@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品詳情 | 轉轉轉二手交易平台</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .container { max-width: 1120px; margin: 2rem auto; padding: 0 20px; }
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+        .step { background: #fff; border: 1px solid #dde5ee; border-radius: 8px; padding: 12px; color: #667085; font-weight: 800; text-align: center; }
+        .step.active { border-color: var(--secondary-color); color: var(--secondary-color); background: #eef6ff; }
+        .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; background: white; padding: 24px; border-radius: 8px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); border: 1px solid #e1e7ef; }
+        .product-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: #eef2f7; border: 1px solid #edf1f5; }
+        .title { margin: 0 0 10px; color: #1f2937; font-size: 1.8rem; line-height: 1.35; }
+        .price { color: #c94335; font-size: 2rem; font-weight: 900; margin: 12px 0; }
+        .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+        .tag { background: #eef6ff; color: #2563eb; padding: 5px 9px; border-radius: 999px; font-size: 0.85rem; font-weight: 800; }
+        .seller-box { background: #f8fafc; border: 1px solid #edf1f5; border-radius: 8px; padding: 14px; color: #475467; display: grid; gap: 6px; }
+        .description { color: #475467; line-height: 1.8; white-space: pre-wrap; border-top: 1px solid #e5e7eb; margin-top: 18px; padding-top: 18px; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .actions button { border: 0; border-radius: 6px; padding: 13px 16px; font-weight: 900; cursor: pointer; font-size: 1rem; }
+        .primary { background: var(--secondary-color); color: white; }
+        .accent { background: #d94a38; color: white; }
+        .secondary { background: #f1f5f9; color: #1f2937; }
+        .forum-box { margin-top: 22px; background: #fff; border-radius: 8px; padding: 18px; box-shadow: 0 3px 12px rgba(15,23,42,0.06); border: 1px solid #e1e7ef; }
+        @media (max-width: 820px) { .detail { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 560px) { .actions { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-main">
+            <a href="/" class="logo">轉轉轉二手交易平台</a>
+            <div class="search-wrapper">
+                <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">搜尋</button>
+            </div>
+            <div class="header-actions">
+                <a href="/cart" class="cart-link" title="購物車">購物車 <span id="cart-count" class="cart-count">0</span></a>
+                <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
+                <div id="user-profile">
+                    <div class="avatar">U</div>
+                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
+                    <div class="dropdown-menu">
+                        <a href="/account.html">我的帳戶</a>
+                        <a href="/products.html">我的商品</a>
+                        <a href="/transactions">我的交易</a>
+                        <a href="#" onclick="logout()">登出</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="main-nav">
+            <a href="/">首頁</a>
+            <a href="/marketplace">商城</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/seller">賣家中心</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="steps">
+            <div class="step active">1 商品詳情</div>
+            <div class="step">2 訂單確認</div>
+            <div class="step">3 建立訂單</div>
+            <div class="step">4 我的交易</div>
+        </div>
+        <section id="product-detail" class="detail">載入中...</section>
+        <section class="forum-box">
+            <strong>相關討論</strong>
+            <p style="color:#667085;">可到討論區查看硬體交易、價格詢問與組裝求助內容，增加專題平台整合感。</p>
+            <button class="secondary" onclick="window.location.href='/forum'">前往討論區</button>
+        </section>
+    </main>
+
+    <script>
+        let product = null;
+
+        window.onload = async function() {
+            const loggedInUser = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
+            if (loggedInUser) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = userName || loggedInUser.split('@')[0];
+            }
+            await updateCartCount();
+            await loadProduct();
+        };
+
+        function placeholderImage() {
+            return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E';
+        }
+
+        async function loadProduct() {
+            const id = new URLSearchParams(window.location.search).get('id');
+            const container = document.getElementById('product-detail');
+            if (!id) {
+                container.innerHTML = '找不到商品資料';
+                return;
+            }
+            const res = await fetch(`/api/products/${id}`);
+            if (!res.ok) {
+                container.innerHTML = '商品不存在或已下架';
+                return;
+            }
+            product = await res.json();
+            container.innerHTML = `
+                <img class="product-image" src="${product.image || placeholderImage()}" alt="${escapeHtml(product.title)}">
+                <div>
+                    <h1 class="title">${escapeHtml(product.title)}</h1>
+                    <div class="price">NT$ ${Number(product.price).toLocaleString()}</div>
+                    <div class="meta">
+                        <span class="tag">${escapeHtml(product.category)}</span>
+                        <span class="tag">${escapeHtml(product.condition || '二手')}</span>
+                        <span class="tag">${product.status === 'active' ? '可購買' : '不可購買'}</span>
+                        <span class="tag">${escapeHtml(product.usageTag || '一般用途')}</span>
+                        <span class="tag">瀏覽 ${product.views || 0}</span>
+                        <span class="tag">參考市價</span>
+                    </div>
+                    <div class="seller-box">
+                        <div><strong>賣家：</strong>${escapeHtml(product.seller || '使用者')}</div>
+                        <div><strong>面交地點：</strong>${escapeHtml(product.location || '待雙方確認')}</div>
+                        <div><strong>價格：</strong>${product.negotiable ? '可議價' : '固定價格'}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="primary" onclick="addToCart()">加入購物車</button>
+                        <button class="accent" onclick="buyNow()">立即購買</button>
+                        <button class="secondary" onclick="addFavorite()">收藏商品</button>
+                    </div>
+                    <div class="description">${escapeHtml(product.desc || '賣家尚未提供商品描述')}</div>
+                </div>
+            `;
+        }
+
+        async function addToCart() {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) return goLogin();
+            const res = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail, productId: product.id })
+            });
+            const result = await res.json();
+            alert(result.message || '已加入購物車');
+            await updateCartCount();
+        }
+
+        function buyNow() {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) return goLogin();
+            window.location.href = `/checkout?productId=${product.id}`;
+        }
+
+        async function addFavorite() {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) return goLogin();
+            const res = await fetch('/api/favorites', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail, productId: product.id })
+            });
+            const result = await res.json();
+            alert(result.message || '已收藏商品');
+        }
+
+        function goLogin() {
+            alert('請先登入');
+            window.location.href = '/login';
+        }
+
+        async function updateCartCount() {
+            const userEmail = localStorage.getItem('userEmail');
+            const cartCountEl = document.getElementById('cart-count');
+            if (!userEmail) { cartCountEl.innerText = 0; return; }
+            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            const items = result.success ? result.data : [];
+            cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
+        }
+
+        function triggerSearch() {
+            const query = document.querySelector('.nav-search').value.trim();
+            if (query) window.location.href = `/marketplace?q=${encodeURIComponent(query)}`;
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') triggerSearch();
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function logout() {
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

@@ -166,11 +166,18 @@
             window.location.reload();
         }
 
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const count = cart.reduce((total, item) => total + item.quantity, 0);
+        async function updateCartCount() {
+            const userEmail = localStorage.getItem('userEmail');
             const cartCountEl = document.getElementById('cart-count');
-            if(cartCountEl) cartCountEl.innerText = count;
+            if (!cartCountEl) return;
+            if (!userEmail) {
+                cartCountEl.innerText = 0;
+                return;
+            }
+            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            const items = result.success ? result.data : [];
+            cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
         }
 
         function triggerSearch() {

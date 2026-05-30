@@ -152,15 +152,41 @@
         }
 
         function updateCartCount(cart) {
-            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            const count = cart.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
             document.getElementById('cart-count').innerText = count;
         }
 
-        function renderCart() {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        async function fetchCart() {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) return [];
+
+            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            return result.success ? result.data.map(item => ({
+                cartItemId: item.cart_item_id,
+                productId: item.id,
+                title: item.title,
+                price: parseFloat(item.price),
+                seller: item.seller_name,
+                quantity: parseInt(item.quantity, 10) || 1
+            })) : [];
+        }
+
+        async function renderCart() {
+            let cart = [];
             const container = document.getElementById('cart-items-container');
             const summary = document.getElementById('cart-summary');
-            
+
+            try {
+                cart = await fetchCart();
+            } catch (err) {
+                console.error('讀取購物車失敗', err);
+                container.innerHTML = '<div class="empty-cart" style="color: red;">讀取購物車失敗，請稍後再試。</div>';
+                summary.style.display = 'none';
+                updateCartCount([]);
+                return;
+            }
+
             updateCartCount(cart);
 
             if (cart.length === 0) {
@@ -190,12 +216,12 @@
                         </div>
                         <div class="item-actions">
                             <div>
-                                <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
+                                <button class="qty-btn" onclick="changeQty(${item.cartItemId}, ${item.quantity - 1})">-</button>
                                 <span style="margin: 0 10px;">${item.quantity}</span>
-                                <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                                <button class="qty-btn" onclick="changeQty(${item.cartItemId}, ${item.quantity + 1})">+</button>
                             </div>
                             <div class="item-price">NT$ ${itemTotal.toLocaleString()}</div>
-                            <button class="remove-btn" onclick="removeItem(${index})">刪除</button>
+                            <button class="remove-btn" onclick="removeItem(${item.cartItemId})">刪除</button>
                         </div>
                     </div>
                 `;
@@ -207,28 +233,37 @@
             document.getElementById('total-sum').innerText = totalSum.toLocaleString();
         }
 
-        function changeQty(index, change) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart[index]) {
-                cart[index].quantity += change;
-                if (cart[index].quantity <= 0) {
-                    cart.splice(index, 1);
-                }
-                localStorage.setItem('cart', JSON.stringify(cart));
+        async function changeQty(cartItemId, quantity) {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) return;
+
+            try {
+                await fetch(`/api/cart/${cartItemId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userEmail, quantity })
+                });
                 renderCart();
+            } catch (err) {
+                console.error('更新購物車數量失敗', err);
+                alert('更新購物車失敗');
             }
         }
 
-        function removeItem(index) {
+        async function removeItem(cartItemId) {
             if (confirm('確定要從購物車移除此商品嗎？')) {
-                let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                cart.splice(index, 1);
-                localStorage.setItem('cart', JSON.stringify(cart));
-                renderCart();
+                const userEmail = localStorage.getItem('userEmail');
+                try {
+                    await fetch(`/api/cart/${cartItemId}?userEmail=${encodeURIComponent(userEmail)}`, { method: 'DELETE' });
+                    renderCart();
+                } catch (err) {
+                    console.error('移除購物車商品失敗', err);
+                    alert('移除商品失敗');
+                }
             }
         }
 
-        function checkout() {
+        async function checkout() {
             const loggedInUser = localStorage.getItem('userEmail');
             if (!loggedInUser) {
                 alert('請先登入後再進行結帳！');
@@ -236,10 +271,22 @@
                 return;
             }
 
-            // 模擬結帳流程
-            alert('感謝您的購買！訂單已成立，我們將通知賣家出貨。');
-            localStorage.removeItem('cart');
-            renderCart();
+            const cart = await fetchCart();
+            for (const item of cart) {
+                await fetch('/api/transactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userEmail: loggedInUser, productId: item.productId, note: '購物車送出的購買需求' })
+                });
+            }
+
+            alert('已送出購買需求，請到「我的交易」查看狀態。');
+            await fetch('/api/cart/clear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail: loggedInUser })
+            });
+            window.location.href = '/transactions';
         }
     </script>
 </body>

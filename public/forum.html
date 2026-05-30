@@ -190,6 +190,14 @@
         <section class="panel composer">
             <h3 id="composer-title">發佈新討論</h3>
             <div class="field"><input type="text" id="post-title" placeholder="請輸入標題，例如：徵求一張 RTX 3060"></div>
+            <div class="field">
+                <select id="post-category">
+                    <option value="硬體交易">硬體交易</option>
+                    <option value="組裝求助">組裝求助</option>
+                    <option value="價格詢問">價格詢問</option>
+                    <option value="燒機驗證">燒機驗證</option>
+                </select>
+            </div>
             <div class="field"><textarea id="post-content" placeholder="請輸入內容，支援換行。"></textarea></div>
             <div class="field"><input type="file" id="post-images" multiple accept="image/*"></div>
             <div class="toolbar">
@@ -255,7 +263,7 @@
                     <div class="post-head">
                         <div>
                             ${isEditing ? `<div class="field"><input id="edit-title-${post.id}" type="text" value="${escapeHtml(post.title)}"></div>` : `<h3 class="post-title">${escapeHtml(post.title)}</h3>`}
-                            <div class="meta">作者：${escapeHtml(post.author || '匿名使用者')} ｜ 時間：${formatDate(post.date)}</div>
+                            <div class="meta">分類：${escapeHtml(post.category || '一般討論')} ｜ 作者：${escapeHtml(post.author || '匿名使用者')} ｜ 時間：${formatDate(post.date)}</div>
                         </div>
                         <div class="post-actions">
                             <button class="btn secondary" onclick="toggleReplyForm(${post.id})">回覆</button>
@@ -332,6 +340,7 @@
         async function submitPost() {
             const title = document.getElementById('post-title').value.trim();
             const content = document.getElementById('post-content').value.trim();
+            const category = document.getElementById('post-category').value;
             if (!title || !content) {
                 alert('標題與內容不能為空！');
                 return;
@@ -342,7 +351,7 @@
                 const response = await fetch(getApiUrl('/api/posts'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, content, author: currentUser || '匿名使用者', images })
+                    body: JSON.stringify({ title, content, category, author: currentUser || '匿名使用者', images })
                 });
 
                 const result = await response.json();
@@ -482,11 +491,18 @@
             window.location.reload();
         }
 
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const count = cart.reduce((total, item) => total + item.quantity, 0);
+        async function updateCartCount() {
+            const userEmail = localStorage.getItem('userEmail');
             const cartCountEl = document.getElementById('cart-count');
-            if(cartCountEl) cartCountEl.innerText = count;
+            if (!cartCountEl) return;
+            if (!userEmail) {
+                cartCountEl.innerText = 0;
+                return;
+            }
+            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            const items = result.success ? result.data : [];
+            cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
         }
 
         function triggerSearch() {

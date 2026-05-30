@@ -8,17 +8,9 @@ const cheerio = require('cheerio');
 // SQLite 資料庫
 const db = require('./db.js');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const USERS_FILE = path.join(__dirname, 'users.json');
-const POSTS_FILE = path.join(__dirname, 'posts.json');
-const PRODUCTS_FILE = path.join(__dirname, 'products.json');
-// 初始化商品資料檔案
-function initProducts() {
-    if (!fs.existsSync(PRODUCTS_FILE)) {
-        fs.writeFileSync(PRODUCTS_FILE, JSON.stringify([]), 'utf8');
-    }
-}
-initProducts();
+// JSON 檔僅保留作為備份或測試資料，正式資料來源統一使用 SQLite。
 // --- 資料庫與使用者相關初始化 ---
 
 // 1. 初始化使用者資料
@@ -37,18 +29,7 @@ function loadUsers() {
 }
 let registeredUsers = loadUsers();
 
-// 2. 初始化論壇文章資料
-function initPosts() {
-    if (!fs.existsSync(POSTS_FILE)) {
-        const initialPosts = [
-            { id: 1, title: 'RTX 3060 available', author: 'Seller A', content: 'Selling a used RTX 3060 in good condition.', date: new Date().toISOString() },
-            { id: 2, title: 'GPU-Z report help needed', author: 'Buyer B', content: 'Looking for help understanding a GPU-Z report and CPU compatibility.', date: new Date(Date.now() - 86400000).toISOString() }
-        ];
-        fs.writeFileSync(POSTS_FILE, JSON.stringify(initialPosts, null, 2), 'utf8');
-        console.log('已建立預設 posts.json');
-    }
-}
-initPosts();
+// 舊版 posts.json 不再作為正式論壇資料來源。
 
 // --- SQLite 資料庫初始化 ---
 db.initDatabase().then(() => {
@@ -58,28 +39,6 @@ db.initDatabase().then(() => {
     process.exit(1);
 });
 
-function readJsonFile(filePath, fallbackValue) {
-    try {
-        if (!fs.existsSync(filePath)) {
-            return fallbackValue;
-        }
-
-        const raw = fs.readFileSync(filePath, 'utf8').trim();
-        if (!raw) {
-            return fallbackValue;
-        }
-
-        return JSON.parse(raw);
-    } catch (error) {
-        console.error(`Error reading ${path.basename(filePath)}:`, error.message);
-        return fallbackValue;
-    }
-}
-
-function writeJsonFile(filePath, data) {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-}
-
 function normalizeAttachmentList(items) {
     if (Array.isArray(items)) {
         return items.filter(Boolean);
@@ -88,27 +47,125 @@ function normalizeAttachmentList(items) {
     return items ? [items] : [];
 }
 
-function normalizeReply(reply) {
+function sendJson(res, statusCode, data) {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+}
+
+function parseJsonBody(req) {
+    return new Promise((resolve, reject) => {
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', () => {
+            try {
+                resolve(body ? JSON.parse(body) : {});
+            } catch (error) {
+                reject(error);
+            }
+        });
+        req.on('error', reject);
+    });
+}
+
+function encodeJsonList(items) {
+    return JSON.stringify(normalizeAttachmentList(items));
+}
+
+function decodeJsonList(value) {
+    if (!value) return [];
+    try {
+        return normalizeAttachmentList(JSON.parse(value));
+    } catch (error) {
+        return normalizeAttachmentList(value);
+    }
+}
+
+async function findRequestUser(identifier) {
+    if (!identifier) return null;
+    if (/^\d+$/.test(String(identifier))) {
+        return db.User.findById(Number(identifier));
+    }
+    return db.User.findByEmail(identifier);
+}
+
+async function getCartUser(parsedUrl, body = {}) {
+    return findRequestUser(body.userId || body.userEmail || parsedUrl.searchParams.get('userId') || parsedUrl.searchParams.get('userEmail'));
+}
+
+function formatDbReply(reply) {
     return {
-        ...reply,
-        images: normalizeAttachmentList(reply.images || reply.image),
+        id: reply.id,
+        content: reply.content,
+        author: reply.author_email || reply.username || '匿名使用者',
+        date: reply.created_at,
+        images: decodeJsonList(reply.images)
     };
 }
 
-function normalizePost(post) {
+async function formatDbPost(post) {
+    const replies = await db.Comment.getByPost(post.id);
     return {
-        ...post,
-        images: normalizeAttachmentList(post.images || post.image),
-        replies: Array.isArray(post.replies) ? post.replies.map(normalizeReply) : [],
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        category: post.category,
+        author: post.author_email || post.author_name || '匿名使用者',
+        date: post.created_at,
+        images: decodeJsonList(post.images),
+        replies: replies.map(formatDbReply)
     };
 }
 
-function loadPostsData() {
-    return readJsonFile(POSTS_FILE, []).map(normalizePost);
+function formatProduct(product) {
+    return {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        category: product.category,
+        desc: product.description,
+        image: product.image_url,
+        seller: product.seller_name || product.seller_email || product.seller_id,
+        sellerEmail: product.seller_email,
+        sellerId: product.seller_id,
+        condition: product.condition || 'used',
+        status: product.status || 'active',
+        location: product.location || '',
+        usageTag: product.usage_tag || '',
+        negotiable: Boolean(product.negotiable),
+        views: product.views || 0,
+        createdAt: product.created_at
+    };
 }
 
-function savePostsData(posts) {
-    writeJsonFile(POSTS_FILE, posts);
+function formatTransaction(row) {
+    return {
+        id: row.id,
+        productId: row.product_id,
+        title: row.product_title,
+        image: row.image_url,
+        price: row.price,
+        status: row.status,
+        note: row.note || '',
+        seller: row.seller_name,
+        buyer: row.buyer_name,
+        createdAt: row.created_at
+    };
+}
+
+function formatTransactionComment(row) {
+    return {
+        id: row.id,
+        transactionId: row.transaction_id,
+        author: row.author_name || row.author_email,
+        authorEmail: row.author_email,
+        content: row.content,
+        createdAt: row.created_at
+    };
+}
+
+async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
+    const user = await findRequestUser(body.userEmail || body.userId || parsedUrl.searchParams.get('userEmail') || parsedUrl.searchParams.get('userId'));
+    return user;
 }
 
 // --- 爬蟲功能實作 ---
@@ -540,141 +597,230 @@ const server = http.createServer(async(req, res) => {
     } else if (pathname === '/api/posts' && req.method === 'GET') {
         setCorsHeaders(res);
         try {
-            const postsData = JSON.stringify(loadPostsData());
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(postsData);
-            
-            // 註解掉 SQLite 讀取，避免重複發送回應引發 ERR_HTTP_HEADERS_SENT
-            // db.Post.getAll().then(posts => {
-            //     res.writeHead(200, { 'Content-Type': 'application/json' });
-            //     res.end(JSON.stringify(posts || []));
-            // }).catch(err => {
-            //     res.writeHead(500, { 'Content-Type': 'application/json' });
-            //     res.end(JSON.stringify({ success: false, message: "無法讀取文章列表" }));
-            // });
+            const posts = await db.Post.getAll();
+            const formattedPosts = await Promise.all(posts.map(formatDbPost));
+            sendJson(res, 200, formattedPosts);
         } catch (error) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, message: "無法讀取文章列表" }));
+            sendJson(res, 500, { success: false, message: "無法讀取文章列表" });
         }
 
     // 5. 新增論壇文章 API (使用 SQLite)
     } else if (pathname === '/api/posts' && req.method === 'POST') {
         setCorsHeaders(res);
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', async () => {
-            try {
-            const { title, content, author, images, author_id, category } = JSON.parse(body);
-                if (!title || !content) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: "標題和內容不能為空" }));
-                }
-
-                const posts = loadPostsData();
-                const newPost = {
-                    id: Date.now(),
-                    title,
-                    content,
-                    author: author || '測試用戶',
-                    date: new Date().toISOString(),
-                    images: normalizeAttachmentList(images),
-                    replies: []
-                };
-                
-                posts.unshift(newPost);
-                savePostsData(posts);
-                const result = await db.Post.create({
-                    author_id: author_id || 1,
-                    title,
-                    content,
-                category: category || '一般討論'
-                });
-                
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, message: "發文成功", post_id: result.id }));
-            } catch (error) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "發文發生錯誤" }));
+        try {
+            const { title, content, author, images, author_id, category } = await parseJsonBody(req);
+            if (!title || !content) {
+                return sendJson(res, 400, { success: false, message: "標題和內容不能為空" });
             }
-        });
+
+            const authorUser = author_id ? await db.User.findById(author_id) : await findRequestUser(author);
+            const result = await db.Post.create({
+                author_id: authorUser?.id || 1,
+                title,
+                content,
+                category: category || '一般討論',
+                images: encodeJsonList(images)
+            });
+
+            sendJson(res, 200, { success: true, message: "發文成功", post_id: result.id });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: "發文發生錯誤" });
+        }
         } else if (/^\/api\/posts\/\d+\/replies$/.test(pathname) && req.method === 'POST') {
             setCorsHeaders(res);
             const postId = parseInt(pathname.split('/')[3]);
-            let body = '';
-            req.on('data', chunk => body += chunk.toString());
-            req.on('end', () => {
-                try {
-                    const { content, author, images } = JSON.parse(body);
-                    if (!content) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: "回覆內容不能為空" }));
-                    }
-
-                    const posts = loadPostsData();
-                    const postIndex = posts.findIndex(post => post.id === postId);
-                    if (postIndex === -1) {
-                        res.writeHead(404, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: "找不到文章" }));
-                    }
-
-                    const newReply = {
-                        id: Date.now(),
-                        content,
-                    author: author || '匿名使用者',
-                        date: new Date().toISOString(),
-                        images: normalizeAttachmentList(images)
-                    };
-
-                    posts[postIndex].replies = Array.isArray(posts[postIndex].replies) ? posts[postIndex].replies : [];
-                    posts[postIndex].replies.push(newReply);
-                    savePostsData(posts);
-
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: true, message: '回覆成功', reply: newReply }));
-                } catch (error) {
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: false, message: '回覆發生錯誤' }));
+            try {
+                const { content, author, images } = await parseJsonBody(req);
+                if (!content) {
+                    return sendJson(res, 400, { success: false, message: "回覆內容不能為空" });
                 }
-            });
+
+                const post = await db.Post.findById(postId);
+                if (!post) {
+                    return sendJson(res, 404, { success: false, message: "找不到文章" });
+                }
+
+                const authorUser = await findRequestUser(author);
+                const result = await db.Comment.create({
+                    post_id: postId,
+                    author_id: authorUser?.id || 1,
+                    content,
+                    images: encodeJsonList(images)
+                });
+
+                const reply = await db.runQueryOne('SELECT c.*, u.username, u.email as author_email FROM comments c LEFT JOIN users u ON c.author_id = u.id WHERE c.id = ?', [result.id]);
+                sendJson(res, 200, { success: true, message: '回覆成功', reply: formatDbReply(reply) });
+            } catch (error) {
+                sendJson(res, 500, { success: false, message: '回覆發生錯誤' });
+            }
 
         // --- 論壇文章修改/刪除 API ---
 } else if (pathname.startsWith('/api/posts/') && (req.method === 'PUT' || req.method === 'DELETE')) {
     setCorsHeaders(res);
     const postId = parseInt(pathname.split('/')[3]); // 取得 URL 中的 id
-        let posts = loadPostsData();
 
     if (req.method === 'DELETE') {
-            const postIndex = posts.findIndex(p => p.id === postId);
-            if (postIndex === -1) {
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ success: false, message: '找不到文章' }));
+        const result = await db.Post.delete(postId);
+        if (!result.changes) {
+            return sendJson(res, 404, { success: false, message: '找不到文章' });
+        }
+        sendJson(res, 200, { success: true, message: '文章已刪除' });
+    } else if (req.method === 'PUT') {
+        try {
+            const { title, content, images } = await parseJsonBody(req);
+            const result = await db.Post.update(postId, {
+                title,
+                content,
+                images: images !== undefined ? encodeJsonList(images) : null
+            });
+            if (!result.changes) {
+                return sendJson(res, 404, { success: false, message: '找不到文章' });
+            }
+            sendJson(res, 200, { success: true, message: '文章已更新' });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '文章更新失敗' });
+        }
+    }
+
+    // --- 專題版商品/收藏/模擬交易 API ---
+    } else if (pathname === '/api/products' && req.method === 'POST') {
+        setCorsHeaders(res);
+        try {
+            const body = await parseJsonBody(req);
+            const { seller, title, category, price, desc, image, condition, location, usageTag, negotiable, status } = body;
+            const user = await db.User.findByEmail(seller);
+            const parsedPrice = parseInt(price, 10);
+
+            if (!user) return sendJson(res, 404, { success: false, message: '找不到賣家帳號' });
+            if (!title || !category || Number.isNaN(parsedPrice)) {
+                return sendJson(res, 400, { success: false, message: '商品名稱、分類與價格不能為空' });
             }
 
-            posts = posts.filter(p => p.id !== postId);
-            savePostsData(posts);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, message: '文章已刪除' }));
-    } else if (req.method === 'PUT') {
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
-                const { title, content, images } = JSON.parse(body);
-            const postIndex = posts.findIndex(p => p.id === postId);
-            if(postIndex > -1) {
-                posts[postIndex].title = title;
-                posts[postIndex].content = content;
-                    if (images !== undefined) {
-                        posts[postIndex].images = normalizeAttachmentList(images);
-                    }
-                    savePostsData(posts);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, message: '文章已更新' }));
-                } else {
-                    res.writeHead(404, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: '找不到文章' }));
+            const result = await db.Product.create({
+                seller_id: user.id,
+                title,
+                description: desc || '',
+                category,
+                price: parsedPrice,
+                condition,
+                image_url: image || null,
+                location,
+                usage_tag: usageTag,
+                negotiable,
+                status
+            });
+
+            sendJson(res, 200, { success: true, message: '商品上架成功', product_id: result.id });
+        } catch (error) {
+            console.error('新增商品錯誤:', error);
+            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
+        }
+
+    } else if (pathname === '/api/products' && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const sellerEmail = parsedUrl.searchParams.get('seller');
+            const statusFilter = parsedUrl.searchParams.get('status');
+            let products = [];
+
+            if (sellerEmail) {
+                const user = await db.User.findByEmail(sellerEmail);
+                if (user) products = await db.Product.findBySeller(user.id);
+            } else {
+                products = await db.Product.getActive();
             }
-        });
-    }
+
+            if (statusFilter && statusFilter !== 'all') {
+                products = products.filter(product => product.status === statusFilter);
+            }
+
+            sendJson(res, 200, products.map(formatProduct));
+        } catch (error) {
+            console.error('讀取商品錯誤:', error);
+            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
+        }
+
+    } else if (pathname.match(/^\/api\/products\/\d+$/) && req.method === 'GET') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3]);
+        try {
+            const product = await db.Product.findById(productId);
+            if (!product) return sendJson(res, 404, { success: false, message: '找不到商品' });
+
+            await db.Product.incrementViews(productId);
+            product.views = (product.views || 0) + 1;
+            sendJson(res, 200, formatProduct(product));
+        } catch (error) {
+            console.error('讀取單一商品錯誤:', error);
+            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
+        }
+
+    } else if (/^\/api\/products\/\d+\/status$/.test(pathname) && req.method === 'POST') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3]);
+        try {
+            const body = await parseJsonBody(req);
+            const user = await findRequestUser(body.seller || body.userEmail);
+            const allowed = ['active', 'sold', 'inactive'];
+            if (!user || !allowed.includes(body.status)) {
+                return sendJson(res, 400, { success: false, message: '狀態或賣家資料不正確' });
+            }
+
+            const result = await db.Product.updateStatus(productId, user.id, body.status);
+            if (!result.changes) return sendJson(res, 403, { success: false, message: '只能管理自己的商品' });
+            sendJson(res, 200, { success: true, message: '商品狀態已更新' });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '商品狀態更新失敗' });
+        }
+
+    } else if (pathname.startsWith('/api/products/') && req.method === 'PUT') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3]);
+        try {
+            const body = await parseJsonBody(req);
+            const { seller, title, category, price, desc, image, condition, location, usageTag, negotiable, status } = body;
+            const user = await db.User.findByEmail(seller);
+            const product = await db.Product.findById(productId);
+            const parsedPrice = parseInt(price, 10);
+
+            if (!user) return sendJson(res, 400, { success: false, message: '缺少賣家帳號' });
+            if (!product || product.seller_id !== user.id) return sendJson(res, 403, { success: false, message: '只能修改自己的商品' });
+            if (!title || !category || Number.isNaN(parsedPrice)) return sendJson(res, 400, { success: false, message: '商品資料不完整' });
+
+            await db.Product.update(productId, {
+                title,
+                category,
+                price: parsedPrice,
+                description: desc || '',
+                image_url: image || null,
+                condition,
+                location,
+                usage_tag: usageTag,
+                negotiable,
+                status
+            });
+
+            sendJson(res, 200, { success: true, message: '商品已更新' });
+        } catch (error) {
+            console.error('更新商品錯誤:', error);
+            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
+        }
+
+    } else if (pathname.startsWith('/api/products/') && req.method === 'DELETE') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3]);
+        try {
+            const userEmail = parsedUrl.searchParams.get('seller') || parsedUrl.searchParams.get('userEmail');
+            const user = await findRequestUser(userEmail);
+            if (!user) return sendJson(res, 400, { success: false, message: '缺少賣家帳號' });
+
+            const result = await db.Product.updateStatus(productId, user.id, 'inactive');
+            if (!result.changes) return sendJson(res, 403, { success: false, message: '只能下架自己的商品' });
+            sendJson(res, 200, { success: true, message: '商品已下架' });
+        } catch (error) {
+            console.error('下架商品錯誤:', error);
+            sendJson(res, 500, { success: false, message: '下架商品失敗' });
+        }
 
     // --- 商品 API (新增 / 讀取) ---
     } else if (pathname === '/api/products' && req.method === 'POST') {
@@ -812,61 +958,216 @@ const server = http.createServer(async(req, res) => {
             }
         });
         
+    } else if (pathname === '/api/favorites' && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const user = await requireUserFromBodyOrQuery(parsedUrl);
+            if (!user) return sendJson(res, 400, { success: false, message: '缺少使用者' });
+            const favorites = await db.Favorite.getByUser(user.id);
+            sendJson(res, 200, { success: true, data: favorites.map(formatProduct) });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '讀取收藏失敗' });
+        }
+
+    } else if (pathname === '/api/favorites' && req.method === 'POST') {
+        setCorsHeaders(res);
+        try {
+            const body = await parseJsonBody(req);
+            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
+            if (!user || !body.productId) return sendJson(res, 400, { success: false, message: '缺少必要參數' });
+            await db.Favorite.add(user.id, body.productId);
+            sendJson(res, 200, { success: true, message: '已加入收藏' });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '加入收藏失敗' });
+        }
+
+    } else if (pathname.startsWith('/api/favorites/') && req.method === 'DELETE') {
+        setCorsHeaders(res);
+        try {
+            const productId = parseInt(pathname.split('/')[3]);
+            const user = await requireUserFromBodyOrQuery(parsedUrl);
+            if (!user || !productId) return sendJson(res, 400, { success: false, message: '缺少必要參數' });
+            await db.Favorite.remove(user.id, productId);
+            sendJson(res, 200, { success: true, message: '已取消收藏' });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '取消收藏失敗' });
+        }
+
+    } else if (pathname === '/api/transactions' && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const user = await requireUserFromBodyOrQuery(parsedUrl);
+            const role = parsedUrl.searchParams.get('role') || 'buyer';
+            if (!user) return sendJson(res, 400, { success: false, message: '缺少使用者' });
+            const rows = role === 'seller' ? await db.Transaction.getBySeller(user.id) : await db.Transaction.getByBuyer(user.id);
+            sendJson(res, 200, { success: true, data: rows.map(formatTransaction) });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '讀取交易失敗' });
+        }
+
+    } else if (pathname === '/api/transactions' && req.method === 'POST') {
+        setCorsHeaders(res);
+        try {
+            const body = await parseJsonBody(req);
+            const buyer = await requireUserFromBodyOrQuery(parsedUrl, body);
+            const product = await db.Product.findById(body.productId);
+            if (!buyer || !product) return sendJson(res, 400, { success: false, message: '找不到買家或商品' });
+            if (product.status !== 'active') return sendJson(res, 400, { success: false, message: '商品目前不能購買' });
+            if (product.seller_id === buyer.id) return sendJson(res, 400, { success: false, message: '不能購買自己的商品' });
+
+            const result = await db.Transaction.create({
+                product_id: product.id,
+                buyer_id: buyer.id,
+                seller_id: product.seller_id,
+                price: product.price,
+                status: 'pending',
+                note: body.note || '買家提出購買需求'
+            });
+            sendJson(res, 200, { success: true, message: '已送出購買需求', transaction_id: result.id });
+        } catch (error) {
+            console.error('建立交易錯誤:', error);
+            sendJson(res, 500, { success: false, message: '建立交易失敗' });
+        }
+
+    } else if (pathname.startsWith('/api/transactions/') && req.method === 'PUT') {
+        setCorsHeaders(res);
+        try {
+            const transactionId = parseInt(pathname.split('/')[3]);
+            const body = await parseJsonBody(req);
+            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
+            const allowed = ['pending', 'contacting', 'completed', 'cancelled'];
+            if (!user || !allowed.includes(body.status)) return sendJson(res, 400, { success: false, message: '交易狀態不正確' });
+            const result = await db.Transaction.updateStatus(transactionId, user.id, body.status);
+            if (!result.changes) return sendJson(res, 403, { success: false, message: '無法更新這筆交易' });
+            sendJson(res, 200, { success: true, message: '交易狀態已更新' });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '更新交易失敗' });
+        }
+
+    } else if (/^\/api\/transactions\/\d+\/comments$/.test(pathname) && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const transactionId = parseInt(pathname.split('/')[3]);
+            const user = await requireUserFromBodyOrQuery(parsedUrl);
+            if (!user) return sendJson(res, 400, { success: false, message: '請先登入' });
+
+            const comments = await db.TransactionComment.getByTransaction(transactionId, user.id);
+            if (!comments) return sendJson(res, 403, { success: false, message: '無法查看這筆交易留言' });
+            sendJson(res, 200, { success: true, data: comments.map(formatTransactionComment) });
+        } catch (error) {
+            console.error('讀取交易留言失敗:', error);
+            sendJson(res, 500, { success: false, message: '讀取留言失敗' });
+        }
+
+    } else if (/^\/api\/transactions\/\d+\/comments$/.test(pathname) && req.method === 'POST') {
+        setCorsHeaders(res);
+        try {
+            const transactionId = parseInt(pathname.split('/')[3]);
+            const body = await parseJsonBody(req);
+            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
+            const content = String(body.content || '').trim();
+            if (!user) return sendJson(res, 400, { success: false, message: '請先登入' });
+            if (!content) return sendJson(res, 400, { success: false, message: '請輸入留言內容' });
+
+            const result = await db.TransactionComment.create(transactionId, user.id, content);
+            if (!result) return sendJson(res, 403, { success: false, message: '無法在這筆交易留言' });
+            sendJson(res, 200, { success: true, message: '留言已送出', id: result.id });
+        } catch (error) {
+            console.error('新增交易留言失敗:', error);
+            sendJson(res, 500, { success: false, message: '新增留言失敗' });
+        }
+
+    } else if (pathname === '/api/account/stats' && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const user = await requireUserFromBodyOrQuery(parsedUrl);
+            if (!user) return sendJson(res, 400, { success: false, message: '缺少使用者' });
+            sendJson(res, 200, { success: true, data: await db.Stats.getByUser(user.id) });
+        } catch (error) {
+            sendJson(res, 500, { success: false, message: '讀取統計失敗' });
+        }
+
     // --- 購物車 API ---
     } else if (pathname === '/api/cart' && req.method === 'GET') {
         setCorsHeaders(res);
-        const userId = parsedUrl.searchParams.get('userId');
-        if (!userId) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ success: false, message: "缺少 userId 參數" }));
-        }
         try {
-            const items = await db.Cart.getByUser(userId);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, data: items }));
+            const user = await getCartUser(parsedUrl);
+            if (!user) {
+                return sendJson(res, 400, { success: false, message: "缺少或找不到使用者" });
+            }
+
+            const items = await db.Cart.getByUser(user.id);
+            sendJson(res, 200, { success: true, data: items });
         } catch (error) {
             console.error('❌ 讀取購物車錯誤:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: "讀取購物車失敗" }));
+            sendJson(res, 500, { success: false, message: "讀取購物車失敗" });
         }
 
     } else if (pathname === '/api/cart' && req.method === 'POST') {
         setCorsHeaders(res);
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', async () => {
-            try {
-                const { userId, productId } = JSON.parse(body);
-                if (!userId || !productId) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: "缺少必要參數" }));
-                }
-                await db.Cart.add(userId, productId);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true, message: "已加入購物車" }));
-            } catch (error) {
-                console.error('❌ 加入購物車錯誤:', error);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "加入購物車失敗" }));
+        try {
+            const body = await parseJsonBody(req);
+            const user = await getCartUser(parsedUrl, body);
+            const { productId } = body;
+            if (!user || !productId) {
+                return sendJson(res, 400, { success: false, message: "缺少必要參數" });
             }
-        });
+
+            await db.Cart.add(user.id, productId);
+            sendJson(res, 200, { success: true, message: "已加入購物車" });
+        } catch (error) {
+            console.error('❌ 加入購物車錯誤:', error);
+            sendJson(res, 500, { success: false, message: "加入購物車失敗" });
+        }
+
+    } else if (pathname === '/api/cart/clear' && req.method === 'POST') {
+        setCorsHeaders(res);
+        try {
+            const body = await parseJsonBody(req);
+            const user = await getCartUser(parsedUrl, body);
+            if (!user) {
+                return sendJson(res, 400, { success: false, message: "缺少或找不到使用者" });
+            }
+
+            await db.Cart.clear(user.id);
+            sendJson(res, 200, { success: true, message: "購物車已清空" });
+        } catch (error) {
+            console.error('❌ 清空購物車錯誤:', error);
+            sendJson(res, 500, { success: false, message: "清空購物車失敗" });
+        }
+
+    } else if (pathname.startsWith('/api/cart/') && req.method === 'PUT') {
+        setCorsHeaders(res);
+        const cartItemId = parseInt(pathname.split('/')[3]);
+        try {
+            const body = await parseJsonBody(req);
+            const user = await getCartUser(parsedUrl, body);
+            const quantity = parseInt(body.quantity, 10);
+            if (!user || Number.isNaN(quantity)) {
+                return sendJson(res, 400, { success: false, message: "缺少必要參數" });
+            }
+
+            await db.Cart.updateQuantity(cartItemId, user.id, quantity);
+            sendJson(res, 200, { success: true, message: "購物車數量已更新" });
+        } catch (error) {
+            console.error('❌ 更新購物車數量錯誤:', error);
+            sendJson(res, 500, { success: false, message: "更新購物車失敗" });
+        }
 
     } else if (pathname.startsWith('/api/cart/') && req.method === 'DELETE') {
         setCorsHeaders(res);
         const cartItemId = parseInt(pathname.split('/')[3]);
-        const userId = parsedUrl.searchParams.get('userId');
-        if (!userId) {
-             res.writeHead(400, { 'Content-Type': 'application/json' });
-             return res.end(JSON.stringify({ success: false, message: "缺少 userId 參數" }));
-        }
         try {
-            await db.Cart.remove(cartItemId, userId);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, message: "已從購物車中移除" }));
+            const user = await getCartUser(parsedUrl);
+            if (!user) {
+                return sendJson(res, 400, { success: false, message: "缺少或找不到使用者" });
+            }
+
+            await db.Cart.remove(cartItemId, user.id);
+            sendJson(res, 200, { success: true, message: "已從購物車中移除" });
         } catch (error) {
             console.error('❌ 移除購物車商品錯誤:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: "移除商品失敗" }));
+            sendJson(res, 500, { success: false, message: "移除商品失敗" });
         }
 
     }// 1. 爬蟲 API 路由
@@ -940,6 +1241,9 @@ const server = http.createServer(async(req, res) => {
         else if (pathname === '/seller') filePath = path.join(__dirname, 'seller.html');
         else if (pathname === '/marketplace') filePath = path.join(__dirname, 'marketplace.html');
         else if (pathname === '/cart') filePath = path.join(__dirname, 'cart.html');
+        else if (pathname === '/checkout') filePath = path.join(__dirname, 'checkout.html');
+        else if (pathname === '/product') filePath = path.join(__dirname, 'product.html');
+        else if (pathname === '/transactions') filePath = path.join(__dirname, 'transactions.html');
 
         const ext = path.extname(filePath);
         const contentType = {

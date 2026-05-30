@@ -3,113 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的帳戶 | 二手硬體交易平台</title>
+    <title>我的帳戶 | 轉轉轉二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* 主內容區 */
-        .container { max-width: 800px; margin: 3rem auto; padding: 0 20px; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .card h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; color: var(--primary-color); }
-        .info-row { margin-bottom: 15px; font-size: 1.1rem; }
-        .info-row strong { display: inline-block; width: 100px; color: #555; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 20px; }
+        .card { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); margin-bottom: 20px; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+        .stat { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+        .stat strong { display: block; font-size: 1.8rem; color: var(--primary-color); }
+        .favorites { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+        .favorite { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #fff; }
+        .favorite img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #eef2f7; }
+        .favorite-body { padding: 12px; }
+        .price { color: var(--accent-color); font-weight: 900; margin-top: 8px; }
+        @media (max-width: 720px) { .stats { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
-
     <header>
         <div class="header-main">
-            <a href="/" class="logo">轉轉轉二手平台</a>
-            
+            <a href="/" class="logo">轉轉轉二手交易平台</a>
             <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
-                <button class="search-btn" onclick="triggerSearch()">🔍</button>
+                <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">搜尋</button>
             </div>
-
             <div class="header-actions">
-                <a href="/cart" class="cart-link" title="購物車">
-                    🛒 <span id="cart-count" class="cart-count">0</span>
-                </a>
-                
-                <div id="auth-section">
-                    <a href="/login" class="auth-btn">登入 / 註冊</a>
-                </div>
-                
+                <a href="/cart" class="cart-link" title="購物車">購物車 <span id="cart-count" class="cart-count">0</span></a>
+                <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
                 <div id="user-profile">
-                    <div class="avatar">👤</div>
+                    <div class="avatar">U</div>
                     <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
                     <div class="dropdown-menu">
                         <a href="/account.html" class="active">我的帳戶</a>
                         <a href="/products.html">我的商品</a>
+                        <a href="/transactions">我的交易</a>
                         <a href="#" onclick="logout()">登出</a>
                     </div>
                 </div>
             </div>
         </div>
-        
         <nav class="main-nav">
             <a href="/">首頁</a>
-            <a href="/marketplace">🛒 商城</a>
-            <a href="#">智慧推薦</a>
+            <a href="/marketplace">商城</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/seller">賣家中心</a>
         </nav>
     </header>
 
-    <div class="container">
-        <div class="card">
-            <h2>基本資料</h2>
-            <div class="info-row"><strong>登入信箱：</strong> <span id="account-email">讀取中...</span></div>
-            <div class="info-row"><strong>會員身分：</strong> 一般會員</div>
-            <div class="info-row"><strong>加入時間：</strong> 2026-05-01</div>
-            <button class="btn-action">修改密碼</button>
-        </div>
-    </div>
+    <main class="container">
+        <section class="card">
+            <h2>我的帳戶</h2>
+            <p>登入信箱：<strong id="account-email">載入中...</strong></p>
+            <p>使用者名稱：<strong id="account-name">載入中...</strong></p>
+            <div class="stats">
+                <div class="stat"><strong id="active-products">0</strong><span>上架商品</span></div>
+                <div class="stat"><strong id="sold-products">0</strong><span>已售出</span></div>
+                <div class="stat"><strong id="post-count">0</strong><span>論壇發文</span></div>
+                <div class="stat"><strong id="favorite-count">0</strong><span>收藏商品</span></div>
+            </div>
+        </section>
+        <section class="card">
+            <h2>我的收藏</h2>
+            <div id="favorites-container" class="favorites">載入中...</div>
+        </section>
+    </main>
 
     <script>
-        window.onload = function() {
-            const loggedInUser = localStorage.getItem('userEmail');
+        window.onload = async function() {
+            const userEmail = localStorage.getItem('userEmail');
             const userName = localStorage.getItem('userName');
-            if (!loggedInUser) {
+            if (!userEmail) {
                 document.getElementById('user-profile').style.display = 'none';
                 document.getElementById('auth-section').style.display = 'block';
                 document.getElementById('account-email').innerText = '尚未登入';
-            } else {
-                // 已登入：顯示會員資料
-                document.getElementById('auth-section').style.display = 'none';
-                document.getElementById('user-profile').style.display = 'flex';
-                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
-                document.getElementById('account-email').innerText = loggedInUser;
+                return;
             }
-            updateCartCount();
+
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('user-profile').style.display = 'flex';
+            document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
+            document.getElementById('account-email').innerText = userEmail;
+            document.getElementById('account-name').innerText = userName || userEmail.split('@')[0];
+            await updateCartCount();
+            await loadStats(userEmail);
+            await loadFavorites(userEmail);
         };
 
-        function logout() {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            alert('已成功登出！');
-            window.location.href = '/';
+        function placeholderImage() {
+            return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E';
         }
 
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const count = cart.reduce((total, item) => total + item.quantity, 0);
+        async function loadStats(userEmail) {
+            const res = await fetch(`/api/account/stats?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            if (!result.success) return;
+            document.getElementById('active-products').innerText = result.data.activeProducts;
+            document.getElementById('sold-products').innerText = result.data.soldProducts;
+            document.getElementById('post-count').innerText = result.data.posts;
+            document.getElementById('favorite-count').innerText = result.data.favorites;
+        }
+
+        async function loadFavorites(userEmail) {
+            const res = await fetch(`/api/favorites?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            const container = document.getElementById('favorites-container');
+            const favorites = result.success ? result.data : [];
+            if (!favorites.length) {
+                container.innerHTML = '<p style="color:#667085;">目前沒有收藏商品。</p>';
+                return;
+            }
+            container.innerHTML = favorites.map(product => `
+                <article class="favorite">
+                    <img src="${product.image || placeholderImage()}" alt="${product.title}">
+                    <div class="favorite-body">
+                        <strong>${product.title}</strong>
+                        <div class="price">NT$ ${Number(product.price).toLocaleString()}</div>
+                        <button class="btn-action" onclick="window.location.href='/product?id=${product.id}'">查看詳情</button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        async function updateCartCount() {
+            const userEmail = localStorage.getItem('userEmail');
             const cartCountEl = document.getElementById('cart-count');
-            if(cartCountEl) cartCountEl.innerText = count;
+            if (!userEmail) { cartCountEl.innerText = 0; return; }
+            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
+            const result = await res.json();
+            const items = result.success ? result.data : [];
+            cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
         }
 
         function triggerSearch() {
-            const input = document.querySelector('.nav-search');
-            if (input && input.value.trim()) {
-                alert('執行搜尋：' + input.value.trim());
-            }
+            const query = document.querySelector('.nav-search').value.trim();
+            if (query) window.location.href = `/marketplace?q=${encodeURIComponent(query)}`;
         }
 
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                triggerSearch();
-            }
-        }
+        function handleSearch(event) { if (event.key === 'Enter') triggerSearch(); }
+        function logout() { localStorage.removeItem('userEmail'); localStorage.removeItem('userName'); window.location.href = '/'; }
     </script>
 </body>
 </html>
