@@ -1,12 +1,18 @@
 const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'nmdwsm.db');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nmdwsm.db');
 let db = null;
 
 // 初始化數據庫連接
 function initDatabase() {
   return new Promise((resolve, reject) => {
+    const dbDir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+
     db = new sqlite3.Database(DB_PATH, (err) => {
       if (err) {
         console.error('❌ 連接數據庫失敗:', err.message);

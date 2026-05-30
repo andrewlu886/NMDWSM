@@ -9,7 +9,10 @@ const cheerio = require('cheerio');
 const db = require('./db.js');
 
 const PORT = process.env.PORT || 3000;
+const PUBLIC_DIR = path.resolve(__dirname);
 const USERS_FILE = path.join(__dirname, 'users.json');
+const BLOCKED_STATIC_EXTENSIONS = new Set(['.db', '.sqlite', '.sqlite3']);
+const BLOCKED_STATIC_FILES = new Set(['users.json', 'products.json', 'posts.json']);
 // JSON 檔僅保留作為備份或測試資料，正式資料來源統一使用 SQLite。
 // --- 資料庫與使用者相關初始化 ---
 
@@ -50,6 +53,12 @@ function normalizeAttachmentList(items) {
 function sendJson(res, statusCode, data) {
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(data));
+}
+
+function isBlockedStaticFile(filePath) {
+    const fileName = path.basename(filePath).toLowerCase();
+    const ext = path.extname(fileName);
+    return BLOCKED_STATIC_EXTENSIONS.has(ext) || BLOCKED_STATIC_FILES.has(fileName);
 }
 
 function parseJsonBody(req) {
@@ -1264,14 +1273,27 @@ const server = http.createServer(async(req, res) => {
         else if (pathname === '/product') filePath = path.join(__dirname, 'product.html');
         else if (pathname === '/transactions') filePath = path.join(__dirname, 'transactions.html');
 
-        const ext = path.extname(filePath);
+        const safeFilePath = path.resolve(filePath);
+        if (!safeFilePath.startsWith(PUBLIC_DIR + path.sep) && safeFilePath !== PUBLIC_DIR) {
+            res.writeHead(403);
+            res.end('Forbidden');
+            return;
+        }
+
+        const ext = path.extname(safeFilePath);
+        if (isBlockedStaticFile(safeFilePath)) {
+            res.writeHead(403);
+            res.end('Forbidden');
+            return;
+        }
+
         const contentType = {
             '.html': 'text/html',
             '.css': 'text/css',
             '.js': 'text/javascript'
         }[ext] || 'text/plain';
 
-        fs.readFile(filePath, (err, data) => {
+        fs.readFile(safeFilePath, (err, data) => {
             if (err) {
                 res.writeHead(404);
                 res.end('File not found');
