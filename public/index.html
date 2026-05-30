@@ -289,33 +289,69 @@
         }
 
         // --- 智慧推薦邏輯 (保留您原本的功能) ---
-        async function runRecommend() {
+            async function runRecommend() {
             const budget = document.getElementById('budget').value;
             const usage = document.getElementById('usage').value;
 
             if(!budget) return alert('請輸入預算');
 
+            const res = document.getElementById('result-display');
+            
             try {
+                // 1. 顯示 Loading 狀態 (給予使用者系統正在運作的反饋)
+                res.style.display = 'block';
+                res.innerHTML = '<p style="text-align: center; color: #666;">🔍 系統正在為您即時爬取與分析最新行情，請稍候...</p>';
+
                 const response = await fetch('/api/recommend', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ budget: parseInt(budget), usage })
+                    body: JSON.stringify({ budget: parseInt(budget), usage: usage })
                 });
 
+                if (!response.ok) throw new Error('API 回應錯誤');
+                
+                // 2. 解析後端傳回來的新 JSON 格式 (包含 suggestedPrice 與 recommendations 清單)
                 const result = await response.json();
 
-                const res = document.getElementById('result-display');
-                res.style.display = 'block';
-                res.innerHTML = `
-                    <strong>系統分析結果：</strong><br>
-                    1. ${result.cpu}<br>
-                    2. ${result.gpu}<br>
-                    3. 用途：${usage === 'gaming' ? '遊戲專用' : '文書機'}<br>
-                    4. 狀態：${result.status}
+                // 3. 重新構建 HTML 渲染畫面
+                let htmlContent = `
+                    <h3 style="color: #2c3e50; margin-top: 0; font-size: 1.1rem;">🎯 系統即時分析結果</h3>
+                    
+                    <div style="background: #e8f4f8; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #3498db;">
+                        <strong>💡 合理定價基準：</strong><br>
+                        根據即時抓取行情，此預算合理入手價中位數約為 <strong style="color: #e74c3c; font-size: 1.2em;">$${result.suggestedPrice.toLocaleString()}</strong> 元
+                    </div>
+
+                    <strong>🏆 最佳推薦主機 (Top 3)：</strong>
+                    <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
                 `;
+
+                // 4. 迴圈將 Top 3 推薦清單印出來
+                if (result.recommendations && result.recommendations.length > 0) {
+                    result.recommendations.forEach((item, index) => {
+                        const usageText = usage === 'gaming' ? '🎮 遊戲加權' : '💼 工作加權';
+                        htmlContent += `
+                            <li style="background: #fff; border: 1px solid #ddd; margin-top: 10px; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                <strong style="color: #2980b9;">No.${index + 1} - ${item.title}</strong><br>
+                                💰 售價：<strong>$${item.price.toLocaleString()}</strong> <br>
+                                ⚙️ 核心：${item.cpu} / ${item.gpu} <br>
+                                📊 推薦分數：${item.matchScore.toFixed(0)} (${usageText})
+                            </li>
+                        `;
+                    });
+                } else {
+                    htmlContent += '<li style="margin-top: 10px; color: #e74c3c;">目前市場上沒有找到符合您預算的機型。</li>';
+                }
+
+                htmlContent += '</ul>';
+                
+                // 5. 將組合好的 HTML 塞回畫面上
+                res.innerHTML = htmlContent;
+
             } catch (error) {
                 alert('推薦系統暫時無法使用，請稍後再試');
                 console.error('推薦API錯誤:', error);
+                res.innerHTML = '<p style="color: red; margin: 0; text-align: center;">❌ 載入失敗，請檢查連線或稍後再試。</p>';
             }
         }
     </script>

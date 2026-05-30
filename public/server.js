@@ -183,6 +183,33 @@ async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
     return user;
 }
 
+// --- 智慧推薦功能實作 ---
+// === 智慧推薦：效能字典與擷取工具 ===
+const GPU_SCORE = {
+    "RTX4090": 35000, "RTX4080": 28000, "RTX4070TI": 25000, "RTX4070": 20000, 
+    "RTX4060TI": 15000, "RTX4060": 12000, "RTX3060": 10000, "RTX3050": 7000,
+    "GTX1650": 5000, "UNKNOWN": 1000
+};
+
+const CPU_SCORE = {
+    "I9-14900K": 20000, "I7-14700K": 18000, "I7-13700F": 15000, 
+    "I5-13400F": 10000, "I5-12400F": 8000, "R5-7500F": 9000,
+    "UNKNOWN": 2000
+};
+
+function extractCPU(text) {
+    const cpuRegex = /(i[3579]-\d{4,5}[KFSX]?|R[3579]-\d{4}[GXZ]?|Ryzen\s*\d\s*\d{4})/i;
+    const match = text.match(cpuRegex);
+    return match ? match[1].toUpperCase().replace(/\s+/g, '') : "UNKNOWN";
+}
+
+function extractGPU(text) {
+    const gpuRegex = /(RTX|GTX|RX)\s*-?\s*\d{4}\s*(Ti|SUPER|XT)?/i;
+    const match = text.match(gpuRegex);
+    return match ? match[1].toUpperCase().replace(/[\s-]/g, '') : "UNKNOWN";
+};
+
+
 // --- 爬蟲功能實作 ---
 
 // 1. 原價屋爬蟲
@@ -473,123 +500,7 @@ async function scrapeNewegg(keyword) {
         if (browser) await browser.close();
     }
 }
-// 11. 中國 中關村在線 爬蟲邏輯 (Puppeteer 裝甲升級版)
-async function scrapeZOL(keyword) {
 
-    let browser;
-    try {
-        browser = await puppeteer.launch({
-            headless: false,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox'
-            ]
-        });
-        const page = await browser.newPage();
-        await page.setViewport({
-            width: 1366,
-            height: 768
-        });
-        await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-        );
-        const searchUrl =
-            `https://detail.zol.com.cn/index.php?c=SearchList&keyword=${encodeURIComponent(keyword)}`;
-
-        await page.goto(
-            searchUrl,
-            {
-                waitUntil: 'networkidle2',
-                timeout: 30000
-            }
-        );
-        console.log(
-            '[ZOL] TITLE:',
-            await page.title()
-        );
-        console.log(
-            '[ZOL] URL:',
-            page.url()
-        );
-        await page.screenshot({
-            path: 'zol_debug.png',
-            fullPage: true
-        });
-        for(let i=0;i<3;i++){
-            await page.evaluate(() => {
-                window.scrollBy(
-                    0,
-                    window.innerHeight
-                );
-            });
-            await new Promise(
-                r => setTimeout(r, 1000)
-            );
-        }
-        const results =
-            await page.evaluate(() => {
-                const arr = [];
-                const links =
-                    document.querySelectorAll('a');
-                links.forEach(link => {
-                    const text =
-                        link.innerText
-                            ?.replace(/\s+/g,' ')
-                            ?.trim();
-
-                    const href =
-                        link.href;
-                    if(
-                        !text ||
-                        text.length < 5
-                    ){
-                        return;
-                    }
-                    if(
-                        href &&
-                        (
-                            href.includes('detail.zol.com.cn')
-                            ||
-                            href.includes('/video_card/')
-                            ||
-                            href.includes('/vga/')
-                        )
-                    ){
-                        arr.push({
-                            platform:
-                                '中關村在線',
-                            name:text,
-                            price:'請查看商品',
-                            url:href,
-                            sales:0
-                        });
-                    }
-                });
-                return arr;
-            });
-        const unique =
-            [...new Map(
-                results.map(
-                    item => [
-                        item.url,
-                        item
-                    ]
-                )
-            ).values()];
-        console.log(
-            `[中關村在線] 找到 ${unique.length} 筆`
-        );
-        return unique.slice(0,10);
-    }
-    catch(error){
-        console.error(
-            '[中關村在線] 錯誤:',
-            error.message
-        );
-        return [];
-    }
-    finally{if(browser){ await browser.close();}}
-}
 // 12. 台灣 Yahoo 購物中心爬蟲邏輯 (特徵錨點抓取法 - 升級版)
 async function scrapeYahoo(keyword) {
     console.log(`[Yahoo購物] 啟動隱形瀏覽器搜尋: ${keyword}`);
@@ -790,30 +701,93 @@ const server = http.createServer(async(req, res) => {
             }
         });
 
-    // 3. 需求推薦 API
+// 3. 需求推薦 API (升級版：即時爬蟲與智慧定價)
     } else if (pathname === '/api/recommend' && req.method === 'POST') {
         setCorsHeaders(res);
         let body = '';
         req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
+        
+        // ⚠️ 這裡非常重要：必須加上 async，因為內部需要 await 爬蟲結果
+        req.on('end', async () => { 
             try {
                 const { budget, usage } = JSON.parse(body);
-                let cpuRatio = (usage === 'gaming') ? 0.2 : (usage === 'office' ? 0.4 : 0.2);
-                let gpuRatio = (usage === 'gaming') ? 0.5 : (usage === 'office' ? 0.2 : 0.4);
+                
+                // 根據用途設定搜尋關鍵字
+                const searchKeyword = usage === 'gaming' ? '電競' : '主機';
 
+                // 1. 同時並發執行兩個爬蟲 API
+                const [coolpcResults, sinyaResults] = await Promise.all([
+                    scrapeCoolpc(searchKeyword),
+                    scrapeSinya(searchKeyword)
+                ]);
+
+                let allProducts = [...coolpcResults, ...sinyaResults];
+                let validProducts = [];
+
+                // 2. 資料清洗與算分
+                for (let item of allProducts) {
+                    let cleanPrice = parseInt(item.price.toString().replace(/[^\d]/g, ''), 10);
+                    
+                    // 濾除無效價格與超出預算的商品
+                    if (isNaN(cleanPrice) || cleanPrice === 0 || cleanPrice > budget || cleanPrice < 3000) {
+                        continue; 
+                    }
+
+                    let cpu = extractCPU(item.name);
+                    let gpu = extractGPU(item.name);
+                    let cpuScore = CPU_SCORE[cpu] || CPU_SCORE["UNKNOWN"];
+                    let gpuScore = GPU_SCORE[gpu] || GPU_SCORE["UNKNOWN"];
+
+                    let matchScore = usage === 'gaming' 
+                        ? (gpuScore * 0.75) + (cpuScore * 0.25) 
+                        : (cpuScore * 0.80) + (gpuScore * 0.20);
+
+                    validProducts.push({
+                        title: item.name,
+                        price: cleanPrice,
+                        cpu: cpu,
+                        gpu: gpu,
+                        matchScore: matchScore
+                    });
+                }
+
+                // 如果爬完完全沒符合預算的資料
+                if (validProducts.length === 0) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ suggestedPrice: 0, recommendations: [] }));
+                }
+
+                // 3. 排序並取得 Top 3
+                validProducts.sort((a, b) => b.matchScore - a.matchScore);
+                const top3Recommendations = validProducts.slice(0, 3);
+
+                // 4. 計算中位數 (去極值)
+                let prices = validProducts.map(p => p.price).sort((a, b) => a - b);
+                let medianPrice = 0;
+                
+                if (prices.length > 4) {
+                    prices.pop(); // 去最高價
+                    prices.shift(); // 去最低價
+                }
+                
+                let mid = Math.floor(prices.length / 2);
+                medianPrice = (prices.length % 2 === 0) 
+                    ? (prices[mid - 1] + prices[mid]) / 2 
+                    : prices[mid];
+
+                // 5. 成功回傳 JSON 給前端
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
-                    cpu: `建議約 ${budget * cpuRatio} 元的處理器`,
-                    gpu: `建議約 ${budget * gpuRatio} 元的顯示卡`,
-                    usage: usage,
-                    status: "success"
+                    suggestedPrice: Math.round(medianPrice),
+                    recommendations: top3Recommendations
                 }));
+
             } catch (error) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "請檢查傳送的資料格式" }));
+                console.error("❌ API 推薦處理發生錯誤:", error);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: "伺服器內部錯誤" }));
             }
         });
-
     // 4. 取得論壇文章 API (使用 SQLite)
     } else if (pathname === '/api/posts' && req.method === 'GET') {
         setCorsHeaders(res);
