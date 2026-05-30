@@ -1516,13 +1516,13 @@ const server = http.createServer(async(req, res) => {
             const momoData = await scrapeMomo(keyword);
             allResults = allResults.concat(momoData);
         }
-        if (platform === 'all' || platform === 'amazon') {
-            const amazonData = await scrapeAmazon(keyword);
-            allResults = allResults.concat(amazonData);
-        }
         if (platform === 'all' || platform === 'newegg') {
             const neweggData = await scrapeNewegg(keyword);
             allResults = allResults.concat(neweggData);
+        }/*
+        if (platform === 'all' || platform === 'amazon') {
+            const amazonData = await scrapeAmazon(keyword);
+            allResults = allResults.concat(amazonData);
         }
         if (platform === 'all' || platform === 'ebay') {
             const ebayData = await scrapeEbay(keyword);
@@ -1531,7 +1531,7 @@ const server = http.createServer(async(req, res) => {
         if (platform === 'all' || platform === 'zol') {
             const zolData = await scrapeZOL(keyword);
             allResults = allResults.concat(zolData);
-        }
+        }*/
         if (platform === 'all' || platform === 'yahoo') {
             const yahooData = await scrapeYahoo(keyword);
             allResults = allResults.concat(yahooData);
@@ -1549,7 +1549,7 @@ const server = http.createServer(async(req, res) => {
 
         // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾
         if (/\d[06]\d0/.test(keyword)) {
-            const autoExcludes = ['風扇','Kg','題','衣','包','墊','筆','袋', '水壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼'];
+            const autoExcludes = ['風扇','Kg','碗','無線','GHz','不鏽鋼','鞋','題','衣','包','墊','筆','袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼'];
             autoExcludes.forEach(ex => {
                 if (!excludeWords.includes(ex)) {
                     excludeWords.push(ex);
