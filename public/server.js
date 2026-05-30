@@ -329,242 +329,7 @@ async function scrapeRuten(keyword) {
         return [{ platform: '露天', name: '錯誤: 取得失敗 (API 異常)', price: 'N/A', url: 'https://www.ruten.com.tw/' }];
     }
 }
-// 4. 蝦皮購物爬蟲邏輯
-async function scrapeShopee(keyword) {
 
-    console.log(`[蝦皮] 開始搜尋: ${keyword}`);
-
-    let browser;
-
-    try {
-
-        browser = await puppeteer.launch({
-            headless: false,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled'
-            ]
-        });
-
-        const page = await browser.newPage();
-
-        await page.setViewport({
-            width: 1366,
-            height: 768
-        });
-
-        await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-        );
-
-        let interceptedItems = [];
-
-        page.on('response', async (response) => {
-
-            const responseUrl = response.url();
-
-            if (
-                responseUrl.includes('/api/v4/search/search_items')
-            ) {
-
-                try {
-
-                    const data =
-                        await response.json();
-
-                    if (
-                        data &&
-                        data.items &&
-                        Array.isArray(data.items)
-                    ) {
-
-                        interceptedItems.push(
-                            ...data.items
-                        );
-
-                    }
-
-                } catch(err) {
-
-                    console.log(
-                        '[蝦皮] API解析失敗'
-                    );
-
-                }
-
-            }
-
-        });
-
-        const searchUrl =
-            `https://shopee.tw/search?keyword=${encodeURIComponent(keyword)}&sortBy=sales`;
-
-        await page.goto(
-            searchUrl,
-            {
-                waitUntil: 'networkidle2',
-                timeout: 30000
-            }
-        );
-
-        console.log(
-            '[蝦皮] TITLE:',
-            await page.title()
-        );
-
-        console.log(
-            '[蝦皮] URL:',
-            page.url()
-        );
-
-        if (
-            page.url().includes('/verify/')
-        ) {
-
-            console.log(
-                '[蝦皮] 已被驗證頁攔截'
-            );
-
-            return [];
-
-        }
-
-        for(let i=0;i<5;i++){
-
-            await page.evaluate(() => {
-
-                window.scrollBy(
-                    0,
-                    window.innerHeight
-                );
-
-            });
-
-            await new Promise(
-                r => setTimeout(r,1500)
-            );
-
-        }
-
-        if(interceptedItems.length > 0){
-
-            const map =
-                new Map();
-
-            const results = [];
-
-            interceptedItems.forEach(item => {
-
-                if(
-                    map.has(item.itemid)
-                ) return;
-
-                map.set(
-                    item.itemid,
-                    true
-                );
-
-                results.push({
-
-                    platform:'蝦皮',
-
-                    name:
-                        item.name,
-
-                    price:
-                        item.price
-                        ? (
-                            item.price
-                            /100000
-                          ).toLocaleString()
-                        : '未知',
-
-                    url:
-                        `https://shopee.tw/product/${item.shopid}/${item.itemid}`,
-
-                    sales:
-                        item.historical_sold || 0
-
-                });
-
-            });
-
-            console.log(
-                `[蝦皮] API模式成功 ${results.length}筆`
-            );
-
-            return results.slice(0,12);
-
-        }
-
-        // API失敗改抓DOM
-
-        const domResults =
-            await page.evaluate(() => {
-
-                const arr = [];
-
-                const cards =
-                    document.querySelectorAll(
-                        '[data-sqe="item"]'
-                    );
-
-                cards.forEach(card => {
-
-                    const link =
-                        card.querySelector('a');
-
-                    if(!link) return;
-
-                    arr.push({
-
-                        platform:'蝦皮',
-
-                        name:
-                            card.innerText
-                                .split('\n')[0],
-
-                        price:'請查看賣場',
-
-                        url:link.href,
-
-                        sales:0
-
-                    });
-
-                });
-
-                return arr;
-
-            });
-
-        console.log(
-            `[蝦皮] DOM模式成功 ${domResults.length}筆`
-        );
-
-        return domResults.slice(0,12);
-
-    } catch(error) {
-
-        console.error(
-            '[蝦皮] 錯誤:',
-            error.message
-        );
-
-        return [];
-
-    } finally {
-
-        if(browser){
-
-            await browser.close();
-
-        }
-
-    }
-
-}
 // 5. PChome 24h 爬蟲
 async function scrapePChome(keyword) {
     try {
@@ -661,222 +426,7 @@ async function scrapeMomo(keyword) {
         return [];
     }
 }
-// 7. 美國 Amazon 爬蟲邏輯 (Puppeteer 終極等待版)
-const results = await page.evaluate(() => {
 
-    const products = [];
-
-    document
-        .querySelectorAll('[data-component-type="s-search-result"]')
-        .forEach(item => {
-
-            const title =
-                item.querySelector('h2 span')
-                    ?.innerText
-                    ?.trim();
-
-            const priceWhole =
-                item.querySelector('.a-price-whole')
-                    ?.innerText
-                    ?.replace(/,/g,'');
-
-            const priceFraction =
-                item.querySelector('.a-price-fraction')
-                    ?.innerText || '00';
-
-            const link =
-                item.querySelector('h2 a')
-                    ?.href;
-
-            if(title && priceWhole){
-
-                products.push({
-
-                    platform:'Amazon',
-
-                    name:title,
-
-                    price:`USD $${priceWhole}.${priceFraction}`,
-
-                    url:link,
-
-                    sales:0
-
-                });
-
-            }
-
-        });
-
-    return products;
-
-});
-// 8. 中國 阿里 1688 爬蟲邏輯 (批發市場底價)
-async function scrape1688(keyword) {
-
-    console.log(
-        `[1688] 搜尋 ${keyword}`
-    );
-
-    let browser;
-
-    try {
-
-        browser =
-            await puppeteer.launch({
-
-                headless:false,
-
-                args:[
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-blink-features=AutomationControlled'
-                ]
-
-            });
-
-        const page =
-            await browser.newPage();
-
-        await page.setViewport({
-            width:1366,
-            height:768
-        });
-
-        await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-        );
-
-        const searchUrl =
-            `https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(keyword)}`;
-
-        await page.goto(
-            searchUrl,
-            {
-                waitUntil:'networkidle2',
-                timeout:30000
-            }
-        );
-
-        console.log(
-            '[1688] TITLE:',
-            await page.title()
-        );
-
-        console.log(
-            '[1688] URL:',
-            page.url()
-        );
-
-        await page.screenshot({
-            path:'1688_debug.png',
-            fullPage:true
-        });
-
-        for(let i=0;i<5;i++){
-
-            await page.evaluate(() => {
-
-                window.scrollBy(
-                    0,
-                    window.innerHeight
-                );
-
-            });
-
-            await new Promise(
-                r=>setTimeout(r,1500)
-            );
-
-        }
-
-        const results =
-            await page.evaluate(() => {
-
-                const products = [];
-
-                const links =
-                    document.querySelectorAll(
-                        'a[href*="offer"]'
-                    );
-
-                links.forEach(link => {
-
-                    const title =
-                        link.innerText
-                            ?.replace(/\s+/g,' ')
-                            ?.trim();
-
-                    const href =
-                        link.href;
-
-                    if(
-                        title &&
-                        title.length > 5
-                    ){
-
-                        products.push({
-
-                            platform:
-                                '阿里1688',
-
-                            name:title,
-
-                            price:
-                                '請查看商品',
-
-                            url:href,
-
-                            sales:0
-
-                        });
-
-                    }
-
-                });
-
-                return products;
-
-            });
-
-        const unique =
-            [...new Map(
-                results.map(
-                    item => [
-                        item.url,
-                        item
-                    ]
-                )
-            ).values()];
-
-        console.log(
-            `[1688] 抓到 ${unique.length} 筆`
-        );
-
-        return unique.slice(0,10);
-
-    }
-    catch(error){
-
-        console.error(
-            '[1688] 錯誤:',
-            error.message
-        );
-
-        return [];
-
-    }
-    finally{
-
-        if(browser){
-
-            await browser.close();
-
-        }
-
-    }
-
-}
 // 9. 美國 Newegg 爬蟲邏輯 (Puppeteer 版 - 3C 硬體權威)
 async function scrapeNewegg(keyword) {
     console.log(`[Newegg] 啟動隱形瀏覽器搜尋美國硬體: ${keyword}`);
@@ -925,52 +475,122 @@ async function scrapeNewegg(keyword) {
 }
 // 11. 中國 中關村在線 爬蟲邏輯 (Puppeteer 裝甲升級版)
 async function scrapeZOL(keyword) {
-    console.log(`[中關村在線] 啟動隱形瀏覽器檢索中國硬體行情: ${keyword}`);
+
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            headless: false,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox'
+            ]
         });
         const page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
-        const url = `https://detail.zol.com.cn/index.php?c=SearchList&keyword=${encodeURIComponent(keyword)}`;
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-
-        // 👇 強制等待商品列表出現
-        await page.waitForSelector('.list-box li', { timeout: 8000 }).catch(() => console.log('[中關村] 等待商品載入超時'));
-
-        const content = await page.content();
-        const $ = cheerio.load(content);
-        let results = [];
-
-        $('.list-box li').each((i, el) => {
-            const name = $(el).find('.pro-intro a').text().trim();
-            const priceText = $(el).find('.price-box .price-now').text().trim();
-            let link = $(el).find('.pro-intro a').attr('href');
-
-            if (name && priceText && !priceText.includes('概念股')) {
-                results.push({
-                    platform: '中關村在線 (CN)',
-                    name: name,
-                    price: `RMB ¥${priceText.replace('￥', '')}`,
-                    url: link ? `https://detail.zol.com.cn${link}` : url,
-                    sales: 0
-                });
-            }
+        await page.setViewport({
+            width: 1366,
+            height: 768
         });
+        await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+        );
+        const searchUrl =
+            `https://detail.zol.com.cn/index.php?c=SearchList&keyword=${encodeURIComponent(keyword)}`;
 
-        console.log(`[中關村在線] 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 10);
+        await page.goto(
+            searchUrl,
+            {
+                waitUntil: 'networkidle2',
+                timeout: 30000
+            }
+        );
+        console.log(
+            '[ZOL] TITLE:',
+            await page.title()
+        );
+        console.log(
+            '[ZOL] URL:',
+            page.url()
+        );
+        await page.screenshot({
+            path: 'zol_debug.png',
+            fullPage: true
+        });
+        for(let i=0;i<3;i++){
+            await page.evaluate(() => {
+                window.scrollBy(
+                    0,
+                    window.innerHeight
+                );
+            });
+            await new Promise(
+                r => setTimeout(r, 1000)
+            );
+        }
+        const results =
+            await page.evaluate(() => {
+                const arr = [];
+                const links =
+                    document.querySelectorAll('a');
+                links.forEach(link => {
+                    const text =
+                        link.innerText
+                            ?.replace(/\s+/g,' ')
+                            ?.trim();
 
-    } catch (error) {
-        console.error(`❌ 中關村在線 爬蟲失敗: ${error.message}`);
-        return [];
-    } finally {
-        if (browser) await browser.close();
+                    const href =
+                        link.href;
+                    if(
+                        !text ||
+                        text.length < 5
+                    ){
+                        return;
+                    }
+                    if(
+                        href &&
+                        (
+                            href.includes('detail.zol.com.cn')
+                            ||
+                            href.includes('/video_card/')
+                            ||
+                            href.includes('/vga/')
+                        )
+                    ){
+                        arr.push({
+                            platform:
+                                '中關村在線',
+                            name:text,
+                            price:'請查看商品',
+                            url:href,
+                            sales:0
+                        });
+                    }
+                });
+                return arr;
+            });
+        const unique =
+            [...new Map(
+                results.map(
+                    item => [
+                        item.url,
+                        item
+                    ]
+                )
+            ).values()];
+        console.log(
+            `[中關村在線] 找到 ${unique.length} 筆`
+        );
+        return unique.slice(0,10);
     }
-}// 12. 台灣 Yahoo 購物中心爬蟲邏輯 (特徵錨點抓取法 - 升級版)
+    catch(error){
+        console.error(
+            '[中關村在線] 錯誤:',
+            error.message
+        );
+        return [];
+    }
+    finally{if(browser){ await browser.close();}}
+}
+// 12. 台灣 Yahoo 購物中心爬蟲邏輯 (特徵錨點抓取法 - 升級版)
 async function scrapeYahoo(keyword) {
     console.log(`[Yahoo購物] 啟動隱形瀏覽器搜尋: ${keyword}`);
     let browser;
