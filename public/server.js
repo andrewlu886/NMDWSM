@@ -2,9 +2,13 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+
 // 引入網路爬蟲相關套件
 const axios = require('axios');
 const cheerio = require('cheerio');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 // SQLite 資料庫
 const db = require('./db.js');
 
@@ -325,57 +329,242 @@ async function scrapeRuten(keyword) {
         return [{ platform: '露天', name: '錯誤: 取得失敗 (API 異常)', price: 'N/A', url: 'https://www.ruten.com.tw/' }];
     }
 }
-// 4. 蝦皮購物爬蟲 (BUG)
+// 4. 蝦皮購物爬蟲邏輯
 async function scrapeShopee(keyword) {
+
+    console.log(`[蝦皮] 開始搜尋: ${keyword}`);
+
+    let browser;
+
     try {
-        console.log(`[蝦皮] 正在透過 API 搜尋: ${keyword}`);
-        
-        // 蝦皮的搜尋 API
-        const apiUrl = `https://shopee.tw/api/v4/search/search_items?keyword=${encodeURIComponent(keyword)}&limit=12&newest=0&order=desc&page_type=search&scenario=PAGE_GLOBAL_SEARCH&version=2`;
-        
-        const response = await axios.get(apiUrl, {
-            headers: { 
-                // 蝦皮經常阻擋爬蟲，需要設定 Header
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Referer': `https://shopee.tw/search?keyword=${encodeURIComponent(keyword)}`,
-                'Accept': 'application/json',
-                'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7'
-            },
-            timeout: 5000
+
+        browser = await puppeteer.launch({
+            headless: false,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled'
+            ]
         });
 
-        let results = [];
-        const items = response.data.items || [];
+        const page = await browser.newPage();
 
-        items.forEach(data => {
-            // 蝦皮的詳細資料在 item_basic 裡面
-            const item = data.item_basic;
-            if (!item) return;
+        await page.setViewport({
+            width: 1366,
+            height: 768
+        });
 
-            // 處理蝦皮的價格放大 10 萬倍問題
-            let itemPrice = null;
-            if (item.price) {
-                itemPrice = item.price / 100000;
+        await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+        );
+
+        let interceptedItems = [];
+
+        page.on('response', async (response) => {
+
+            const responseUrl = response.url();
+
+            if (
+                responseUrl.includes('/api/v4/search/search_items')
+            ) {
+
+                try {
+
+                    const data =
+                        await response.json();
+
+                    if (
+                        data &&
+                        data.items &&
+                        Array.isArray(data.items)
+                    ) {
+
+                        interceptedItems.push(
+                            ...data.items
+                        );
+
+                    }
+
+                } catch(err) {
+
+                    console.log(
+                        '[蝦皮] API解析失敗'
+                    );
+
+                }
+
             }
 
-            results.push({
-                platform: '蝦皮',
-                name: item.name || '蝦皮商品',
-                price: itemPrice ? itemPrice.toLocaleString() : '請至賣場確認',
-                // 蝦皮商品網址: /product/{shopid}/{itemid}
-                url: (item.shopid && item.itemid) ? `https://shopee.tw/product/${item.shopid}/${item.itemid}` : `https://shopee.tw/search?keyword=${encodeURIComponent(keyword)}`
-            });
         });
 
-        console.log(`[蝦皮] 搜尋完成，找到 ${results.length} 筆`);
-        return results;
+        const searchUrl =
+            `https://shopee.tw/search?keyword=${encodeURIComponent(keyword)}&sortBy=sales`;
 
-    } catch (error) {
-        console.error(`蝦皮爬蟲失敗: ${error.message}`);
-        return [{ platform: '蝦皮', name: '錯誤: 取得失敗 (可能被擋)', price: 'N/A', url: 'https://shopee.tw/' }];
+        await page.goto(
+            searchUrl,
+            {
+                waitUntil: 'networkidle2',
+                timeout: 30000
+            }
+        );
+
+        console.log(
+            '[蝦皮] TITLE:',
+            await page.title()
+        );
+
+        console.log(
+            '[蝦皮] URL:',
+            page.url()
+        );
+
+        if (
+            page.url().includes('/verify/')
+        ) {
+
+            console.log(
+                '[蝦皮] 已被驗證頁攔截'
+            );
+
+            return [];
+
+        }
+
+        for(let i=0;i<5;i++){
+
+            await page.evaluate(() => {
+
+                window.scrollBy(
+                    0,
+                    window.innerHeight
+                );
+
+            });
+
+            await new Promise(
+                r => setTimeout(r,1500)
+            );
+
+        }
+
+        if(interceptedItems.length > 0){
+
+            const map =
+                new Map();
+
+            const results = [];
+
+            interceptedItems.forEach(item => {
+
+                if(
+                    map.has(item.itemid)
+                ) return;
+
+                map.set(
+                    item.itemid,
+                    true
+                );
+
+                results.push({
+
+                    platform:'蝦皮',
+
+                    name:
+                        item.name,
+
+                    price:
+                        item.price
+                        ? (
+                            item.price
+                            /100000
+                          ).toLocaleString()
+                        : '未知',
+
+                    url:
+                        `https://shopee.tw/product/${item.shopid}/${item.itemid}`,
+
+                    sales:
+                        item.historical_sold || 0
+
+                });
+
+            });
+
+            console.log(
+                `[蝦皮] API模式成功 ${results.length}筆`
+            );
+
+            return results.slice(0,12);
+
+        }
+
+        // API失敗改抓DOM
+
+        const domResults =
+            await page.evaluate(() => {
+
+                const arr = [];
+
+                const cards =
+                    document.querySelectorAll(
+                        '[data-sqe="item"]'
+                    );
+
+                cards.forEach(card => {
+
+                    const link =
+                        card.querySelector('a');
+
+                    if(!link) return;
+
+                    arr.push({
+
+                        platform:'蝦皮',
+
+                        name:
+                            card.innerText
+                                .split('\n')[0],
+
+                        price:'請查看賣場',
+
+                        url:link.href,
+
+                        sales:0
+
+                    });
+
+                });
+
+                return arr;
+
+            });
+
+        console.log(
+            `[蝦皮] DOM模式成功 ${domResults.length}筆`
+        );
+
+        return domResults.slice(0,12);
+
+    } catch(error) {
+
+        console.error(
+            '[蝦皮] 錯誤:',
+            error.message
+        );
+
+        return [];
+
+    } finally {
+
+        if(browser){
+
+            await browser.close();
+
+        }
+
     }
-}
 
+}
 // 5. PChome 24h 爬蟲
 async function scrapePChome(keyword) {
     try {
@@ -472,6 +661,399 @@ async function scrapeMomo(keyword) {
         return [];
     }
 }
+// 7. 美國 Amazon 爬蟲邏輯 (Puppeteer 終極等待版)
+const results = await page.evaluate(() => {
+
+    const products = [];
+
+    document
+        .querySelectorAll('[data-component-type="s-search-result"]')
+        .forEach(item => {
+
+            const title =
+                item.querySelector('h2 span')
+                    ?.innerText
+                    ?.trim();
+
+            const priceWhole =
+                item.querySelector('.a-price-whole')
+                    ?.innerText
+                    ?.replace(/,/g,'');
+
+            const priceFraction =
+                item.querySelector('.a-price-fraction')
+                    ?.innerText || '00';
+
+            const link =
+                item.querySelector('h2 a')
+                    ?.href;
+
+            if(title && priceWhole){
+
+                products.push({
+
+                    platform:'Amazon',
+
+                    name:title,
+
+                    price:`USD $${priceWhole}.${priceFraction}`,
+
+                    url:link,
+
+                    sales:0
+
+                });
+
+            }
+
+        });
+
+    return products;
+
+});
+// 8. 中國 阿里 1688 爬蟲邏輯 (批發市場底價)
+async function scrape1688(keyword) {
+
+    console.log(
+        `[1688] 搜尋 ${keyword}`
+    );
+
+    let browser;
+
+    try {
+
+        browser =
+            await puppeteer.launch({
+
+                headless:false,
+
+                args:[
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-blink-features=AutomationControlled'
+                ]
+
+            });
+
+        const page =
+            await browser.newPage();
+
+        await page.setViewport({
+            width:1366,
+            height:768
+        });
+
+        await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+        );
+
+        const searchUrl =
+            `https://s.1688.com/selloffer/offer_search.htm?keywords=${encodeURIComponent(keyword)}`;
+
+        await page.goto(
+            searchUrl,
+            {
+                waitUntil:'networkidle2',
+                timeout:30000
+            }
+        );
+
+        console.log(
+            '[1688] TITLE:',
+            await page.title()
+        );
+
+        console.log(
+            '[1688] URL:',
+            page.url()
+        );
+
+        await page.screenshot({
+            path:'1688_debug.png',
+            fullPage:true
+        });
+
+        for(let i=0;i<5;i++){
+
+            await page.evaluate(() => {
+
+                window.scrollBy(
+                    0,
+                    window.innerHeight
+                );
+
+            });
+
+            await new Promise(
+                r=>setTimeout(r,1500)
+            );
+
+        }
+
+        const results =
+            await page.evaluate(() => {
+
+                const products = [];
+
+                const links =
+                    document.querySelectorAll(
+                        'a[href*="offer"]'
+                    );
+
+                links.forEach(link => {
+
+                    const title =
+                        link.innerText
+                            ?.replace(/\s+/g,' ')
+                            ?.trim();
+
+                    const href =
+                        link.href;
+
+                    if(
+                        title &&
+                        title.length > 5
+                    ){
+
+                        products.push({
+
+                            platform:
+                                '阿里1688',
+
+                            name:title,
+
+                            price:
+                                '請查看商品',
+
+                            url:href,
+
+                            sales:0
+
+                        });
+
+                    }
+
+                });
+
+                return products;
+
+            });
+
+        const unique =
+            [...new Map(
+                results.map(
+                    item => [
+                        item.url,
+                        item
+                    ]
+                )
+            ).values()];
+
+        console.log(
+            `[1688] 抓到 ${unique.length} 筆`
+        );
+
+        return unique.slice(0,10);
+
+    }
+    catch(error){
+
+        console.error(
+            '[1688] 錯誤:',
+            error.message
+        );
+
+        return [];
+
+    }
+    finally{
+
+        if(browser){
+
+            await browser.close();
+
+        }
+
+    }
+
+}
+// 9. 美國 Newegg 爬蟲邏輯 (Puppeteer 版 - 3C 硬體權威)
+async function scrapeNewegg(keyword) {
+    console.log(`[Newegg] 啟動隱形瀏覽器搜尋美國硬體: ${keyword}`);
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=en-US']
+        });
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+        const searchUrl = `https://www.newegg.com/p/pl?d=${encodeURIComponent(keyword)}`;
+        await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+
+        const content = await page.content();
+        const $ = cheerio.load(content);
+        let results = [];
+
+        $('.item-cell').each((i, el) => {
+            const name = $(el).find('.item-title').text().trim();
+            const priceWhole = $(el).find('.price-current strong').text().trim();
+            const priceFraction = $(el).find('.price-current sup').text().trim();
+            const link = $(el).find('.item-title').attr('href');
+
+            if (name && priceWhole) {
+                results.push({
+                    platform: 'Newegg (US)',
+                    name: name,
+                    price: `USD $${priceWhole}${priceFraction}`,
+                    url: link,
+                    sales: 0
+                });
+            }
+        });
+
+        console.log(`[Newegg] 搜尋完成，找到 ${results.length} 筆`);
+        return results.slice(0, 10);
+
+    } catch (error) {
+        console.error(`❌ Newegg 爬蟲失敗: ${error.message}`);
+        return [];
+    } finally {
+        if (browser) await browser.close();
+    }
+}
+// 11. 中國 中關村在線 爬蟲邏輯 (Puppeteer 裝甲升級版)
+async function scrapeZOL(keyword) {
+    console.log(`[中關村在線] 啟動隱形瀏覽器檢索中國硬體行情: ${keyword}`);
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+        const url = `https://detail.zol.com.cn/index.php?c=SearchList&keyword=${encodeURIComponent(keyword)}`;
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+
+        // 👇 強制等待商品列表出現
+        await page.waitForSelector('.list-box li', { timeout: 8000 }).catch(() => console.log('[中關村] 等待商品載入超時'));
+
+        const content = await page.content();
+        const $ = cheerio.load(content);
+        let results = [];
+
+        $('.list-box li').each((i, el) => {
+            const name = $(el).find('.pro-intro a').text().trim();
+            const priceText = $(el).find('.price-box .price-now').text().trim();
+            let link = $(el).find('.pro-intro a').attr('href');
+
+            if (name && priceText && !priceText.includes('概念股')) {
+                results.push({
+                    platform: '中關村在線 (CN)',
+                    name: name,
+                    price: `RMB ¥${priceText.replace('￥', '')}`,
+                    url: link ? `https://detail.zol.com.cn${link}` : url,
+                    sales: 0
+                });
+            }
+        });
+
+        console.log(`[中關村在線] 搜尋完成，找到 ${results.length} 筆`);
+        return results.slice(0, 10);
+
+    } catch (error) {
+        console.error(`❌ 中關村在線 爬蟲失敗: ${error.message}`);
+        return [];
+    } finally {
+        if (browser) await browser.close();
+    }
+}// 12. 台灣 Yahoo 購物中心爬蟲邏輯 (特徵錨點抓取法 - 升級版)
+async function scrapeYahoo(keyword) {
+    console.log(`[Yahoo購物] 啟動隱形瀏覽器搜尋: ${keyword}`);
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+        const searchUrl = `https://tw.buy.yahoo.com/search/product?p=${encodeURIComponent(keyword)}`;
+        await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+
+        // 👇 擴大雷達：同時等待 /gdsale/ (一般商品) 與 /activity/ (活動促銷品)
+        await page.waitForSelector('a[href*="/gdsale/"], a[href*="/activity/"]', { timeout: 8000 }).catch(() => console.log('[Yahoo購物] 等待商品載入超時'));
+
+        // 模擬人類往下滾動，多滾幾次確保圖片和價格動態載入完成
+        for(let i = 0; i < 3; i++) {
+            await page.evaluate(() => window.scrollBy(0, 800));
+            await new Promise(r => setTimeout(r, 800));
+        }
+
+        const content = await page.content();
+        const $ = cheerio.load(content);
+        let results = [];
+
+        // 👇 擴大雷達範圍
+        // 👇 替換 scrapeYahoo 裡面的這段 each 迴圈
+        $('a[href*="/gdsale/"], a[href*="/activity/"]').each((i, el) => {
+            const link = $(el).attr('href');
+            
+            // 1. 智慧標題萃取：找出字數最長的 span 當作標題，並濾除垃圾文字
+            let name = '';
+            $(el).find('span, div').each((_, element) => {
+                const text = $(element).text().trim();
+                // 如果這段文字比目前存的長，而且不是系統按鈕文字，就當作標題
+                if (text.length > name.length && !text.includes('比較找相似') && !text.includes('折價券')) {
+                    name = text;
+                }
+            });
+
+            // 再次強制清理可能殘留的開頭文字
+            name = name.replace(/^比較找相似\s*/, '').trim();
+            
+            // 2. 精準價格萃取：尋找金錢符號，並避免抓到怪異的龐大數字
+            const rawText = $(el).text(); 
+            // 尋找 $ 後面跟著數字與逗號的組合
+            const priceMatch = rawText.match(/\$\s*([0-9,]+)/);
+            let price = priceMatch ? priceMatch[1].replace(/,/g, '') : null;
+
+            // 確保標題存在，且價格大於 0 才推入陣列
+            if (name && price && parseInt(price) > 0 && name.length > 5) {
+                results.push({
+                    platform: 'Yahoo購物',
+                    name: name,
+                    price: price,
+                    url: link.startsWith('http') ? link : `https://tw.buy.yahoo.com${link}`,
+                    sales: 0 
+                });
+            }
+        });
+
+        // 去除重複項目
+        const uniqueResults = [];
+        const urls = new Set();
+        for (const item of results) {
+            if (!urls.has(item.url)) {
+                urls.add(item.url);
+                uniqueResults.push(item);
+            }
+        }
+
+        console.log(`[Yahoo購物] 搜尋完成，找到 ${uniqueResults.length} 筆`);
+        return uniqueResults.slice(0, 10);
+
+    } catch (error) {
+        console.error(`❌ Yahoo購物 爬蟲失敗: ${error.message}`);
+        return [];
+    } finally {
+        if (browser) await browser.close();
+    }
+}
 // 總和爬蟲執行函式
 async function performScraping(platform, keyword) {
         let tasks = [];
@@ -481,6 +1063,14 @@ async function performScraping(platform, keyword) {
         if (platform === 'all' || platform === 'pchome') tasks.push(scrapePChome(keyword));
         if (platform === 'all' || platform === 'momo')   tasks.push(scrapeMomo(keyword));
         if (platform === 'all' || platform === 'shopee') tasks.push(scrapeShopee(keyword));
+        if (platform === 'all' || platform === 'amazon') tasks.push(scrapeAmazon(keyword));
+        if (platform === 'all' || platform === '1688')  tasks.push(scrape1688(keyword));
+        if (platform === 'all' || platform === 'newegg') tasks.push(scrapeNewegg(keyword));
+        if (platform === 'all' || platform === 'ebay')   tasks.push(scrapeEbay(keyword));
+        if (platform === 'all' || platform === 'zol')    tasks.push(scrapeZOL(keyword));
+        if (platform === 'all' || platform === 'yahoo') tasks.push(scrapeYahoo(keyword));
+        if (platform === 'all' || platform === 'etmall') tasks.push(scrapeETMall(keyword));
+        
         // 等待所有爬蟲任務完成
         const resultsArray = await Promise.all(tasks);
         // 將二維陣列扁平化為一維陣列
@@ -1201,9 +1791,12 @@ const server = http.createServer(async(req, res) => {
     }// 1. 爬蟲 API 路由
     else if (pathname === '/api/scrape' && req.method === 'GET') {
         setCorsHeaders(res);
-        const keyword = parsedUrl.searchParams.get('keyword');
-        const platform = parsedUrl.searchParams.get('platform') || 'all';
-        const excludeStr = parsedUrl.searchParams.get('exclude') || '';
+        const getParam = (key) => parsedUrl.query ? parsedUrl.query[key] : parsedUrl.searchParams?.get(key);
+        const keyword = getParam('keyword');
+        const platform = getParam('platform') || 'all';
+        const excludeStr = getParam('exclude') || ''; 
+        const includeStr = getParam('include') || ''; 
+        const categoriesStr = getParam('categories') || ''; 
         if (!keyword) {
             res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
             return res.end(JSON.stringify({ success: false, message: "請輸入搜尋關鍵字" }));
@@ -1235,6 +1828,73 @@ const server = http.createServer(async(req, res) => {
             const shopeeData = await scrapeShopee(keyword);
             allResults = allResults.concat(shopeeData);
         }
+        if (platform === 'all' || platform === 'amazon') {
+            const amazonData = await scrapeAmazon(keyword);
+            allResults = allResults.concat(amazonData);
+        }
+        if (platform === 'all' || platform === '1688') {
+            const alibabaData = await scrape1688(keyword);
+            allResults = allResults.concat(alibabaData);
+        }
+        if (platform === 'all' || platform === 'newegg') {
+            const neweggData = await scrapeNewegg(keyword);
+            allResults = allResults.concat(neweggData);
+        }
+        if (platform === 'all' || platform === 'ebay') {
+            const ebayData = await scrapeEbay(keyword);
+            allResults = allResults.concat(ebayData);
+        }
+        if (platform === 'all' || platform === 'zol') {
+            const zolData = await scrapeZOL(keyword);
+            allResults = allResults.concat(zolData);
+        }
+        if (platform === 'all' || platform === 'yahoo') {
+            const yahooData = await scrapeYahoo(keyword);
+            allResults = allResults.concat(yahooData);
+        }
+        if (platform === 'all' || platform === 'etmall') {
+            const etmallData = await scrapeETMall(keyword);
+            allResults = allResults.concat(etmallData);
+        }
+        // ==========================================
+        // 核心邏輯：三向關鍵字過濾器 + 智慧防呆機制
+        // ==========================================
+    
+       // const includeStr = parsedUrl.query.include || '';
+        //const categoriesStr = parsedUrl.query.categories || '';
+
+        const includeWords = includeStr.split(/[\s,]+/).filter(w => w);
+        let excludeWords = excludeStr.split(/[\s,]+/).filter(w => w); 
+        const categoryWords = categoriesStr.split(',').filter(w => w);
+
+        // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾
+        if (/\d[06]\d0/.test(keyword)) {
+            const autoExcludes = ['風扇','Kg','題','衣','包','墊','筆','袋', '水壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼'];
+            autoExcludes.forEach(ex => {
+                if (!excludeWords.includes(ex)) {
+                    excludeWords.push(ex);
+                }
+            });
+            console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞: ${autoExcludes.join(', ')}`);
+        }
+
+        if (includeWords.length > 0 || excludeWords.length > 0 || categoryWords.length > 0) {
+            allResults = allResults.filter(item => {
+                const nameLower = item.name.toLowerCase();
+
+                const isIncludeMatch = includeWords.length === 0 || 
+                    includeWords.every(inc => nameLower.includes(inc.toLowerCase()));
+
+                const isExcludeMatch = excludeWords.length === 0 || 
+                    !excludeWords.some(exc => nameLower.includes(exc.toLowerCase()));
+
+                const isCategoryMatch = categoryWords.length === 0 || 
+                    categoryWords.some(cat => nameLower.includes(cat.toLowerCase()));
+
+                return isIncludeMatch && isExcludeMatch && isCategoryMatch;
+            });
+        }
+        // ==========================================
         if (excludeStr) {
             const excludeWords = excludeStr.split(/[, ]+/).filter(w => w);
             allResults = allResults.filter(item => {
