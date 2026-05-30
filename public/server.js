@@ -184,32 +184,74 @@ async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
 }
 
 // --- 智慧推薦功能實作 ---
-// === 智慧推薦：效能字典與擷取工具 ===
+// ==========================================
+// 1. CPU 效能字典 (2026 最新版)
+// ==========================================
+const CPU_SCORE = {
+    "TRPRO9995WX": 38000, "TRPRO9855WX": 35000, "TR9980X": 32000, "TR9970X": 30000,
+    "W9-3475X": 28000, "W5-2455X": 25000,
+    "RYZEN99950X3D": 29000, "RYZEN99950X": 27500, "RYZEN99900X3D": 26500, 
+    "RYZEN79850X3D": 26000, "RYZEN79800X3D": 25500, "RYZEN99900X": 25000,
+    "ULTRA9285K": 26000, "I9-14900KS": 25000, "I9-14900K": 24000, "I9-14900KF": 23500,
+    "RYZEN97950X3D": 24500, "RYZEN97950X": 23000, "I9-13900K": 22000,
+    "ULTRA7270KPLUS": 21000, "ULTRA7265K": 20000, "ULTRA7265KF": 19500,
+    "RYZEN79700X": 19000, "RYZEN59600X": 18500, 
+    "I7-14700K": 19500, "I7-14700KF": 19000, "I7-14700": 18000, "I7-14700F": 17500,
+    // 補上常見筆電 CPU 分數 (H/HX 結尾)
+    "I7-13620H": 14000, "I9-13900HX": 18000, "I7-13700H": 15000, 
+    "RYZEN77800X3D": 18500, "RYZEN97900X": 18000, "RYZEN77700X": 17000,
+    "I7-13700K": 17000, "I7-13700F": 16000,
+    "ULTRA5250KPLUS": 15000, "ULTRA5250KFPLUS": 14500, 
+    "ULTRA5245K": 14000, "ULTRA5245KF": 13500,
+    "RYZEN59500F": 14000, "RYZEN57500F": 13000, "RYZEN57600X": 13500,
+    "I5-14600K": 14500, "I5-14500": 12500, "I5-14400": 11500, "I5-14400F": 11000,
+    "I5-13600K": 13000, "I5-13500": 11500, "I5-13400F": 10500, "I5-12600K": 11000,
+    "RYZEN75800X3D": 13500, "RYZEN75700X": 11000, "RYZEN55600X": 10000,
+    "ULTRA5235": 9500, "ULTRA5225": 8500, "ULTRA5225F": 8000,
+    "RYZEN78700G": 9000, "RYZEN58600G": 8000, "RYZEN58500G": 7000, "RYZEN58400F": 6500,
+    "I5-12400": 8500, "I5-12400F": 8000,
+    "I3-14100": 7000, "I3-13100": 6000, "I3-12100": 5500,
+    "RYZEN55600GT": 6500, "RYZEN55500X3D": 6000, "RYZEN55500GT": 5500,
+    "RYZEN53400G": 4000,
+    "I9處理器": 15000, "RYZEN9處理器": 15000,
+    "I7處理器": 12000, "RYZEN7處理器": 12000,
+    "I5處理器": 8500,  "RYZEN5處理器": 8500,
+    "I3處理器": 5500,  "RYZEN3處理器": 5500,
+    "UNKNOWN": 2000
+};
+
+// ==========================================
+// 2.擷取工具
+// ==========================================
+function extractCPU(text) {
+    // 新增了 |(?:i[3579]|Ryzen\s*[3579])處理器 來捕捉模糊寫法
+    const cpuRegex = /(i[3579]-\d{4,5}[A-Z]*|Ultra\s*[579]\s*\d{3}[A-Z]*|Ryzen\s*\d\s*\d{4}[A-Z\d]*|R[3579]-\d{4}[A-Z\d]*|TR\s*(PRO\s*)?\d{4}[A-Z]*|(?:i[3579]|Ryzen\s*[3579])處理器)/i;
+    
+    const match = text.match(cpuRegex);
+    if (match) {
+        return match[0].toUpperCase().replace(/\s+/g, '');
+    }
+    return "UNKNOWN";
+}
+
+// ==========================================
+// 3. GPU 效能字典
+// ==========================================
 const GPU_SCORE = {
+    "RTX5090": 40000, "RTX5080": 32000, "RTX5070": 26000, "RTX5060": 16000,
     "RTX4090": 35000, "RTX4080": 28000, "RTX4070TI": 25000, "RTX4070": 20000, 
     "RTX4060TI": 15000, "RTX4060": 12000, "RTX3060": 10000, "RTX3050": 7000,
     "GTX1650": 5000, "UNKNOWN": 1000
 };
 
-const CPU_SCORE = {
-    "I9-14900K": 20000, "I7-14700K": 18000, "I7-13700F": 15000, 
-    "I5-13400F": 10000, "I5-12400F": 8000, "R5-7500F": 9000,
-    "UNKNOWN": 2000
-};
-
-function extractCPU(text) {
-    const cpuRegex = /(i[3579]-\d{4,5}[KFSX]?|R[3579]-\d{4}[GXZ]?|Ryzen\s*\d\s*\d{4})/i;
-    const match = text.match(cpuRegex);
-    return match ? match[1].toUpperCase().replace(/\s+/g, '') : "UNKNOWN";
-}
-
+// ==========================================
+// 4. GPU 擷取工具
+// ==========================================
 function extractGPU(text) {
     const gpuRegex = /(RTX|GTX|RX)\s*-?\s*\d{4}\s*(Ti|SUPER|XT)?/i;
     const match = text.match(gpuRegex);
-    return match ? match[1].toUpperCase().replace(/[\s-]/g, '') : "UNKNOWN";
-};
-
-
+    return match ? match[0].toUpperCase().replace(/[\s-]/g, '') : "UNKNOWN";
+}
 // --- 爬蟲功能實作 ---
 
 // 1. 原價屋爬蟲
@@ -800,19 +842,48 @@ const server = http.createServer(async(req, res) => {
                     return res.end(JSON.stringify({ suggestedPrice: 0, recommendations: [] }));
                 }
 
-                validProducts.sort((a, b) => b.matchScore - a.matchScore);
+                // ==========================================
+                // ⚠️ 升級版排序：先比分數 (高到低)，分數一樣時比價格 (低到高)
+                // ==========================================
+                validProducts.sort((a, b) => {
+                    if (b.matchScore === a.matchScore) {
+                        return a.price - b.price; // 分數平手時，越便宜的排越前面
+                    }
+                    return b.matchScore - a.matchScore; // 分數不同時，分數高的排前面
+                });
                 const top3Recommendations = validProducts.slice(0, 3);
+                // ==========================================
+                // ✨ 補上這段：將所有符合條件的價格排序，並計算出中位數 medianPrice
+                // ==========================================================
+                let prices = validProducts.map(p => p.price).sort((a, b) => a - b);
+                let medianPrice = 0; // 👈 宣告變數，給予預設值 0
 
+                if (prices.length > 4) {
+                    prices.pop();   // 去除最高價
+                    prices.shift(); // 去除最低價
+                }
+
+                if (prices.length > 0) {
+                    let mid = Math.floor(prices.length / 2);
+                    medianPrice = (prices.length % 2 === 0) 
+                        ? (prices[mid - 1] + prices[mid]) / 2 
+                        : prices[mid];
+                }
+                // ==========================================================
+                // 計算完畢，現在可以安全地回傳給前端了！
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
+                return res.end(JSON.stringify({
                     suggestedPrice: Math.round(medianPrice),
                     recommendations: top3Recommendations
                 }));
 
             } catch (error) {
                 console.error("❌ API 推薦處理發生錯誤:", error);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "伺服器內部錯誤" }));
+                // 防呆：確保標頭還沒送出才送 500 錯誤
+                if (!res.headersSent) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: false, message: "伺服器內部錯誤" }));
+                }
             }
         });
     // 4. 取得論壇文章 API (使用 SQLite)
