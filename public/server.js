@@ -710,37 +710,80 @@ const server = http.createServer(async(req, res) => {
         // ⚠️ 這裡非常重要：必須加上 async，因為內部需要 await 爬蟲結果
         req.on('end', async () => { 
             try {
-                const { budget, usage } = JSON.parse(body);
+                // 1. 接收前端傳來的新參數 productType
+                const { budget, usage, productType } = JSON.parse(body);
                 
-                // 根據用途設定搜尋關鍵字
-                const searchKeyword = usage === 'gaming' ? '電競' : '主機';
+                // 2. 根據「商品種類」與「用途」精準設定搜尋關鍵字
+                let searchKeyword = '';
+                if (productType === 'laptop') {
+                    searchKeyword = usage === 'gaming' ? '筆電' : '筆記型電腦';
+                } else if (productType === 'component') {
+                    searchKeyword = usage === 'gaming' ? '顯示卡' : '處理器';
+                } else {
+                    // desktop (主機)
+                    searchKeyword = usage === 'gaming' ? '主機' : '套裝機'; 
+                }
 
-                // 1. 同時並發執行兩個爬蟲 API
-                const [coolpcResults, sinyaResults] = await Promise.all([
+                const [coolpcResults, sinyaResults, pchomeResults, momoResults, yahooResults, rutenResults] = await Promise.all([
                     scrapeCoolpc(searchKeyword),
-                    scrapeSinya(searchKeyword)
+                    scrapeSinya(searchKeyword),
+                    scrapePChome(searchKeyword),
+                    scrapeMomo(searchKeyword),
+                    //scrapeShopee(searchKeyword),
+                    scrapeYahoo(searchKeyword),
+                    scrapeRuten(searchKeyword)
+                    // scrapeAmazon(searchKeyword),
+                    // scrapeNewegg(searchKeyword),
+                    // scrapeEbay(searchKeyword),
+                    // scrape1688(searchKeyword),
+                    // scrapeZOL(searchKeyword)
                 ]);
-
-                let allProducts = [...coolpcResults, ...sinyaResults];
+// 2. 將所有通路的資料全部大融合
+                let allProducts = [
+                    ...coolpcResults, 
+                    ...sinyaResults, 
+                    ...(pchomeResults || []), 
+                    ...(momoResults || []), 
+                    ...(yahooResults || []), 
+                    ...(rutenResults || [])
+                ];
+                
                 let validProducts = [];
 
-                // 2. 資料清洗與算分
+                // 3. 資料清洗與彈性防呆
                 for (let item of allProducts) {
                     let cleanPrice = parseInt(item.price.toString().replace(/[^\d]/g, ''), 10);
                     
-                    // 濾除無效價格與超出預算的商品
-                    if (isNaN(cleanPrice) || cleanPrice === 0 || cleanPrice > budget || cleanPrice < 3000) {
+                    // 提高最低價格門檻：筆電/主機低於 5000 元通常是配件或垃圾
+                    const minPrice = productType === 'component' ? 500 : 5000;
+                    if (isNaN(cleanPrice) || cleanPrice === 0 || cleanPrice > budget || cleanPrice < minPrice) {
                         continue; 
                     }
 
                     let cpu = extractCPU(item.name);
                     let gpu = extractGPU(item.name);
+                    
+                    // 🛡️ 彈性防呆：
+                    // 如果是買「零件」，嚴格要求必須要有 CPU 或 GPU。
+                    // 如果是買「整機/筆電」，只要價格大於 5000 (前面已過濾)，就算標題沒寫 CPU/GPU 也放行，避免誤殺合法文書機！
+                    if (productType === 'component' && cpu === "UNKNOWN" && gpu === "UNKNOWN") {
+                        continue; 
+                    }
+
                     let cpuScore = CPU_SCORE[cpu] || CPU_SCORE["UNKNOWN"];
                     let gpuScore = GPU_SCORE[gpu] || GPU_SCORE["UNKNOWN"];
 
-                    let matchScore = usage === 'gaming' 
-                        ? (gpuScore * 0.75) + (cpuScore * 0.25) 
-                        : (cpuScore * 0.80) + (gpuScore * 0.20);
+                    // 4. 動態計分邏輯
+                    let matchScore = 0;
+                    if (productType === 'component') {
+                        // 如果單買零件，因為不可能同時有 CPU 和 GPU，所以取最高分作為該零件的絕對分數
+                        matchScore = Math.max(cpuScore, gpuScore); 
+                    } else {
+                        // 整機/筆電的加權計分
+                        matchScore = usage === 'gaming' 
+                            ? (gpuScore * 0.75) + (cpuScore * 0.25) 
+                            : (cpuScore * 0.80) + (gpuScore * 0.20);
+                    }
 
                     validProducts.push({
                         title: item.name,
@@ -751,31 +794,15 @@ const server = http.createServer(async(req, res) => {
                     });
                 }
 
-                // 如果爬完完全沒符合預算的資料
+                // 如果過濾完沒有東西了
                 if (validProducts.length === 0) {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     return res.end(JSON.stringify({ suggestedPrice: 0, recommendations: [] }));
                 }
 
-                // 3. 排序並取得 Top 3
                 validProducts.sort((a, b) => b.matchScore - a.matchScore);
                 const top3Recommendations = validProducts.slice(0, 3);
 
-                // 4. 計算中位數 (去極值)
-                let prices = validProducts.map(p => p.price).sort((a, b) => a - b);
-                let medianPrice = 0;
-                
-                if (prices.length > 4) {
-                    prices.pop(); // 去最高價
-                    prices.shift(); // 去最低價
-                }
-                
-                let mid = Math.floor(prices.length / 2);
-                medianPrice = (prices.length % 2 === 0) 
-                    ? (prices[mid - 1] + prices[mid]) / 2 
-                    : prices[mid];
-
-                // 5. 成功回傳 JSON 給前端
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
                     suggestedPrice: Math.round(medianPrice),
@@ -1418,17 +1445,9 @@ const server = http.createServer(async(req, res) => {
             const momoData = await scrapeMomo(keyword);
             allResults = allResults.concat(momoData);
         }
-        if (platform === 'all' || platform === 'shopee') {
-            const shopeeData = await scrapeShopee(keyword);
-            allResults = allResults.concat(shopeeData);
-        }
         if (platform === 'all' || platform === 'amazon') {
             const amazonData = await scrapeAmazon(keyword);
             allResults = allResults.concat(amazonData);
-        }
-        if (platform === 'all' || platform === '1688') {
-            const alibabaData = await scrape1688(keyword);
-            allResults = allResults.concat(alibabaData);
         }
         if (platform === 'all' || platform === 'newegg') {
             const neweggData = await scrapeNewegg(keyword);
@@ -1445,10 +1464,6 @@ const server = http.createServer(async(req, res) => {
         if (platform === 'all' || platform === 'yahoo') {
             const yahooData = await scrapeYahoo(keyword);
             allResults = allResults.concat(yahooData);
-        }
-        if (platform === 'all' || platform === 'etmall') {
-            const etmallData = await scrapeETMall(keyword);
-            allResults = allResults.concat(etmallData);
         }
         // ==========================================
         // 核心邏輯：三向關鍵字過濾器 + 智慧防呆機制

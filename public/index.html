@@ -237,6 +237,14 @@
             <div class="card">
                 <h3>智慧配置推薦</h3>
                 <div class="form-group">
+                    <div class="form-group">
+                    <label>商品種類</label>
+                    <select id="productType">
+                        <option value="desktop">套裝主機 (Desktop)</option>
+                        <option value="laptop">筆記型電腦 (Laptop)</option>
+                        <option value="component">核心零件 (CPU/顯卡)</option>
+                    </select>
+                </div>
                     <label>預算範圍 (NTD)</label>
                     <input type="number" id="budget" placeholder="例如: 20000">
                 </div>
@@ -292,20 +300,21 @@
             async function runRecommend() {
             const budget = document.getElementById('budget').value;
             const usage = document.getElementById('usage').value;
+            const productType = document.getElementById('productType').value; // 新增抓取商品種類
 
             if(!budget) return alert('請輸入預算');
 
             const res = document.getElementById('result-display');
             
             try {
-                // 1. 顯示 Loading 狀態 (給予使用者系統正在運作的反饋)
                 res.style.display = 'block';
                 res.innerHTML = '<p style="text-align: center; color: #666;">🔍 系統正在為您即時爬取與分析最新行情，請稍候...</p>';
 
                 const response = await fetch('/api/recommend', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ budget: parseInt(budget), usage: usage })
+                    // 把 productType 也包進 JSON 傳給後端
+                    body: JSON.stringify({ budget: parseInt(budget), usage: usage, productType: productType }) 
                 });
 
                 if (!response.ok) throw new Error('API 回應錯誤');
@@ -317,11 +326,6 @@
                 let htmlContent = `
                     <h3 style="color: #2c3e50; margin-top: 0; font-size: 1.1rem;">🎯 系統即時分析結果</h3>
                     
-                    <div style="background: #e8f4f8; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #3498db;">
-                        <strong>💡 合理定價基準：</strong><br>
-                        根據即時抓取行情，此預算合理入手價中位數約為 <strong style="color: #e74c3c; font-size: 1.2em;">$${result.suggestedPrice.toLocaleString()}</strong> 元
-                    </div>
-
                     <strong>🏆 最佳推薦主機 (Top 3)：</strong>
                     <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
                 `;
