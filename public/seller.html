@@ -5,30 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>賣家中心 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
-    <style>
-        .container { max-width: 980px; margin: 2rem auto; padding: 0 20px; display: grid; grid-template-columns: 1.4fr 0.9fr; gap: 24px; }
-        .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); }
-        h2 { margin: 0 0 18px; color: var(--primary-color); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .form-group { margin-bottom: 14px; }
-        .form-group.full { grid-column: 1 / -1; }
-        label { display: block; margin-bottom: 6px; color: #4b5563; font-weight: 700; font-size: 0.9rem; }
-        input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font: inherit; }
-        textarea { min-height: 120px; resize: vertical; }
-        .check-row { display: flex; align-items: center; gap: 8px; color: #4b5563; }
-        .check-row input { width: auto; }
-        .btn { width: 100%; padding: 12px; border: 0; border-radius: 6px; color: white; background: var(--secondary-color); font-weight: 700; cursor: pointer; }
-        .btn:hover { background: #2980b9; }
-        .preview-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: #eef2f7; border: 1px solid #e5e7eb; }
-        .preview-title { margin: 12px 0 6px; font-size: 1.2rem; font-weight: 800; color: #1f2937; }
-        .preview-price { color: var(--accent-color); font-size: 1.4rem; font-weight: 800; }
-        .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        .tag { background: #eef6ff; color: #2563eb; padding: 4px 8px; border-radius: 999px; font-size: 0.82rem; font-weight: 700; }
-        .seller-subnav { grid-column: 1 / -1; display: flex; gap: 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; box-shadow: 0 4px 14px rgba(15,23,42,0.05); }
-        .seller-subnav a { text-decoration: none; color: #475467; font-weight: 800; padding: 9px 14px; border-radius: 6px; }
-        .seller-subnav a.active, .seller-subnav a:hover { background: var(--secondary-color); color: #fff; }
-        @media (max-width: 820px) { .container { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
-    </style>
 </head>
 <body>
     <header>
@@ -39,15 +15,14 @@
                 <button class="search-btn" onclick="triggerSearch()">搜尋</button>
             </div>
             <div class="header-actions">
-                <a href="/cart" class="cart-link" title="購物車">購物車 <span id="cart-count" class="cart-count">0</span></a>
+                <a href="/cart" class="cart-link" title="購物車">購物車<span id="cart-count" class="cart-count">0</span></a>
                 <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
                 <div id="user-profile">
                     <div class="avatar">U</div>
-                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
+                    <span id="user-display-name" style="color:white;font-size:.95rem;">載入中...</span>
                     <div class="dropdown-menu">
                         <a href="/account.html">我的帳戶</a>
-                        <a href="/products.html">我的商品</a>
-                        <a href="/transactions">我的交易</a>
+                        <a href="/transactions">購買清單</a>
                         <a href="#" onclick="logout()">登出</a>
                     </div>
                 </div>
@@ -63,139 +38,245 @@
         </nav>
     </header>
 
-    <main class="container">
-        <div class="seller-subnav">
-            <a href="/seller" class="active">新增商品</a>
-            <a href="/products.html">我的商品</a>
-            <a href="/transactions">我的交易</a>
-        </div>
-        <section class="panel">
-            <h2 id="page-title">新增商品</h2>
-            <form id="seller-form" onsubmit="submitProduct(event)">
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label for="product-title">商品名稱</label>
-                        <input type="text" id="product-title" placeholder="例如 RTX 3060 12G 顯示卡" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-category">分類</label>
-                        <select id="product-category" required>
-                            <option value="gpu">顯示卡 GPU</option>
-                            <option value="cpu">處理器 CPU</option>
-                            <option value="mb">主機板 MB</option>
-                            <option value="ram">記憶體 RAM</option>
-                            <option value="cooler">散熱</option>
-                            <option value="ssd">固態硬碟 SSD</option>
-                            <option value="hdd">傳統硬碟 HDD</option>
-                            <option value="case">機殼 Case</option>
-                            <option value="psu">電源供應器 PSU</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-price">價格 NTD</label>
-                        <input type="number" id="product-price" min="1" placeholder="例如 4500" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-condition">商品狀況</label>
-                        <select id="product-condition">
-                            <option value="new">全新未拆</option>
-                            <option value="excellent">近全新</option>
-                            <option value="good" selected>正常使用</option>
-                            <option value="used">有使用痕跡</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-location">廠家名稱</label>
-                        <input type="text" id="product-location" placeholder="例如 ASUS / GIGABYTE / MSI">
-                    </div>
-                    <div class="form-group">
-                        <label for="product-usage">推薦用途</label>
-                        <select id="product-usage">
-                            <option value="遊戲">遊戲</option>
-                            <option value="文書">文書</option>
-                            <option value="剪輯">剪輯</option>
-                            <option value="收藏/備品">收藏/備品</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-quantity">數量</label>
-                        <input type="number" id="product-quantity" min="1" value="1" placeholder="例如 1">
-                    </div>
-                    <div class="form-group full" id="product-benchmark-group">
-                        <label for="product-benchmark-log">跑分軟體檢測</label>
-                        <div style="display:flex; gap:8px; align-items:flex-start;">
-                            <textarea id="product-benchmark-log" placeholder="請貼上 OCCT log 內容" rows="5" style="flex:1"></textarea>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <button id="parse-benchmark-btn" type="button" class="btn" style="padding:8px 12px; height:40px;">解析 log</button>
-                                <a href="/benchmark-instructions.html" target="_blank" style="display:inline-block; padding:8px 12px; background:#eef6ff; color:#2563eb; border-radius:6px; text-decoration:none; text-align:center;">跑分軟體使用方法</a>
-                            </div>
-                        </div>
-                        <div id="benchmark-parse-result" style="margin-top:8px; color:#0f172a; font-weight:700; white-space: pre-wrap;"></div>
-                        <div style="margin-top:8px; display:grid; gap:8px; grid-template-columns:repeat(2,minmax(0,1fr));">
-                            <div>
-                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">1 threads, SSE</label>
-                                <input id="product-benchmark-cpu-t1-sse" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
-                            </div>
-                            <div>
-                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">12 threads, SSE</label>
-                                <input id="product-benchmark-cpu-t12-sse" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
-                            </div>
-                            <div>
-                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">1 threads, AVX</label>
-                                <input id="product-benchmark-cpu-t1-avx" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
-                            </div>
-                            <div>
-                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">12 threads, AVX</label>
-                                <input id="product-benchmark-cpu-t12-avx" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
-                            </div>
-                        </div>
-                        <input type="hidden" id="product-benchmark-read" />
-                        <input type="hidden" id="product-benchmark-write" />
-                        <input type="hidden" id="product-benchmark-combined" />
-                        <input type="hidden" id="product-benchmark-score" />
-                    </div>
-                    <div class="form-group full">
-                        <label for="product-image">商品圖片網址</label>
-                        <input type="url" id="product-image" placeholder="https://...jpg" oninput="updatePreview()">
-                    </div>
-                    <div class="form-group full">
-                        <label for="product-desc">商品描述</label>
-                        <textarea id="product-desc" placeholder="說明使用時間、保固、測試狀況、配件..." required></textarea>
-                    </div>
-                </div>
-                <button type="submit" id="submit-btn" class="btn">送出商品</button>
-            </form>
-        </section>
+    <main class="nmd-page nmd-page-wide seller-center-page">
+        <div class="seller-layout">
+            <aside class="nmd-card nmd-card-pad seller-sidebar">
+                <h2>賣家中心</h2>
+                <a href="#seller-dashboard" class="seller-side-link active">賣家首頁</a>
+                <a href="/transactions?role=seller" class="seller-side-link">我的銷售</a>
+                <a href="/products.html" class="seller-side-link">我的商品</a>
+                <a href="#product-form-section" class="seller-side-link" onclick="scrollToProductForm(event)">新增商品</a>
+                <a href="/scrape" class="seller-side-link">市價查詢</a>
+                <a href="/#recommend" class="seller-side-link">智慧推薦</a>
+                <a href="/forum" class="seller-side-link">討論區</a>
+            </aside>
 
-        <aside class="panel">
-            <h2>商品預覽</h2>
-            <img id="preview-image" class="preview-image" alt="商品預覽">
-            <div class="preview-title" id="preview-title">商品名稱</div>
-            <div class="preview-price" id="preview-price">NT$ 0</div>
-            <p id="preview-desc" style="color:#667085; line-height:1.6;">商品描述會顯示在這裡。</p>
-            <div class="meta">
-                <span class="tag" id="preview-condition">正常使用</span>
-                <span class="tag" id="preview-location">廠家名稱</span>
-                <span class="tag" id="preview-usage">遊戲</span>
-                <span class="tag" id="preview-benchmark">未提供分數</span>
-                <span class="tag" id="preview-benchmark-read">R:-</span>
-                <span class="tag" id="preview-benchmark-write">W:-</span>
-                <span class="tag" id="preview-benchmark-combined">C:-</span>
-                <span class="tag" id="preview-benchmark-raw">未提供 log</span>
-                <span class="tag">已驗證零件</span>
+            <div class="seller-main">
+                <section id="seller-dashboard" class="seller-dashboard">
+                    <div class="nmd-hero seller-hero">
+                        <div>
+                            <p class="seller-eyebrow">NMDWSM SELLER CENTER</p>
+                            <h1>賣家中心</h1>
+                            <p>掌握訂單、商品與營運數據，並用跑分 log 補強二手零件可信度。</p>
+                        </div>
+                        <button class="nmd-btn" type="button" onclick="scrollToProductForm()">新增商品</button>
+                    </div>
+
+                    <div class="seller-metric-grid">
+                        <article class="nmd-card nmd-card-pad seller-metric">
+                            <span>待處理訂單</span>
+                            <strong id="metric-pending-orders">0</strong>
+                        </article>
+                        <article class="nmd-card nmd-card-pad seller-metric">
+                            <span>已完成訂單</span>
+                            <strong id="metric-completed-orders">0</strong>
+                        </article>
+                        <article class="nmd-card nmd-card-pad seller-metric">
+                            <span>取消訂單</span>
+                            <strong id="metric-cancelled-orders">0</strong>
+                        </article>
+                        <article class="nmd-card nmd-card-pad seller-metric">
+                            <span>上架中商品</span>
+                            <strong id="metric-active-products">0</strong>
+                        </article>
+                    </div>
+
+                    <div class="seller-dashboard-two">
+                        <section class="nmd-card nmd-card-pad">
+                            <div class="seller-section-head">
+                                <div>
+                                    <h2>近期銷售</h2>
+                                    <p class="nmd-muted">買家送出訂單後，會顯示在這裡供賣家展示流程。</p>
+                                </div>
+                                <a class="nmd-btn secondary" href="/transactions?role=seller">查看全部</a>
+                            </div>
+                            <div id="recent-sales-list" class="seller-list">
+                                <div class="nmd-empty">目前沒有交易紀錄，買家下單後會顯示在這裡。</div>
+                            </div>
+                        </section>
+
+                        <aside class="seller-right-column">
+                            <section class="nmd-card nmd-card-pad seller-performance-card">
+                                <h2>營運表現</h2>
+                                <strong id="performance-label">良好</strong>
+                                <p id="performance-desc">商品與交易資料正常，適合展示賣家後台流程。</p>
+                            </section>
+
+                            <section class="nmd-card nmd-card-pad">
+                                <h2>推薦給您</h2>
+                                <div class="seller-tip">補上清楚商品圖片，能讓二手零件更容易被買家信任。</div>
+                                <div class="seller-tip">描述中加入使用時間、保固狀況與配件內容，demo 時更完整。</div>
+                                <div class="seller-tip">CPU / RAM 可貼上 OCCT log，讓跑分資訊跟商品一起展示。</div>
+                            </section>
+
+                            <section class="nmd-card nmd-card-pad">
+                                <h2>平台公告</h2>
+                                <p class="nmd-muted">本平台為專題展示用交易流程，不含真實金流、物流與客服聊天。</p>
+                            </section>
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="product-form-section" class="seller-form-section">
+                    <div class="nmd-hero seller-form-title">
+                        <div>
+                            <h1 id="page-title">新增 / 編輯商品</h1>
+                            <p>商品表單與即時預覽並排，方便賣家檢查上架資訊與跑分資料。</p>
+                        </div>
+                    </div>
+
+                    <div class="seller-form-layout">
+                        <section class="nmd-card nmd-card-pad">
+                            <form id="seller-form" onsubmit="submitProduct(event)">
+                                <div class="nmd-form-grid">
+                                    <div class="nmd-full">
+                                        <label class="nmd-label" for="product-title">商品名稱</label>
+                                        <input class="nmd-field" type="text" id="product-title" placeholder="例如 RTX 3060 12G 顯示卡" required>
+                                    </div>
+
+                                    <div>
+                                        <label class="nmd-label" for="product-category">分類</label>
+                                        <select class="nmd-field" id="product-category" required>
+                                            <option value="gpu">顯示卡 GPU</option>
+                                            <option value="cpu">處理器 CPU</option>
+                                            <option value="mb">主機板 MB</option>
+                                            <option value="ram">記憶體 RAM</option>
+                                            <option value="cooler">散熱</option>
+                                            <option value="ssd">固態硬碟 SSD</option>
+                                            <option value="hdd">傳統硬碟 HDD</option>
+                                            <option value="case">機殼 Case</option>
+                                            <option value="psu">電源供應器 PSU</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="nmd-label" for="product-price">價格 NTD</label>
+                                        <input class="nmd-field" type="number" id="product-price" min="1" placeholder="例如 4500" required>
+                                    </div>
+
+                                    <div>
+                                        <label class="nmd-label" for="product-condition">商品狀況</label>
+                                        <select class="nmd-field" id="product-condition">
+                                            <option value="new">全新未拆</option>
+                                            <option value="excellent">九成新</option>
+                                            <option value="good" selected>正常使用</option>
+                                            <option value="used">二手零件</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="nmd-label" for="product-location">廠商 / 品牌</label>
+                                        <input class="nmd-field" type="text" id="product-location" placeholder="例如 ASUS / GIGABYTE / MSI">
+                                    </div>
+
+                                    <div>
+                                        <label class="nmd-label" for="product-usage">推薦用途</label>
+                                        <select class="nmd-field" id="product-usage">
+                                            <option value="遊戲">遊戲</option>
+                                            <option value="剪輯">剪輯</option>
+                                            <option value="文書">文書</option>
+                                            <option value="直播 / 創作">直播 / 創作</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="nmd-label" for="product-quantity">數量</label>
+                                        <input class="nmd-field" type="number" id="product-quantity" min="1" value="1" placeholder="例如 1">
+                                    </div>
+
+                                    <div class="nmd-full benchmark-card" id="product-benchmark-group">
+                                        <div class="benchmark-head">
+                                            <div>
+                                                <label class="nmd-label" for="product-benchmark-log">跑分軟體檢測</label>
+                                                <p>可貼上 OCCT log，系統會協助解析展示用跑分資訊。</p>
+                                            </div>
+                                            <a class="nmd-btn secondary benchmark-help" href="/benchmark-instructions.html" target="_blank">跑分軟體使用方法</a>
+                                        </div>
+
+                                        <div class="benchmark-input-row">
+                                            <textarea class="nmd-field" id="product-benchmark-log" placeholder="請貼上 OCCT log 內容" rows="6"></textarea>
+                                            <button id="parse-benchmark-btn" type="button" class="nmd-btn">解析 log</button>
+                                        </div>
+
+                                        <div id="benchmark-parse-result" class="benchmark-result" aria-live="polite"></div>
+
+                                        <div class="benchmark-cpu-grid">
+                                            <div>
+                                                <label class="nmd-label" for="product-benchmark-cpu-t1-sse">1 threads, SSE</label>
+                                                <input class="nmd-field" id="product-benchmark-cpu-t1-sse" readonly>
+                                            </div>
+                                            <div>
+                                                <label class="nmd-label" for="product-benchmark-cpu-t12-sse">12 threads, SSE</label>
+                                                <input class="nmd-field" id="product-benchmark-cpu-t12-sse" readonly>
+                                            </div>
+                                            <div>
+                                                <label class="nmd-label" for="product-benchmark-cpu-t1-avx">1 threads, AVX</label>
+                                                <input class="nmd-field" id="product-benchmark-cpu-t1-avx" readonly>
+                                            </div>
+                                            <div>
+                                                <label class="nmd-label" for="product-benchmark-cpu-t12-avx">12 threads, AVX</label>
+                                                <input class="nmd-field" id="product-benchmark-cpu-t12-avx" readonly>
+                                            </div>
+                                        </div>
+
+                                        <input type="hidden" id="product-benchmark-read">
+                                        <input type="hidden" id="product-benchmark-write">
+                                        <input type="hidden" id="product-benchmark-combined">
+                                        <input type="hidden" id="product-benchmark-score">
+                                    </div>
+
+                                    <div class="nmd-full">
+                                        <label class="nmd-label" for="product-image">商品圖片網址</label>
+                                        <input class="nmd-field" type="url" id="product-image" placeholder="https://...jpg" oninput="updatePreview()">
+                                    </div>
+
+                                    <div class="nmd-full">
+                                        <label class="nmd-label" for="product-desc">商品描述</label>
+                                        <textarea class="nmd-field" id="product-desc" placeholder="請描述使用時間、配件、外觀狀況、保固與交易建議..." required></textarea>
+                                    </div>
+                                </div>
+
+                                <button type="submit" id="submit-btn" class="nmd-btn seller-submit-btn">送出商品</button>
+                            </form>
+                        </section>
+
+                        <aside class="nmd-card nmd-card-pad seller-preview-card">
+                            <h2>商品預覽</h2>
+                            <img id="preview-image" class="seller-preview-image" alt="商品預覽">
+                            <h3 class="seller-preview-title" id="preview-title">商品名稱</h3>
+                            <div class="nmd-price seller-preview-price" id="preview-price">NT$ 0</div>
+                            <p id="preview-desc" class="nmd-muted">商品描述會顯示在這裡。</p>
+                            <div class="nmd-pills">
+                                <span class="nmd-pill" id="preview-condition">正常使用</span>
+                                <span class="nmd-pill" id="preview-category">顯示卡 GPU</span>
+                                <span class="nmd-pill" id="preview-location">廠商品牌</span>
+                                <span class="nmd-pill" id="preview-usage">遊戲</span>
+                                <span class="nmd-pill" id="preview-benchmark">未提供分數</span>
+                                <span class="nmd-pill" id="preview-benchmark-read">R:-</span>
+                                <span class="nmd-pill" id="preview-benchmark-write">W:-</span>
+                                <span class="nmd-pill" id="preview-benchmark-combined">C:-</span>
+                                <span class="nmd-pill gray" id="preview-benchmark-raw">未提供 log</span>
+                                <span class="nmd-pill success">已驗證零件</span>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
             </div>
-        </aside>
+        </div>
     </main>
 
     <script>
         const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
         let editingProductId = null;
 
-        function getApiUrl(path) { return `${API_BASE}${path}`; }
+        function getApiUrl(path) {
+            return `${API_BASE}${path}`;
+        }
 
         window.onload = async function() {
             const loggedInUser = localStorage.getItem('userEmail');
             const userName = localStorage.getItem('userName');
+
             if (!loggedInUser) {
                 alert('請先登入後再使用賣家中心');
                 window.location.href = '/login';
@@ -205,59 +286,140 @@
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('user-profile').style.display = 'flex';
             document.getElementById('user-display-name').innerText = userName || loggedInUser.split('@')[0];
-            updateCartCount();
+
             bindPreview();
             updateBenchmarkVisibility();
+            updatePreview();
 
             const id = new URLSearchParams(window.location.search).get('id');
-            if (id) await loadProduct(id);
-            updatePreview();
+            if (id) {
+                await loadProduct(id);
+                scrollToProductForm();
+            }
+
+            await Promise.all([
+                updateCartCount(),
+                loadSellerDashboard(loggedInUser)
+            ]);
         };
 
         function bindPreview() {
-            ['product-title', 'product-price', 'product-desc', 'product-condition', 'product-location', 'product-usage'].forEach(id => {
-                document.getElementById(id).addEventListener('input', updatePreview);
-                document.getElementById(id).addEventListener('change', updatePreview);
+            ['product-title', 'product-price', 'product-desc', 'product-condition', 'product-location', 'product-usage', 'product-quantity'].forEach(id => {
+                const el = document.getElementById(id);
+                el.addEventListener('input', updatePreview);
+                el.addEventListener('change', updatePreview);
             });
+
             document.getElementById('product-category').addEventListener('change', () => {
                 updateBenchmarkVisibility();
+                updateParsedBenchmark();
+                updatePreview();
             });
+
             const logEl = document.getElementById('product-benchmark-log');
-            if (logEl) {
-                document.getElementById('parse-benchmark-btn').addEventListener('click', () => {
+            document.getElementById('parse-benchmark-btn').addEventListener('click', updateParsedBenchmark);
+            logEl.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+                    event.preventDefault();
                     updateParsedBenchmark();
-                });
-                logEl.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey || e.shiftKey) === false) {
-                        e.preventDefault();
-                        updateParsedBenchmark();
-                    }
-                });
-                logEl.addEventListener('input', () => {
-                    // clear result when user edits
-                    document.getElementById('benchmark-parse-result').innerText = '';
-                });
-            }
+                }
+            });
+            logEl.addEventListener('input', () => {
+                setBenchmarkMessage('');
+                updatePreview();
+            });
+        }
+
+        function scrollToProductForm(event) {
+            if (event) event.preventDefault();
+            document.getElementById('product-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function updateBenchmarkVisibility() {
             const category = document.getElementById('product-category').value.toLowerCase();
             const benchmarkGroup = document.getElementById('product-benchmark-group');
             if (!benchmarkGroup) return;
-            // 僅在 CPU 或 RAM 分類顯示跑分軟體檢測欄位
+            // 僅在 CPU 或 RAM 分類顯示跑分軟體檢測欄位，避免其他商品被過度干擾。
             benchmarkGroup.style.display = (category === 'cpu' || category === 'ram') ? '' : 'none';
+        }
+
+        async function loadSellerDashboard(userEmail) {
+            try {
+                const [productsRes, salesRes] = await Promise.all([
+                    fetch(getApiUrl(`/api/products?seller=${encodeURIComponent(userEmail)}`)),
+                    fetch(getApiUrl(`/api/transactions?role=seller&userEmail=${encodeURIComponent(userEmail)}`))
+                ]);
+
+                const products = productsRes.ok ? await productsRes.json() : [];
+                const salesResult = salesRes.ok ? await salesRes.json() : { success: false, data: [] };
+                const sales = salesResult.success ? salesResult.data : [];
+                const activeProducts = products.filter(product => (product.status || 'active') === 'active');
+
+                document.getElementById('metric-pending-orders').innerText = sales.filter(item => item.status === 'pending' || item.status === 'contacting').length;
+                document.getElementById('metric-completed-orders').innerText = sales.filter(item => item.status === 'completed').length;
+                document.getElementById('metric-cancelled-orders').innerText = sales.filter(item => item.status === 'cancelled').length;
+                document.getElementById('metric-active-products').innerText = activeProducts.length;
+
+                renderRecentSales(sales);
+                updatePerformance(products, sales);
+            } catch (error) {
+                console.error('讀取賣家中心資料失敗:', error);
+            }
+        }
+
+        function renderRecentSales(sales) {
+            const list = document.getElementById('recent-sales-list');
+            const visibleSales = [...sales].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 3);
+
+            if (!visibleSales.length) {
+                list.innerHTML = '<div class="nmd-empty">目前沒有交易紀錄，買家下單後會顯示在這裡。</div>';
+                return;
+            }
+
+            list.innerHTML = visibleSales.map(item => `
+                <article class="seller-sale-row">
+                    <img class="nmd-thumb" src="${escapeHtml(item.image || placeholderImage())}" alt="${escapeHtml(item.title || '商品圖片')}">
+                    <div>
+                        <strong>${escapeHtml(item.title || '未命名商品')}</strong>
+                        <span>買家：${escapeHtml(item.buyer || '買家')}</span>
+                    </div>
+                    <strong class="nmd-price">NT$ ${formatPrice(item.price)}</strong>
+                    <span class="nmd-pill ${statusClass(item.status)}">${statusLabel(item.status)}</span>
+                    <a class="nmd-btn secondary" href="/product?id=${encodeURIComponent(item.productId)}">查看</a>
+                </article>
+            `).join('');
+        }
+
+        function updatePerformance(products, sales) {
+            const label = document.getElementById('performance-label');
+            const desc = document.getElementById('performance-desc');
+            const hasProducts = products.length > 0;
+            const hasSales = sales.length > 0;
+
+            if (hasProducts && hasSales) {
+                label.innerText = '良好';
+                desc.innerText = '商品與交易資料正常，適合展示完整賣家後台流程。';
+            } else if (hasProducts) {
+                label.innerText = '可優化';
+                desc.innerText = '目前已有商品資料，可以補上更多描述、圖片與跑分資訊。';
+            } else {
+                label.innerText = '待建立';
+                desc.innerText = '先新增一筆商品，賣家中心就能開始累積展示資料。';
+            }
         }
 
         async function loadProduct(id) {
             editingProductId = id;
             document.getElementById('page-title').innerText = '編輯商品';
             document.getElementById('submit-btn').innerText = '儲存修改';
+
             const res = await fetch(getApiUrl(`/api/products/${id}`));
             if (!res.ok) {
                 alert('找不到商品');
                 window.location.href = '/products.html';
                 return;
             }
+
             const product = await res.json();
             document.getElementById('product-title').value = product.title || '';
             document.getElementById('product-category').value = (product.category || 'gpu').toLowerCase();
@@ -273,42 +435,35 @@
             document.getElementById('product-location').value = product.location || '';
             document.getElementById('product-usage').value = product.usageTag || '遊戲';
             document.getElementById('product-quantity').value = product.quantity || 1;
-            updatePreview();
+
+            updateBenchmarkVisibility();
             updateParsedBenchmark();
+            updatePreview();
         }
 
         function updateParsedBenchmark() {
-            const log = document.getElementById('product-benchmark-log')?.value || '';
+            const log = document.getElementById('product-benchmark-log').value || '';
             const category = document.getElementById('product-category').value.toLowerCase();
-            const scores = parseBenchmarkScore(log, category) || { read: null, write: null, combined: null, best: null, mismatch: false };
-            const resultEl = document.getElementById('benchmark-parse-result');
+            const scores = parseBenchmarkScore(log, category);
 
             if (scores.mismatch) {
-                resultEl.innerText = '警告：貼上的 log 與所選分類不符，請確認後再貼上正確的跑分 log。';
+                setBenchmarkMessage('警告：貼上的 log 與所選分類不符，請確認後再貼上正確的跑分 log。', 'warning');
             } else if (scores.read || scores.write || scores.combined || scores.best || scores.cpu_t1_sse) {
-                // 根據類別顯示不同的解析結果
-                if (category === 'cpu') {
-                    const a = scores.cpu_t1_sse != null ? scores.cpu_t1_sse : '-';
-                    const b = scores.cpu_t12_sse != null ? scores.cpu_t12_sse : '-';
-                    const c = scores.cpu_t1_avx != null ? scores.cpu_t1_avx : '-';
-                    const d = scores.cpu_t12_avx != null ? scores.cpu_t12_avx : '-';
-                    resultEl.innerText = `1 threads, SSE : ${a}\n12 threads, SSE : ${b}\n1 threads, AVX : ${c}\n12 threads, AVX : ${d}`;
-                } else if (category === 'ram') {
-                    const a = scores.cpu_t1_sse != null ? scores.cpu_t1_sse : '-';
-                    const b = scores.cpu_t12_sse != null ? scores.cpu_t12_sse : '-';
-                    const c = scores.cpu_t1_avx != null ? scores.cpu_t1_avx : '-';
-                    const d = scores.cpu_t12_avx != null ? scores.cpu_t12_avx : '-';
-                    resultEl.innerText = `1 threads, SSE : ${a}\n12 threads, SSE : ${b}\n1 threads, AVX : ${c}\n12 threads, AVX : ${d}`;
+                if (category === 'cpu' || category === 'ram') {
+                    const a = scores.cpu_t1_sse ?? '-';
+                    const b = scores.cpu_t12_sse ?? '-';
+                    const c = scores.cpu_t1_avx ?? '-';
+                    const d = scores.cpu_t12_avx ?? '-';
+                    setBenchmarkMessage(`解析完成\n1 threads, SSE：${a}\n12 threads, SSE：${b}\n1 threads, AVX：${c}\n12 threads, AVX：${d}`, 'success');
                 } else {
-                    resultEl.innerText = '';
+                    setBenchmarkMessage('解析完成', 'success');
                 }
             } else if (log.trim().length === 0) {
-                resultEl.innerText = '';
+                setBenchmarkMessage('');
             } else {
-                resultEl.innerText = '未能解析分數，請確認已貼上完整跑分 log。';
+                setBenchmarkMessage('未能解析分數，請確認已貼上完整跑分 log。', 'warning');
             }
 
-            // 將解析結果填回欄位（若不適用則留空）
             document.getElementById('product-benchmark-read').value = scores.read || '';
             document.getElementById('product-benchmark-write').value = scores.write || '';
             document.getElementById('product-benchmark-combined').value = scores.combined || '';
@@ -316,122 +471,116 @@
             document.getElementById('product-benchmark-cpu-t12-sse').value = scores.cpu_t12_sse || '';
             document.getElementById('product-benchmark-cpu-t1-avx').value = scores.cpu_t1_avx || '';
             document.getElementById('product-benchmark-cpu-t12-avx').value = scores.cpu_t12_avx || '';
-            // CPU 不需要總分；RAM 則保留 best
+
             if (category === 'cpu') {
                 document.getElementById('product-benchmark-score').value = '';
             } else {
                 document.getElementById('product-benchmark-score').value = scores.best || '';
             }
 
-            // 不顯示 CPU 的加粗總分，只保留結果欄位
-            if (category === 'cpu') {
-                document.getElementById('preview-benchmark').innerText = '';
-            } else {
-                document.getElementById('preview-benchmark').innerText = scores.best ? `分數 ${scores.best}` : '未提供分數';
-            }
-            document.getElementById('preview-benchmark-read').innerText = `R:${scores.read || '-'}`;
-            document.getElementById('preview-benchmark-write').innerText = `W:${scores.write || '-'}`;
-            document.getElementById('preview-benchmark-combined').innerText = `C:${scores.combined || '-'}`;
+            updatePreview();
+        }
+
+        function setBenchmarkMessage(message, type = 'info') {
+            const resultEl = document.getElementById('benchmark-parse-result');
+            resultEl.innerText = message;
+            resultEl.className = `benchmark-result ${message ? type : ''}`;
         }
 
         function updatePreview() {
             const image = document.getElementById('product-image').value.trim();
-            document.getElementById('preview-image').src = image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3EProduct Image%3C/text%3E%3C/svg%3E';
+            const category = document.getElementById('product-category').value.toLowerCase();
+            const log = document.getElementById('product-benchmark-log').value || '';
+            const parsed = parseBenchmarkScore(log, category);
+
+            document.getElementById('preview-image').src = image || placeholderImage();
             document.getElementById('preview-title').innerText = document.getElementById('product-title').value || '商品名稱';
-            document.getElementById('preview-price').innerText = `NT$ ${(parseInt(document.getElementById('product-price').value, 10) || 0).toLocaleString()}`;
+            document.getElementById('preview-price').innerText = `NT$ ${formatPrice(document.getElementById('product-price').value)}`;
             document.getElementById('preview-desc').innerText = document.getElementById('product-desc').value || '商品描述會顯示在這裡。';
             document.getElementById('preview-condition').innerText = document.getElementById('product-condition').selectedOptions[0].text;
-            document.getElementById('preview-location').innerText = document.getElementById('product-location').value || '廠家名稱';
+            document.getElementById('preview-category').innerText = categoryLabel(category);
+            document.getElementById('preview-location').innerText = document.getElementById('product-location').value || '廠商品牌';
             document.getElementById('preview-usage').innerText = document.getElementById('product-usage').value;
-            const bs = document.getElementById('product-benchmark-log')?.value || '';
-            const category = document.getElementById('product-category').value.toLowerCase();
-            const parsed = parseBenchmarkScore(bs, category) || { read: null, write: null, combined: null, best: null };
-            // 不顯示 CPU 的總分（保留結果欄位）
+
             if (category === 'cpu') {
-                document.getElementById('preview-benchmark').innerText = '';
+                document.getElementById('preview-benchmark').innerText = parsed.cpu_t1_sse || parsed.cpu_t12_sse || parsed.cpu_t1_avx || parsed.cpu_t12_avx ? 'CPU 跑分已解析' : '未提供分數';
                 document.getElementById('product-benchmark-score').value = '';
             } else {
                 document.getElementById('preview-benchmark').innerText = parsed.best ? `分數 ${parsed.best}` : '未提供分數';
                 document.getElementById('product-benchmark-score').value = parsed.best || '';
             }
+
             document.getElementById('preview-benchmark-read').innerText = `R:${parsed.read || '-'}`;
             document.getElementById('preview-benchmark-write').innerText = `W:${parsed.write || '-'}`;
             document.getElementById('preview-benchmark-combined').innerText = `C:${parsed.combined || '-'}`;
-            const rawPreview = bs ? (bs.length > 30 ? bs.slice(0, 30) + '...' : bs) : '未提供 log';
-            document.getElementById('preview-benchmark-raw').innerText = rawPreview;
+            document.getElementById('preview-benchmark-raw').innerText = log ? (log.length > 30 ? `${log.slice(0, 30)}...` : log) : '未提供 log';
         }
 
         function parseBenchmarkScore(log, category) {
-            if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null, mismatch: false };
-            const lower = log.toLowerCase();
+            if (!log || typeof log !== 'string') {
+                return { read: null, write: null, combined: null, best: null, mismatch: false };
+            }
 
-            // Helper to extract first numeric with optional unit
             function extractNumberWithUnit(patterns) {
-                for (const p of patterns) {
-                    const re = new RegExp(p + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(mb/s|gb/s|mbps|gbps|mb|gb|ms|s)?', 'i');
-                    const m = log.match(re);
-                    if (m && m[1]) return Number(m[1]);
+                for (const pattern of patterns) {
+                    const re = new RegExp(`${pattern}\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(mb/s|gb/s|mbps|gbps|mb|gb|ms|s)?`, 'i');
+                    const match = log.match(re);
+                    if (match && match[1]) return Number(match[1]);
                 }
                 return null;
             }
 
-            // Detect type
             const looksLikeCPU = /\b(cpu|processor|occt cpu|prime95|fpu|stresscpu)\b/i.test(log);
             const looksLikeRAM = /\b(memory|ram|bandwidth|read\s*mb\/s|write\s*mb\/s|occt memory)\b/i.test(log);
 
             if (category === 'cpu') {
-                if (!looksLikeCPU && looksLikeRAM) return { read: null, write: null, combined: null, best: null, mismatch: true };
-                // 優先擷取指定的 CPU 四項數值
-                function findCpuLabel(label) {
-                    const re = new RegExp(label.replace(/\s+/g, '\\s*') + '\\s*:\\s*(\\d+(?:\\.\\d+)?)', 'i');
-                    const m = log.match(re);
-                    return m && m[1] ? Number(m[1]) : null;
+                if (!looksLikeCPU && looksLikeRAM) {
+                    return { read: null, write: null, combined: null, best: null, mismatch: true };
                 }
-                const t1_sse = findCpuLabel('1 threads, SSE');
-                const t12_sse = findCpuLabel('12 threads, SSE');
-                const t1_avx = findCpuLabel('1 threads, AVX');
-                const t12_avx = findCpuLabel('12 threads, AVX');
-                if (t1_sse || t12_sse || t1_avx || t12_avx) {
+
+                const findCpuLabel = (label) => {
+                    const re = new RegExp(`${label.replace(/\s+/g, '\\s*')}\\s*:\\s*(\\d+(?:\\.\\d+)?)`, 'i');
+                    const match = log.match(re);
+                    return match && match[1] ? Number(match[1]) : null;
+                };
+
+                const t1Sse = findCpuLabel('1 threads, SSE');
+                const t12Sse = findCpuLabel('12 threads, SSE');
+                const t1Avx = findCpuLabel('1 threads, AVX');
+                const t12Avx = findCpuLabel('12 threads, AVX');
+
+                if (t1Sse || t12Sse || t1Avx || t12Avx) {
                     return {
-                        cpu_t1_sse: t1_sse || null,
-                        cpu_t12_sse: t12_sse || null,
-                        cpu_t1_avx: t1_avx || null,
-                        cpu_t12_avx: t12_avx || null,
-                        // 同時保留兼容欄位（read/write/combined）但不回傳總分
-                        read: t1_sse || null,
-                        write: t12_sse || null,
-                        combined: t1_avx || null,
+                        cpu_t1_sse: t1Sse || null,
+                        cpu_t12_sse: t12Sse || null,
+                        cpu_t1_avx: t1Avx || null,
+                        cpu_t12_avx: t12Avx || null,
+                        read: t1Sse || null,
+                        write: t12Sse || null,
+                        combined: t1Avx || null,
                         best: null,
                         mismatch: false
                     };
                 }
-                // fallback: try to find a CPU score: look for 'score' or 'total' or 'gflops'
-                let score = null;
-                const scoreRe = /(?:score|total score|overall)[:\-]?\s*(\d+(?:\.\d+)?)/i;
-                const m = log.match(scoreRe);
-                if (m && m[1]) score = Number(m[1]);
-                if (!score) {
-                    const g = log.match(/(\d+(?:\.\d+)?)\s*(gflops|gflop)/i);
-                    if (g && g[1]) score = Number(g[1]);
-                }
-                if (!score) {
-                    const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
-                    if (nums.length) score = nums.slice().sort((a,b)=>b-a)[0];
-                }
-                return { read: null, write: null, combined: null, best: score || null, mismatch: false, note: looksLikeCPU ? null : '不確定為 CPU log' };
+
+                const scoreMatch = log.match(/(?:score|total score|overall)[:\-]?\s*(\d+(?:\.\d+)?)/i);
+                const gflopsMatch = log.match(/(\d+(?:\.\d+)?)\s*(gflops|gflop)/i);
+                const score = scoreMatch?.[1] ? Number(scoreMatch[1]) : (gflopsMatch?.[1] ? Number(gflopsMatch[1]) : null);
+                return { read: null, write: null, combined: null, best: score, mismatch: false };
             }
 
             if (category === 'ram') {
-                if (!looksLikeRAM && looksLikeCPU) return { read: null, write: null, combined: null, best: null, mismatch: true };
-                // extract read/write bandwidth values (MB/s)
+                if (!looksLikeRAM && looksLikeCPU) {
+                    return { read: null, write: null, combined: null, best: null, mismatch: true };
+                }
+
                 const read = extractNumberWithUnit(['read', 'memory read', 'bandwidth read', 'read bandwidth']);
                 const write = extractNumberWithUnit(['write', 'memory write', 'bandwidth write', 'write bandwidth']);
                 let combined = extractNumberWithUnit(['combined', 'overall', 'total']);
-                if (!combined && read && write) combined = ((read + write) / 2);
+                if (!combined && read && write) combined = (read + write) / 2;
                 return { read: read || null, write: write || null, combined: combined || null, best: combined || read || write || null, mismatch: false };
             }
 
-            // default: attempt generic parse
             const genericRead = extractNumberWithUnit(['read', 'seq read', 'sequential read']);
             const genericWrite = extractNumberWithUnit(['write', 'seq write', 'sequential write']);
             const genericCombined = extractNumberWithUnit(['combined', 'overall', 'total score']);
@@ -441,6 +590,8 @@
 
         async function submitProduct(event) {
             event.preventDefault();
+            updateParsedBenchmark();
+
             const seller = localStorage.getItem('userEmail');
             const payload = {
                 seller,
@@ -450,10 +601,10 @@
                 desc: document.getElementById('product-desc').value.trim(),
                 image: document.getElementById('product-image').value.trim(),
                 benchmarkLog: document.getElementById('product-benchmark-log').value.trim(),
-                benchmarkScore: document.getElementById('product-benchmark-score').value ? parseFloat(document.getElementById('product-benchmark-score').value) : null,
-                benchmarkRead: document.getElementById('product-benchmark-read').value ? parseFloat(document.getElementById('product-benchmark-read').value) : null,
-                benchmarkWrite: document.getElementById('product-benchmark-write').value ? parseFloat(document.getElementById('product-benchmark-write').value) : null,
-                benchmarkCombined: document.getElementById('product-benchmark-combined').value ? parseFloat(document.getElementById('product-benchmark-combined').value) : null,
+                benchmarkScore: numberOrNull(document.getElementById('product-benchmark-score').value),
+                benchmarkRead: numberOrNull(document.getElementById('product-benchmark-read').value),
+                benchmarkWrite: numberOrNull(document.getElementById('product-benchmark-write').value),
+                benchmarkCombined: numberOrNull(document.getElementById('product-benchmark-combined').value),
                 condition: document.getElementById('product-condition').value,
                 location: document.getElementById('product-location').value.trim(),
                 usageTag: document.getElementById('product-usage').value,
@@ -468,25 +619,73 @@
                 body: JSON.stringify(payload)
             });
             const result = await res.json();
+
             if (result.success) {
-                alert(editingProductId ? '商品已更新' : '商品已上架');
+                alert(editingProductId ? '商品已更新' : '商品已新增');
                 window.location.href = '/products.html';
             } else {
-                alert(result.message || '儲存失敗');
+                alert(result.message || '送出失敗');
             }
         }
 
-        function logout() {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            window.location.href = '/';
+        function numberOrNull(value) {
+            return value ? parseFloat(value) : null;
+        }
+
+        function categoryLabel(category) {
+            return {
+                cpu: '處理器 CPU',
+                gpu: '顯示卡 GPU',
+                mb: '主機板 MB',
+                ram: '記憶體 RAM',
+                cooler: '散熱',
+                ssd: '固態硬碟 SSD',
+                hdd: '傳統硬碟 HDD',
+                case: '機殼 Case',
+                psu: '電源供應器 PSU'
+            }[category] || category || '其他零件';
+        }
+
+        function statusLabel(status) {
+            return {
+                pending: '待付款',
+                contacting: '洽談中',
+                paid: '待出貨',
+                completed: '已完成',
+                cancelled: '不成立'
+            }[status] || '待處理';
+        }
+
+        function statusClass(status) {
+            if (status === 'completed') return 'success';
+            if (status === 'cancelled') return 'gray';
+            return '';
+        }
+
+        function formatPrice(value) {
+            return (parseInt(value, 10) || 0).toLocaleString();
+        }
+
+        function placeholderImage() {
+            return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3EProduct Image%3C/text%3E%3C/svg%3E';
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
         }
 
         async function updateCartCount() {
             const userEmail = localStorage.getItem('userEmail');
             const cartCountEl = document.getElementById('cart-count');
             if (!cartCountEl || !userEmail) return;
-            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
+
+            const res = await fetch(getApiUrl(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`));
             const result = await res.json();
             const items = result.success ? result.data : [];
             cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
@@ -494,11 +693,19 @@
 
         function triggerSearch() {
             const input = document.querySelector('.nav-search');
-            if (input.value.trim()) window.location.href = `/marketplace?q=${encodeURIComponent(input.value.trim())}`;
+            if (input.value.trim()) {
+                window.location.href = `/marketplace?q=${encodeURIComponent(input.value.trim())}`;
+            }
         }
 
         function handleSearch(event) {
             if (event.key === 'Enter') triggerSearch();
+        }
+
+        function logout() {
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            window.location.href = '/';
         }
     </script>
 </body>
