@@ -3,92 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>訂單確認 | 一次買夠二手交易平台</title>
+    <title>結帳 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        .container { max-width: 1080px; margin: 2rem auto; padding: 0 20px; }
-        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
-        .step { background: #fff; border: 1px solid #dde5ee; border-radius: 8px; padding: 12px; color: #667085; font-weight: 800; text-align: center; }
-        .step.active { border-color: var(--secondary-color); color: var(--secondary-color); background: #eef6ff; }
-        .layout { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
-        .panel { background: #fff; border: 1px solid #e1e7ef; border-radius: 8px; box-shadow: 0 3px 14px rgba(15, 23, 42, 0.06); overflow: hidden; }
-        .panel-title { padding: 14px 16px; border-bottom: 1px solid #edf1f5; font-weight: 900; color: #26384d; background: #f8fafc; }
-        .product-row { display: grid; grid-template-columns: 110px 1fr auto; gap: 16px; align-items: center; padding: 16px; }
-        .product-row img { width: 110px; height: 86px; object-fit: cover; border-radius: 6px; border: 1px solid #edf1f5; background: #eef2f7; }
-        .product-title { font-size: 1.08rem; font-weight: 900; color: #26384d; line-height: 1.35; }
-        .meta { color: #667085; margin-top: 8px; display: grid; gap: 4px; }
-        .price { color: #c94335; font-size: 1.2rem; font-weight: 900; white-space: nowrap; }
-        .info { padding: 16px; display: grid; gap: 10px; color: #475467; }
-        .info-row { display: flex; justify-content: space-between; gap: 12px; }
-        .summary { padding: 16px; display: grid; gap: 12px; }
-        .total { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #edf1f5; font-weight: 900; }
-        .total strong { color: #c94335; font-size: 1.3rem; }
-        .primary-btn, .secondary-btn { border: 0; border-radius: 6px; padding: 12px 14px; cursor: pointer; font-weight: 900; text-align: center; text-decoration: none; }
-        .primary-btn { background: var(--secondary-color); color: white; }
-        .secondary-btn { background: #eef2f7; color: #26384d; }
-        .actions { display: grid; gap: 10px; }
-        .note { color: #667085; font-size: 0.9rem; line-height: 1.6; }
-        @media (max-width: 820px) {
-            .layout { grid-template-columns: 1fr; }
-            .steps { grid-template-columns: 1fr 1fr; }
-            .product-row { grid-template-columns: 88px 1fr; }
-            .product-row img { width: 88px; height: 70px; }
-            .price { grid-column: 1 / -1; }
-        }
+        body { background: var(--nmd-bg); }
+        .checkout-product { display:grid; grid-template-columns:110px 1fr auto; gap:16px; align-items:center; padding:18px; }
+        .checkout-product img { width:110px; height:86px; border-radius:12px; object-fit:cover; background:#eef2f7; border:1px solid #edf1f5; }
+        .checkout-note { min-height:120px; resize:vertical; }
+        @media(max-width:720px){ .checkout-product{grid-template-columns:1fr;} .checkout-product img{width:100%;height:180px;} }
     </style>
 </head>
 <body>
     <header>
         <div class="header-main">
             <a href="/" class="logo">一次買夠二手交易平台</a>
-            <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)">
-                <button class="search-btn" onclick="triggerSearch()">搜尋</button>
-            </div>
+            <div class="search-wrapper"><input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)"><button class="search-btn" onclick="triggerSearch()">搜尋</button></div>
             <div class="header-actions">
-                <a href="/cart" class="cart-link" title="購物車">購物車 <span id="cart-count" class="cart-count">0</span></a>
+                <a href="/cart" class="cart-link" title="購物車">購物車<span id="cart-count" class="cart-count">0</span></a>
                 <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
-                <div id="user-profile">
-                    <div class="avatar">U</div>
-                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
-                    <div class="dropdown-menu">
-                        <a href="/account.html">我的帳戶</a>
-                        <a href="/products.html">我的商品</a>
-                        <a href="/transactions">我的交易</a>
-                        <a href="#" onclick="logout()">登出</a>
-                    </div>
-                </div>
+                <div id="user-profile"><div class="avatar">U</div><span id="user-display-name" style="color:white;font-size:.95rem;">載入中...</span><div class="dropdown-menu"><a href="/account.html">我的帳戶</a><a href="/transactions">購買清單</a><a href="#" onclick="logout()">登出</a></div></div>
             </div>
         </div>
-        <nav class="main-nav">
-            <a href="/">首頁</a>
-            <a href="/marketplace">商城</a>
-            <a href="/#recommend">智慧推薦</a>
-            <a href="/forum">討論區</a>
-            <a href="/scrape">市價查詢</a>
-            <a href="/seller">賣家中心</a>
-        </nav>
+        <nav class="main-nav"><a href="/">首頁</a><a href="/marketplace">商城</a><a href="/#recommend">智慧推薦</a><a href="/forum">討論區</a><a href="/scrape">市價查詢</a><a href="/seller">賣家中心</a></nav>
     </header>
 
-    <main class="container">
-        <h2>訂單確認</h2>
-        <div class="steps">
-            <div class="step active">1 商品詳情</div>
-            <div class="step active">2 訂單確認</div>
-            <div class="step">3 建立訂單</div>
-            <div class="step">4 我的交易</div>
-        </div>
-
-        <div class="layout">
-            <section class="panel">
-                <div class="panel-title">商品資訊</div>
-                <div id="product-area">載入中...</div>
+    <main class="nmd-page">
+        <div class="nmd-hero"><div><h1>結帳確認</h1><p>確認商品與交易備註。本平台目前為展示用流程，不含真實金流與物流。</p></div></div>
+        <div class="nmd-grid-2">
+            <section class="nmd-card">
+                <div class="nmd-card-pad" style="border-bottom:1px solid #edf1f5;"><h2>訂單商品</h2></div>
+                <div id="product-area">載入商品中...</div>
+                <div class="nmd-card-pad">
+                    <label class="nmd-label" for="order-note">買家備註</label>
+                    <textarea id="order-note" class="nmd-field checkout-note" placeholder="例如：希望週末面交，現場測試外觀、序號與配件。"></textarea>
+                    <h3>交易方式</h3>
+                    <div class="nmd-field">面交測試 / 私訊聯絡，平台僅展示交易流程。</div>
+                </div>
             </section>
-
-            <aside class="panel">
-                <div class="panel-title">訂單摘要</div>
-                <div id="summary-area" class="summary">載入中...</div>
-            </aside>
+            <aside id="summary-area" class="nmd-card nmd-card-pad">載入摘要中...</aside>
         </div>
     </main>
 
@@ -98,12 +50,7 @@
         window.onload = async function() {
             const userEmail = localStorage.getItem('userEmail');
             const userName = localStorage.getItem('userName');
-            if (!userEmail) {
-                alert('請先登入才能建立訂單');
-                window.location.href = '/login';
-                return;
-            }
-
+            if (!userEmail) { alert('請先登入後再結帳'); window.location.href = '/login'; return; }
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('user-profile').style.display = 'flex';
             document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
@@ -111,119 +58,55 @@
             await loadProduct();
         };
 
-        function placeholderImage() {
-            return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E';
-        }
-
         async function loadProduct() {
             const id = new URLSearchParams(window.location.search).get('productId');
-            if (!id) {
-                document.getElementById('product-area').innerHTML = '<div class="info">找不到商品資料</div>';
-                return;
-            }
-
+            if (!id) { document.getElementById('product-area').innerHTML = '<div class="nmd-empty">缺少商品 id。</div>'; return; }
             const res = await fetch(`/api/products/${id}`);
-            if (!res.ok) {
-                document.getElementById('product-area').innerHTML = '<div class="info">商品不存在或已下架</div>';
-                return;
-            }
-
+            if (!res.ok) { document.getElementById('product-area').innerHTML = '<div class="nmd-empty">找不到商品。</div>'; return; }
             product = await res.json();
             renderProduct();
-            renderSummary();
         }
 
         function renderProduct() {
             document.getElementById('product-area').innerHTML = `
-                <div class="product-row">
-                    <img src="${product.image || placeholderImage()}" alt="${escapeHtml(product.title)}">
-                    <div>
-                        <div class="product-title">${escapeHtml(product.title)}</div>
-                        <div class="meta">
-                            <span>賣家：${escapeHtml(product.seller || '使用者')}</span>
-                            <span>廠家名稱：${escapeHtml(product.location || '未填寫')}</span>
-                            <span>商品狀態：${product.status === 'active' ? '可購買' : '目前不可購買'}</span>
-                        </div>
-                    </div>
-                    <div class="price">NT$ ${Number(product.price).toLocaleString()}</div>
-                </div>
-                <div class="info">
-                    <div class="info-row"><span>交易方式</span><strong>平台模擬洽談</strong></div>
-                    <div class="info-row"><span>付款方式</span><strong>展示用，不處理金流</strong></div>
-                    <div class="info-row"><span>物流方式</span><strong>展示用，不處理物流</strong></div>
-                </div>
-            `;
-        }
-
-        function renderSummary() {
+                <div class="checkout-product">
+                    <img src="${escapeHtml(product.image || placeholderImage())}" alt="${escapeHtml(product.title)}">
+                    <div><strong>${escapeHtml(product.title)}</strong><div class="nmd-muted">賣家：${escapeHtml(product.seller || '平台使用者')}</div><div class="nmd-muted">廠商 / 品牌：${escapeHtml(product.location || '未提供')}</div></div>
+                    <strong class="nmd-price">NT$ ${Number(product.price || 0).toLocaleString()}</strong>
+                </div>`;
             document.getElementById('summary-area').innerHTML = `
-                <div class="info-row"><span>商品金額</span><strong>NT$ ${Number(product.price).toLocaleString()}</strong></div>
-                <div class="info-row"><span>平台手續費</span><strong>NT$ 0</strong></div>
-                <div class="info-row"><span>物流費</span><strong>NT$ 0</strong></div>
-                <div class="total"><span>訂單總額</span><strong>NT$ ${Number(product.price).toLocaleString()}</strong></div>
-                <p class="note">建立訂單後會進入「我的交易」，賣家可在後台確認交易狀態。此流程僅供畢業專題展示。</p>
-                <div class="actions">
-                    <button class="primary-btn" onclick="createOrder()">建立訂單</button>
-                    <a class="secondary-btn" href="/product?id=${product.id}">返回商品</a>
-                </div>
-            `;
+                <h2>付款摘要</h2>
+                <div class="nmd-summary-line"><span>商品金額</span><strong>NT$ ${Number(product.price || 0).toLocaleString()}</strong></div>
+                <div class="nmd-summary-line"><span>平台金流</span><strong>展示用</strong></div>
+                <div class="nmd-summary-line"><span>物流</span><strong>面交 / 聯絡</strong></div>
+                <div class="nmd-total-line"><span>總計</span><span class="nmd-price">NT$ ${Number(product.price || 0).toLocaleString()}</span></div>
+                <button class="nmd-btn" style="width:100%;" onclick="createOrder()">送出訂單</button>
+                <a class="nmd-btn secondary" style="width:100%;margin-top:10px;" href="/product?id=${product.id}">返回商品</a>`;
         }
 
         async function createOrder() {
-            if (!product || product.status !== 'active') {
-                alert('商品目前不可建立訂單');
-                return;
-            }
-
+            if (!product || product.status !== 'active') { alert('商品目前不可購買'); return; }
             const userEmail = localStorage.getItem('userEmail');
-            const res = await fetch('/api/transactions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userEmail, productId: product.id, note: '訂單確認頁建立' })
-            });
+            const note = document.getElementById('order-note').value.trim() || '訂單確認頁建立';
+            const res = await fetch('/api/transactions', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userEmail, productId: product.id, note }) });
             const result = await res.json();
-            if (!result.success) {
-                alert(result.message || '建立訂單失敗');
-                return;
-            }
-
+            if (!result.success) { alert(result.message || '建立訂單失敗'); return; }
             window.location.href = '/transactions';
         }
 
         async function updateCartCount() {
             const userEmail = localStorage.getItem('userEmail');
-            const cartCountEl = document.getElementById('cart-count');
-            if (!userEmail) { cartCountEl.innerText = 0; return; }
             const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
             const result = await res.json();
             const items = result.success ? result.data : [];
-            cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
+            document.getElementById('cart-count').innerText = items.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 1), 0);
         }
 
-        function triggerSearch() {
-            const query = document.querySelector('.nav-search').value.trim();
-            if (query) window.location.href = `/marketplace?q=${encodeURIComponent(query)}`;
-        }
-
-        function handleSearch(event) {
-            if (event.key === 'Enter') triggerSearch();
-        }
-
-        function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>"']/g, char => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            }[char]));
-        }
-
-        function logout() {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            window.location.href = '/';
-        }
+        function placeholderImage(){ return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E'; }
+        function triggerSearch(){ const q=document.querySelector('.nav-search').value.trim(); if(q) window.location.href=`/marketplace?q=${encodeURIComponent(q)}`; }
+        function handleSearch(event){ if(event.key==='Enter') triggerSearch(); }
+        function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function logout(){ localStorage.removeItem('userEmail'); localStorage.removeItem('userName'); window.location.href='/'; }
     </script>
 </body>
 </html>

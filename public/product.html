@@ -6,26 +6,21 @@
     <title>商品詳情 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        .container { max-width: 1120px; margin: 2rem auto; padding: 0 20px; }
-        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
-        .step { background: #fff; border: 1px solid #dde5ee; border-radius: 8px; padding: 12px; color: #667085; font-weight: 800; text-align: center; }
-        .step.active { border-color: var(--secondary-color); color: var(--secondary-color); background: #eef6ff; }
-        .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; background: white; padding: 24px; border-radius: 8px; box-shadow: 0 4px 14px rgba(15,23,42,0.06); border: 1px solid #e1e7ef; }
-        .product-image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: #eef2f7; border: 1px solid #edf1f5; }
-        .title { margin: 0 0 10px; color: #1f2937; font-size: 1.8rem; line-height: 1.35; }
-        .price { color: #c94335; font-size: 2rem; font-weight: 900; margin: 12px 0; }
-        .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
-        .tag { background: #eef6ff; color: #2563eb; padding: 5px 9px; border-radius: 999px; font-size: 0.85rem; font-weight: 800; }
-        .seller-box { background: #f8fafc; border: 1px solid #edf1f5; border-radius: 8px; padding: 14px; color: #475467; display: grid; gap: 6px; }
-        .description { color: #475467; line-height: 1.8; white-space: pre-wrap; border-top: 1px solid #e5e7eb; margin-top: 18px; padding-top: 18px; }
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .actions button { border: 0; border-radius: 6px; padding: 13px 16px; font-weight: 900; cursor: pointer; font-size: 1rem; }
-        .primary { background: var(--secondary-color); color: white; }
-        .accent { background: #d94a38; color: white; }
-        .secondary { background: #f1f5f9; color: #1f2937; }
-        .forum-box { margin-top: 22px; background: #fff; border-radius: 8px; padding: 18px; box-shadow: 0 3px 12px rgba(15,23,42,0.06); border: 1px solid #e1e7ef; }
-        @media (max-width: 820px) { .detail { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 560px) { .actions { grid-template-columns: 1fr; } }
+        body { background: radial-gradient(circle at 90% 5%, rgba(47,143,216,.13), transparent 28rem), var(--nmd-bg); }
+        .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+        .step { background:#fff; border:1px solid var(--nmd-border); border-radius:12px; padding:12px; text-align:center; color:var(--nmd-muted); font-weight:900; }
+        .step.active { background:var(--nmd-blue-soft); color:var(--nmd-blue); border-color:#a9d4fb; }
+        .product-photo { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:18px; background:#eef2f7; border:1px solid #edf1f5; }
+        .image-note, .info-box, .seller-box, .verify-box { background:#f8fbff; border:1px solid var(--nmd-border); border-radius:14px; padding:16px; }
+        .detail-stack { display:grid; gap:16px; align-content:start; }
+        .title { margin:0; color:var(--nmd-text); font-size:clamp(1.8rem,3vw,2.35rem); line-height:1.25; }
+        .price { color:var(--nmd-red); font-size:2.2rem; font-weight:900; }
+        .info-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .info-box span, .seller-box span, .verify-box span { display:block; color:var(--nmd-muted); font-size:.86rem; font-weight:900; margin-bottom:6px; }
+        .description { white-space:pre-wrap; line-height:1.85; }
+        .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .action-grid .wide { grid-column:1/-1; }
+        @media (max-width:620px){ .steps,.info-grid,.action-grid{grid-template-columns:1fr;} .action-grid .wide{grid-column:auto;} }
     </style>
 </head>
 <body>
@@ -37,101 +32,89 @@
                 <button class="search-btn" onclick="triggerSearch()">搜尋</button>
             </div>
             <div class="header-actions">
-                <a href="/cart" class="cart-link" title="購物車">購物車 <span id="cart-count" class="cart-count">0</span></a>
+                <a href="/cart" class="cart-link" title="購物車">購物車<span id="cart-count" class="cart-count">0</span></a>
                 <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
                 <div id="user-profile">
                     <div class="avatar">U</div>
-                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
+                    <span id="user-display-name" style="color:white;font-size:.95rem;">載入中...</span>
                     <div class="dropdown-menu">
                         <a href="/account.html">我的帳戶</a>
-                        <a href="/products.html">我的商品</a>
-                        <a href="/transactions">我的交易</a>
+                        <a href="/transactions">購買清單</a>
                         <a href="#" onclick="logout()">登出</a>
                     </div>
                 </div>
             </div>
         </div>
         <nav class="main-nav">
-            <a href="/">首頁</a>
-            <a href="/marketplace">商城</a>
-            <a href="/#recommend">智慧推薦</a>
-            <a href="/forum">討論區</a>
-            <a href="/scrape">市價查詢</a>
-            <a href="/seller">賣家中心</a>
+            <a href="/">首頁</a><a href="/marketplace">商城</a><a href="/#recommend">智慧推薦</a><a href="/forum">討論區</a><a href="/scrape">市價查詢</a><a href="/seller">賣家中心</a>
         </nav>
     </header>
 
-    <main class="container">
+    <main class="nmd-page">
         <div class="steps">
-            <div class="step active">1 商品詳情</div>
-            <div class="step">2 訂單確認</div>
-            <div class="step">3 建立訂單</div>
-            <div class="step">4 我的交易</div>
+            <div class="step active">1 商品詳情</div><div class="step">2 購物車</div><div class="step">3 結帳確認</div><div class="step">4 購買清單</div>
         </div>
-        <section id="product-detail" class="detail">載入中...</section>
-        <section class="forum-box">
-            <strong>相關討論</strong>
-            <p style="color:#667085;">可到討論區查看硬體交易、價格詢問與組裝求助內容，增加專題平台整合感。</p>
-            <button class="secondary" onclick="window.location.href='/forum'">前往討論區</button>
-        </section>
+        <section id="product-detail" class="nmd-grid-product">載入商品中...</section>
     </main>
 
     <script>
         let product = null;
 
         window.onload = async function() {
-            const loggedInUser = localStorage.getItem('userEmail');
-            const userName = localStorage.getItem('userName');
-            if (loggedInUser) {
-                document.getElementById('auth-section').style.display = 'none';
-                document.getElementById('user-profile').style.display = 'flex';
-                document.getElementById('user-display-name').innerText = userName || loggedInUser.split('@')[0];
-            }
+            setupUser();
             await updateCartCount();
             await loadProduct();
         };
 
-        function placeholderImage() {
-            return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E';
+        function setupUser() {
+            const userEmail = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
+            if (!userEmail) return;
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('user-profile').style.display = 'flex';
+            document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
         }
 
         async function loadProduct() {
             const id = new URLSearchParams(window.location.search).get('id');
             const container = document.getElementById('product-detail');
             if (!id) {
-                container.innerHTML = '找不到商品資料';
+                container.innerHTML = '<div class="nmd-card nmd-card-pad">缺少商品 id，請從商城選擇商品。</div>';
                 return;
             }
             const res = await fetch(`/api/products/${id}`);
             if (!res.ok) {
-                container.innerHTML = '商品不存在或已下架';
+                container.innerHTML = '<div class="nmd-card nmd-card-pad">找不到商品。</div>';
                 return;
             }
             product = await res.json();
-            container.innerHTML = `
-                <img class="product-image" src="${product.image || placeholderImage()}" alt="${escapeHtml(product.title)}">
-                <div>
+            renderProduct();
+        }
+
+        function renderProduct() {
+            document.getElementById('product-detail').innerHTML = `
+                <div class="detail-stack">
+                    <img class="product-photo" src="${escapeHtml(product.image || placeholderImage())}" alt="${escapeHtml(product.title)}">
+                    <div class="image-note nmd-muted">二手零件建議面交測試，確認外觀、序號、配件與實際運作狀況後再完成交易。</div>
+                </div>
+                <div class="nmd-card nmd-card-pad detail-stack">
+                    <div class="nmd-pills"><span class="nmd-pill">${escapeHtml(categoryLabel(product.category))}</span><span class="nmd-pill">${escapeHtml(conditionLabel(product.condition))}</span><span class="nmd-pill">${escapeHtml(product.usageTag || '一般用途')}</span><span class="nmd-pill">瀏覽 ${product.views || 0}</span></div>
                     <h1 class="title">${escapeHtml(product.title)}</h1>
-                    <div class="price">NT$ ${Number(product.price).toLocaleString()}</div>
-                    <div class="meta">
-                        <span class="tag">${escapeHtml(product.category)}</span>
-                        <span class="tag">${escapeHtml(product.condition || '二手')}</span>
-                        <span class="tag">${escapeHtml(product.location || '廠家名稱')}</span>
-                        <span class="tag">${product.status === 'active' ? '可購買' : '不可購買'}</span>
-                        <span class="tag">${escapeHtml(product.usageTag || '一般用途')}</span>
-                        <span class="tag">瀏覽 ${product.views || 0}</span>
-                        <span class="tag">參考市價</span>
+                    <div class="price">NT$ ${Number(product.price || 0).toLocaleString()}</div>
+                    <div class="action-grid">
+                        <button class="nmd-btn" onclick="buyNow()">立即購買</button>
+                        <button class="nmd-btn secondary" onclick="addToCart()">加入購物車</button>
+                        <button class="nmd-btn secondary wide" onclick="addFavorite()">收藏商品</button>
                     </div>
-                    <div class="seller-box">
-                        <div><strong>賣家：</strong>${escapeHtml(product.seller || '使用者')}</div>
-                        <div><strong>廠家名稱：</strong>${escapeHtml(product.location || '未填寫')}</div>
+                    <div class="info-grid">
+                        <div class="info-box"><span>商品分類</span><strong>${escapeHtml(categoryLabel(product.category))}</strong></div>
+                        <div class="info-box"><span>商品狀況</span><strong>${escapeHtml(conditionLabel(product.condition))}</strong></div>
+                        <div class="info-box"><span>廠商 / 品牌</span><strong>${escapeHtml(product.location || '未提供')}</strong></div>
+                        <div class="info-box"><span>商品狀態</span><strong>${product.status === 'active' ? '可購買' : '暫不可購買'}</strong></div>
                     </div>
-                    <div class="actions">
-                        <button class="primary" onclick="addToCart()">加入購物車</button>
-                        <button class="accent" onclick="buyNow()">立即購買</button>
-                        <button class="secondary" onclick="addFavorite()">收藏商品</button>
-                    </div>
-                    <div class="description">${escapeHtml(product.desc || '賣家尚未提供商品描述')}</div>
+                    <div class="seller-box"><span>賣家名稱</span><strong>${escapeHtml(product.seller || '平台使用者')}</strong></div>
+                    <div class="nmd-card-pad description" style="padding:0;"><h2>商品描述</h2>${escapeHtml(product.desc || '賣家尚未提供商品描述。')}</div>
+                    <div class="verify-box"><span>燒機驗證</span><strong>未來可接入測試資料</strong><div class="nmd-muted" style="margin-top:6px;">本階段先保留擴充位置，不影響目前交易流程展示。</div></div>
                 </div>
             `;
         }
@@ -139,73 +122,52 @@
         async function addToCart() {
             const userEmail = localStorage.getItem('userEmail');
             if (!userEmail) return goLogin();
-            const res = await fetch('/api/cart', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userEmail, productId: product.id })
-            });
+            const res = await fetch('/api/cart', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userEmail, productId: product.id }) });
             const result = await res.json();
             alert(result.message || '已加入購物車');
             await updateCartCount();
         }
 
         function buyNow() {
-            const userEmail = localStorage.getItem('userEmail');
-            if (!userEmail) return goLogin();
+            if (!localStorage.getItem('userEmail')) return goLogin();
             window.location.href = `/checkout?productId=${product.id}`;
         }
 
         async function addFavorite() {
             const userEmail = localStorage.getItem('userEmail');
             if (!userEmail) return goLogin();
-            const res = await fetch('/api/favorites', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userEmail, productId: product.id })
-            });
+            const res = await fetch('/api/favorites', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userEmail, productId: product.id }) });
             const result = await res.json();
             alert(result.message || '已收藏商品');
         }
 
-        function goLogin() {
-            alert('請先登入');
-            window.location.href = '/login';
-        }
+        function goLogin() { alert('請先登入'); window.location.href = '/login'; }
 
         async function updateCartCount() {
             const userEmail = localStorage.getItem('userEmail');
-            const cartCountEl = document.getElementById('cart-count');
-            if (!userEmail) { cartCountEl.innerText = 0; return; }
+            const el = document.getElementById('cart-count');
+            if (!userEmail) { el.innerText = 0; return; }
             const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
             const result = await res.json();
             const items = result.success ? result.data : [];
-            cartCountEl.innerText = items.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
+            el.innerText = items.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 1), 0);
         }
 
-        function triggerSearch() {
-            const query = document.querySelector('.nav-search').value.trim();
-            if (query) window.location.href = `/marketplace?q=${encodeURIComponent(query)}`;
+        function categoryLabel(category) {
+            const labels = { cpu:'處理器 CPU', gpu:'顯示卡 GPU', mb:'主機板 MB', ram:'記憶體 RAM', cooler:'散熱', ssd:'固態硬碟 SSD', hdd:'傳統硬碟 HDD', case:'機殼 Case', psu:'電源供應器 PSU' };
+            return labels[category] || category || '其他零件';
         }
 
-        function handleSearch(event) {
-            if (event.key === 'Enter') triggerSearch();
+        function conditionLabel(condition) {
+            const labels = { new:'全新未拆', excellent:'九成新', good:'正常使用', used:'二手零件' };
+            return labels[condition] || condition || '二手';
         }
 
-        function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>"']/g, char => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            }[char]));
-        }
-
-        function logout() {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            window.location.href = '/';
-        }
+        function placeholderImage() { return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E'; }
+        function triggerSearch() { const q = document.querySelector('.nav-search').value.trim(); if (q) window.location.href = `/marketplace?q=${encodeURIComponent(q)}`; }
+        function handleSearch(event) { if (event.key === 'Enter') triggerSearch(); }
+        function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function logout() { localStorage.removeItem('userEmail'); localStorage.removeItem('userName'); window.location.href = '/'; }
     </script>
 </body>
 </html>

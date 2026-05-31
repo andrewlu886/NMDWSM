@@ -176,8 +176,8 @@
                         <div class="product-title">${product.title}</div>
                         <div class="product-price">NT$ ${Number(product.price).toLocaleString()}</div>
                         <div class="meta">
-                            <span class="tag">${product.category}</span>
-                            <span class="tag">${product.condition || 'used'}</span>
+                            <span class="tag">${categoryLabel(product.category)}</span>
+                            <span class="tag">${conditionLabel(product.condition)}</span>
                             <span class="tag">${product.location || '廠家名稱'}</span>
                             <span class="tag">${product.usageTag || '未分類'}</span>
                             <span class="tag">瀏覽 ${product.views || 0}</span>
@@ -240,6 +240,31 @@
             if (value.includes('case') || value.includes('機殼')) return 'case';
             if (value.includes('psu') || value.includes('電源')) return 'psu';
             return value;
+        }
+
+        function categoryLabel(category) {
+            const labels = {
+                cpu: '處理器 CPU',
+                gpu: '顯示卡 GPU',
+                mb: '主機板 MB',
+                ram: '記憶體 RAM',
+                cooler: '散熱',
+                ssd: '固態硬碟 SSD',
+                hdd: '傳統硬碟 HDD',
+                case: '機殼 Case',
+                psu: '電源供應器 PSU'
+            };
+            return labels[normalizeCategory(category)] || category || '未分類';
+        }
+
+        function conditionLabel(condition) {
+            const labels = {
+                new: '全新未拆',
+                excellent: '近全新',
+                good: '正常使用',
+                used: '有使用痕跡'
+            };
+            return labels[condition] || condition || '二手';
         }
 
         function categorySearchText(category) {

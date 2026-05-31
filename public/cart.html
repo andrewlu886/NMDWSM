@@ -6,288 +6,143 @@
     <title>購物車 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        /* 主內容區 */
-        .container { max-width: 900px; margin: 2rem auto; padding: 0 20px; }
-        .page-title { color: var(--primary-color); margin-bottom: 2rem; font-size: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-        
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .item-info { flex-grow: 1; }
-        .item-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
-        .item-seller { font-size: 0.85rem; color: #888; }
-        
-        .item-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .qty-btn {
-            background: #eee;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .qty-btn:hover { background: #ddd; }
-        .item-price { font-weight: bold; color: var(--accent-color); min-width: 100px; text-align: right; }
-        
-        .remove-btn {
-            background: #ff7675;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .remove-btn:hover { background: #d63031; }
-
-        .cart-summary {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: right;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .total-price { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); margin: 10px 0; }
-        .checkout-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        .checkout-btn:hover { background: #2ecc71; }
-        
-        .empty-cart { text-align: center; padding: 50px; color: #777; font-size: 1.2rem; }
+        body { background: var(--nmd-bg); }
+        .cart-actions { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+        .qty-control { display:inline-flex; align-items:center; gap:10px; }
+        .qty-control button { width:32px; height:32px; border:0; border-radius:8px; background:#eef2f7; cursor:pointer; font-weight:900; }
+        @media (max-width:900px){ .cart-actions{justify-content:flex-start;} }
     </style>
 </head>
 <body>
-
     <header>
         <div class="header-main">
             <a href="/" class="logo">一次買夠二手交易平台</a>
-            
-            <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="搜尋商品或文章..." onkeydown="handleSearch(event)">
-                <button class="search-btn" onclick="triggerSearch()">🔍</button>
-            </div>
-
+            <div class="search-wrapper"><input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)"><button class="search-btn" onclick="triggerSearch()">搜尋</button></div>
             <div class="header-actions">
-                <a href="/cart" class="cart-link" title="購物車">
-                    🛒 <span id="cart-count" class="cart-count">0</span>
-                </a>
-                
-                <div id="auth-section">
-                    <a href="/login" class="auth-btn">登入 / 註冊</a>
-                </div>
-                
-                <div id="user-profile">
-                    <div class="avatar">👤</div>
-                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
-                    <div class="dropdown-menu">
-                        <a href="/account.html">我的帳戶</a>
-                        <a href="/products.html">我的商品</a>
-                        <a href="#" onclick="logout()">登出</a>
-                    </div>
-                </div>
+                <a href="/cart" class="cart-link" title="購物車">購物車<span id="cart-count" class="cart-count">0</span></a>
+                <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
+                <div id="user-profile"><div class="avatar">U</div><span id="user-display-name" style="color:white;font-size:.95rem;">載入中...</span><div class="dropdown-menu"><a href="/account.html">我的帳戶</a><a href="/transactions">購買清單</a><a href="#" onclick="logout()">登出</a></div></div>
             </div>
         </div>
-        
-        <nav class="main-nav">
-            <a href="/">首頁</a>
-            <a href="/marketplace">商城</a>
-            <a href="/#recommend">智慧推薦</a>
-            <a href="/forum">討論區</a>
-            <a href="/scrape">市價查詢</a>
-            <a href="/seller">賣家中心</a>
-        </nav>
+        <nav class="main-nav"><a href="/">首頁</a><a href="/marketplace">商城</a><a href="/#recommend">智慧推薦</a><a href="/forum">討論區</a><a href="/scrape">市價查詢</a><a href="/seller">賣家中心</a></nav>
     </header>
 
-    <div class="container">
-        <h1 class="page-title">我的購物車</h1>
-        <div id="cart-items-container">
-            <!-- 購物車項目會顯示在這裡 -->
+    <main class="nmd-page">
+        <div class="nmd-hero">
+            <div><h1>購物車</h1><p>確認準備購買的二手零件、數量與金額。</p></div>
+            <a class="nmd-btn secondary" href="/marketplace">繼續逛商城</a>
         </div>
-        
-        <div class="cart-summary" id="cart-summary" style="display: none;">
-            <div>總計數量: <span id="total-qty">0</span> 件</div>
-            <div class="total-price">總金額: NT$ <span id="total-sum">0</span></div>
-            <button class="checkout-btn" onclick="checkout()">確認結帳</button>
+        <div class="nmd-grid-2">
+            <section id="cart-items-container" class="nmd-card">載入購物車中...</section>
+            <aside id="cart-summary" class="nmd-card nmd-card-pad" style="display:none;"></aside>
         </div>
-    </div>
+    </main>
 
     <script>
-        window.onload = function() {
-            // 處理登入狀態
-            const loggedInUser = localStorage.getItem('userEmail');
-            const userName = localStorage.getItem('userName');
-            if (loggedInUser) {
-                document.getElementById('auth-section').style.display = 'none';
-                document.getElementById('user-profile').style.display = 'flex';
-                document.getElementById('user-display-name').innerText = userName || loggedInUser.split('@')[0];
-            }
-            
-            renderCart();
+        window.onload = async function() {
+            setupUser();
+            await renderCart();
         };
 
-        function logout() {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            alert('已成功登出！');
-            window.location.href = '/';
-        }
-
-        function updateCartCount(cart) {
-            const count = cart.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
-            document.getElementById('cart-count').innerText = count;
+        function setupUser() {
+            const userEmail = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
+            if (!userEmail) return;
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('user-profile').style.display = 'flex';
+            document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
         }
 
         async function fetchCart() {
             const userEmail = localStorage.getItem('userEmail');
             if (!userEmail) return [];
-
             const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
             const result = await res.json();
             return result.success ? result.data.map(item => ({
                 cartItemId: item.cart_item_id,
                 productId: item.id,
                 title: item.title,
-                price: parseFloat(item.price),
-                seller: item.seller_name,
+                price: Number(item.price) || 0,
+                seller: item.seller_name || item.seller || '平台使用者',
+                image: item.image_url || item.image,
                 quantity: parseInt(item.quantity, 10) || 1
             })) : [];
         }
 
         async function renderCart() {
-            let cart = [];
             const container = document.getElementById('cart-items-container');
             const summary = document.getElementById('cart-summary');
-
+            let cart = [];
             try {
                 cart = await fetchCart();
-            } catch (err) {
-                console.error('讀取購物車失敗', err);
-                container.innerHTML = '<div class="empty-cart" style="color: red;">讀取購物車失敗，請稍後再試。</div>';
-                summary.style.display = 'none';
-                updateCartCount([]);
+            } catch (error) {
+                container.innerHTML = '<div class="nmd-empty">購物車載入失敗，請稍後再試。</div>';
                 return;
             }
-
             updateCartCount(cart);
-
-            if (cart.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-cart">
-                        <div style="font-size: 3rem; margin-bottom: 10px;">🛒</div>
-                        您的購物車是空的，去<a href="/marketplace" style="color: var(--secondary-color);">商城</a>逛逛吧！
-                    </div>`;
+            if (!cart.length) {
+                container.innerHTML = '<div class="nmd-empty">目前購物車沒有商品，先到商城挑選零件吧。</div>';
                 summary.style.display = 'none';
                 return;
             }
-
-            let html = '';
-            let totalSum = 0;
-            let totalQty = 0;
-
-            cart.forEach((item, index) => {
+            let total = 0;
+            let qty = 0;
+            container.innerHTML = cart.map(item => {
                 const itemTotal = item.price * item.quantity;
-                totalSum += itemTotal;
-                totalQty += item.quantity;
-
-                html += `
-                    <div class="cart-item">
-                        <div class="item-info">
-                            <div class="item-title">${item.title}</div>
-                            <div class="item-seller">賣家: ${item.seller}</div>
-                        </div>
-                        <div class="item-actions">
-                            <div>
-                                <button class="qty-btn" onclick="changeQty(${item.cartItemId}, ${item.quantity - 1})">-</button>
-                                <span style="margin: 0 10px;">${item.quantity}</span>
-                                <button class="qty-btn" onclick="changeQty(${item.cartItemId}, ${item.quantity + 1})">+</button>
-                            </div>
-                            <div class="item-price">NT$ ${itemTotal.toLocaleString()}</div>
-                            <button class="remove-btn" onclick="removeItem(${item.cartItemId})">刪除</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
+                total += itemTotal;
+                qty += item.quantity;
+                return `
+                    <div class="nmd-table-row">
+                        <img class="nmd-thumb" src="${escapeHtml(item.image || placeholderImage())}" alt="${escapeHtml(item.title)}">
+                        <div><strong>${escapeHtml(item.title)}</strong><div class="nmd-muted">賣家：${escapeHtml(item.seller)}</div></div>
+                        <div><span class="nmd-label">單價</span><strong>NT$ ${item.price.toLocaleString()}</strong></div>
+                        <div><span class="nmd-label">數量</span><span class="qty-control"><button onclick="changeQty(${item.cartItemId}, ${item.quantity - 1})">-</button><strong>${item.quantity}</strong><button onclick="changeQty(${item.cartItemId}, ${item.quantity + 1})">+</button></span></div>
+                        <div class="cart-actions"><strong class="nmd-price">NT$ ${itemTotal.toLocaleString()}</strong><button class="nmd-btn danger" onclick="removeItem(${item.cartItemId})">移除</button></div>
+                    </div>`;
+            }).join('');
             summary.style.display = 'block';
-            document.getElementById('total-qty').innerText = totalQty;
-            document.getElementById('total-sum').innerText = totalSum.toLocaleString();
+            summary.innerHTML = `
+                <h2>訂單摘要</h2>
+                <div class="nmd-summary-line"><span>商品數量</span><strong>${qty} 件</strong></div>
+                <div class="nmd-summary-line"><span>商品總額</span><strong>NT$ ${total.toLocaleString()}</strong></div>
+                <div class="nmd-summary-line"><span>交易方式</span><strong>面交測試</strong></div>
+                <div class="nmd-total-line"><span>總計</span><span class="nmd-price">NT$ ${total.toLocaleString()}</span></div>
+                <button class="nmd-btn" style="width:100%;" onclick="checkout()">前往結帳</button>
+                <p class="nmd-muted">展示用交易流程，不含真實金流與物流。</p>`;
         }
+
+        function updateCartCount(cart) { document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.quantity, 0); }
 
         async function changeQty(cartItemId, quantity) {
             const userEmail = localStorage.getItem('userEmail');
             if (!userEmail) return;
-
-            try {
-                await fetch(`/api/cart/${cartItemId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userEmail, quantity })
-                });
-                renderCart();
-            } catch (err) {
-                console.error('更新購物車數量失敗', err);
-                alert('更新購物車失敗');
-            }
+            await fetch(`/api/cart/${cartItemId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userEmail, quantity }) });
+            await renderCart();
         }
 
         async function removeItem(cartItemId) {
-            if (confirm('確定要從購物車移除此商品嗎？')) {
-                const userEmail = localStorage.getItem('userEmail');
-                try {
-                    await fetch(`/api/cart/${cartItemId}?userEmail=${encodeURIComponent(userEmail)}`, { method: 'DELETE' });
-                    renderCart();
-                } catch (err) {
-                    console.error('移除購物車商品失敗', err);
-                    alert('移除商品失敗');
-                }
-            }
+            if (!confirm('確定要移除這項商品嗎？')) return;
+            const userEmail = localStorage.getItem('userEmail');
+            await fetch(`/api/cart/${cartItemId}?userEmail=${encodeURIComponent(userEmail)}`, { method:'DELETE' });
+            await renderCart();
         }
 
         async function checkout() {
-            const loggedInUser = localStorage.getItem('userEmail');
-            if (!loggedInUser) {
-                alert('請先登入後再進行結帳！');
-                window.location.href = '/login';
-                return;
-            }
-
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) { alert('請先登入後再結帳'); window.location.href = '/login'; return; }
             const cart = await fetchCart();
             for (const item of cart) {
-                await fetch('/api/transactions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userEmail: loggedInUser, productId: item.productId, note: '購物車送出的購買需求' })
-                });
+                await fetch('/api/transactions', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userEmail, productId: item.productId, note: '購物車送出的購買需求' }) });
             }
-
-            alert('已送出購買需求，請到「我的交易」查看狀態。');
-            await fetch('/api/cart/clear', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userEmail: loggedInUser })
-            });
+            await fetch('/api/cart/clear', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userEmail }) });
             window.location.href = '/transactions';
         }
+
+        function placeholderImage() { return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E'; }
+        function triggerSearch(){ const q=document.querySelector('.nav-search').value.trim(); if(q) window.location.href=`/marketplace?q=${encodeURIComponent(q)}`; }
+        function handleSearch(event){ if(event.key==='Enter') triggerSearch(); }
+        function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function logout(){ localStorage.removeItem('userEmail'); localStorage.removeItem('userName'); window.location.href='/'; }
     </script>
 </body>
 </html>
