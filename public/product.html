@@ -17,7 +17,8 @@
         .price { color:var(--nmd-red); font-size:2.2rem; font-weight:900; }
         .info-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
         .info-box span, .seller-box span, .verify-box span { display:block; color:var(--nmd-muted); font-size:.86rem; font-weight:900; margin-bottom:6px; }
-        .description { white-space:pre-wrap; line-height:1.85; }
+        .description, .specs { white-space:pre-wrap; line-height:1.85; }
+        .specs { background:#fff; border:1px solid var(--nmd-border); border-radius:14px; padding:16px; }
         .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .action-grid .wide { grid-column:1/-1; }
         @media (max-width:620px){ .steps,.info-grid,.action-grid{grid-template-columns:1fr;} .action-grid .wide{grid-column:auto;} }
@@ -98,7 +99,7 @@
                     <div class="image-note nmd-muted">二手零件建議面交測試，確認外觀、序號、配件與實際運作狀況後再完成交易。</div>
                 </div>
                 <div class="nmd-card nmd-card-pad detail-stack">
-                    <div class="nmd-pills"><span class="nmd-pill">${escapeHtml(categoryLabel(product.category))}</span><span class="nmd-pill">${escapeHtml(conditionLabel(product.condition))}</span><span class="nmd-pill">${escapeHtml(product.usageTag || '一般用途')}</span><span class="nmd-pill">瀏覽 ${product.views || 0}</span></div>
+                    <div class="nmd-pills"><span class="nmd-pill">${escapeHtml(categoryLabel(product.category, product.coolingType))}</span><span class="nmd-pill">${escapeHtml(conditionLabel(product.condition))}</span><span class="nmd-pill">${escapeHtml(product.usageTag || '一般用途')}</span><span class="nmd-pill">瀏覽 ${product.views || 0}</span></div>
                     <h1 class="title">${escapeHtml(product.title)}</h1>
                     <div class="price">NT$ ${Number(product.price || 0).toLocaleString()}</div>
                     <div class="action-grid">
@@ -107,12 +108,13 @@
                         <button class="nmd-btn secondary wide" onclick="addFavorite()">收藏商品</button>
                     </div>
                     <div class="info-grid">
-                        <div class="info-box"><span>商品分類</span><strong>${escapeHtml(categoryLabel(product.category))}</strong></div>
+                        <div class="info-box"><span>商品分類</span><strong>${escapeHtml(categoryLabel(product.category, product.coolingType))}</strong></div>
                         <div class="info-box"><span>商品狀況</span><strong>${escapeHtml(conditionLabel(product.condition))}</strong></div>
                         <div class="info-box"><span>廠商 / 品牌</span><strong>${escapeHtml(product.location || '未提供')}</strong></div>
                         <div class="info-box"><span>商品狀態</span><strong>${product.status === 'active' ? '可購買' : '暫不可購買'}</strong></div>
                     </div>
                     <div class="seller-box"><span>賣家名稱</span><strong>${escapeHtml(product.seller || '平台使用者')}</strong></div>
+                    <div class="specs"><h2>商品規格</h2>${escapeHtml(product.specs || '賣家尚未提供商品規格。')}</div>
                     <div class="nmd-card-pad description" style="padding:0;"><h2>商品描述</h2>${escapeHtml(product.desc || '賣家尚未提供商品描述。')}</div>
                     <div class="verify-box"><span>燒機驗證</span><strong>未來可接入測試資料</strong><div class="nmd-muted" style="margin-top:6px;">本階段先保留擴充位置，不影響目前交易流程展示。</div></div>
                 </div>
@@ -153,9 +155,15 @@
             el.innerText = items.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 1), 0);
         }
 
-        function categoryLabel(category) {
+        function categoryLabel(category, coolingType = '') {
             const labels = { cpu:'處理器 CPU', gpu:'顯示卡 GPU', mb:'主機板 MB', ram:'記憶體 RAM', cooler:'散熱', ssd:'固態硬碟 SSD', hdd:'傳統硬碟 HDD', case:'機殼 Case', psu:'電源供應器 PSU' };
-            return labels[category] || category || '其他零件';
+            const base = labels[category] || category || '其他零件';
+            if (category === 'cooler' && coolingType) return `${base} / ${coolingTypeLabel(coolingType)}`;
+            return base;
+        }
+
+        function coolingTypeLabel(type) {
+            return { liquid: '水冷', fan: '風扇' }[type] || type || '';
         }
 
         function conditionLabel(condition) {

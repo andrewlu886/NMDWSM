@@ -138,6 +138,8 @@ function formatProduct(product) {
         price: product.price,
         category: product.category,
         desc: product.description,
+        specs: product.specs || '',
+        coolingType: product.cooling_type || '',
         image: product.image_url,
         seller: product.seller_name || product.seller_email || product.seller_id,
         sellerEmail: product.seller_email,
@@ -1274,7 +1276,7 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const body = await parseJsonBody(req);
-            const { seller, title, category, price, desc, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
+            const { seller, title, category, price, desc, specs, coolingType, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
             const user = await db.User.findByEmail(seller);
             const parsedPrice = parseInt(price, 10);
 
@@ -1289,6 +1291,8 @@ const server = http.createServer(async(req, res) => {
                 seller_id: user.id,
                 title,
                 description: desc || '',
+                specs: specs || '',
+                cooling_type: category === 'cooler' ? (coolingType || '') : '',
                 category,
                 price: parsedPrice,
                 condition,
@@ -1372,7 +1376,7 @@ const server = http.createServer(async(req, res) => {
         const productId = parseInt(pathname.split('/')[3]);
         try {
             const body = await parseJsonBody(req);
-            const { seller, title, category, price, desc, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
+            const { seller, title, category, price, desc, specs, coolingType, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
             const user = await db.User.findByEmail(seller);
             const product = await db.Product.findById(productId);
             const parsedPrice = parseInt(price, 10);
@@ -1388,6 +1392,8 @@ const server = http.createServer(async(req, res) => {
                 category,
                 price: parsedPrice,
                 description: desc || '',
+                specs: specs || '',
+                cooling_type: category === 'cooler' ? (coolingType || '') : '',
                 image_url: image || null,
                 benchmark_log: benchmarkLog || null,
                 benchmark_score: scores.best,
@@ -1430,7 +1436,7 @@ const server = http.createServer(async(req, res) => {
         req.on('data', chunk => body += chunk.toString());
         req.on('end', async () => {
             try {
-                const { seller, title, category, price, desc, image, benchmarkLog } = JSON.parse(body);
+                const { seller, title, category, price, desc, specs, coolingType, image, benchmarkLog } = JSON.parse(body);
                 console.log(`🛒 準備新增商品: ${title}, 賣家: ${seller}`);
                 
                 // 透過 email 找出對應使用者的 ID (seller_id)
@@ -1451,6 +1457,8 @@ const server = http.createServer(async(req, res) => {
                     seller_id: user.id,
                     title: title,
                     description: desc || '',
+                    specs: specs || '',
+                    cooling_type: category === 'cooler' ? (coolingType || '') : '',
                     category: category || '未分類',
                     price: parseInt(price, 10),
                     condition: 'unknown',
@@ -1491,6 +1499,8 @@ const server = http.createServer(async(req, res) => {
                 price: p.price,
                 category: p.category,
                 desc: p.description,
+                specs: p.specs || '',
+                coolingType: p.cooling_type || '',
                 image: p.image_url,
                 seller: p.seller_name || sellerEmail
             }));
@@ -1516,6 +1526,8 @@ const server = http.createServer(async(req, res) => {
                     price: product.price,
                     category: product.category,
                     desc: product.description,
+                    specs: product.specs || '',
+                    coolingType: product.cooling_type || '',
                     image: product.image_url,
                     seller: product.seller_name || product.seller_id
                 };
@@ -1553,7 +1565,7 @@ const server = http.createServer(async(req, res) => {
         req.on('data', chunk => body += chunk.toString());
         req.on('end', async () => {
             try {
-                const { title, category, price, desc, image, benchmarkLog } = JSON.parse(body);
+                const { title, category, price, desc, specs, coolingType, image, benchmarkLog } = JSON.parse(body);
                 
                 const scores = parseBenchmarkScore(benchmarkLog, category);
                 if (scores && scores.mismatch) {
@@ -1561,8 +1573,8 @@ const server = http.createServer(async(req, res) => {
                     return res.end(JSON.stringify({ success: false, message: '跑分 log 與分類不符' }));
                 }
                 await db.runUpdate(
-                    'UPDATE products SET title = ?, category = ?, price = ?, description = ?, image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ? WHERE id = ?',
-                    [title, category, parseInt(price, 10), desc || '', image || null, benchmarkLog || null, scores.best, scores.read, scores.write, scores.combined, productId]
+                    'UPDATE products SET title = ?, category = ?, price = ?, description = ?, specs = ?, cooling_type = ?, image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ? WHERE id = ?',
+                    [title, category, parseInt(price, 10), desc || '', specs || '', category === 'cooler' ? (coolingType || '') : '', image || null, benchmarkLog || null, scores.best, scores.read, scores.write, scores.combined, productId]
                 );
                 
                 res.writeHead(200, { 'Content-Type': 'application/json' });

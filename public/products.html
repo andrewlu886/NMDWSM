@@ -86,7 +86,7 @@
             container.innerHTML = products.map(product => `
                 <article class="nmd-table-row product-row">
                     <img class="nmd-thumb" src="${escapeHtml(product.image || placeholderImage())}" alt="${escapeHtml(product.title)}">
-                    <div><strong>${escapeHtml(product.title)}</strong><div class="nmd-muted">${escapeHtml(product.desc || '尚未提供商品描述')}</div><div class="nmd-pills" style="margin-top:10px;"><span class="nmd-pill ${product.status === 'sold' ? 'success' : product.status === 'inactive' ? 'gray' : ''}">${statusLabel(product.status)}</span><span class="nmd-pill">${categoryLabel(product.category)}</span><span class="nmd-pill">瀏覽 ${product.views || 0}</span></div></div>
+                    <div><strong>${escapeHtml(product.title)}</strong><div class="nmd-muted">${escapeHtml(product.desc || '尚未提供商品描述')}</div><div class="nmd-pills" style="margin-top:10px;"><span class="nmd-pill ${product.status === 'sold' ? 'success' : product.status === 'inactive' ? 'gray' : ''}">${statusLabel(product.status)}</span><span class="nmd-pill">${categoryLabel(product.category, product.coolingType)}</span><span class="nmd-pill">瀏覽 ${product.views || 0}</span></div></div>
                     <strong class="nmd-price">NT$ ${Number(product.price || 0).toLocaleString()}</strong>
                     <span>${conditionLabel(product.condition)}</span>
                     <div class="actions"><a class="nmd-btn secondary" href="/product?id=${product.id}">查看</a><button class="nmd-btn secondary" onclick="editProduct(${product.id})">編輯</button><button class="nmd-btn danger" onclick="setStatus(${product.id}, 'inactive')">下架</button></div>
@@ -103,7 +103,8 @@
 
         function editProduct(id) { window.location.href = `/seller?id=${id}`; }
         function statusLabel(status){ return { active:'上架中', sold:'已售出', inactive:'已下架' }[status] || status || '上架中'; }
-        function categoryLabel(category){ return { cpu:'處理器 CPU', gpu:'顯示卡 GPU', mb:'主機板 MB', ram:'記憶體 RAM', cooler:'散熱', ssd:'固態硬碟 SSD', hdd:'傳統硬碟 HDD', case:'機殼 Case', psu:'電源供應器 PSU' }[category] || category || '其他零件'; }
+        function categoryLabel(category, coolingType = ''){ const base = { cpu:'處理器 CPU', gpu:'顯示卡 GPU', mb:'主機板 MB', ram:'記憶體 RAM', cooler:'散熱', ssd:'固態硬碟 SSD', hdd:'傳統硬碟 HDD', case:'機殼 Case', psu:'電源供應器 PSU' }[category] || category || '其他零件'; return category === 'cooler' && coolingType ? `${base} / ${coolingTypeLabel(coolingType)}` : base; }
+        function coolingTypeLabel(type){ return { liquid:'水冷', fan:'風扇' }[type] || type || ''; }
         function conditionLabel(condition){ return { new:'全新未拆', excellent:'九成新', good:'正常使用', used:'二手零件' }[condition] || condition || '二手'; }
         async function updateCartCount(){ const userEmail=localStorage.getItem('userEmail'); const res=await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`); const result=await res.json(); const items=result.success?result.data:[]; document.getElementById('cart-count').innerText=items.reduce((s,i)=>s+(parseInt(i.quantity,10)||1),0); }
         function placeholderImage(){ return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E'; }

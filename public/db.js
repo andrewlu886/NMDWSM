@@ -43,6 +43,8 @@ function initDatabase() {
             category TEXT,
             price INTEGER NOT NULL,
             condition TEXT,
+            specs TEXT,
+            cooling_type TEXT,
             image_url TEXT,
             benchmark_log TEXT,
             benchmark_score INTEGER,
@@ -154,20 +156,26 @@ function initDatabase() {
             console.error('❌ 初始化資料表失敗:', err.message);
             reject(err);
           } else {
-            // 自動容錯：嘗試幫舊版資料庫補上 role 欄位 (若欄位已存在會靜默忽略)
-            db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'buyer'", () => {});
-            db.run("ALTER TABLE products ADD COLUMN image_url TEXT", () => {});
-            db.run("ALTER TABLE products ADD COLUMN benchmark_log TEXT", () => {});
-            db.run("ALTER TABLE products ADD COLUMN benchmark_score INTEGER", () => {});
-            db.run("ALTER TABLE products ADD COLUMN benchmark_read REAL", () => {});
-            db.run("ALTER TABLE products ADD COLUMN benchmark_write REAL", () => {});
-            db.run("ALTER TABLE products ADD COLUMN benchmark_combined REAL", () => {});
-            db.run("ALTER TABLE products ADD COLUMN location TEXT", () => {});
-            db.run("ALTER TABLE products ADD COLUMN usage_tag TEXT", () => {});
-            db.run("ALTER TABLE products ADD COLUMN negotiable INTEGER DEFAULT 0", () => {});
-            db.run("ALTER TABLE products ADD COLUMN views INTEGER DEFAULT 0", () => {});
-            db.run("ALTER TABLE transactions ADD COLUMN note TEXT", () => {});
-            db.run(`CREATE TABLE IF NOT EXISTS transaction_comments (
+            const migrations = [
+              "ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'buyer'",
+              "ALTER TABLE products ADD COLUMN image_url TEXT",
+              "ALTER TABLE products ADD COLUMN specs TEXT",
+              "ALTER TABLE products ADD COLUMN cooling_type TEXT",
+              "ALTER TABLE products ADD COLUMN benchmark_log TEXT",
+              "ALTER TABLE products ADD COLUMN benchmark_score INTEGER",
+              "ALTER TABLE products ADD COLUMN benchmark_read REAL",
+              "ALTER TABLE products ADD COLUMN benchmark_write REAL",
+              "ALTER TABLE products ADD COLUMN benchmark_combined REAL",
+              "ALTER TABLE products ADD COLUMN location TEXT",
+              "ALTER TABLE products ADD COLUMN usage_tag TEXT",
+              "ALTER TABLE products ADD COLUMN negotiable INTEGER DEFAULT 0",
+              "ALTER TABLE products ADD COLUMN views INTEGER DEFAULT 0",
+              "ALTER TABLE transactions ADD COLUMN note TEXT",
+              "ALTER TABLE posts ADD COLUMN images TEXT",
+              "ALTER TABLE comments ADD COLUMN images TEXT",
+              "ALTER TABLE cart_items ADD COLUMN quantity INTEGER DEFAULT 1"
+            ];
+            const createTransactionComments = `CREATE TABLE IF NOT EXISTS transaction_comments (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               transaction_id INTEGER NOT NULL,
               author_id INTEGER NOT NULL,
@@ -175,13 +183,25 @@ function initDatabase() {
               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
               FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
               FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
-            )`, () => {});
-            db.run("ALTER TABLE posts ADD COLUMN images TEXT", () => {});
-            db.run("ALTER TABLE comments ADD COLUMN images TEXT", () => {});
-            db.run("ALTER TABLE cart_items ADD COLUMN quantity INTEGER DEFAULT 1", () => {});
-            
-            console.log('✅ 數據庫連接成功並完成資料表初始化');
-            resolve(db);
+            )`;
+            let chain = Promise.resolve();
+            migrations.forEach((sql) => {
+              chain = chain.then(() => new Promise((migrationResolve) => {
+                db.run(sql, () => migrationResolve());
+              }));
+            });
+            chain
+              .then(() => new Promise((migrationResolve, migrationReject) => {
+                db.run(createTransactionComments, (migrationErr) => {
+                  if (migrationErr) migrationReject(migrationErr);
+                  else migrationResolve();
+                });
+              }))
+              .then(() => {
+                console.log('✅ 數據庫連接成功並完成資料表初始化');
+                resolve(db);
+              })
+              .catch(reject);
           }
         });
       }
@@ -266,8 +286,8 @@ const Product = {
   async create(data) {
     const sql = `INSERT INTO products (
                  seller_id, title, description, category, price, condition,
-                 status, image_url, benchmark_log, benchmark_score, benchmark_read, benchmark_write, benchmark_combined, location, usage_tag, negotiable
-                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                 specs, cooling_type, status, image_url, benchmark_log, benchmark_score, benchmark_read, benchmark_write, benchmark_combined, location, usage_tag, negotiable
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     return runUpdate(sql, [
       data.seller_id,
       data.title,
@@ -275,6 +295,8 @@ const Product = {
       data.category,
       data.price,
       data.condition || 'used',
+      data.specs || '',
+      data.cooling_type || '',
       data.status || 'active',
       data.image_url || null,
       data.benchmark_log || null,
@@ -291,7 +313,7 @@ const Product = {
   async update(id, data) {
     const sql = `UPDATE products SET
                  title = ?, category = ?, price = ?, description = ?,
-                 image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ?, condition = ?, location = ?, usage_tag = ?,
+                 image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ?, condition = ?, specs = ?, cooling_type = ?, location = ?, usage_tag = ?,
                  negotiable = ?, status = ?
                  WHERE id = ?`;
     return runUpdate(sql, [
@@ -306,6 +328,8 @@ const Product = {
       data.benchmark_write || null,
       data.benchmark_combined || null,
       data.condition || 'used',
+      data.specs || '',
+      data.cooling_type || '',
       data.location || '',
       data.usage_tag || '',
       data.negotiable ? 1 : 0,

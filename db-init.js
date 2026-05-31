@@ -42,6 +42,8 @@ const createTables = () => {
       category TEXT,
       price REAL NOT NULL,
       condition TEXT,
+      specs TEXT,
+      cooling_type TEXT,
       images TEXT,
       status TEXT DEFAULT 'active',
       burn_in_status TEXT DEFAULT 'untested',
@@ -178,6 +180,8 @@ function ensureColumn(table, column, definition) {
 function migrateSchema() {
   ensureColumn('users', 'role', "role TEXT DEFAULT 'buyer'");
   ensureColumn('products', 'burn_in_status', "burn_in_status TEXT DEFAULT 'untested'");
+  ensureColumn('products', 'specs', 'specs TEXT');
+  ensureColumn('products', 'cooling_type', 'cooling_type TEXT');
   ensureColumn('products', 'tested_at', 'tested_at DATETIME');
   ensureColumn('products', 'price_estimate', 'price_estimate REAL');
 }

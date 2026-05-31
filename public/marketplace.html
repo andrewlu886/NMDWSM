@@ -12,6 +12,7 @@
         .filter-section { margin-bottom: 22px; }
         .category-list { list-style: none; padding: 0; margin: 0; }
         .category-list a { display: block; padding: 8px 0; color: #475467; text-decoration: none; }
+        .category-list a.subcategory { padding-left: 18px; font-size: 0.92rem; color: #667085; }
         .category-list a.active, .category-list a:hover { color: var(--secondary-color); font-weight: 800; }
         .filter-input { width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 8px; }
         .page-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--primary-color); margin: 0 0 18px; }
@@ -79,6 +80,8 @@
                     <li><a href="#" onclick="filterCategory('mb', event)">主機板 MB</a></li>
                     <li><a href="#" onclick="filterCategory('ram', event)">記憶體 RAM</a></li>
                     <li><a href="#" onclick="filterCategory('cooler', event)">散熱</a></li>
+                    <li><a href="#" class="subcategory" onclick="filterCategory('cooler-liquid', event)">散熱 - 水冷</a></li>
+                    <li><a href="#" class="subcategory" onclick="filterCategory('cooler-fan', event)">散熱 - 風扇</a></li>
                     <li><a href="#" onclick="filterCategory('ssd', event)">固態硬碟 SSD</a></li>
                     <li><a href="#" onclick="filterCategory('hdd', event)">傳統硬碟 HDD</a></li>
                     <li><a href="#" onclick="filterCategory('case', event)">機殼 Case</a></li>
@@ -117,6 +120,8 @@
                 <button class="search-tag" type="button" data-field="category" data-value="gpu" onclick="toggleSearchTag(this)">顯示卡 GPU</button>
                 <button class="search-tag" type="button" data-field="category" data-value="cpu" onclick="toggleSearchTag(this)">處理器 CPU</button>
                 <button class="search-tag" type="button" data-field="category" data-value="cooler" onclick="toggleSearchTag(this)">散熱</button>
+                <button class="search-tag" type="button" data-field="coolingType" data-value="liquid" onclick="toggleSearchTag(this)">水冷</button>
+                <button class="search-tag" type="button" data-field="coolingType" data-value="fan" onclick="toggleSearchTag(this)">風扇</button>
                 <button class="search-tag" type="button" data-field="usageTag" data-value="遊戲" onclick="toggleSearchTag(this)">遊戲</button>
                 <button class="search-tag" type="button" data-field="location" data-value="ASUS" onclick="toggleSearchTag(this)">ASUS</button>
                 <button class="search-tag" type="button" data-field="location" data-value="GIGABYTE" onclick="toggleSearchTag(this)">GIGABYTE</button>
@@ -175,7 +180,7 @@
                         <div class="product-title">${product.title}</div>
                         <div class="product-price">NT$ ${Number(product.price).toLocaleString()}</div>
                         <div class="meta">
-                            <span class="tag">${categoryLabel(product.category)}</span>
+                            <span class="tag">${categoryLabel(product.category, product.coolingType)}</span>
                             <span class="tag">${conditionLabel(product.condition)}</span>
                             <span class="tag">${product.location || '廠家名稱'}</span>
                             <span class="tag">${product.usageTag || '未分類'}</span>
@@ -199,7 +204,7 @@
             currentCategory = category;
             document.querySelectorAll('.category-list a').forEach(link => link.classList.remove('active'));
             if (event) event.target.classList.add('active');
-            const titles = { all: '全部商品', cpu: '處理器 CPU', gpu: '顯示卡 GPU', mb: '主機板 MB', ram: '記憶體 RAM', cooler: '散熱', ssd: '固態硬碟 SSD', hdd: '傳統硬碟 HDD', case: '機殼 Case', psu: '電源供應器 PSU' };
+            const titles = { all: '全部商品', cpu: '處理器 CPU', gpu: '顯示卡 GPU', mb: '主機板 MB', ram: '記憶體 RAM', cooler: '散熱', 'cooler-liquid': '散熱 - 水冷', 'cooler-fan': '散熱 - 風扇', ssd: '固態硬碟 SSD', hdd: '傳統硬碟 HDD', case: '機殼 Case', psu: '電源供應器 PSU' };
             document.getElementById('current-category-title').innerText = titles[category] || category;
             applyFilters();
         }
@@ -220,6 +225,8 @@
             for (const tag of selectedTags.values()) {
                 const productValue = tag.field === 'category'
                     ? normalizeCategory(product.category)
+                    : tag.field === 'coolingType'
+                        ? String(product.coolingType || '').toLowerCase()
                     : String(product[tag.field] || '').toLowerCase();
                 const tagValue = String(tag.value || '').toLowerCase();
                 if (!productValue.includes(tagValue)) return false;
@@ -241,7 +248,7 @@
             return value;
         }
 
-        function categoryLabel(category) {
+        function categoryLabel(category, coolingType = '') {
             const labels = {
                 cpu: '處理器 CPU',
                 gpu: '顯示卡 GPU',
@@ -253,7 +260,14 @@
                 case: '機殼 Case',
                 psu: '電源供應器 PSU'
             };
-            return labels[normalizeCategory(category)] || category || '未分類';
+            const normalized = normalizeCategory(category);
+            const base = labels[normalized] || category || '未分類';
+            if (normalized === 'cooler' && coolingType) return `${base} / ${coolingTypeLabel(coolingType)}`;
+            return base;
+        }
+
+        function coolingTypeLabel(type) {
+            return { liquid: '水冷', fan: '風扇' }[type] || type || '';
         }
 
         function conditionLabel(condition) {
@@ -292,12 +306,64 @@
             return labels[condition] || condition || '';
         }
 
+        function normalizeSearchText(value) {
+            return String(value || '')
+                .toLowerCase()
+                .replace(/[\s_-]+/g, '')
+                .replace(/顯示卡/g, 'gpu')
+                .replace(/显示卡/g, 'gpu')
+                .replace(/圖形卡/g, 'gpu')
+                .replace(/图形卡/g, 'gpu')
+                .replace(/筆記型電腦/g, '筆電')
+                .replace(/筆記型电脑/g, '筆電')
+                .replace(/notebook/g, '筆電')
+                .replace(/laptop/g, '筆電');
+        }
+
+        function autoExcludeWords(keyword) {
+            const compact = normalizeSearchText(keyword);
+            const hasGpuModel = /(rtx|gtx|rx)\d{4}|\d[06]\d0/.test(compact);
+            if (!hasGpuModel) return [];
+            return [
+                '筆電', '筆記型', 'notebook', 'laptop', '電競筆電',
+                '主機', '整機', '套裝機', '桌機',
+                '支架', '貼紙', '貼膜', '保護貼', '轉接線', '延長線',
+                '包', '袋', '鞋', '衣', '空機殼'
+            ];
+        }
+
+        function matchesAutoExcludes(product, excludeWords) {
+            if (!excludeWords.length) return true;
+            const compactText = normalizeSearchText(productSearchText(product));
+            return !excludeWords.some(word => compactText.includes(normalizeSearchText(word)));
+        }
+
+        function hasLiquidCoolingIntent(keyword) {
+            const compact = normalizeSearchText(keyword);
+            return compact.includes('水冷') || compact.includes('liquid') || compact.includes('aio');
+        }
+
+        function hasFanCoolingIntent(keyword) {
+            const compact = normalizeSearchText(keyword);
+            return compact.includes('風扇') || compact.includes('風冷') || compact.includes('fan');
+        }
+
+        function keywordMatchesProduct(product, keywords) {
+            if (!keywords.length) return true;
+            const text = productSearchText(product);
+            const compactText = normalizeSearchText(text);
+            return keywords.every(keyword => text.includes(keyword) || compactText.includes(normalizeSearchText(keyword)));
+        }
+
         function productSearchText(product) {
             return [
                 product.title,
                 product.desc,
+                product.specs,
                 product.category,
                 categorySearchText(product.category),
+                product.coolingType,
+                coolingTypeLabel(product.coolingType),
                 product.condition,
                 conditionSearchText(product.condition),
                 product.location,
@@ -312,15 +378,24 @@
             const maxPrice = parseInt(document.getElementById('max-price').value, 10) || Infinity;
             const usage = document.getElementById('usage-filter').value;
             const sortBy = document.getElementById('sort-select').value;
-            const keywords = currentKeyword.split(/\s+/).filter(Boolean);
+            const keywords = currentKeyword.toLowerCase().split(/\s+/).filter(Boolean);
+            const junkExcludes = autoExcludeWords(currentKeyword);
+            const liquidCoolingIntent = hasLiquidCoolingIntent(currentKeyword);
+            const fanCoolingIntent = hasFanCoolingIntent(currentKeyword);
 
             let filtered = allProducts.filter(product => {
-                const matchesCategory = currentCategory === 'all' || normalizeCategory(product.category) === currentCategory;
+                const matchesCategory = currentCategory === 'all'
+                    || normalizeCategory(product.category) === currentCategory
+                    || (currentCategory === 'cooler-liquid' && normalizeCategory(product.category) === 'cooler' && product.coolingType === 'liquid')
+                    || (currentCategory === 'cooler-fan' && normalizeCategory(product.category) === 'cooler' && product.coolingType === 'fan');
                 const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
                 const matchesUsage = usage === 'all' || product.usageTag === usage;
-                const text = productSearchText(product);
-                const matchesKeyword = !keywords.length || keywords.every(keyword => text.includes(keyword));
-                return matchesCategory && matchesPrice && matchesUsage && matchesKeyword && matchesSelectedTags(product) && product.status === 'active';
+                const productCategory = normalizeCategory(product.category);
+                const matchesLiquidIntent = !liquidCoolingIntent || (productCategory === 'cooler' && product.coolingType === 'liquid');
+                const matchesFanIntent = !fanCoolingIntent || (productCategory === 'cooler' && product.coolingType === 'fan');
+                const matchesIntent = matchesLiquidIntent && matchesFanIntent;
+                const matchesKeyword = keywordMatchesProduct(product, keywords);
+                return matchesCategory && matchesPrice && matchesUsage && matchesIntent && matchesKeyword && matchesAutoExcludes(product, junkExcludes) && matchesSelectedTags(product) && product.status === 'active';
             });
 
             if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);

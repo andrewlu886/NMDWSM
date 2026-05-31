@@ -154,6 +154,15 @@
                                         <input class="nmd-field" type="number" id="product-price" min="1" placeholder="例如 4500" required>
                                     </div>
 
+                                    <div id="cooling-type-group" style="display:none;">
+                                        <label class="nmd-label" for="product-cooling-type">散熱細項</label>
+                                        <select class="nmd-field" id="product-cooling-type">
+                                            <option value="">請選擇散熱細項</option>
+                                            <option value="liquid">水冷</option>
+                                            <option value="fan">風扇</option>
+                                        </select>
+                                    </div>
+
                                     <div>
                                         <label class="nmd-label" for="product-condition">商品狀況</label>
                                         <select class="nmd-field" id="product-condition">
@@ -234,6 +243,11 @@
                                         <label class="nmd-label" for="product-desc">商品描述</label>
                                         <textarea class="nmd-field" id="product-desc" placeholder="請描述使用時間、配件、外觀狀況、保固與交易建議..." required></textarea>
                                     </div>
+
+                                    <div class="nmd-full">
+                                        <label class="nmd-label" for="product-specs">商品規格</label>
+                                        <textarea class="nmd-field" id="product-specs" placeholder="例如：750W、80 Plus Gold、全模組、ATX 尺寸、保固至 2027/05"></textarea>
+                                    </div>
                                 </div>
 
                                 <button type="submit" id="submit-btn" class="nmd-btn seller-submit-btn">送出商品</button>
@@ -246,6 +260,7 @@
                             <h3 class="seller-preview-title" id="preview-title">商品名稱</h3>
                             <div class="nmd-price seller-preview-price" id="preview-price">NT$ 0</div>
                             <p id="preview-desc" class="nmd-muted">商品描述會顯示在這裡。</p>
+                            <p id="preview-specs" class="nmd-muted">商品規格會顯示在這裡。</p>
                             <div class="nmd-pills">
                                 <span class="nmd-pill" id="preview-condition">正常使用</span>
                                 <span class="nmd-pill" id="preview-category">顯示卡 GPU</span>
@@ -289,6 +304,7 @@
 
             bindPreview();
             updateBenchmarkVisibility();
+            updateCoolingTypeVisibility();
             updatePreview();
 
             const id = new URLSearchParams(window.location.search).get('id');
@@ -304,7 +320,7 @@
         };
 
         function bindPreview() {
-            ['product-title', 'product-price', 'product-desc', 'product-condition', 'product-location', 'product-usage', 'product-quantity'].forEach(id => {
+            ['product-title', 'product-price', 'product-desc', 'product-specs', 'product-condition', 'product-location', 'product-usage', 'product-quantity', 'product-cooling-type'].forEach(id => {
                 const el = document.getElementById(id);
                 el.addEventListener('input', updatePreview);
                 el.addEventListener('change', updatePreview);
@@ -312,6 +328,7 @@
 
             document.getElementById('product-category').addEventListener('change', () => {
                 updateBenchmarkVisibility();
+                updateCoolingTypeVisibility();
                 updateParsedBenchmark();
                 updatePreview();
             });
@@ -341,6 +358,16 @@
             if (!benchmarkGroup) return;
             // 僅在 CPU 或 RAM 分類顯示跑分軟體檢測欄位，避免其他商品被過度干擾。
             benchmarkGroup.style.display = (category === 'cpu' || category === 'ram') ? '' : 'none';
+        }
+
+        function updateCoolingTypeVisibility() {
+            const category = document.getElementById('product-category').value.toLowerCase();
+            const group = document.getElementById('cooling-type-group');
+            const field = document.getElementById('product-cooling-type');
+            if (!group || !field) return;
+            const isCooler = category === 'cooler';
+            group.style.display = isCooler ? '' : 'none';
+            if (!isCooler) field.value = '';
         }
 
         async function loadSellerDashboard(userEmail) {
@@ -423,8 +450,10 @@
             const product = await res.json();
             document.getElementById('product-title').value = product.title || '';
             document.getElementById('product-category').value = (product.category || 'gpu').toLowerCase();
+            document.getElementById('product-cooling-type').value = product.coolingType || '';
             document.getElementById('product-price').value = product.price || '';
             document.getElementById('product-desc').value = product.desc || '';
+            document.getElementById('product-specs').value = product.specs || '';
             document.getElementById('product-image').value = product.image || '';
             document.getElementById('product-benchmark-log').value = product.benchmarkLog || '';
             document.getElementById('product-benchmark-score').value = product.benchmarkScore || '';
@@ -437,6 +466,7 @@
             document.getElementById('product-quantity').value = product.quantity || 1;
 
             updateBenchmarkVisibility();
+            updateCoolingTypeVisibility();
             updateParsedBenchmark();
             updatePreview();
         }
@@ -497,8 +527,9 @@
             document.getElementById('preview-title').innerText = document.getElementById('product-title').value || '商品名稱';
             document.getElementById('preview-price').innerText = `NT$ ${formatPrice(document.getElementById('product-price').value)}`;
             document.getElementById('preview-desc').innerText = document.getElementById('product-desc').value || '商品描述會顯示在這裡。';
+            document.getElementById('preview-specs').innerText = document.getElementById('product-specs').value || '商品規格會顯示在這裡。';
             document.getElementById('preview-condition').innerText = document.getElementById('product-condition').selectedOptions[0].text;
-            document.getElementById('preview-category').innerText = categoryLabel(category);
+            document.getElementById('preview-category').innerText = categoryLabel(category, document.getElementById('product-cooling-type').value);
             document.getElementById('preview-location').innerText = document.getElementById('product-location').value || '廠商品牌';
             document.getElementById('preview-usage').innerText = document.getElementById('product-usage').value;
 
@@ -597,8 +628,10 @@
                 seller,
                 title: document.getElementById('product-title').value.trim(),
                 category: document.getElementById('product-category').value,
+                coolingType: document.getElementById('product-cooling-type').value,
                 price: document.getElementById('product-price').value.trim(),
                 desc: document.getElementById('product-desc').value.trim(),
+                specs: document.getElementById('product-specs').value.trim(),
                 image: document.getElementById('product-image').value.trim(),
                 benchmarkLog: document.getElementById('product-benchmark-log').value.trim(),
                 benchmarkScore: numberOrNull(document.getElementById('product-benchmark-score').value),
@@ -632,8 +665,8 @@
             return value ? parseFloat(value) : null;
         }
 
-        function categoryLabel(category) {
-            return {
+        function categoryLabel(category, coolingType = '') {
+            const base = {
                 cpu: '處理器 CPU',
                 gpu: '顯示卡 GPU',
                 mb: '主機板 MB',
@@ -644,6 +677,12 @@
                 case: '機殼 Case',
                 psu: '電源供應器 PSU'
             }[category] || category || '其他零件';
+            if (category === 'cooler' && coolingType) return `${base} / ${coolingTypeLabel(coolingType)}`;
+            return base;
+        }
+
+        function coolingTypeLabel(type) {
+            return { liquid: '水冷', fan: '風扇' }[type] || type || '';
         }
 
         function statusLabel(status) {

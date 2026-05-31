@@ -5,6 +5,7 @@
   "main": "public/server.js",
   "scripts": {
     "start": "node public/server.js",
+    "seed:demo": "node public/seed-demo-data.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
