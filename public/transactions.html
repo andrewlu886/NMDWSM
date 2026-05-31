@@ -64,6 +64,60 @@
             line-height: 1.6;
         }
 
+        .wallet-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 18px 20px;
+            border: 1px solid #cfe2f6;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #eef7ff 100%);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .wallet-card.hidden {
+            display: none;
+        }
+
+        .wallet-label {
+            color: #667085;
+            font-size: 0.9rem;
+            font-weight: 900;
+        }
+
+        .wallet-balance {
+            margin-top: 6px;
+            color: #1f6fad;
+            font-size: clamp(1.55rem, 3vw, 2.15rem);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .wallet-note {
+            margin-top: 8px;
+            color: #667085;
+            line-height: 1.5;
+        }
+
+        .wallet-reset-btn,
+        .pay-btn,
+        .ship-btn,
+        .refund-btn {
+            border: 0;
+            background: var(--secondary-color);
+            color: #fff;
+        }
+
+        .ship-btn {
+            background: #14a06f;
+        }
+
+        .refund-btn {
+            background: #f59e0b;
+        }
+
         .role-switch {
             display: inline-flex;
             gap: 8px;
@@ -325,6 +379,10 @@
                 flex-direction: column;
             }
 
+            .wallet-card {
+                grid-template-columns: 1fr;
+            }
+
             .status-tabs {
                 display: flex;
                 overflow-x: auto;
@@ -366,6 +424,10 @@
             }
 
             .role-switch {
+                width: 100%;
+            }
+
+            .wallet-reset-btn {
                 width: 100%;
             }
 
@@ -419,6 +481,15 @@
             </div>
         </div>
 
+        <section id="wallet-card" class="wallet-card" aria-label="展示用虛擬餘額">
+            <div>
+                <div class="wallet-label">展示用虛擬餘額</div>
+                <div id="wallet-balance" class="wallet-balance">NT$ 0</div>
+                <div class="wallet-note">此餘額只保存在本瀏覽器，用於展示付款、扣款與退貨流程，不代表真實金流。</div>
+            </div>
+            <button class="wallet-reset-btn" type="button" onclick="resetWallet()">重置為 NT$ 1,000,000</button>
+        </section>
+
         <section class="order-shell">
             <div id="status-tabs" class="status-tabs"></div>
             <div class="summary-row">
@@ -436,8 +507,10 @@
             { key: 'paid', label: '待出貨' },
             { key: 'completed', label: '已完成' },
             { key: 'cancelled', label: '不成立' },
-            { key: 'refund', label: '退貨 / 退款' }
+            { key: 'refund', label: '退貨' }
         ];
+        const DEMO_WALLET_KEY = 'demoWalletBalance';
+        const DEMO_WALLET_INITIAL_BALANCE = 1000000;
 
         let currentRole = 'buyer';
         let currentStatus = 'all';
@@ -457,6 +530,7 @@
             document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
 
             renderStatusTabs();
+            initWallet();
             await updateCartCount();
             await loadOrders();
         };
@@ -479,6 +553,7 @@
             document.getElementById('page-desc').innerText = role === 'buyer'
                 ? '查看你的二手零件購買紀錄，包含待付款、待出貨與已完成訂單。'
                 : '查看買家送出的交易紀錄，賣家完整流程可在下一階段再擴充。';
+            renderWallet();
             renderStatusTabs();
             await loadOrders();
         }
@@ -513,6 +588,7 @@
             const roleText = currentRole === 'buyer' ? '購買紀錄' : '銷售紀錄';
             const statusLabel = STATUS_TABS.find(tab => tab.key === currentStatus)?.label || '全部';
             document.getElementById('summary').innerText = `${visibleOrders.length} 筆${statusLabel === '全部' ? '' : statusLabel}${roleText}`;
+            renderWallet();
 
             if (!visibleOrders.length) {
                 container.className = 'empty';
@@ -532,6 +608,9 @@
             const oppositeName = currentRole === 'buyer' ? order.seller || '平台使用者' : order.buyer || '平台使用者';
             const status = mapStatus(order.status);
             const canCancel = !['cancelled', 'completed', 'refund'].includes(order.status);
+            const canPay = currentRole === 'buyer' && order.status === 'pending';
+            const canShip = currentRole === 'seller' && order.status === 'paid';
+            const canRefund = currentRole === 'buyer' && ['paid', 'completed'].includes(order.status);
 
             return `
                 <article class="order-card">
@@ -568,6 +647,9 @@
                         <div class="note">${status.help}</div>
                         <div class="actions">
                             <a class="view-btn" href="/product?id=${order.productId}">查看商品</a>
+                            ${canPay ? `<button class="pay-btn" onclick="payOrder(${order.id})">付款</button>` : ''}
+                            ${canShip ? `<button class="ship-btn" onclick="shipOrder(${order.id})">出貨</button>` : ''}
+                            ${canRefund ? `<button class="refund-btn" onclick="refundOrder(${order.id})">退貨</button>` : ''}
                             <button class="cancel-btn" onclick="cancelOrder(${order.id})" ${canCancel ? '' : 'disabled'}>${order.status === 'cancelled' ? '已取消' : '取消訂單'}</button>
                         </div>
                     </div>
@@ -588,8 +670,8 @@
                 paid: { label: '待出貨', className: '', help: '此狀態保留給未來付款後的出貨展示。' },
                 completed: { label: '已完成', className: 'completed', help: '此筆交易已完成，可回到商品頁查看商品資訊。' },
                 cancelled: { label: '不成立', className: 'cancelled', help: '此筆交易已取消或不成立。' },
-                refund: { label: '退貨 / 退款', className: 'cancelled', help: '此狀態保留給未來退貨退款展示。' },
-                refunded: { label: '退貨 / 退款', className: 'cancelled', help: '此狀態保留給未來退貨退款展示。' }
+                refund: { label: '退貨', className: 'cancelled', help: '此狀態保留給未來退貨展示，展示用餘額會退回買家。' },
+                refunded: { label: '退貨', className: 'cancelled', help: '此狀態保留給未來退貨展示，展示用餘額會退回買家。' }
             };
             return statusMap[status] || { label: '交易紀錄', className: '', help: '此筆資料為交易紀錄。' };
         }
@@ -597,6 +679,7 @@
         async function cancelOrder(id) {
             if (!confirm('確定要取消這筆訂單嗎？')) return;
 
+            const order = orders.find(item => Number(item.id) === Number(id));
             const userEmail = localStorage.getItem('userEmail');
             const res = await fetch(`/api/transactions/${id}`, {
                 method: 'PUT',
@@ -604,8 +687,125 @@
                 body: JSON.stringify({ userEmail, status: 'cancelled' })
             });
             const result = await res.json();
-            if (!result.success) alert(result.message || '取消訂單失敗');
+            if (!result.success) {
+                alert(result.message || '取消訂單失敗');
+            } else if (currentRole === 'buyer' && order?.status === 'paid') {
+                addWalletBalance(getOrderTotal(order));
+                alert('已取消訂單，展示用餘額已退回。');
+            }
             await loadOrders();
+        }
+
+        async function payOrder(id) {
+            const order = orders.find(item => Number(item.id) === Number(id));
+            if (!order || order.status !== 'pending') return;
+
+            const total = getOrderTotal(order);
+            const balance = getWalletBalance();
+            if (balance < total) {
+                alert(`展示用餘額不足，目前餘額為 NT$ ${balance.toLocaleString()}。`);
+                return;
+            }
+
+            const userEmail = localStorage.getItem('userEmail');
+            const res = await fetch(`/api/transactions/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail, status: 'paid' })
+            });
+            const result = await res.json();
+            if (!result.success) {
+                alert(result.message || '付款失敗');
+                return;
+            }
+
+            setWalletBalance(balance - total);
+            alert('付款成功，訂單已更新為待出貨。');
+            await loadOrders();
+        }
+
+        async function shipOrder(id) {
+            const order = orders.find(item => Number(item.id) === Number(id));
+            if (!order || order.status !== 'paid') return;
+            if (!confirm('確定要將這筆訂單標記為已出貨並完成交易嗎？')) return;
+
+            const userEmail = localStorage.getItem('userEmail');
+            const res = await fetch(`/api/transactions/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail, status: 'completed' })
+            });
+            const result = await res.json();
+            if (!result.success) {
+                alert(result.message || '出貨失敗');
+                return;
+            }
+
+            alert('已出貨，訂單已更新為已完成。');
+            await loadOrders();
+        }
+
+        async function refundOrder(id) {
+            const order = orders.find(item => Number(item.id) === Number(id));
+            if (!order || !['paid', 'completed'].includes(order.status)) return;
+            if (!confirm('確定要申請退貨並退回展示用餘額嗎？')) return;
+
+            const userEmail = localStorage.getItem('userEmail');
+            const res = await fetch(`/api/transactions/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail, status: 'refund' })
+            });
+            const result = await res.json();
+            if (!result.success) {
+                alert(result.message || '退貨失敗');
+                return;
+            }
+
+            addWalletBalance(getOrderTotal(order));
+            alert('退貨成功，展示用餘額已退回。');
+            await loadOrders();
+        }
+
+        function initWallet() {
+            if (localStorage.getItem(DEMO_WALLET_KEY) === null) {
+                setWalletBalance(DEMO_WALLET_INITIAL_BALANCE);
+                return;
+            }
+            renderWallet();
+        }
+
+        function renderWallet() {
+            const card = document.getElementById('wallet-card');
+            const balanceEl = document.getElementById('wallet-balance');
+            if (!card || !balanceEl) return;
+
+            card.classList.toggle('hidden', currentRole !== 'buyer');
+            balanceEl.innerText = `NT$ ${getWalletBalance().toLocaleString()}`;
+        }
+
+        function resetWallet() {
+            setWalletBalance(DEMO_WALLET_INITIAL_BALANCE);
+        }
+
+        function getWalletBalance() {
+            const value = parseInt(localStorage.getItem(DEMO_WALLET_KEY), 10);
+            return Number.isFinite(value) ? value : DEMO_WALLET_INITIAL_BALANCE;
+        }
+
+        function setWalletBalance(value) {
+            localStorage.setItem(DEMO_WALLET_KEY, String(Math.max(0, parseInt(value, 10) || 0)));
+            renderWallet();
+        }
+
+        function addWalletBalance(amount) {
+            setWalletBalance(getWalletBalance() + (parseInt(amount, 10) || 0));
+        }
+
+        function getOrderTotal(order) {
+            const quantity = parseInt(order.quantity, 10) || 1;
+            const unitPrice = parseInt(order.price, 10) || 0;
+            return unitPrice * quantity;
         }
 
         async function updateCartCount() {

@@ -1529,7 +1529,7 @@ const server = http.createServer(async(req, res) => {
             const transactionId = parseInt(pathname.split('/')[3]);
             const body = await parseJsonBody(req);
             const user = await requireUserFromBodyOrQuery(parsedUrl, body);
-            const allowed = ['pending', 'contacting', 'completed', 'cancelled'];
+            const allowed = ['pending', 'contacting', 'paid', 'completed', 'cancelled', 'refund'];
             if (!user || !allowed.includes(body.status)) return sendJson(res, 400, { success: false, message: '交易狀態不正確' });
             const result = await db.Transaction.updateStatus(transactionId, user.id, body.status);
             if (!result.changes) return sendJson(res, 403, { success: false, message: '無法更新這筆交易' });
