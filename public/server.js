@@ -148,8 +148,44 @@ function formatProduct(product) {
         usageTag: product.usage_tag || '',
         negotiable: Boolean(product.negotiable),
         views: product.views || 0,
+        benchmarkLog: product.benchmark_log || '',
+        benchmarkScore: product.benchmark_score || null,
+        benchmarkRead: product.benchmark_read || null,
+        benchmarkWrite: product.benchmark_write || null,
+        benchmarkCombined: product.benchmark_combined || null,
         createdAt: product.created_at
     };
+}
+function parseBenchmarkScore(log) {
+    if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null };
+
+    function findLabel(labels) {
+        for (const label of labels) {
+            const re = new RegExp(label + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)', 'i');
+            const m = log.match(re);
+            if (m && m[1]) return Number(m[1]);
+        }
+        return null;
+    }
+
+    const read = findLabel(['Read', 'Sequential Read', 'Seq Read']);
+    const write = findLabel(['Write', 'Sequential Write', 'Seq Write']);
+    const combined = findLabel(['Combined', 'Overall', 'Combined Score', 'Total Score']);
+
+    // fallback: try to detect typical standalone scores (decimals allowed)
+    if (!read || !write || !combined) {
+        const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
+        if (!combined && nums.length) {
+            // try to pick a reasonable combined (~largest)
+            const sorted = nums.slice().sort((a,b)=>b-a);
+            if (sorted.length) combined = combined || sorted[0];
+        }
+        if (!read && nums.length) read = read || nums[0] || null;
+        if (!write && nums.length>1) write = write || nums[1] || null;
+    }
+
+    const best = combined || read || write || null;
+    return { read: read || null, write: write || null, combined: combined || null, best };
 }
 
 function formatTransaction(row) {
@@ -1070,7 +1106,7 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const body = await parseJsonBody(req);
-            const { seller, title, category, price, desc, image, condition, location, usageTag, negotiable, status } = body;
+            const { seller, title, category, price, desc, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
             const user = await db.User.findByEmail(seller);
             const parsedPrice = parseInt(price, 10);
 
@@ -1079,6 +1115,7 @@ const server = http.createServer(async(req, res) => {
                 return sendJson(res, 400, { success: false, message: '商品名稱、分類與價格不能為空' });
             }
 
+            const scores = parseBenchmarkScore(benchmarkLog);
             const result = await db.Product.create({
                 seller_id: user.id,
                 title,
@@ -1087,6 +1124,11 @@ const server = http.createServer(async(req, res) => {
                 price: parsedPrice,
                 condition,
                 image_url: image || null,
+                benchmark_log: benchmarkLog || null,
+                benchmark_score: scores.best,
+                benchmark_read: scores.read,
+                benchmark_write: scores.write,
+                benchmark_combined: scores.combined,
                 location,
                 usage_tag: usageTag,
                 negotiable,
@@ -1161,7 +1203,7 @@ const server = http.createServer(async(req, res) => {
         const productId = parseInt(pathname.split('/')[3]);
         try {
             const body = await parseJsonBody(req);
-            const { seller, title, category, price, desc, image, condition, location, usageTag, negotiable, status } = body;
+            const { seller, title, category, price, desc, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
             const user = await db.User.findByEmail(seller);
             const product = await db.Product.findById(productId);
             const parsedPrice = parseInt(price, 10);
@@ -1170,12 +1212,18 @@ const server = http.createServer(async(req, res) => {
             if (!product || product.seller_id !== user.id) return sendJson(res, 403, { success: false, message: '只能修改自己的商品' });
             if (!title || !category || Number.isNaN(parsedPrice)) return sendJson(res, 400, { success: false, message: '商品資料不完整' });
 
+            const scores = parseBenchmarkScore(benchmarkLog);
             await db.Product.update(productId, {
                 title,
                 category,
                 price: parsedPrice,
                 description: desc || '',
                 image_url: image || null,
+                benchmark_log: benchmarkLog || null,
+                benchmark_score: scores.best,
+                benchmark_read: scores.read,
+                benchmark_write: scores.write,
+                benchmark_combined: scores.combined,
                 condition,
                 location,
                 usage_tag: usageTag,
@@ -1212,7 +1260,7 @@ const server = http.createServer(async(req, res) => {
         req.on('data', chunk => body += chunk.toString());
         req.on('end', async () => {
             try {
-                const { seller, title, category, price, desc, image } = JSON.parse(body);
+                const { seller, title, category, price, desc, image, benchmarkLog } = JSON.parse(body);
                 console.log(`🛒 準備新增商品: ${title}, 賣家: ${seller}`);
                 
                 // 透過 email 找出對應使用者的 ID (seller_id)
@@ -1224,6 +1272,7 @@ const server = http.createServer(async(req, res) => {
                 }
                 
                 // 寫入 SQLite 資料庫
+                const scores = parseBenchmarkScore(benchmarkLog);
                 const result = await db.Product.create({
                     seller_id: user.id,
                     title: title,
@@ -1231,7 +1280,12 @@ const server = http.createServer(async(req, res) => {
                     category: category || '未分類',
                     price: parseInt(price, 10),
                     condition: 'unknown',
-                    image_url: image || null
+                    image_url: image || null,
+                    benchmark_log: benchmarkLog || null,
+                    benchmark_score: scores.best,
+                    benchmark_read: scores.read,
+                    benchmark_write: scores.write,
+                    benchmark_combined: scores.combined
                 });
                 console.log(`✅ 商品已成功寫入 SQLite 資料庫！(商品 ID: ${result.id})`);
                 
@@ -1325,11 +1379,12 @@ const server = http.createServer(async(req, res) => {
         req.on('data', chunk => body += chunk.toString());
         req.on('end', async () => {
             try {
-                const { title, category, price, desc, image } = JSON.parse(body);
+                const { title, category, price, desc, image, benchmarkLog } = JSON.parse(body);
                 
+                const scores = parseBenchmarkScore(benchmarkLog);
                 await db.runUpdate(
-                    'UPDATE products SET title = ?, category = ?, price = ?, description = ?, image_url = ? WHERE id = ?',
-                    [title, category, parseInt(price, 10), desc || '', image || null, productId]
+                    'UPDATE products SET title = ?, category = ?, price = ?, description = ?, image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ? WHERE id = ?',
+                    [title, category, parseInt(price, 10), desc || '', image || null, benchmarkLog || null, scores.best, scores.read, scores.write, scores.combined, productId]
                 );
                 
                 res.writeHead(200, { 'Content-Type': 'application/json' });

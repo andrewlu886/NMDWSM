@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑分軟體使用方法 | 一次買夠二手交易平台</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 20px; }
+        .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
+        h1, h2 { color: var(--primary-color); }
+        .step { margin-bottom: 18px; }
+        .step strong { display: block; margin-bottom: 8px; }
+        .note { margin-top: 12px; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; color: #334155; }
+        .btn-link { display: inline-block; margin-top: 18px; padding: 10px 16px; background: var(--secondary-color); color: #fff; border-radius: 7px; text-decoration: none; }
+        ul { margin: 0; padding-left: 1.2rem; }
+        @media (max-width: 780px) { .container { padding: 0 16px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-main">
+            <a href="/" class="logo">一次買夠二手交易平台</a>
+            <div class="header-actions">
+                <a href="/seller" class="auth-btn">回到賣家中心</a>
+            </div>
+        </div>
+    </header>
+    <main class="container">
+        <section class="panel">
+            <h1>跑分軟體使用方法</h1>
+            <p>請依照以下步驟使用 OCCT 進行檢測，完成後將 log 貼回商品表單，系統會嘗試自動擷取分數。</p>
+
+            <div class="step">
+                <strong>1. 下載並安裝 OCCT</strong>
+                <p>前往 OCCT 官方網站下載最新版本，安裝完成後開啟程式。</p>
+            </div>
+
+            <div class="step">
+                <strong>2. 選擇檢測項目</strong>
+                <p>建議選擇 CPU 或 GPU 測試項目，讓 OCCT 產生完整測試結果。</p>
+            </div>
+
+            <div class="step">
+                <strong>3. 執行測試並儲存 log</strong>
+                <p>完成測試後，將 OCCT 產生的 log 檔案儲存下來（通常為文字檔）。</p>
+            </div>
+
+            <div class="step">
+                <strong>4. 將 log 內容貼回本系統</strong>
+                <p>打開 log 檔案，複製全部內容，回到「賣家中心」中的「跑分軟體檢測」欄位貼上。</p>
+            </div>
+
+            <div class="note">
+                本系統會嘗試從 log 中自動解析分數，例如包含「3DMark」或「CPU Test」相關結果時，會將分數存入商品資料庫，後續可用於定價模型。<br>
+                若解析失敗，請確認已貼上完整 log 內容。
+            </div>
+
+            <a href="/seller" class="btn-link">回到賣家中心</a>
+        </section>
+    </main>
+</body>
+</html>

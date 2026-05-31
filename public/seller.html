@@ -121,6 +121,32 @@
                         <label for="product-quantity">數量</label>
                         <input type="number" id="product-quantity" min="1" value="1" placeholder="例如 1">
                     </div>
+                    <div class="form-group full" id="product-benchmark-group">
+                        <label for="product-benchmark-log">跑分軟體檢測</label>
+                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                            <textarea id="product-benchmark-log" placeholder="請貼上 OCCT log 內容" rows="5" style="flex:1"></textarea>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <button id="parse-benchmark-btn" type="button" class="btn" style="padding:8px 12px; height:40px;">解析 log</button>
+                                <a href="/benchmark-instructions.html" target="_blank" style="display:inline-block; padding:8px 12px; background:#eef6ff; color:#2563eb; border-radius:6px; text-decoration:none; text-align:center;">跑分軟體使用方法</a>
+                            </div>
+                        </div>
+                        <div id="benchmark-parse-result" style="margin-top:8px; color:#0f172a; font-weight:700;"></div>
+                        <div style="margin-top:8px; display:flex; gap:8px;">
+                            <div style="flex:1;">
+                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">Read</label>
+                                <input id="product-benchmark-read" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">Write</label>
+                                <input id="product-benchmark-write" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">Combined</label>
+                                <input id="product-benchmark-combined" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
+                            </div>
+                        </div>
+                        <input type="hidden" id="product-benchmark-score" />
+                    </div>
                     <div class="form-group full">
                         <label for="product-image">商品圖片網址</label>
                         <input type="url" id="product-image" placeholder="https://...jpg" oninput="updatePreview()">
@@ -144,6 +170,11 @@
                 <span class="tag" id="preview-condition">正常使用</span>
                 <span class="tag" id="preview-location">廠家名稱</span>
                 <span class="tag" id="preview-usage">遊戲</span>
+                <span class="tag" id="preview-benchmark">未提供分數</span>
+                <span class="tag" id="preview-benchmark-read">R:-</span>
+                <span class="tag" id="preview-benchmark-write">W:-</span>
+                <span class="tag" id="preview-benchmark-combined">C:-</span>
+                <span class="tag" id="preview-benchmark-raw">未提供 log</span>
                 <span class="tag">已驗證零件</span>
             </div>
         </aside>
@@ -169,6 +200,7 @@
             document.getElementById('user-display-name').innerText = userName || loggedInUser.split('@')[0];
             updateCartCount();
             bindPreview();
+            updateBenchmarkVisibility();
 
             const id = new URLSearchParams(window.location.search).get('id');
             if (id) await loadProduct(id);
@@ -180,6 +212,32 @@
                 document.getElementById(id).addEventListener('input', updatePreview);
                 document.getElementById(id).addEventListener('change', updatePreview);
             });
+            document.getElementById('product-category').addEventListener('change', () => {
+                updateBenchmarkVisibility();
+            });
+            const logEl = document.getElementById('product-benchmark-log');
+            if (logEl) {
+                document.getElementById('parse-benchmark-btn').addEventListener('click', () => {
+                    updateParsedBenchmark();
+                });
+                logEl.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey || e.shiftKey) === false) {
+                        e.preventDefault();
+                        updateParsedBenchmark();
+                    }
+                });
+                logEl.addEventListener('input', () => {
+                    // clear result when user edits
+                    document.getElementById('benchmark-parse-result').innerText = '';
+                });
+            }
+        }
+
+        function updateBenchmarkVisibility() {
+            const category = document.getElementById('product-category').value;
+            const benchmarkGroup = document.getElementById('product-benchmark-group');
+            if (!benchmarkGroup) return;
+            benchmarkGroup.style.display = (category === 'gpu' || category === 'cpu') ? '' : 'none';
         }
 
         async function loadProduct(id) {
@@ -198,11 +256,40 @@
             document.getElementById('product-price').value = product.price || '';
             document.getElementById('product-desc').value = product.desc || '';
             document.getElementById('product-image').value = product.image || '';
+            document.getElementById('product-benchmark-log').value = product.benchmarkLog || '';
+            document.getElementById('product-benchmark-score').value = product.benchmarkScore || '';
+            document.getElementById('product-benchmark-read').value = product.benchmarkRead || '';
+            document.getElementById('product-benchmark-write').value = product.benchmarkWrite || '';
+            document.getElementById('product-benchmark-combined').value = product.benchmarkCombined || '';
             document.getElementById('product-condition').value = product.condition || 'good';
             document.getElementById('product-location').value = product.location || '';
             document.getElementById('product-usage').value = product.usageTag || '遊戲';
             document.getElementById('product-quantity').value = product.quantity || 1;
             updatePreview();
+            updateParsedBenchmark();
+        }
+
+        function updateParsedBenchmark() {
+            const log = document.getElementById('product-benchmark-log')?.value || '';
+            const scores = parseBenchmarkScore(log) || { read: null, write: null, combined: null, best: null };
+            const resultEl = document.getElementById('benchmark-parse-result');
+            if (scores.read || scores.write || scores.combined) {
+                resultEl.innerText = `Read : ${scores.read || '-'}\nWrite : ${scores.write || '-'}\nCombined : ${scores.combined || '-'} `;
+            } else if (log.trim().length === 0) {
+                resultEl.innerText = '';
+            } else {
+                resultEl.innerText = '未能解析分數，請確認已貼上完整 OCCT log。';
+            }
+
+            document.getElementById('product-benchmark-read').value = scores.read || '';
+            document.getElementById('product-benchmark-write').value = scores.write || '';
+            document.getElementById('product-benchmark-combined').value = scores.combined || '';
+            document.getElementById('product-benchmark-score').value = scores.best || '';
+
+            document.getElementById('preview-benchmark').innerText = scores.best ? `分數 ${scores.best}` : '未提供分數';
+            document.getElementById('preview-benchmark-read').innerText = `R:${scores.read || '-'}`;
+            document.getElementById('preview-benchmark-write').innerText = `W:${scores.write || '-'}`;
+            document.getElementById('preview-benchmark-combined').innerText = `C:${scores.combined || '-'}`;
         }
 
         function updatePreview() {
@@ -214,6 +301,45 @@
             document.getElementById('preview-condition').innerText = document.getElementById('product-condition').selectedOptions[0].text;
             document.getElementById('preview-location').innerText = document.getElementById('product-location').value || '廠家名稱';
             document.getElementById('preview-usage').innerText = document.getElementById('product-usage').value;
+            const bs = document.getElementById('product-benchmark-log')?.value || '';
+            const parsed = parseBenchmarkScore(bs) || { read: null, write: null, combined: null, best: null };
+            document.getElementById('preview-benchmark').innerText = parsed.best ? `分數 ${parsed.best}` : '未提供分數';
+            document.getElementById('preview-benchmark-read').innerText = `R:${parsed.read || '-'}`;
+            document.getElementById('preview-benchmark-write').innerText = `W:${parsed.write || '-'}`;
+            document.getElementById('preview-benchmark-combined').innerText = `C:${parsed.combined || '-'}`;
+            document.getElementById('product-benchmark-score').value = parsed.best || '';
+            const rawPreview = bs ? (bs.length > 30 ? bs.slice(0, 30) + '...' : bs) : '未提供 log';
+            document.getElementById('preview-benchmark-raw').innerText = rawPreview;
+        }
+
+        function parseBenchmarkScore(log) {
+            if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null };
+
+            function findLabel(labels) {
+                for (const label of labels) {
+                    const re = new RegExp(label + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)', 'i');
+                    const m = log.match(re);
+                    if (m && m[1]) return Number(m[1]);
+                }
+                return null;
+            }
+
+            let read = findLabel(['Read', 'Sequential Read', 'Seq Read']);
+            let write = findLabel(['Write', 'Sequential Write', 'Seq Write']);
+            let combined = findLabel(['Combined', 'Overall', 'Combined Score', 'Total Score']);
+
+            if ((!read || !write || !combined)) {
+                const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
+                if (!combined && nums.length) {
+                    const sorted = nums.slice().sort((a,b)=>b-a);
+                    if (sorted.length) combined = combined || sorted[0];
+                }
+                if (!read && nums.length) read = read || nums[0] || null;
+                if (!write && nums.length>1) write = write || nums[1] || null;
+            }
+
+            const best = combined || read || write || null;
+            return { read: read || null, write: write || null, combined: combined || null, best };
         }
 
         async function submitProduct(event) {
@@ -226,6 +352,11 @@
                 price: document.getElementById('product-price').value.trim(),
                 desc: document.getElementById('product-desc').value.trim(),
                 image: document.getElementById('product-image').value.trim(),
+                benchmarkLog: document.getElementById('product-benchmark-log').value.trim(),
+                benchmarkScore: document.getElementById('product-benchmark-score').value ? parseFloat(document.getElementById('product-benchmark-score').value) : null,
+                benchmarkRead: document.getElementById('product-benchmark-read').value ? parseFloat(document.getElementById('product-benchmark-read').value) : null,
+                benchmarkWrite: document.getElementById('product-benchmark-write').value ? parseFloat(document.getElementById('product-benchmark-write').value) : null,
+                benchmarkCombined: document.getElementById('product-benchmark-combined').value ? parseFloat(document.getElementById('product-benchmark-combined').value) : null,
                 condition: document.getElementById('product-condition').value,
                 location: document.getElementById('product-location').value.trim(),
                 usageTag: document.getElementById('product-usage').value,

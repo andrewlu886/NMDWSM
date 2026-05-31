@@ -44,6 +44,11 @@ function initDatabase() {
             price INTEGER NOT NULL,
             condition TEXT,
             image_url TEXT,
+            benchmark_log TEXT,
+            benchmark_score INTEGER,
+            benchmark_read REAL,
+            benchmark_write REAL,
+            benchmark_combined REAL,
             location TEXT,
             usage_tag TEXT,
             negotiable INTEGER DEFAULT 0,
@@ -152,6 +157,11 @@ function initDatabase() {
             // 自動容錯：嘗試幫舊版資料庫補上 role 欄位 (若欄位已存在會靜默忽略)
             db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'buyer'", () => {});
             db.run("ALTER TABLE products ADD COLUMN image_url TEXT", () => {});
+            db.run("ALTER TABLE products ADD COLUMN benchmark_log TEXT", () => {});
+            db.run("ALTER TABLE products ADD COLUMN benchmark_score INTEGER", () => {});
+            db.run("ALTER TABLE products ADD COLUMN benchmark_read REAL", () => {});
+            db.run("ALTER TABLE products ADD COLUMN benchmark_write REAL", () => {});
+            db.run("ALTER TABLE products ADD COLUMN benchmark_combined REAL", () => {});
             db.run("ALTER TABLE products ADD COLUMN location TEXT", () => {});
             db.run("ALTER TABLE products ADD COLUMN usage_tag TEXT", () => {});
             db.run("ALTER TABLE products ADD COLUMN negotiable INTEGER DEFAULT 0", () => {});
@@ -256,8 +266,8 @@ const Product = {
   async create(data) {
     const sql = `INSERT INTO products (
                  seller_id, title, description, category, price, condition,
-                 status, image_url, location, usage_tag, negotiable
-                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                 status, image_url, benchmark_log, benchmark_score, benchmark_read, benchmark_write, benchmark_combined, location, usage_tag, negotiable
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     return runUpdate(sql, [
       data.seller_id,
       data.title,
@@ -267,6 +277,11 @@ const Product = {
       data.condition || 'used',
       data.status || 'active',
       data.image_url || null,
+      data.benchmark_log || null,
+      data.benchmark_score || null,
+      data.benchmark_read || null,
+      data.benchmark_write || null,
+      data.benchmark_combined || null,
       data.location || '',
       data.usage_tag || '',
       data.negotiable ? 1 : 0
@@ -276,7 +291,7 @@ const Product = {
   async update(id, data) {
     const sql = `UPDATE products SET
                  title = ?, category = ?, price = ?, description = ?,
-                 image_url = ?, condition = ?, location = ?, usage_tag = ?,
+                 image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ?, condition = ?, location = ?, usage_tag = ?,
                  negotiable = ?, status = ?
                  WHERE id = ?`;
     return runUpdate(sql, [
@@ -285,6 +300,11 @@ const Product = {
       data.price,
       data.description || '',
       data.image_url || null,
+      data.benchmark_log || null,
+      data.benchmark_score || null,
+      data.benchmark_read || null,
+      data.benchmark_write || null,
+      data.benchmark_combined || null,
       data.condition || 'used',
       data.location || '',
       data.usage_tag || '',
