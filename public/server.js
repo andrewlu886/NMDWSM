@@ -265,6 +265,30 @@ async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
     return user;
 }
 
+function validateTransactionTransition(transaction, user, nextStatus) {
+    const currentStatus = transaction.status || 'pending';
+    const isBuyer = transaction.buyer_id === user.id;
+    const isSeller = transaction.seller_id === user.id;
+
+    if (['cancelled', 'refund', 'refunded'].includes(currentStatus)) {
+        return '此交易流程已結束，無法再更新';
+    }
+    if (nextStatus === 'paid') {
+        return isBuyer && currentStatus === 'pending' ? '' : '只有買家可以付款待付款訂單';
+    }
+    if (nextStatus === 'cancelled') {
+        return isBuyer && currentStatus === 'pending' ? '' : '只有買家可以取消待付款訂單';
+    }
+    if (nextStatus === 'refund') {
+        return isBuyer && ['paid', 'completed'].includes(currentStatus) ? '' : '只有買家可以退貨已付款或已完成訂單';
+    }
+    if (nextStatus === 'completed') {
+        return isSeller && currentStatus === 'paid' ? '' : '只有賣家可以將待出貨訂單標記為已完成';
+    }
+
+    return '交易狀態不正確';
+}
+
 // --- 智慧推薦功能實作 ---
 // ==========================================
 // 1. GPU 動態算分引擎
@@ -1627,8 +1651,12 @@ const server = http.createServer(async(req, res) => {
             const transactionId = parseInt(pathname.split('/')[3]);
             const body = await parseJsonBody(req);
             const user = await requireUserFromBodyOrQuery(parsedUrl, body);
-            const allowed = ['pending', 'contacting', 'paid', 'completed', 'cancelled', 'refund'];
+            const allowed = ['paid', 'completed', 'cancelled', 'refund'];
             if (!user || !allowed.includes(body.status)) return sendJson(res, 400, { success: false, message: '交易狀態不正確' });
+            const transaction = await db.Transaction.findForUser(transactionId, user.id);
+            if (!transaction) return sendJson(res, 403, { success: false, message: '無法更新這筆交易' });
+            const transitionError = validateTransactionTransition(transaction, user, body.status);
+            if (transitionError) return sendJson(res, 400, { success: false, message: transitionError });
             const result = await db.Transaction.updateStatus(transactionId, user.id, body.status);
             if (!result.changes) return sendJson(res, 403, { success: false, message: '無法更新這筆交易' });
             sendJson(res, 200, { success: true, message: '交易狀態已更新' });

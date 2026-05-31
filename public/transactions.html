@@ -260,6 +260,92 @@
             padding: 16px;
         }
 
+        .order-progress {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            padding: 14px 16px;
+            border-top: 1px solid #edf1f5;
+            background: #fbfdff;
+        }
+
+        .progress-step {
+            position: relative;
+            display: grid;
+            justify-items: center;
+            gap: 7px;
+            color: #98a2b3;
+            font-size: 0.82rem;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .progress-step::before {
+            content: "";
+            position: absolute;
+            top: 9px;
+            left: calc(-50% + 14px);
+            right: calc(50% + 14px);
+            height: 2px;
+            background: #d8e2ee;
+        }
+
+        .progress-step:first-child::before {
+            display: none;
+        }
+
+        .progress-dot {
+            position: relative;
+            z-index: 1;
+            width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            border: 3px solid #d8e2ee;
+            background: #fff;
+        }
+
+        .progress-step.done,
+        .progress-step.active {
+            color: #2364a0;
+        }
+
+        .progress-step.done::before,
+        .progress-step.active::before {
+            background: var(--secondary-color);
+        }
+
+        .progress-step.done .progress-dot,
+        .progress-step.active .progress-dot {
+            border-color: var(--secondary-color);
+            background: var(--secondary-color);
+        }
+
+        .progress-step.active .progress-dot {
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.16);
+        }
+
+        .order-progress.terminal {
+            grid-template-columns: 1fr;
+            justify-items: start;
+            color: #667085;
+            font-weight: 900;
+        }
+
+        .terminal-progress-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: #f3f4f6;
+            color: #667085;
+        }
+
+        .terminal-progress-pill.return {
+            background: #fff7ed;
+            color: #b45309;
+        }
+
         .product-img {
             width: 92px;
             height: 74px;
@@ -396,6 +482,10 @@
                 grid-template-columns: 84px minmax(0, 1fr) 120px;
             }
 
+            .order-progress {
+                overflow-x: auto;
+            }
+
             .quantity,
             .money {
                 text-align: left;
@@ -416,6 +506,20 @@
 
             .order-body {
                 grid-template-columns: 1fr;
+            }
+
+            .order-progress {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-step {
+                justify-items: start;
+                grid-template-columns: 24px 1fr;
+                text-align: left;
+            }
+
+            .progress-step::before {
+                display: none;
             }
 
             .product-img {
@@ -607,7 +711,7 @@
             const oppositeLabel = currentRole === 'buyer' ? '賣家' : '買家';
             const oppositeName = currentRole === 'buyer' ? order.seller || '平台使用者' : order.buyer || '平台使用者';
             const status = mapStatus(order.status);
-            const canCancel = !['cancelled', 'completed', 'refund'].includes(order.status);
+            const canCancel = currentRole === 'buyer' && order.status === 'pending';
             const canPay = currentRole === 'buyer' && order.status === 'pending';
             const canShip = currentRole === 'seller' && order.status === 'paid';
             const canRefund = currentRole === 'buyer' && ['paid', 'completed'].includes(order.status);
@@ -643,6 +747,7 @@
                             <div class="money">NT$ ${total.toLocaleString()}</div>
                         </div>
                     </div>
+                    ${renderOrderProgress(order.status)}
                     <div class="order-foot">
                         <div class="note">${status.help}</div>
                         <div class="actions">
@@ -650,10 +755,35 @@
                             ${canPay ? `<button class="pay-btn" onclick="payOrder(${order.id})">付款</button>` : ''}
                             ${canShip ? `<button class="ship-btn" onclick="shipOrder(${order.id})">出貨</button>` : ''}
                             ${canRefund ? `<button class="refund-btn" onclick="refundOrder(${order.id})">退貨</button>` : ''}
-                            <button class="cancel-btn" onclick="cancelOrder(${order.id})" ${canCancel ? '' : 'disabled'}>${order.status === 'cancelled' ? '已取消' : '取消訂單'}</button>
+                            ${canCancel ? `<button class="cancel-btn" onclick="cancelOrder(${order.id})">取消訂單</button>` : ''}
                         </div>
                     </div>
                 </article>
+            `;
+        }
+
+        function renderOrderProgress(status) {
+            if (status === 'cancelled') {
+                return '<div class="order-progress terminal"><span class="terminal-progress-pill">流程已結束：不成立</span></div>';
+            }
+            if (status === 'refund' || status === 'refunded') {
+                return '<div class="order-progress terminal"><span class="terminal-progress-pill return">流程已結束：退貨</span></div>';
+            }
+
+            const steps = ['建立訂單', '已付款', '已出貨', '已完成'];
+            const activeIndex = {
+                pending: 0,
+                paid: 1,
+                completed: 3
+            }[status] ?? 0;
+
+            return `
+                <div class="order-progress" aria-label="交易進度">
+                    ${steps.map((step, index) => {
+                        const stepClass = index < activeIndex ? 'done' : (index === activeIndex ? 'active' : '');
+                        return `<div class="progress-step ${stepClass}"><span class="progress-dot"></span><span>${step}</span></div>`;
+                    }).join('')}
+                </div>
             `;
         }
 
