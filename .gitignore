@@ -17,6 +17,7 @@ pids
 *.db
 *.sqlite
 *.sqlite3
+!public/nmdwsm.db
 public/users.json
 public/products.json
 public/posts.json

@@ -82,6 +82,8 @@
                     <li><a href="#" onclick="filterCategory('cooler', event)">散熱</a></li>
                     <li><a href="#" onclick="filterCategory('ssd', event)">固態硬碟 SSD</a></li>
                     <li><a href="#" onclick="filterCategory('hdd', event)">傳統硬碟 HDD</a></li>
+                    <li><a href="#" onclick="filterCategory('case', event)">機殼 Case</a></li>
+                    <li><a href="#" onclick="filterCategory('psu', event)">電源供應器 PSU</a></li>
                 </ul>
             </div>
             <div class="filter-section">
@@ -198,7 +200,7 @@
             currentCategory = category;
             document.querySelectorAll('.category-list a').forEach(link => link.classList.remove('active'));
             if (event) event.target.classList.add('active');
-            const titles = { all: '全部商品', cpu: '處理器 CPU', gpu: '顯示卡 GPU', mb: '主機板 MB', ram: '記憶體 RAM', cooler: '散熱', ssd: '固態硬碟 SSD', hdd: '傳統硬碟 HDD' };
+            const titles = { all: '全部商品', cpu: '處理器 CPU', gpu: '顯示卡 GPU', mb: '主機板 MB', ram: '記憶體 RAM', cooler: '散熱', ssd: '固態硬碟 SSD', hdd: '傳統硬碟 HDD', case: '機殼 Case', psu: '電源供應器 PSU' };
             document.getElementById('current-category-title').innerText = titles[category] || category;
             applyFilters();
         }
@@ -217,14 +219,31 @@
 
         function matchesSelectedTags(product) {
             for (const tag of selectedTags.values()) {
-                const productValue = String(product[tag.field] || '').toLowerCase();
+                const productValue = tag.field === 'category'
+                    ? normalizeCategory(product.category)
+                    : String(product[tag.field] || '').toLowerCase();
                 const tagValue = String(tag.value || '').toLowerCase();
                 if (!productValue.includes(tagValue)) return false;
             }
             return true;
         }
 
+        function normalizeCategory(category) {
+            const value = String(category || '').toLowerCase();
+            if (value.includes('cpu') || value.includes('處理器')) return 'cpu';
+            if (value.includes('gpu') || value.includes('顯示卡')) return 'gpu';
+            if (value.includes('mb') || value.includes('motherboard') || value.includes('主機板')) return 'mb';
+            if (value.includes('ram') || value.includes('記憶體')) return 'ram';
+            if (value.includes('cooler') || value.includes('散熱')) return 'cooler';
+            if (value.includes('ssd') || value.includes('固態硬碟')) return 'ssd';
+            if (value.includes('hdd') || value.includes('傳統硬碟')) return 'hdd';
+            if (value.includes('case') || value.includes('機殼')) return 'case';
+            if (value.includes('psu') || value.includes('電源')) return 'psu';
+            return value;
+        }
+
         function categorySearchText(category) {
+            const normalized = normalizeCategory(category);
             const labels = {
                 cpu: 'cpu 處理器 中央處理器 processor intel amd',
                 gpu: 'gpu 顯示卡 graphics card nvidia geforce rtx amd radeon',
@@ -232,9 +251,11 @@
                 ram: 'ram 記憶體 memory ddr4 ddr5',
                 cooler: '散熱 cooler 風扇 水冷 塔散',
                 ssd: 'ssd 固態硬碟 nvme m2',
-                hdd: 'hdd 傳統硬碟 hard disk'
+                hdd: 'hdd 傳統硬碟 hard disk',
+                case: 'case 機殼 chassis atx matx itx',
+                psu: 'psu 電源 電源供應器 power supply 金牌 銅牌'
             };
-            return labels[category] || category || '';
+            return labels[normalized] || category || '';
         }
 
         function conditionSearchText(condition) {
@@ -270,7 +291,7 @@
             const keywords = currentKeyword.split(/\s+/).filter(Boolean);
 
             let filtered = allProducts.filter(product => {
-                const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
+                const matchesCategory = currentCategory === 'all' || normalizeCategory(product.category) === currentCategory;
                 const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
                 const matchesUsage = usage === 'all' || product.usageTag === usage;
                 const text = productSearchText(product);
