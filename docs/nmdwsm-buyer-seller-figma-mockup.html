@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NMDWSM 買家賣家流程重作 - Figma Mockup</title>
+    <style>
+        :root {
+            --navy: #22384d;
+            --navy-2: #1a2c40;
+            --blue: #2f8fd8;
+            --blue-soft: #e8f3ff;
+            --red: #e64b3c;
+            --green: #14a06f;
+            --bg: #f3f7fb;
+            --surface: #ffffff;
+            --border: #dce6f1;
+            --text: #1f2d3d;
+            --muted: #667085;
+            --muted-2: #98a2b3;
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background: #dce6f1;
+            color: var(--text);
+        }
+
+        .canvas {
+            display: grid;
+            gap: 56px;
+            padding: 48px;
+        }
+
+        .frame {
+            width: 1440px;
+            min-height: 900px;
+            margin: 0 auto;
+            background:
+                radial-gradient(circle at 88% 8%, rgba(47, 143, 216, 0.14), transparent 300px),
+                linear-gradient(180deg, #f9fcff 0%, var(--bg) 100%);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.85);
+        }
+
+        .cover {
+            display: grid;
+            grid-template-columns: 1fr 460px;
+            gap: 56px;
+            padding: 72px;
+            align-items: center;
+            background:
+                linear-gradient(135deg, rgba(34, 56, 77, 0.96), rgba(25, 46, 68, 0.95)),
+                radial-gradient(circle at top right, rgba(47, 143, 216, 0.4), transparent 380px);
+            color: #fff;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(47, 143, 216, 0.18);
+            color: #9fd1ff;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            font-size: 13px;
+        }
+
+        h1, h2, h3, p {
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: 56px;
+            line-height: 1.08;
+            margin: 24px 0 20px;
+            letter-spacing: -0.04em;
+        }
+
+        .cover p {
+            color: #d7e7f8;
+            font-size: 20px;
+            line-height: 1.8;
+            max-width: 720px;
+        }
+
+        .cover-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 28px;
+            padding: 28px;
+            backdrop-filter: blur(14px);
+        }
+
+        .cover-card strong {
+            display: block;
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .cover-card span {
+            color: #c8d9ea;
+            line-height: 1.7;
+        }
+
+        .header {
+            background: var(--navy);
+            color: #fff;
+        }
+
+        .header-main {
+            display: grid;
+            grid-template-columns: 320px 1fr 260px;
+            gap: 28px;
+            align-items: center;
+            padding: 22px 72px;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+
+        .search {
+            display: grid;
+            grid-template-columns: 1fr 108px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 5px;
+        }
+
+        .search span {
+            color: var(--muted-2);
+            padding: 14px 18px;
+        }
+
+        .search button,
+        .btn {
+            border: 0;
+            border-radius: 10px;
+            background: var(--blue);
+            color: #fff;
+            font-weight: 900;
+            padding: 12px 18px;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            font-weight: 800;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            background: #eef2f7;
+            color: #4b2e83;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+        }
+
+        .nav {
+            display: flex;
+            gap: 34px;
+            padding: 13px 72px;
+            background: rgba(0,0,0,0.18);
+            font-weight: 800;
+            color: #e8f1fb;
+        }
+
+        .page {
+            padding: 42px 72px 64px;
+        }
+
+        .page-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 24px;
+            margin-bottom: 26px;
+        }
+
+        .page-title h2 {
+            font-size: 34px;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+        }
+
+        .product-detail {
+            display: grid;
+            grid-template-columns: 560px 1fr;
+            gap: 28px;
+        }
+
+        .product-photo {
+            min-height: 520px;
+            border-radius: 22px;
+            background:
+                linear-gradient(135deg, rgba(34, 56, 77, 0.08), rgba(47, 143, 216, 0.16)),
+                url("https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=1200&q=80") center/cover;
+        }
+
+        .product-info {
+            padding: 34px;
+        }
+
+        .price {
+            color: var(--red);
+            font-size: 34px;
+            font-weight: 900;
+            margin: 16px 0;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .tag {
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: var(--blue-soft);
+            color: #2364a0;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .btn.secondary {
+            background: #fff;
+            border: 1px solid var(--border);
+            color: var(--blue);
+        }
+
+        .btn.danger {
+            background: var(--red);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: #f8fbff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .label {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .cart-layout,
+        .checkout-layout,
+        .account-layout,
+        .seller-layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 24px;
+        }
+
+        .list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 96px 1fr 120px 80px 140px;
+            gap: 16px;
+            align-items: center;
+            padding: 18px;
+        }
+
+        .thumb {
+            width: 96px;
+            height: 76px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #dfe8f2, #b9d4ee);
+            object-fit: cover;
+        }
+
+        .summary-card {
+            padding: 24px;
+            align-self: start;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #edf1f5;
+            color: var(--muted);
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 0;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            overflow: hidden;
+        }
+
+        .tabs span {
+            text-align: center;
+            padding: 18px 8px;
+            border-right: 1px solid #edf1f5;
+            font-weight: 900;
+        }
+
+        .tabs .active {
+            color: var(--red);
+            box-shadow: inset 0 -3px 0 var(--red);
+        }
+
+        .order-card {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .order-head {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: #f9fbfd;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--blue-soft);
+            color: #2364a0;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .status.done {
+            background: #e9f8f3;
+            color: var(--green);
+        }
+
+        .status.gray {
+            background: #f3f4f6;
+            color: var(--muted);
+        }
+
+        .sidebar {
+            padding: 22px;
+            align-self: start;
+        }
+
+        .side-link {
+            display: block;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .side-link.active {
+            background: var(--blue-soft);
+            color: var(--blue);
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .metric {
+            padding: 20px;
+        }
+
+        .metric strong {
+            display: block;
+            color: var(--blue);
+            font-size: 32px;
+            margin-bottom: 6px;
+        }
+
+        .dashboard {
+            display: grid;
+            gap: 20px;
+        }
+
+        .dashboard-two {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .field {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--muted);
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .flow-step {
+            padding: 22px;
+            min-height: 170px;
+            position: relative;
+        }
+
+        .flow-step strong {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .palette {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .swatch {
+            height: 110px;
+            border-radius: 16px;
+            color: #fff;
+            padding: 14px;
+            display: flex;
+            align-items: end;
+            font-weight: 900;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas">
+        <section class="frame cover">
+            <div>
+                <span class="eyebrow">NMDWSM REDESIGN</span>
+                <h1>買家與賣家全會員流程重作</h1>
+                <p>藍色科技電商風格，為二手電腦零件交易平台重新整理商品詳情、購物車、結帳、購買清單、會員中心、賣家中心與商品管理流程。</p>
+            </div>
+            <div class="cover-card">
+                <strong>1440px</strong>
+                <span>Desktop-first Figma frames。可直接依照本 HTML 版面搬進 Figma，或作為下一階段 HTML/CSS 重作依據。</span>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="page">
+                <div class="page-title">
+                    <div>
+                        <h2>流程總覽</h2>
+                        <p>買家與賣家入口分流，買家走購買清單，賣家走賣家中心。</p>
+                    </div>
+                </div>
+                <div class="flow">
+                    <div class="card flow-step"><strong>商城</strong><p>瀏覽二手電腦零件，依分類、品牌、用途篩選。</p></div>
+                    <div class="card flow-step"><strong>商品詳情</strong><p>查看價格、狀況、賣家、描述與主要操作。</p></div>
+                    <div class="card flow-step"><strong>購物車</strong><p>確認商品、數量與小計。</p></div>
+                    <div class="card flow-step"><strong>結帳</strong><p>填寫備註並送出訂單。</p></div>
+                    <div class="card flow-step"><strong>購買清單</strong><p>查看待付款、已完成、不成立等狀態。</p></div>
+                    <div class="card flow-step"><strong>賣家中心</strong><p>管理商品、銷售紀錄與營運數據。</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="header">
+                <div class="header-main">
+                    <div class="logo">一次買夠二手交易平台</div>
+                    <div class="search"><span>搜尋商品...</span><button>搜尋</button></div>
+                    <div class="header-actions"><span>購物車 0</span><div class="avatar">U</div><span>豐川祥子</span></div>
+                </div>
+                <div class="nav"><span>首頁</span><span>商城</span><span>智慧推薦</span><span>討論區</span><span>市價查詢</span><span>賣家中心</span></div>
+            </div>
+            <div class="page">
+                <div class="page-title"><div><h2>商品詳情</h2><p>買家可以清楚看到商品、賣家與二手狀況。</p></div></div>
+                <div class="product-detail">
+                    <div class="product-photo card"></div>
+                    <div class="product-info card">
+                        <span class="eyebrow">顯示卡 GPU</span>
+                        <h2>MSI RTX 4060 Ti 8G 顯示卡</h2>
+                        <div class="price">NT$ 9,800</div>
+                        <div class="tags"><span class="tag">九成新</span><span class="tag">MSI</span><span class="tag">遊戲</span><span class="tag">瀏覽 24</span></div>
+                        <div class="actions"><button class="btn">立即購買</button><button class="btn secondary">加入購物車</button><button class="btn secondary">收藏商品</button></div>
+                        <div class="info-grid">
+                            <div class="info-box"><span class="label">賣家名稱</span>椎名立希</div>
+                            <div class="info-box"><span class="label">商品狀態</span>可購買</div>
+                            <div class="info-box"><span class="label">交易建議</span>面交測試後交易</div>
+                            <div class="info-box"><span class="label">燒機驗證</span>未來可接入</div>
+                        </div>
+                        <p style="margin-top: 24px; line-height: 1.8; color: var(--muted);">顯示卡功能正常，無拆修紀錄，適合 1080p 遊戲與剪輯入門使用。建議交易前現場測試外觀、序號與配件。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="header"><div class="header-main"><div class="logo">一次買夠二手交易平台</div><div class="search"><span>搜尋商品...</span><button>搜尋</button></div><div class="header-actions"><span>購物車 2</span><div class="avatar">U</div><span>豐川祥子</span></div></div><div class="nav"><span>首頁</span><span>商城</span><span>智慧推薦</span><span>討論區</span><span>市價查詢</span><span>賣家中心</span></div></div>
+            <div class="page">
+                <div class="page-title"><div><h2>購物車</h2><p>確認準備購買的二手零件與金額。</p></div></div>
+                <div class="cart-layout">
+                    <div class="list">
+                        <div class="card row"><img class="thumb" src="https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=400&q=80"><div><strong>MSI RTX 4060 Ti 8G 顯示卡</strong><br><span class="label">賣家：椎名立希</span></div><strong>NT$ 9,800</strong><strong>1</strong><strong style="color:var(--red)">NT$ 9,800</strong></div>
+                        <div class="card row"><img class="thumb" src="https://images.unsplash.com/photo-1624705013726-8cb4f9415f40?auto=format&fit=crop&w=400&q=80"><div><strong>Corsair RM750x 金牌電源</strong><br><span class="label">賣家：祐天寺若麥</span></div><strong>NT$ 2,600</strong><strong>1</strong><strong style="color:var(--red)">NT$ 2,600</strong></div>
+                    </div>
+                    <aside class="card summary-card"><h3>訂單摘要</h3><div class="summary-line"><span>商品總額</span><strong>NT$ 12,400</strong></div><div class="summary-line"><span>交易方式</span><strong>面交測試</strong></div><div class="summary-total"><span>總計</span><span style="color:var(--red)">NT$ 12,400</span></div><button class="btn" style="width:100%">前往結帳</button></aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="header"><div class="header-main"><div class="logo">一次買夠二手交易平台</div><div class="search"><span>搜尋商品...</span><button>搜尋</button></div><div class="header-actions"><span>購物車 1</span><div class="avatar">U</div><span>豐川祥子</span></div></div><div class="nav"><span>首頁</span><span>商城</span><span>智慧推薦</span><span>討論區</span><span>市價查詢</span><span>賣家中心</span></div></div>
+            <div class="page">
+                <div class="page-title"><div><h2>結帳</h2><p>展示用交易確認，不含真實金流與物流。</p></div></div>
+                <div class="checkout-layout">
+                    <div class="card" style="padding:24px">
+                        <h3>訂單商品</h3>
+                        <div class="row" style="padding-left:0;padding-right:0"><img class="thumb" src="https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=400&q=80"><div><strong>MSI RTX 4060 Ti 8G 顯示卡</strong><br><span class="label">賣家：椎名立希</span></div><strong>NT$ 9,800</strong><strong>1</strong><strong style="color:var(--red)">NT$ 9,800</strong></div>
+                        <h3 style="margin-top:28px">交易備註</h3>
+                        <div class="field">希望週末面交，現場測試風扇與顯示輸出。</div>
+                        <h3 style="margin-top:28px">交易方式</h3>
+                        <div class="field">面交測試 / 私訊聯絡，平台僅展示交易流程。</div>
+                    </div>
+                    <aside class="card summary-card"><h3>付款摘要</h3><div class="summary-line"><span>商品金額</span><strong>NT$ 9,800</strong></div><div class="summary-line"><span>平台金流</span><strong>展示用</strong></div><div class="summary-total"><span>總計</span><span style="color:var(--red)">NT$ 9,800</span></div><button class="btn" style="width:100%">送出訂單</button></aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="header"><div class="header-main"><div class="logo">一次買夠二手交易平台</div><div class="search"><span>搜尋商品...</span><button>搜尋</button></div><div class="header-actions"><span>購物車 0</span><div class="avatar">U</div><span>豐川祥子</span></div></div><div class="nav"><span>首頁</span><span>商城</span><span>智慧推薦</span><span>討論區</span><span>市價查詢</span><span>賣家中心</span></div></div>
+            <div class="page">
+                <div class="page-title"><div><h2>購買清單</h2><p>查看你的二手零件購買紀錄。</p></div></div>
+                <div class="card">
+                    <div class="tabs"><span class="active">全部</span><span>待付款</span><span>待出貨</span><span>已完成</span><span>不成立</span><span>退貨 / 退款</span></div>
+                    <div class="list" style="padding:20px">
+                        <div class="card order-card"><div class="order-head"><strong>訂單編號 #3 ｜ 2026/05/31 15:18</strong><span class="status">待付款</span></div><div class="row"><img class="thumb" src="https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=400&q=80"><div><strong>MSI RTX 4060 Ti 8G 顯示卡</strong><br><span class="label">賣家：椎名立希</span></div><strong>NT$ 9,800</strong><strong>1</strong><strong style="color:var(--red)">NT$ 9,800</strong></div></div>
+                        <div class="card order-card"><div class="order-head"><strong>訂單編號 #1 ｜ 2026/05/31 15:10</strong><span class="status done">已完成</span></div><div class="row"><img class="thumb" src="https://images.unsplash.com/photo-1624705013726-8cb4f9415f40?auto=format&fit=crop&w=400&q=80"><div><strong>Corsair RM750x 金牌電源</strong><br><span class="label">賣家：祐天寺若麥</span></div><strong>NT$ 2,600</strong><strong>1</strong><strong style="color:var(--red)">NT$ 2,600</strong></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="header"><div class="header-main"><div class="logo">一次買夠二手交易平台</div><div class="search"><span>搜尋商品...</span><button>搜尋</button></div><div class="header-actions"><span>購物車 0</span><div class="avatar">U</div><span>豐川祥子</span></div></div><div class="nav"><span>首頁</span><span>商城</span><span>智慧推薦</span><span>討論區</span><span>市價查詢</span><span>賣家中心</span></div></div>
+            <div class="page">
+                <div class="page-title"><div><h2>會員中心</h2><p>帳戶資料、購買摘要、收藏商品與近期交易。</p></div></div>
+                <div class="account-layout">
+                    <div class="dashboard">
+                        <div class="metric-grid"><div class="card metric"><strong>2</strong><span>待付款</span></div><div class="card metric"><strong>1</strong><span>已完成</span></div><div class="card metric"><strong>6</strong><span>收藏商品</span></div><div class="card metric"><strong>3</strong><span>近期交易</span></div></div>
+                        <div class="card" style="padding:24px"><h3>收藏商品</h3><div class="row"><img class="thumb"><div><strong>B550 ATX 主機板</strong><br><span class="label">ASUS / 遊戲</span></div><strong>NT$ 2,600</strong><span></span><button class="btn secondary">查看</button></div></div>
+                    </div>
+                    <aside class="card summary-card"><h3>帳戶資料</h3><div class="summary-line"><span>使用者</span><strong>豐川祥子</strong></div><div class="summary-line"><span>Email</span><strong>saki@email.com</strong></div><div class="summary-line"><span>城市</span><strong>台北市</strong></div><button class="btn secondary" style="width:100%;margin-top:18px">編輯資料</button></aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="header"><div class="header-main"><div class="logo">一次買夠二手交易平台</div><div class="search"><span>搜尋商品...</span><button>搜尋</button></div><div class="header-actions"><span>購物車 0</span><div class="avatar">U</div><span>祐天寺若麥</span></div></div><div class="nav"><span>首頁</span><span>商城</span><span>智慧推薦</span><span>討論區</span><span>市價查詢</span><span>賣家中心</span></div></div>
+            <div class="page">
+                <div class="seller-layout" style="grid-template-columns:240px 1fr">
+                    <aside class="card sidebar"><h3>賣家中心</h3><span class="side-link active">賣家首頁</span><span class="side-link">我的銷售</span><span class="side-link">我的商品</span><span class="side-link">新增商品</span><span class="side-link">市價查詢</span><span class="side-link">智慧推薦</span><span class="side-link">討論區</span></aside>
+                    <div class="dashboard">
+                        <div class="page-title" style="margin:0"><div><h2>賣家中心</h2><p>掌握訂單、商品與營運數據。</p></div><button class="btn">新增商品</button></div>
+                        <div class="metric-grid"><div class="card metric"><strong>1</strong><span>待處理訂單</span></div><div class="card metric"><strong>1</strong><span>已完成訂單</span></div><div class="card metric"><strong>0</strong><span>取消訂單</span></div><div class="card metric"><strong>2</strong><span>上架中商品</span></div></div>
+                        <div class="dashboard-two"><div class="card" style="padding:24px"><h3>近期銷售</h3><div class="row"><img class="thumb" src="https://images.unsplash.com/photo-1624705013726-8cb4f9415f40?auto=format&fit=crop&w=400&q=80"><div><strong>Corsair RM750x 金牌電源</strong><br><span class="label">買家：豐川祥子</span></div><strong>NT$ 2,600</strong><span class="status done">已完成</span><button class="btn secondary">查看</button></div></div><aside class="card summary-card"><h3>營運表現</h3><strong style="font-size:32px;color:var(--green)">良好</strong><p style="color:var(--muted);line-height:1.7">商品與交易資料正常，適合展示賣家後台流程。</p></aside></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="page">
+                <div class="page-title"><div><h2>商品管理</h2><p>賣家管理上架、已售出與已下架商品。</p></div><button class="btn">新增商品</button></div>
+                <div class="card">
+                    <div class="tabs" style="grid-template-columns:repeat(3,1fr)"><span class="active">上架中</span><span>已售出</span><span>已下架</span></div>
+                    <div class="list" style="padding:20px">
+                        <div class="row"><img class="thumb" src="https://images.unsplash.com/photo-1624705013726-8cb4f9415f40?auto=format&fit=crop&w=400&q=80"><div><strong>Corsair RM750x 金牌電源</strong><br><span class="label">電源供應器 PSU / Corsair</span></div><strong>NT$ 2,600</strong><span class="status">上架中</span><button class="btn secondary">編輯</button></div>
+                        <div class="row"><img class="thumb"><div><strong>GTX 1660 Super 6G</strong><br><span class="label">顯示卡 GPU / GIGABYTE</span></div><strong>NT$ 3,200</strong><span class="status">上架中</span><button class="btn secondary">編輯</button></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="page">
+                <div class="page-title"><div><h2>新增 / 編輯商品</h2><p>商品表單與即時預覽並排，方便賣家檢查上架資訊。</p></div></div>
+                <div class="product-detail" style="grid-template-columns:1fr 420px">
+                    <div class="card" style="padding:28px">
+                        <div class="form-grid">
+                            <div class="field">商品名稱</div><div class="field">分類</div><div class="field">價格 NTD</div><div class="field">商品狀況</div><div class="field">廠商 / 品牌</div><div class="field">推薦用途</div><div class="field">數量</div><div class="field">商品圖片網址</div><div class="field" style="grid-column:1/-1;height:160px">商品描述</div>
+                        </div>
+                        <button class="btn" style="margin-top:20px;width:100%">送出商品</button>
+                    </div>
+                    <aside class="card summary-card"><h3>商品預覽</h3><div class="product-photo" style="min-height:260px"></div><h3 style="margin-top:18px">商品名稱</h3><div class="price">NT$ 0</div><p style="color:var(--muted)">商品描述會顯示在這裡。</p><div class="tags"><span class="tag">正常使用</span><span class="tag">廠商品牌</span><span class="tag">遊戲</span></div></aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="page">
+                <div class="page-title"><div><h2>我的銷售</h2><p>賣家查看買家訂單，不做留言、金流、物流。</p></div></div>
+                <div class="card">
+                    <div class="tabs"><span class="active">全部</span><span>待付款</span><span>待出貨</span><span>已完成</span><span>不成立</span><span>退貨 / 退款</span></div>
+                    <div class="list" style="padding:20px">
+                        <div class="card order-card"><div class="order-head"><strong>銷售編號 #2 ｜ 買家：千早愛音</strong><span class="status">待付款</span></div><div class="row"><img class="thumb" src="https://images.unsplash.com/photo-1624705013726-8cb4f9415f40?auto=format&fit=crop&w=400&q=80"><div><strong>Corsair RM750x 金牌電源</strong><br><span class="label">二手零件交易紀錄</span></div><strong>NT$ 2,600</strong><strong>1</strong><button class="btn secondary">查看商品</button></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="frame">
+            <div class="page">
+                <div class="page-title"><div><h2>共用元件與樣式</h2><p>可搬進 Figma 作為 Components page。</p></div></div>
+                <div class="component-grid">
+                    <div class="card summary-card"><h3>Buttons</h3><div class="actions"><button class="btn">Primary</button><button class="btn secondary">Secondary</button><button class="btn danger">Danger</button></div></div>
+                    <div class="card summary-card"><h3>Status Pills</h3><div class="tags"><span class="status">待付款</span><span class="status done">已完成</span><span class="status gray">不成立</span></div></div>
+                    <div class="card summary-card"><h3>Member Menu</h3><div class="field">我的帳戶</div><div class="field" style="margin-top:8px">購買清單</div><div class="field" style="margin-top:8px">登出</div></div>
+                </div>
+                <h3 style="margin-top:32px">Color Tokens</h3>
+                <div class="palette">
+                    <div class="swatch" style="background:var(--navy)">Navy</div>
+                    <div class="swatch" style="background:var(--blue)">Blue</div>
+                    <div class="swatch" style="background:var(--red)">Red</div>
+                    <div class="swatch" style="background:var(--green)">Green</div>
+                    <div class="swatch" style="background:var(--muted)">Muted</div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
