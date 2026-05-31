@@ -258,3 +258,243 @@ header {
 .btn-action:hover {
     background-color: #2980b9;
 }
+
+/* --- NMDWSM blue commerce redesign tokens --- */
+:root {
+    --nmd-navy: #22384d;
+    --nmd-navy-dark: #1a2c40;
+    --nmd-blue: #2f8fd8;
+    --nmd-blue-soft: #e8f3ff;
+    --nmd-red: #e64b3c;
+    --nmd-green: #14a06f;
+    --nmd-bg: #f3f7fb;
+    --nmd-surface: #ffffff;
+    --nmd-border: #dce6f1;
+    --nmd-text: #1f2d3d;
+    --nmd-muted: #667085;
+    --nmd-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+    --nmd-radius: 18px;
+}
+
+.nmd-page {
+    max-width: 1180px;
+    margin: 2rem auto;
+    padding: 0 20px 48px;
+}
+
+.nmd-page-wide {
+    max-width: 1320px;
+}
+
+.nmd-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.nmd-hero h1 {
+    margin: 0 0 8px;
+    color: var(--nmd-text);
+    font-size: clamp(1.8rem, 3vw, 2.35rem);
+    letter-spacing: -0.03em;
+}
+
+.nmd-hero p,
+.nmd-muted {
+    color: var(--nmd-muted);
+    line-height: 1.7;
+}
+
+.nmd-card {
+    background: var(--nmd-surface);
+    border: 1px solid var(--nmd-border);
+    border-radius: var(--nmd-radius);
+    box-shadow: var(--nmd-shadow);
+}
+
+.nmd-card-pad {
+    padding: 24px;
+}
+
+.nmd-grid-2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px;
+    align-items: start;
+}
+
+.nmd-grid-product {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
+    gap: 28px;
+}
+
+.nmd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    border: 0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    background: var(--nmd-blue);
+    color: #fff;
+    font: inherit;
+    font-weight: 900;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.nmd-btn.secondary {
+    background: #fff;
+    color: var(--nmd-blue);
+    border: 1px solid var(--nmd-border);
+}
+
+.nmd-btn.danger {
+    background: var(--nmd-red);
+}
+
+.nmd-btn:disabled {
+    background: #e5e7eb;
+    color: var(--nmd-muted);
+    cursor: not-allowed;
+}
+
+.nmd-price {
+    color: var(--nmd-red);
+    font-weight: 900;
+}
+
+.nmd-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: var(--nmd-blue-soft);
+    color: #2364a0;
+    font-size: 0.83rem;
+    font-weight: 900;
+}
+
+.nmd-pill.success {
+    background: #e9f8f3;
+    color: var(--nmd-green);
+}
+
+.nmd-pill.gray {
+    background: #f3f4f6;
+    color: var(--nmd-muted);
+}
+
+.nmd-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.nmd-field {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--nmd-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: #fff;
+    font: inherit;
+}
+
+.nmd-label {
+    display: block;
+    color: var(--nmd-muted);
+    font-size: 0.86rem;
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+.nmd-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.nmd-full {
+    grid-column: 1 / -1;
+}
+
+.nmd-table-row {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) 120px 80px 130px;
+    gap: 16px;
+    align-items: center;
+    padding: 18px;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.nmd-thumb {
+    width: 96px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #eef2f7;
+    border: 1px solid #edf1f5;
+}
+
+.nmd-summary-line,
+.nmd-total-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.nmd-total-line {
+    border-bottom: 0;
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.nmd-empty {
+    padding: 44px 24px;
+    text-align: center;
+    border-radius: 14px;
+    color: var(--nmd-muted);
+    border: 1px dashed #c9d5e3;
+    background: #fbfdff;
+    font-weight: 800;
+}
+
+@media (max-width: 900px) {
+    .nmd-grid-2,
+    .nmd-grid-product {
+        grid-template-columns: 1fr;
+    }
+
+    .nmd-table-row {
+        grid-template-columns: 84px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 620px) {
+    .nmd-page {
+        padding: 0 12px 36px;
+    }
+
+    .nmd-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .nmd-form-grid,
+    .nmd-table-row {
+        grid-template-columns: 1fr;
+    }
+
+    .nmd-thumb {
+        width: 100%;
+        height: 170px;
+    }
+}
