@@ -130,21 +130,28 @@
                                 <a href="/benchmark-instructions.html" target="_blank" style="display:inline-block; padding:8px 12px; background:#eef6ff; color:#2563eb; border-radius:6px; text-decoration:none; text-align:center;">跑分軟體使用方法</a>
                             </div>
                         </div>
-                        <div id="benchmark-parse-result" style="margin-top:8px; color:#0f172a; font-weight:700;"></div>
-                        <div style="margin-top:8px; display:flex; gap:8px;">
-                            <div style="flex:1;">
-                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">Read</label>
-                                <input id="product-benchmark-read" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
+                        <div id="benchmark-parse-result" style="margin-top:8px; color:#0f172a; font-weight:700; white-space: pre-wrap;"></div>
+                        <div style="margin-top:8px; display:grid; gap:8px; grid-template-columns:repeat(2,minmax(0,1fr));">
+                            <div>
+                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">1 threads, SSE</label>
+                                <input id="product-benchmark-cpu-t1-sse" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
                             </div>
-                            <div style="flex:1;">
-                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">Write</label>
-                                <input id="product-benchmark-write" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
+                            <div>
+                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">12 threads, SSE</label>
+                                <input id="product-benchmark-cpu-t12-sse" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
                             </div>
-                            <div style="flex:1;">
-                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">Combined</label>
-                                <input id="product-benchmark-combined" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
+                            <div>
+                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">1 threads, AVX</label>
+                                <input id="product-benchmark-cpu-t1-avx" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
+                            </div>
+                            <div>
+                                <label style="display:block; color:#475467; font-weight:700; font-size:0.9rem;">12 threads, AVX</label>
+                                <input id="product-benchmark-cpu-t12-avx" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d1d5db; background:#f8fafc;" />
                             </div>
                         </div>
+                        <input type="hidden" id="product-benchmark-read" />
+                        <input type="hidden" id="product-benchmark-write" />
+                        <input type="hidden" id="product-benchmark-combined" />
                         <input type="hidden" id="product-benchmark-score" />
                     </div>
                     <div class="form-group full">
@@ -234,10 +241,11 @@
         }
 
         function updateBenchmarkVisibility() {
-            const category = document.getElementById('product-category').value;
+            const category = document.getElementById('product-category').value.toLowerCase();
             const benchmarkGroup = document.getElementById('product-benchmark-group');
             if (!benchmarkGroup) return;
-            benchmarkGroup.style.display = (category === 'gpu' || category === 'cpu') ? '' : 'none';
+            // 僅在 CPU 或 RAM 分類顯示跑分軟體檢測欄位
+            benchmarkGroup.style.display = (category === 'cpu' || category === 'ram') ? '' : 'none';
         }
 
         async function loadProduct(id) {
@@ -252,7 +260,7 @@
             }
             const product = await res.json();
             document.getElementById('product-title').value = product.title || '';
-            document.getElementById('product-category').value = product.category || 'gpu';
+            document.getElementById('product-category').value = (product.category || 'gpu').toLowerCase();
             document.getElementById('product-price').value = product.price || '';
             document.getElementById('product-desc').value = product.desc || '';
             document.getElementById('product-image').value = product.image || '';
@@ -271,22 +279,56 @@
 
         function updateParsedBenchmark() {
             const log = document.getElementById('product-benchmark-log')?.value || '';
-            const scores = parseBenchmarkScore(log) || { read: null, write: null, combined: null, best: null };
+            const category = document.getElementById('product-category').value.toLowerCase();
+            const scores = parseBenchmarkScore(log, category) || { read: null, write: null, combined: null, best: null, mismatch: false };
             const resultEl = document.getElementById('benchmark-parse-result');
-            if (scores.read || scores.write || scores.combined) {
-                resultEl.innerText = `Read : ${scores.read || '-'}\nWrite : ${scores.write || '-'}\nCombined : ${scores.combined || '-'} `;
+
+            if (scores.mismatch) {
+                resultEl.innerText = '警告：貼上的 log 與所選分類不符，請確認後再貼上正確的跑分 log。';
+            } else if (scores.read || scores.write || scores.combined || scores.best || scores.cpu_t1_sse) {
+                // 根據類別顯示不同的解析結果
+                if (category === 'cpu') {
+                    const a = scores.cpu_t1_sse != null ? scores.cpu_t1_sse : '-';
+                    const b = scores.cpu_t12_sse != null ? scores.cpu_t12_sse : '-';
+                    const c = scores.cpu_t1_avx != null ? scores.cpu_t1_avx : '-';
+                    const d = scores.cpu_t12_avx != null ? scores.cpu_t12_avx : '-';
+                    resultEl.innerText = `1 threads, SSE : ${a}\n12 threads, SSE : ${b}\n1 threads, AVX : ${c}\n12 threads, AVX : ${d}`;
+                } else if (category === 'ram') {
+                    const a = scores.cpu_t1_sse != null ? scores.cpu_t1_sse : '-';
+                    const b = scores.cpu_t12_sse != null ? scores.cpu_t12_sse : '-';
+                    const c = scores.cpu_t1_avx != null ? scores.cpu_t1_avx : '-';
+                    const d = scores.cpu_t12_avx != null ? scores.cpu_t12_avx : '-';
+                    resultEl.innerText = `1 threads, SSE : ${a}\n12 threads, SSE : ${b}\n1 threads, AVX : ${c}\n12 threads, AVX : ${d}`;
+                } else {
+                    resultEl.innerText = '';
+                }
             } else if (log.trim().length === 0) {
                 resultEl.innerText = '';
             } else {
-                resultEl.innerText = '未能解析分數，請確認已貼上完整 OCCT log。';
+                resultEl.innerText = '未能解析分數，請確認已貼上完整跑分 log。';
             }
 
+            // 將解析結果填回欄位（若不適用則留空）
             document.getElementById('product-benchmark-read').value = scores.read || '';
             document.getElementById('product-benchmark-write').value = scores.write || '';
             document.getElementById('product-benchmark-combined').value = scores.combined || '';
-            document.getElementById('product-benchmark-score').value = scores.best || '';
+            document.getElementById('product-benchmark-cpu-t1-sse').value = scores.cpu_t1_sse || '';
+            document.getElementById('product-benchmark-cpu-t12-sse').value = scores.cpu_t12_sse || '';
+            document.getElementById('product-benchmark-cpu-t1-avx').value = scores.cpu_t1_avx || '';
+            document.getElementById('product-benchmark-cpu-t12-avx').value = scores.cpu_t12_avx || '';
+            // CPU 不需要總分；RAM 則保留 best
+            if (category === 'cpu') {
+                document.getElementById('product-benchmark-score').value = '';
+            } else {
+                document.getElementById('product-benchmark-score').value = scores.best || '';
+            }
 
-            document.getElementById('preview-benchmark').innerText = scores.best ? `分數 ${scores.best}` : '未提供分數';
+            // 不顯示 CPU 的加粗總分，只保留結果欄位
+            if (category === 'cpu') {
+                document.getElementById('preview-benchmark').innerText = '';
+            } else {
+                document.getElementById('preview-benchmark').innerText = scores.best ? `分數 ${scores.best}` : '未提供分數';
+            }
             document.getElementById('preview-benchmark-read').innerText = `R:${scores.read || '-'}`;
             document.getElementById('preview-benchmark-write').innerText = `W:${scores.write || '-'}`;
             document.getElementById('preview-benchmark-combined').innerText = `C:${scores.combined || '-'}`;
@@ -302,44 +344,99 @@
             document.getElementById('preview-location').innerText = document.getElementById('product-location').value || '廠家名稱';
             document.getElementById('preview-usage').innerText = document.getElementById('product-usage').value;
             const bs = document.getElementById('product-benchmark-log')?.value || '';
-            const parsed = parseBenchmarkScore(bs) || { read: null, write: null, combined: null, best: null };
-            document.getElementById('preview-benchmark').innerText = parsed.best ? `分數 ${parsed.best}` : '未提供分數';
+            const category = document.getElementById('product-category').value.toLowerCase();
+            const parsed = parseBenchmarkScore(bs, category) || { read: null, write: null, combined: null, best: null };
+            // 不顯示 CPU 的總分（保留結果欄位）
+            if (category === 'cpu') {
+                document.getElementById('preview-benchmark').innerText = '';
+                document.getElementById('product-benchmark-score').value = '';
+            } else {
+                document.getElementById('preview-benchmark').innerText = parsed.best ? `分數 ${parsed.best}` : '未提供分數';
+                document.getElementById('product-benchmark-score').value = parsed.best || '';
+            }
             document.getElementById('preview-benchmark-read').innerText = `R:${parsed.read || '-'}`;
             document.getElementById('preview-benchmark-write').innerText = `W:${parsed.write || '-'}`;
             document.getElementById('preview-benchmark-combined').innerText = `C:${parsed.combined || '-'}`;
-            document.getElementById('product-benchmark-score').value = parsed.best || '';
             const rawPreview = bs ? (bs.length > 30 ? bs.slice(0, 30) + '...' : bs) : '未提供 log';
             document.getElementById('preview-benchmark-raw').innerText = rawPreview;
         }
 
-        function parseBenchmarkScore(log) {
-            if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null };
+        function parseBenchmarkScore(log, category) {
+            if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null, mismatch: false };
+            const lower = log.toLowerCase();
 
-            function findLabel(labels) {
-                for (const label of labels) {
-                    const re = new RegExp(label + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)', 'i');
+            // Helper to extract first numeric with optional unit
+            function extractNumberWithUnit(patterns) {
+                for (const p of patterns) {
+                    const re = new RegExp(p + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(mb/s|gb/s|mbps|gbps|mb|gb|ms|s)?', 'i');
                     const m = log.match(re);
                     if (m && m[1]) return Number(m[1]);
                 }
                 return null;
             }
 
-            let read = findLabel(['Read', 'Sequential Read', 'Seq Read']);
-            let write = findLabel(['Write', 'Sequential Write', 'Seq Write']);
-            let combined = findLabel(['Combined', 'Overall', 'Combined Score', 'Total Score']);
+            // Detect type
+            const looksLikeCPU = /\b(cpu|processor|occt cpu|prime95|fpu|stresscpu)\b/i.test(log);
+            const looksLikeRAM = /\b(memory|ram|bandwidth|read\s*mb\/s|write\s*mb\/s|occt memory)\b/i.test(log);
 
-            if ((!read || !write || !combined)) {
-                const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
-                if (!combined && nums.length) {
-                    const sorted = nums.slice().sort((a,b)=>b-a);
-                    if (sorted.length) combined = combined || sorted[0];
+            if (category === 'cpu') {
+                if (!looksLikeCPU && looksLikeRAM) return { read: null, write: null, combined: null, best: null, mismatch: true };
+                // 優先擷取指定的 CPU 四項數值
+                function findCpuLabel(label) {
+                    const re = new RegExp(label.replace(/\s+/g, '\\s*') + '\\s*:\\s*(\\d+(?:\\.\\d+)?)', 'i');
+                    const m = log.match(re);
+                    return m && m[1] ? Number(m[1]) : null;
                 }
-                if (!read && nums.length) read = read || nums[0] || null;
-                if (!write && nums.length>1) write = write || nums[1] || null;
+                const t1_sse = findCpuLabel('1 threads, SSE');
+                const t12_sse = findCpuLabel('12 threads, SSE');
+                const t1_avx = findCpuLabel('1 threads, AVX');
+                const t12_avx = findCpuLabel('12 threads, AVX');
+                if (t1_sse || t12_sse || t1_avx || t12_avx) {
+                    return {
+                        cpu_t1_sse: t1_sse || null,
+                        cpu_t12_sse: t12_sse || null,
+                        cpu_t1_avx: t1_avx || null,
+                        cpu_t12_avx: t12_avx || null,
+                        // 同時保留兼容欄位（read/write/combined）但不回傳總分
+                        read: t1_sse || null,
+                        write: t12_sse || null,
+                        combined: t1_avx || null,
+                        best: null,
+                        mismatch: false
+                    };
+                }
+                // fallback: try to find a CPU score: look for 'score' or 'total' or 'gflops'
+                let score = null;
+                const scoreRe = /(?:score|total score|overall)[:\-]?\s*(\d+(?:\.\d+)?)/i;
+                const m = log.match(scoreRe);
+                if (m && m[1]) score = Number(m[1]);
+                if (!score) {
+                    const g = log.match(/(\d+(?:\.\d+)?)\s*(gflops|gflop)/i);
+                    if (g && g[1]) score = Number(g[1]);
+                }
+                if (!score) {
+                    const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
+                    if (nums.length) score = nums.slice().sort((a,b)=>b-a)[0];
+                }
+                return { read: null, write: null, combined: null, best: score || null, mismatch: false, note: looksLikeCPU ? null : '不確定為 CPU log' };
             }
 
-            const best = combined || read || write || null;
-            return { read: read || null, write: write || null, combined: combined || null, best };
+            if (category === 'ram') {
+                if (!looksLikeRAM && looksLikeCPU) return { read: null, write: null, combined: null, best: null, mismatch: true };
+                // extract read/write bandwidth values (MB/s)
+                const read = extractNumberWithUnit(['read', 'memory read', 'bandwidth read', 'read bandwidth']);
+                const write = extractNumberWithUnit(['write', 'memory write', 'bandwidth write', 'write bandwidth']);
+                let combined = extractNumberWithUnit(['combined', 'overall', 'total']);
+                if (!combined && read && write) combined = ((read + write) / 2);
+                return { read: read || null, write: write || null, combined: combined || null, best: combined || read || write || null, mismatch: false };
+            }
+
+            // default: attempt generic parse
+            const genericRead = extractNumberWithUnit(['read', 'seq read', 'sequential read']);
+            const genericWrite = extractNumberWithUnit(['write', 'seq write', 'sequential write']);
+            const genericCombined = extractNumberWithUnit(['combined', 'overall', 'total score']);
+            const best = genericCombined || genericRead || genericWrite || null;
+            return { read: genericRead || null, write: genericWrite || null, combined: genericCombined || null, best, mismatch: false };
         }
 
         async function submitProduct(event) {

@@ -156,36 +156,82 @@ function formatProduct(product) {
         createdAt: product.created_at
     };
 }
-function parseBenchmarkScore(log) {
-    if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null };
+function parseBenchmarkScore(log, category) {
+    if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null, mismatch: false };
+    category = String(category || '').toLowerCase();
 
-    function findLabel(labels) {
-        for (const label of labels) {
-            const re = new RegExp(label + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)', 'i');
+    function extractNumberWithUnit(patterns) {
+        for (const p of patterns) {
+            const re = new RegExp(p + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(mb/s|gb/s|mbps|gbps|mb|gb|ms|s)?', 'i');
             const m = log.match(re);
             if (m && m[1]) return Number(m[1]);
         }
         return null;
     }
 
-    const read = findLabel(['Read', 'Sequential Read', 'Seq Read']);
-    const write = findLabel(['Write', 'Sequential Write', 'Seq Write']);
-    const combined = findLabel(['Combined', 'Overall', 'Combined Score', 'Total Score']);
+    const looksLikeCPU = /\b(cpu|processor|occt cpu|prime95|fpu|stresscpu)\b/i.test(log);
+    const looksLikeRAM = /\b(memory|ram|bandwidth|read\s*mb\/s|write\s*mb\/s|occt memory)\b/i.test(log);
 
-    // fallback: try to detect typical standalone scores (decimals allowed)
-    if (!read || !write || !combined) {
-        const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
-        if (!combined && nums.length) {
-            // try to pick a reasonable combined (~largest)
-            const sorted = nums.slice().sort((a,b)=>b-a);
-            if (sorted.length) combined = combined || sorted[0];
+    if (category === 'cpu') {
+        if (!looksLikeCPU && looksLikeRAM) return { read: null, write: null, combined: null, best: null, mismatch: true };
+        function findCpuLabel(label) {
+            const re = new RegExp(label.replace(/\s+/g, '\\s*') + '\\s*:', 'i');
+            const m = log.match(re);
+            if (m) {
+                // capture number after the label and colon
+                const after = log.slice(m.index + m[0].length);
+                const numMatch = after.match(/\s*(\d+(?:\.\d+)?)/);
+                return numMatch ? Number(numMatch[1]) : null;
+            }
+            return null;
         }
-        if (!read && nums.length) read = read || nums[0] || null;
-        if (!write && nums.length>1) write = write || nums[1] || null;
+        const t1_sse = findCpuLabel('1 threads, SSE');
+        const t12_sse = findCpuLabel('12 threads, SSE');
+        const t1_avx = findCpuLabel('1 threads, AVX');
+        const t12_avx = findCpuLabel('12 threads, AVX');
+        if (t1_sse || t12_sse || t1_avx || t12_avx) {
+            return {
+                cpu_t1_sse: t1_sse || null,
+                cpu_t12_sse: t12_sse || null,
+                cpu_t1_avx: t1_avx || null,
+                cpu_t12_avx: t12_avx || null,
+                read: t1_sse || null,
+                write: t12_sse || null,
+                combined: t1_avx || null,
+                best: null,
+                mismatch: false
+            };
+        }
+        let score = null;
+        const scoreRe = /(?:score|total score|overall)[:\-]?\s*(\d+(?:\.\d+)?)/i;
+        const m = log.match(scoreRe);
+        if (m && m[1]) score = Number(m[1]);
+        if (!score) {
+            const g = log.match(/(\d+(?:\.\d+)?)\s*(gflops|gflop)/i);
+            if (g && g[1]) score = Number(g[1]);
+        }
+        if (!score) {
+            const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
+            if (nums.length) score = nums.slice().sort((a,b)=>b-a)[0];
+        }
+        return { read: null, write: null, combined: null, best: score || null, mismatch: false };
     }
 
-    const best = combined || read || write || null;
-    return { read: read || null, write: write || null, combined: combined || null, best };
+    if (category === 'ram') {
+        if (!looksLikeRAM && looksLikeCPU) return { read: null, write: null, combined: null, best: null, mismatch: true };
+        const read = extractNumberWithUnit(['read', 'memory read', 'bandwidth read', 'read bandwidth']);
+        const write = extractNumberWithUnit(['write', 'memory write', 'bandwidth write', 'write bandwidth']);
+        let combined = extractNumberWithUnit(['combined', 'overall', 'total']);
+        if (!combined && read && write) combined = ((read + write) / 2);
+        return { read: read || null, write: write || null, combined: combined || null, best: combined || read || write || null, mismatch: false };
+    }
+
+    // generic fallback
+    const genericRead = extractNumberWithUnit(['read', 'seq read', 'sequential read']);
+    const genericWrite = extractNumberWithUnit(['write', 'seq write', 'sequential write']);
+    const genericCombined = extractNumberWithUnit(['combined', 'overall', 'total score']);
+    const best = genericCombined || genericRead || genericWrite || null;
+    return { read: genericRead || null, write: genericWrite || null, combined: genericCombined || null, best, mismatch: false };
 }
 
 function formatTransaction(row) {
@@ -1115,7 +1161,8 @@ const server = http.createServer(async(req, res) => {
                 return sendJson(res, 400, { success: false, message: '商品名稱、分類與價格不能為空' });
             }
 
-            const scores = parseBenchmarkScore(benchmarkLog);
+            const scores = parseBenchmarkScore(benchmarkLog, category);
+            if (scores && scores.mismatch) return sendJson(res, 400, { success: false, message: '跑分 log 與分類不符' });
             const result = await db.Product.create({
                 seller_id: user.id,
                 title,
@@ -1212,7 +1259,8 @@ const server = http.createServer(async(req, res) => {
             if (!product || product.seller_id !== user.id) return sendJson(res, 403, { success: false, message: '只能修改自己的商品' });
             if (!title || !category || Number.isNaN(parsedPrice)) return sendJson(res, 400, { success: false, message: '商品資料不完整' });
 
-            const scores = parseBenchmarkScore(benchmarkLog);
+            const scores = parseBenchmarkScore(benchmarkLog, category);
+            if (scores && scores.mismatch) return sendJson(res, 400, { success: false, message: '跑分 log 與分類不符' });
             await db.Product.update(productId, {
                 title,
                 category,
@@ -1272,7 +1320,11 @@ const server = http.createServer(async(req, res) => {
                 }
                 
                 // 寫入 SQLite 資料庫
-                const scores = parseBenchmarkScore(benchmarkLog);
+                const scores = parseBenchmarkScore(benchmarkLog, category);
+                if (scores && scores.mismatch) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: false, message: '跑分 log 與分類不符' }));
+                }
                 const result = await db.Product.create({
                     seller_id: user.id,
                     title: title,
@@ -1381,7 +1433,11 @@ const server = http.createServer(async(req, res) => {
             try {
                 const { title, category, price, desc, image, benchmarkLog } = JSON.parse(body);
                 
-                const scores = parseBenchmarkScore(benchmarkLog);
+                const scores = parseBenchmarkScore(benchmarkLog, category);
+                if (scores && scores.mismatch) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: false, message: '跑分 log 與分類不符' }));
+                }
                 await db.runUpdate(
                     'UPDATE products SET title = ?, category = ?, price = ?, description = ?, image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ? WHERE id = ?',
                     [title, category, parseInt(price, 10), desc || '', image || null, benchmarkLog || null, scores.best, scores.read, scores.write, scores.combined, productId]
