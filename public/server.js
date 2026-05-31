@@ -252,6 +252,84 @@ function extractGPU(text) {
     const match = text.match(gpuRegex);
     return match ? match[0].toUpperCase().replace(/[\s-]/g, '') : "UNKNOWN";
 }
+// ==========================================
+// 5. 記憶體 (RAM) 擷取與加分邏輯
+// ==========================================
+function extractRAM(text) {
+    // 鎖定常見的記憶體容量 (8, 16, 32, 64, 128)，排除 SSD 常見容量以防誤判
+    // 同時偵測是否有帶 DDR4/DDR5 或 記憶體 字眼
+    const ramRegex = /\b(8|16|32|64|128)\s*(?:GB|G)\b/i;
+    const match = text.match(ramRegex);
+    if (match) {
+        let size = parseInt(match[1], 10);
+        return size + "GB"; // 統一格式為 16GB, 32GB
+    }
+    return "UNKNOWN";
+}
+function getRamBonusScore(ramString) {
+    if (ramString === "128GB") return 6500;
+    if (ramString === "64GB") return 4500;
+    if (ramString === "32GB") return 3500;
+    if (ramString === "16GB") return 1800;
+    if (ramString === "8GB") return 900;
+    if (ramString === "4GB") return 400;
+    if (ramString === "2GB") return 100;
+    return 0; // 找不到不加分
+}
+// ==========================================
+// 6. 作業系統 (OS) 擷取與加分邏輯
+// ==========================================
+function extractOS(text) {
+    const osRegex = /(Win\s*11|Windows\s*11|W11|Win\s*10|Windows\s*10|W10)([\w\u4e00-\u9fa5]*)/i;
+    const match = text.match(osRegex);
+    if (match) {
+        // match[1] 是系統版本 (Win11), match[2] 是後綴 (專業版/Pro)
+        let version = match[1].toUpperCase().replace(/\s+/g, '');
+        let edition = match[2] || "";
+        if (version === 'WINDOWS11' || version === 'W11') version = 'WIN11';
+        if (version === 'WINDOWS10' || version === 'W10') version = 'WIN10';
+        
+        if (edition.includes("專業") || edition.toUpperCase().includes("PRO")) {
+            return version + " Pro";
+        }
+        return version; // 預設為 Home 或未標明版本
+    }
+    return "UNKNOWN";
+}
+
+function getOsBonusScore(osString) {
+    if (osString.includes("Pro")) return 2000; // 專業版最值錢，加 1000 分
+    if (osString.includes("WIN11") || osString.includes("WIN10")) return 1500; // 一般版加 500 分
+    return 0; // 空機或找不到不加分
+}
+// ==========================================
+// 7. 儲存空間 (SSD/HDD) 萃取與加分邏輯 (含 HDD 給分版)
+// ==========================================
+function getStorageBonusScore(storageString) {
+    if (storageString === "UNKNOWN") return 0; 
+    
+    // --- 傳統硬碟 (HDD) 給分區間 ---
+    if (storageString.includes("HDD")) {
+        if (storageString.includes("8TB")) return 3500; 
+        if (storageString.includes("4TB")) return 2300; 
+        if (storageString.includes("2TB")) return 1200;
+        if (storageString.includes("1TB")) return 700;
+        if (storageString.includes("500GB")) return 300;
+        return 0;
+    }
+    
+    // --- 固態硬碟 (SSD) 給分區間 ---
+    if (storageString.includes("SSD")) {
+        if (storageString.includes("8TB")) return 6000;
+        if (storageString.includes("4TB")) return 4500;
+        if (storageString.includes("2TB")) return 3500;
+        if (storageString.includes("1TB")) return 1800;
+        if (storageString.includes("512GB")) return 1000;
+        if (storageString.includes("256GB")) return 500;
+    }
+    
+    return 0; 
+}
 // --- 爬蟲功能實作 ---
 
 // 1. 原價屋爬蟲
@@ -780,7 +858,7 @@ const server = http.createServer(async(req, res) => {
                     // scrape1688(searchKeyword),
                     // scrapeZOL(searchKeyword)
                 ]);
-// 2. 將所有通路的資料全部大融合
+                // 2. 將所有通路的資料全部大融合
                 let allProducts = [
                     ...coolpcResults, 
                     ...sinyaResults, 
@@ -793,47 +871,62 @@ const server = http.createServer(async(req, res) => {
                 let validProducts = [];
 
                 // 3. 資料清洗與彈性防呆
+                // (前方的 for 迴圈與防呆邏輯保持不變...)
                 for (let item of allProducts) {
+                    if (!item || !item.price) continue;
                     let cleanPrice = parseInt(item.price.toString().replace(/[^\d]/g, ''), 10);
                     
-                    // 提高最低價格門檻：筆電/主機低於 5000 元通常是配件或垃圾
                     const minPrice = productType === 'component' ? 500 : 5000;
                     if (isNaN(cleanPrice) || cleanPrice === 0 || cleanPrice > budget || cleanPrice < minPrice) {
                         continue; 
                     }
 
+                    // 1. 萃取所有硬體特徵
                     let cpu = extractCPU(item.name);
                     let gpu = extractGPU(item.name);
+                    let ram = extractRAM(item.name); // 🟢 新增：萃取記憶體
+                    let os = extractOS(item.name);   // 🟢 新增：萃取 OS
                     
-                    // 🛡️ 彈性防呆：
-                    // 如果是買「零件」，嚴格要求必須要有 CPU 或 GPU。
-                    // 如果是買「整機/筆電」，只要價格大於 5000 (前面已過濾)，就算標題沒寫 CPU/GPU 也放行，避免誤殺合法文書機！
-                    if (productType === 'component' && cpu === "UNKNOWN" && gpu === "UNKNOWN") {
+                    // 防呆：整機或筆電必須要有 CPU 或 GPU
+                    if (productType !== 'component' && cpu === "UNKNOWN" && gpu === "UNKNOWN") {
                         continue; 
                     }
 
                     let cpuScore = CPU_SCORE[cpu] || CPU_SCORE["UNKNOWN"];
                     let gpuScore = GPU_SCORE[gpu] || GPU_SCORE["UNKNOWN"];
 
-                    // 4. 動態計分邏輯
-                    let matchScore = 0;
+                    // 2. 計算核心分數 (Base Score)
+                    let baseScore = 0;
                     if (productType === 'component') {
-                        // 如果單買零件，因為不可能同時有 CPU 和 GPU，所以取最高分作為該零件的絕對分數
-                        matchScore = Math.max(cpuScore, gpuScore); 
+                        baseScore = Math.max(cpuScore, gpuScore); 
                     } else {
-                        // 整機/筆電的加權計分
-                        matchScore = usage === 'gaming' 
+                        baseScore = usage === 'gaming' 
                             ? (gpuScore * 0.75) + (cpuScore * 0.25) 
-                            : (cpuScore * 0.80) + (gpuScore * 0.20);
+                            : (cpuScore * 0.75) + (gpuScore * 0.25);
                     }
 
+                    // 3. 計算額外加分 (Bonus Score)
+                    let bonusScore = 0;
+                    if (productType !== 'component') { // 只有買整機/筆電才算 RAM 和 OS 加分
+                        bonusScore += getRamBonusScore(ram);
+                        bonusScore += getOsBonusScore(os);
+                    }
+
+                    // 4. 總推薦分數
+                    let finalMatchScore = baseScore + bonusScore;
+
+                    // 5. 推入結果陣列 (連同 ram 和 os 一起送給前端)
                     validProducts.push({
                         title: item.name,
                         price: cleanPrice,
                         cpu: cpu,
                         gpu: gpu,
-                        matchScore: matchScore
-                    });
+                        ram: ram,                
+                        os: os,                  
+                        matchScore: finalMatchScore,
+                        platform: item.platform || "未知平台",
+                        url: item.url || "#"  
+                });
                 }
 
                 // 如果過濾完沒有東西了
@@ -843,7 +936,7 @@ const server = http.createServer(async(req, res) => {
                 }
 
                 // ==========================================
-                // ⚠️ 升級版排序：先比分數 (高到低)，分數一樣時比價格 (低到高)
+                // 先比分數 (高到低)，分數一樣時比價格 (低到高)
                 // ==========================================
                 validProducts.sort((a, b) => {
                     if (b.matchScore === a.matchScore) {
@@ -852,9 +945,6 @@ const server = http.createServer(async(req, res) => {
                     return b.matchScore - a.matchScore; // 分數不同時，分數高的排前面
                 });
                 const top3Recommendations = validProducts.slice(0, 3);
-                // ==========================================
-                // ✨ 補上這段：將所有符合條件的價格排序，並計算出中位數 medianPrice
-                // ==========================================================
                 let prices = validProducts.map(p => p.price).sort((a, b) => a - b);
                 let medianPrice = 0; // 👈 宣告變數，給予預設值 0
 
@@ -887,7 +977,7 @@ const server = http.createServer(async(req, res) => {
             }
         });
     // 4. 取得論壇文章 API (使用 SQLite)
-    } else if (pathname === '/api/posts' && req.method === 'GET') {
+    }else if (pathname === '/api/posts' && req.method === 'GET') {
         setCorsHeaders(res);
         try {
             const posts = await db.Post.getAll();

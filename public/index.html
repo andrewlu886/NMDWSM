@@ -251,8 +251,8 @@
                 <div class="form-group">
                     <label>用途</label>
                     <select id="usage">
-                        <option value="gaming">3A 遊戲專用 (Cyberpunk 2077)</option>
-                        <option value="office">高效率文書機</option>
+                        <option value="gaming">3A 遊戲專用</option>
+                        <option value="office">高性能文書機</option>
                     </select>
                 </div>
                 <button class="btn-action" onclick="runRecommend()">生成推薦清單</button>
@@ -336,9 +336,10 @@
                         const usageText = usage === 'gaming' ? '🎮 遊戲加權' : '💼 工作加權';
                         htmlContent += `
                             <li style="background: #fff; border: 1px solid #ddd; margin-top: 10px; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                                <strong style="color: #2980b9;">No.${index + 1} - ${item.title}</strong><br>
+                                <strong style="color: #2980b9;">No.${index + 1} - <a href="${item.url}" target="_blank" style="text-decoration: none; color: #2980b9;">[${item.platform}] ${item.title}</a></strong><br>
                                 💰 售價：<strong>$${item.price.toLocaleString()}</strong> <br>
                                 ⚙️ 核心：${item.cpu} / ${item.gpu} <br>
+                                🚀 擴充：${item.ram !== 'UNKNOWN' ? item.ram : '未標示 RAM'} / ${item.os !== 'UNKNOWN' ? item.os : '未標示系統'} <br>
                                 📊 推薦分數：${item.matchScore.toFixed(0)} (${usageText})
                             </li>
                         `;
