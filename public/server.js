@@ -267,41 +267,78 @@ async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
 
 // --- 智慧推薦功能實作 ---
 // ==========================================
-// 1. CPU 效能字典 (2026 最新版)
+// 1. GPU 動態算分引擎
 // ==========================================
-const CPU_SCORE = {
-    "TRPRO9995WX": 38000, "TRPRO9855WX": 35000, "TR9980X": 32000, "TR9970X": 30000,
-    "W9-3475X": 28000, "W5-2455X": 25000,
-    "RYZEN99950X3D": 29000, "RYZEN99950X": 27500, "RYZEN99900X3D": 26500, 
-    "RYZEN79850X3D": 26000, "RYZEN79800X3D": 25500, "RYZEN99900X": 25000,
-    "ULTRA9285K": 26000, "I9-14900KS": 25000, "I9-14900K": 24000, "I9-14900KF": 23500,
-    "RYZEN97950X3D": 24500, "RYZEN97950X": 23000, "I9-13900K": 22000,
-    "ULTRA7270KPLUS": 21000, "ULTRA7265K": 20000, "ULTRA7265KF": 19500,
-    "RYZEN79700X": 19000, "RYZEN59600X": 18500, 
-    "I7-14700K": 19500, "I7-14700KF": 19000, "I7-14700": 18000, "I7-14700F": 17500,
-    // 補上常見筆電 CPU 分數 (H/HX 結尾)
-    "I7-13620H": 14000, "I9-13900HX": 18000, "I7-13700H": 15000, 
-    "RYZEN77800X3D": 18500, "RYZEN97900X": 18000, "RYZEN77700X": 17000,
-    "I7-13700K": 17000, "I7-13700F": 16000,
-    "ULTRA5250KPLUS": 15000, "ULTRA5250KFPLUS": 14500, 
-    "ULTRA5245K": 14000, "ULTRA5245KF": 13500,
-    "RYZEN59500F": 14000, "RYZEN57500F": 13000, "RYZEN57600X": 13500,
-    "I5-14600K": 14500, "I5-14500": 12500, "I5-14400": 11500, "I5-14400F": 11000,
-    "I5-13600K": 13000, "I5-13500": 11500, "I5-13400F": 10500, "I5-12600K": 11000,
-    "RYZEN75800X3D": 13500, "RYZEN75700X": 11000, "RYZEN55600X": 10000,
-    "ULTRA5235": 9500, "ULTRA5225": 8500, "ULTRA5225F": 8000,
-    "RYZEN78700G": 9000, "RYZEN58600G": 8000, "RYZEN58500G": 7000, "RYZEN58400F": 6500,
-    "I5-12400": 8500, "I5-12400F": 8000,
-    "I3-14100": 7000, "I3-13100": 6000, "I3-12100": 5500,
-    "RYZEN55600GT": 6500, "RYZEN55500X3D": 6000, "RYZEN55500GT": 5500,
-    "RYZEN53400G": 4000,
-    "I9處理器": 15000, "RYZEN9處理器": 15000,
-    "I7處理器": 12000, "RYZEN7處理器": 12000,
-    "I5處理器": 7500,  "RYZEN5處理器": 6500,
-    "I3處理器": 5500,  "RYZEN3處理器": 4000,
-    "UNKNOWN": 2000
-};
+function getDynamicGPUScore(gpuStr) {
+    if (!gpuStr || gpuStr === "UNKNOWN") return 1000;
+    let text = gpuStr.toUpperCase().replace(/[\s-]/g, '');
 
+    // 匹配 NVIDIA (例: RTX4070TI, GTX1650)
+    // 拆解為: [1]品牌(RTX/GTX) [2]世代(40) [3]位階(70) [4]後綴(TI)
+    const nvRegex = /(RTX|GTX)(\d{1,2})(\d{2})(TI|SUPER)?/;
+    const nvMatch = text.match(nvRegex);
+
+    if (nvMatch) {
+        let gen = parseInt(nvMatch[2], 10);   // 10, 20, 30, 40, 50
+        let tier = parseInt(nvMatch[3], 10);  // 50, 60, 70, 80, 90
+        let suffix = nvMatch[4] || "";
+
+        // GTX 16 系列特例，歸類為 1.5 代
+        let genIndex = (gen === 16) ? 1.5 : (gen / 10);
+
+        // A. 決定基準分數 (以 30 系列 / Gen 3 為基準)
+        let baseScore = 5000;
+        if (tier === 50) baseScore = 6000;
+        else if (tier === 60) baseScore = 10000;
+        else if (tier === 70) baseScore = 16000;
+        else if (tier === 80) baseScore = 22000;
+        else if (tier === 90) baseScore = 28000;
+
+        // B. 世代指數加權 (每代效能成長抓 25%)
+        // 算式: Base * (1.25 ^ (目前世代 - 3))
+        let genMultiplier = Math.pow(1.25, genIndex - 3);
+
+        // C. 後綴加權
+        let suffixMultiplier = 1.0;
+        if (suffix === "TI") suffixMultiplier = 1.15;      // Ti 強約 15%
+        if (suffix === "SUPER") suffixMultiplier = 1.10;   // SUPER 強約 10%
+
+        return Math.round(baseScore * genMultiplier * suffixMultiplier);
+    }
+
+    // 匹配 AMD (例: RX7800XT)
+    const amdRegex = /(RX)(\d)(\d{2})(0)(XTX|XT|GRE)?/;
+    const amdMatch = text.match(amdRegex);
+    if (amdMatch) {
+        let gen = parseInt(amdMatch[2], 10);  // 5, 6, 7
+        let tier = parseInt(amdMatch[3], 10); // 60, 70, 80, 90
+        let suffix = amdMatch[5] || "";
+
+        let baseScore = 4500;
+        if (tier === 60) baseScore = 9000;
+        else if (tier === 70) baseScore = 14000;
+        else if (tier === 80) baseScore = 20000;
+        else if (tier === 90) baseScore = 26000;
+
+        // AMD 每一代跳號是 1 (例如 RX 6000 -> RX 7000)
+        let genMultiplier = Math.pow(1.20, gen - 6); // 以 RX 6000 為基準，代差成長 20%
+        
+        let suffixMultiplier = 1.0;
+        if (suffix === "XTX") suffixMultiplier = 1.20;
+        if (suffix === "XT") suffixMultiplier = 1.15;
+        if (suffix === "GRE") suffixMultiplier = 1.10;
+
+        return Math.round(baseScore * genMultiplier * suffixMultiplier);
+    }
+
+    return 1000; // 無法辨識的 GPU 基礎分
+}
+
+function extractGPU(text) {
+    const gpuRegex = /(RTX|GTX|RX)\s*-?\s*\d{4}\s*(Ti|SUPER|XTX|XT|GRE)?/i;
+    const match = text.match(gpuRegex);
+    return match ? match[0].toUpperCase().replace(/[\s-]/g, '') : "UNKNOWN";
+}
 // ==========================================
 // 2.擷取工具
 // ==========================================
@@ -315,16 +352,78 @@ function extractCPU(text) {
     }
     return "UNKNOWN";
 }
+// ==========================================
+// 2. CPU 動態算分引擎
+// ==========================================
+function getDynamicCPUScore(cpuStr) {
+    if (!cpuStr || cpuStr === "UNKNOWN") return 2000;
+    let text = cpuStr.toUpperCase().replace(/\s+/g, '');
 
-// ==========================================
-// 3. GPU 效能字典
-// ==========================================
-const GPU_SCORE = {
-    "RTX5090": 40000, "RTX5080": 32000, "RTX5070": 26000, "RTX5060": 16000,
-    "RTX4090": 35000, "RTX4080": 28000, "RTX4070TI": 25000, "RTX4070": 20000, 
-    "RTX4060TI": 15000, "RTX4060": 12000, "RTX3060": 10000, "RTX3050": 7000,
-    "GTX1650": 5000, "UNKNOWN": 1000
-};
+    // 匹配 Intel Core (例: I7-13700K, I5-12400F)
+    const intelRegex = /I([3579])-(\d{2})(\d{3})([KFSX]*)/;
+    const intelMatch = text.match(intelRegex);
+    if (intelMatch) {
+        let series = parseInt(intelMatch[1], 10); // 3, 5, 7, 9
+        let gen = parseInt(intelMatch[2], 10);    // 12, 13, 14
+        let suffix = intelMatch[4] || "";
+
+        // A. 位階基準分 (以 12 代為基準 Gen 12)
+        let baseScore = 4000;
+        if (series === 3) baseScore = 6000;
+        else if (series === 5) baseScore = 9000;
+        else if (series === 7) baseScore = 14000;
+        else if (series === 9) baseScore = 19000;
+
+        // B. 世代加權 (Intel 每代擠牙膏約 12%~15%)
+        let genMultiplier = Math.pow(1.15, gen - 12);
+
+        // C. 後綴加權
+        let suffixMultiplier = 1.0;
+        if (suffix.includes("K")) suffixMultiplier = 1.10; // K 版時脈較高
+        if (suffix.includes("T") || suffix.includes("U")) suffixMultiplier = 0.8; // 低壓版扣分
+
+        return Math.round(baseScore * genMultiplier * suffixMultiplier);
+    }
+
+    // 匹配 AMD Ryzen (例: RYZEN7-7800X3D)
+    const amdRegex = /(?:RYZEN|R)([3579])-?(\d)(\d{2})(0)([XG3DF]*)/;
+    const amdMatch = text.match(amdRegex);
+    if (amdMatch) {
+        let series = parseInt(amdMatch[1], 10); // 3, 5, 7, 9
+        let gen = parseInt(amdMatch[2], 10);    // 5, 7, 9 (千位數)
+        let suffix = amdMatch[5] || "";
+
+        let baseScore = 4000;
+        if (series === 3) baseScore = 5500;
+        else if (series === 5) baseScore = 8500;
+        else if (series === 7) baseScore = 13500;
+        else if (series === 9) baseScore = 18500;
+
+        // AMD 世代跳號 (5000 -> 7000 是跳 2，所以要除以 2)
+        let genMultiplier = Math.pow(1.15, (gen - 5) / 2);
+
+        let suffixMultiplier = 1.0;
+        if (suffix.includes("X3D")) suffixMultiplier = 1.25; // 遊戲神 U，給予 25% 加成
+        if (suffix.includes("X")) suffixMultiplier = 1.08;
+        if (suffix.includes("G")) suffixMultiplier = 0.95; // 帶內顯通常快取較小
+
+        return Math.round(baseScore * genMultiplier * suffixMultiplier);
+    }
+    
+    // 處理模糊型號 (如 "i5處理器")
+    if (text.includes("I9") || text.includes("RYZEN9")) return 15000;
+    if (text.includes("I7") || text.includes("RYZEN7")) return 12000;
+    if (text.includes("I5") || text.includes("RYZEN5")) return 8500;
+    if (text.includes("I3") || text.includes("RYZEN3")) return 5500;
+
+    return 2000; // 無法辨識的 CPU 基礎分
+}
+
+function extractCPU(text) {
+    const cpuRegex = /(i[3579]-\d{4,5}[KFSX]*|Ryzen\s*\d\s*\d{4}[A-Z\d]*|R[3579]-\d{4}[A-Z\d]*|(?:i[3579]|Ryzen\s*[3579])處理器)/i;
+    const match = text.match(cpuRegex);
+    return match ? match[0].toUpperCase().replace(/\s+/g, '') : "UNKNOWN";
+}
 
 // ==========================================
 // 4. GPU 擷取工具
@@ -974,9 +1073,8 @@ const server = http.createServer(async(req, res) => {
                         continue; 
                     }
 
-                    let cpuScore = CPU_SCORE[cpu] || CPU_SCORE["UNKNOWN"];
-                    let gpuScore = GPU_SCORE[gpu] || GPU_SCORE["UNKNOWN"];
-
+                    let cpuScore = getDynamicCPUScore(cpu);
+                    let gpuScore = getDynamicGPUScore(gpu);
                     // 2. 計算核心分數 (Base Score)
                     let baseScore = 0;
                     if (productType === 'component') {
