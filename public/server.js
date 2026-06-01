@@ -634,7 +634,7 @@ async function scrapeCoolpc(keyword) {
                 
                 results.push({
                     platform: '原價屋',
-                    name: text.substring(0, 60) + '...', // 名稱過長截斷為 60 字
+                    name: text.substring(0, 125) + '...', // 名稱過長截斷為 60 字
                     price: price,
                     url: 'https://www.coolpc.com.tw/evaluate.php'
                 });
@@ -890,7 +890,6 @@ async function scrapeNewegg(keyword) {
         if (browser) await browser.close();
     }
 }
-
 // 8. 台灣 Yahoo 購物中心爬蟲邏輯
 async function scrapeYahoo(keyword) {
     console.log(`[Yahoo購物] 啟動隱形瀏覽器搜尋: ${keyword}`);
@@ -906,7 +905,7 @@ async function scrapeYahoo(keyword) {
         const searchUrl = `https://tw.buy.yahoo.com/search/product?p=${encodeURIComponent(keyword)}`;
         await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
 
-        // 👇 擴大雷達：同時等待 /gdsale/ (一般商品) 與 /activity/ (活動促銷品)
+        // 等待商品載入
         await page.waitForSelector('a[href*="/gdsale/"], a[href*="/activity/"]', { timeout: 8000 }).catch(() => console.log('[Yahoo購物] 等待商品載入超時'));
 
         // 模擬人類往下滾動，多滾幾次確保圖片和價格動態載入完成
@@ -919,31 +918,33 @@ async function scrapeYahoo(keyword) {
         const $ = cheerio.load(content);
         let results = [];
 
-        // 👇 擴大雷達範圍
-        // 👇 替換 scrapeYahoo 裡面的這段 each 迴圈
         $('a[href*="/gdsale/"], a[href*="/activity/"]').each((i, el) => {
             const link = $(el).attr('href');
             
-            // 1. 智慧標題萃取：找出字數最長的 span 當作標題，並濾除垃圾文字
-            let name = '';
-            $(el).find('span, div').each((_, element) => {
-                const text = $(element).text().trim();
-                // 如果這段文字比目前存的長，而且不是系統按鈕文字，就當作標題
-                if (text.length > name.length && !text.includes('比較找相似') && !text.includes('折價券')) {
-                    name = text;
-                }
-            });
-
-            // 再次強制清理可能殘留的開頭文字
-            name = name.replace(/^比較找相似\s*/, '').trim();
+            // 智慧標題萃取，優先抓取圖片的 alt 屬性（最乾淨的商品名稱）
+            let name = $(el).find('img').attr('alt');
             
-            // 2. 精準價格萃取：尋找金錢符號，並避免抓到怪異的龐大數字
-            const rawText = $(el).text(); 
-            // 尋找 $ 後面跟著數字與逗號的組合
-            const priceMatch = rawText.match(/\$\s*([0-9,]+)/);
+            // 備用方案：如果真的沒抓到 img，只找沒有子元素的純文字節點，避免抓到整個卡片
+            if (!name) {
+                $(el).find('span, div').each((_, element) => {
+                    if ($(element).children().length === 0) {
+                        const text = $(element).text().trim();
+                        if (text.length > (name?.length || 0) && !text.includes('比較找相似') && !text.includes('折價券')) {
+                            name = text;
+                        }
+                    }
+                });
+            }
+            if (!name) name = '';
+            name = name.replace(/^比較找相似\s*/, '').trim();
+
+            // 精準價格萃取，將 HTML 標籤替換成「空白」，製造物理隔離
+            const htmlContent = $(el).html() || '';
+            const spacedText = htmlContent.replace(/<[^>]+>/g, ' '); 
+            
+            const priceMatch = spacedText.match(/\$\s*([0-9,]+)/);
             let price = priceMatch ? priceMatch[1].replace(/,/g, '') : null;
 
-            // 確保標題存在，且價格大於 0 才推入陣列
             if (name && price && parseInt(price) > 0 && name.length > 5) {
                 results.push({
                     platform: 'Yahoo購物',
@@ -1119,7 +1120,6 @@ const server = http.createServer(async(req, res) => {
                     scrapeSinya(searchKeyword),
                     scrapePChome(searchKeyword),
                     scrapeMomo(searchKeyword),
-                    //scrapeShopee(searchKeyword),
                     scrapeYahoo(searchKeyword),
                     scrapeRuten(searchKeyword)
                     // scrapeAmazon(searchKeyword),
