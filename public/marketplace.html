@@ -17,9 +17,6 @@
         .filter-input { width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 8px; }
         .page-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--primary-color); margin: 0 0 18px; }
         .sort-select { padding: 9px 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; }
-        .search-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 18px; }
-        .search-tag { border: 1px solid #d7e3ef; background: #fff; color: #475467; border-radius: 999px; padding: 7px 12px; font-weight: 800; cursor: pointer; }
-        .search-tag.active { background: var(--secondary-color); color: #fff; border-color: var(--secondary-color); }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
         .product-card { background: white; border: 1px solid #edf0f4; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 14px rgba(15,23,42,0.06); display: flex; flex-direction: column; min-height: 100%; }
         .product-image-link { display: block; background: #eef2f7; overflow: hidden; }
@@ -119,17 +116,6 @@
                     <option value="views">熱門瀏覽</option>
                 </select>
             </div>
-            <div class="search-tags" aria-label="搜尋篩選標籤">
-                <button class="search-tag" type="button" data-field="category" data-value="gpu" onclick="toggleSearchTag(this)">顯示卡 GPU</button>
-                <button class="search-tag" type="button" data-field="category" data-value="cpu" onclick="toggleSearchTag(this)">處理器 CPU</button>
-                <button class="search-tag" type="button" data-field="category" data-value="cooler" onclick="toggleSearchTag(this)">散熱</button>
-                <button class="search-tag" type="button" data-field="coolingType" data-value="liquid" onclick="toggleSearchTag(this)">水冷</button>
-                <button class="search-tag" type="button" data-field="coolingType" data-value="fan" onclick="toggleSearchTag(this)">風扇</button>
-                <button class="search-tag" type="button" data-field="usageTag" data-value="遊戲" onclick="toggleSearchTag(this)">遊戲</button>
-                <button class="search-tag" type="button" data-field="location" data-value="ASUS" onclick="toggleSearchTag(this)">ASUS</button>
-                <button class="search-tag" type="button" data-field="location" data-value="GIGABYTE" onclick="toggleSearchTag(this)">GIGABYTE</button>
-                <button class="search-tag" type="button" data-field="location" data-value="MSI" onclick="toggleSearchTag(this)">MSI</button>
-            </div>
             <div id="products-container" class="products-grid">
                 <div class="empty">載入商品中...</div>
             </div>
@@ -140,7 +126,6 @@
         let allProducts = [];
         let currentCategory = 'all';
         let currentKeyword = '';
-        const selectedTags = new Map();
 
         window.onload = async function() {
             const loggedInUser = localStorage.getItem('userEmail');
@@ -212,31 +197,6 @@
             const titles = { all: '全部商品', cpu: '處理器 CPU', gpu: '顯示卡 GPU', mb: '主機板 MB', ram: '記憶體 RAM', cooler: '散熱', 'cooler-liquid': '散熱 - 水冷', 'cooler-fan': '散熱 - 風扇', ssd: '固態硬碟 SSD', hdd: '傳統硬碟 HDD', case: '機殼 Case', psu: '電源供應器 PSU' };
             document.getElementById('current-category-title').innerText = titles[category] || category;
             applyFilters();
-        }
-
-        function toggleSearchTag(button) {
-            const key = `${button.dataset.field}:${button.dataset.value}`;
-            if (selectedTags.has(key)) {
-                selectedTags.delete(key);
-                button.classList.remove('active');
-            } else {
-                selectedTags.set(key, { field: button.dataset.field, value: button.dataset.value });
-                button.classList.add('active');
-            }
-            applyFilters();
-        }
-
-        function matchesSelectedTags(product) {
-            for (const tag of selectedTags.values()) {
-                const productValue = tag.field === 'category'
-                    ? normalizeCategory(product.category)
-                    : tag.field === 'coolingType'
-                        ? String(product.coolingType || '').toLowerCase()
-                    : String(product[tag.field] || '').toLowerCase();
-                const tagValue = String(tag.value || '').toLowerCase();
-                if (!productValue.includes(tagValue)) return false;
-            }
-            return true;
         }
 
         function normalizeCategory(category) {
@@ -400,7 +360,7 @@
                 const matchesFanIntent = !fanCoolingIntent || (productCategory === 'cooler' && product.coolingType === 'fan');
                 const matchesIntent = matchesLiquidIntent && matchesFanIntent;
                 const matchesKeyword = keywordMatchesProduct(product, keywords);
-                return matchesCategory && matchesPrice && matchesUsage && matchesIntent && matchesKeyword && matchesAutoExcludes(product, junkExcludes) && matchesSelectedTags(product) && product.status === 'active';
+                return matchesCategory && matchesPrice && matchesUsage && matchesIntent && matchesKeyword && matchesAutoExcludes(product, junkExcludes) && product.status === 'active';
             });
 
             if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
