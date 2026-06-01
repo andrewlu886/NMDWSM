@@ -10,6 +10,12 @@
             min-height: 220px;
             resize: vertical;
         }
+
+        #preview-desc {
+            text-align: left;
+            white-space: pre-wrap;
+            line-height: 1.7;
+        }
     </style>
 </head>
 <body>
@@ -526,7 +532,16 @@
         }
 
         function mergeProductCopy(specs, desc) {
-            return [specs, desc].map(text => String(text || '').trim()).filter(Boolean).join('\n\n');
+            return [specs, desc].map(cleanProductCopy).filter(Boolean).join('\n\n');
+        }
+
+        function cleanProductCopy(text) {
+            return String(text || '')
+                .split('\n')
+                .map(line => line.trim())
+                .join('\n')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
         }
 
         function updateParsedBenchmark() {
@@ -696,7 +711,7 @@
                 category: document.getElementById('product-category').value,
                 coolingType: document.getElementById('product-cooling-type').value,
                 price: document.getElementById('product-price').value.trim(),
-                desc: document.getElementById('product-desc').value.trim(),
+                desc: cleanProductCopy(document.getElementById('product-desc').value),
                 specs: '',
                 image: existingProductImages[0] || document.getElementById('product-image').value.trim(),
                 benchmarkLog: document.getElementById('product-benchmark-log').value.trim(),

@@ -25,9 +25,10 @@
         .price { color:var(--nmd-red); font-size:2.2rem; font-weight:900; }
         .info-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
         .info-box span, .seller-box span, .verify-box span { display:block; color:var(--nmd-muted); font-size:.86rem; font-weight:900; margin-bottom:6px; }
-        .description, .specs { white-space:pre-wrap; line-height:1.85; }
+        .description-text { white-space:pre-wrap; line-height:1.85; }
         .product-copy { background:#fff; border:1px solid var(--nmd-border); border-radius:14px; padding:18px; display:grid; gap:18px; }
         .product-copy h2 { margin:0 0 10px; }
+        .product-copy-section { text-align:left; }
         .product-copy-section + .product-copy-section { border-top:1px solid var(--nmd-border); padding-top:18px; }
         .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .action-grid .wide { grid-column:1/-1; }
@@ -137,7 +138,7 @@
                     <div class="product-copy">
                         <section class="product-copy-section description">
                             <h2>商品描述</h2>
-                            ${escapeHtml(combinedDescription())}
+                            <div class="description-text">${escapeHtml(combinedDescription())}</div>
                         </section>
                         <section class="product-copy-section verify-box">
                             <span>燒機驗證</span><strong>未來可接入測試資料</strong><div class="nmd-muted" style="margin-top:6px;">本階段先保留擴充位置，不影響目前交易流程展示。</div>
@@ -148,8 +149,17 @@
         }
 
         function combinedDescription() {
-            const parts = [product.specs, product.desc].map(text => String(text || '').trim()).filter(Boolean);
+            const parts = [product.specs, product.desc].map(cleanProductCopy).filter(Boolean);
             return parts.length ? parts.join('\n\n') : '賣家尚未提供商品描述。';
+        }
+
+        function cleanProductCopy(text) {
+            return String(text || '')
+                .split('\n')
+                .map(line => line.trim())
+                .join('\n')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
         }
 
         function productImages() {
