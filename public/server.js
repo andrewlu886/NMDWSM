@@ -1930,58 +1930,59 @@ const server = http.createServer(async(req, res) => {
     else if (pathname === '/api/scrape' && req.method === 'GET') {
         setCorsHeaders(res);
         const getParam = (key) => parsedUrl.query ? parsedUrl.query[key] : parsedUrl.searchParams?.get(key);
+        
         const keyword = getParam('keyword');
-        const platform = getParam('platform') || 'all';
+        // 接收前端傳來的逗號字串 (例如 "coolpc,sinya")
+        const platformParam = getParam('platform') || 'all'; 
         const excludeStr = getParam('exclude') || ''; 
         const includeStr = getParam('include') || ''; 
-        const categoriesStr = getParam('categories') || ''; 
+        const categoriesStr = getParam('categories') || ''
         if (!keyword) {
             res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
             return res.end(JSON.stringify({ success: false, message: "請輸入搜尋關鍵字" }));
         }
         console.log(`[系統] 收到搜尋請求: ${keyword}`);
-        
+
+        const requestedPlatforms = platformParam.split(',');
+        const isAll = requestedPlatforms.includes('all');
+
         let allResults = [];
-        if (platform === 'all' || platform === 'coolpc') {
+        
+        // 根據解開的陣列，精準觸發爬蟲
+        if (isAll || requestedPlatforms.includes('coolpc')) {
             const coolpcData = await scrapeCoolpc(keyword);
             allResults = allResults.concat(coolpcData);
         }
-        if (platform === 'all' || platform === 'sinya') {
+        if (isAll || requestedPlatforms.includes('sinya')) {
             const sinyaData = await scrapeSinya(keyword);
             allResults = allResults.concat(sinyaData);
         }
-        if (platform === 'all' || platform === 'ruten') {
+        if (isAll || requestedPlatforms.includes('ruten')) {
             const rutenData = await scrapeRuten(keyword);
             allResults = allResults.concat(rutenData);
         }
-        if (platform === 'all' || platform === 'pchome') {
+        if (isAll || requestedPlatforms.includes('pchome')) {
             const pchomeData = await scrapePChome(keyword);
             allResults = allResults.concat(pchomeData);
         }
-        if (platform === 'all' || platform === 'momo') {
+        if (isAll || requestedPlatforms.includes('momo')) {
             const momoData = await scrapeMomo(keyword);
             allResults = allResults.concat(momoData);
         }
-        if (platform === 'all' || platform === 'newegg') {
+        if (isAll || requestedPlatforms.includes('newegg')) {
             const neweggData = await scrapeNewegg(keyword);
             allResults = allResults.concat(neweggData);
-        }/*
-        if (platform === 'all' || platform === 'amazon') {
-            const amazonData = await scrapeAmazon(keyword);
-            allResults = allResults.concat(amazonData);
         }
-        if (platform === 'all' || platform === 'ebay') {
-            const ebayData = await scrapeEbay(keyword);
-            allResults = allResults.concat(ebayData);
-        }
-        if (platform === 'all' || platform === 'zol') {
-            const zolData = await scrapeZOL(keyword);
-            allResults = allResults.concat(zolData);
-        }*/
-        if (platform === 'all' || platform === 'yahoo') {
+        if (isAll || requestedPlatforms.includes('yahoo')) {
             const yahooData = await scrapeYahoo(keyword);
             allResults = allResults.concat(yahooData);
         }
+        if (isAll || requestedPlatforms.includes('shopee')) {
+            const shopeeData = await scrapeShopee(keyword);
+            allResults = allResults.concat(shopeeData);
+        }
+
+        // ... (底下繼續接你原本處理 allResults 的邏輯)
         // ==========================================
         // 核心邏輯：三向關鍵字過濾器 + 智慧防呆機制
         // ==========================================
@@ -1996,7 +1997,7 @@ const server = http.createServer(async(req, res) => {
         if (/\d[06]\d0/.test(keyword)) {
             const autoExcludes = [
                 'Kg','架','折疊','會議','眼鏡','Kg', '碗', '無線', 'GHz', '不鏽鋼', '鞋', '題', '衣', '包', '墊', '筆', '袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼',
-                //'風扇',
+                ' 金牌',' 銀牌',' 銅牌',
                 'Fan', 'Cooler', 'Liquid', 'Heatsink',           // 排除散熱器
                 'Cable', 'Adapter', 'Extension', 'Bracket',      // 排除線材與支架
                 'Case', 'Chassis', 'Enclosure',                  // 排除空機殼
@@ -2028,14 +2029,7 @@ const server = http.createServer(async(req, res) => {
                 return isIncludeMatch && isExcludeMatch && isCategoryMatch;
             });
         }
-        // ==========================================
-        if (excludeStr) {
-            const excludeWords = excludeStr.split(/[, ]+/).filter(w => w);
-            allResults = allResults.filter(item => {
-                const nameLower = item.name.toLowerCase();
-                return !excludeWords.some(ex => nameLower.includes(ex.toLowerCase()));
-            });
-        }
+        
         // 價格排序 (由低到高)
         allResults.sort((a, b) => {
             const parsePrice = (priceStr) => {
