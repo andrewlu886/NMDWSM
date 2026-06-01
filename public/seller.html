@@ -240,6 +240,12 @@
                                     </div>
 
                                     <div class="nmd-full">
+                                        <label class="nmd-label" for="product-images">商品圖片上傳（最多 6 張）</label>
+                                        <input class="nmd-field" type="file" id="product-images" accept="image/png,image/jpeg,image/webp" multiple>
+                                        <div id="selected-images-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+                                    </div>
+
+                                    <div class="nmd-full">
                                         <label class="nmd-label" for="product-desc">商品描述</label>
                                         <textarea class="nmd-field" id="product-desc" placeholder="請描述使用時間、配件、外觀狀況、保固與交易建議..." required></textarea>
                                     </div>
@@ -283,6 +289,8 @@
     <script>
         const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
         let editingProductId = null;
+        let selectedProductImages = [];
+        let existingProductImages = [];
 
         function getApiUrl(path) {
             return `${API_BASE}${path}`;
@@ -334,6 +342,7 @@
             });
 
             const logEl = document.getElementById('product-benchmark-log');
+            document.getElementById('product-images').addEventListener('change', handleProductImagesChange);
             document.getElementById('parse-benchmark-btn').addEventListener('click', updateParsedBenchmark);
             logEl.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
@@ -448,6 +457,8 @@
             }
 
             const product = await res.json();
+            existingProductImages = product.images || (product.image ? [product.image] : []);
+            selectedProductImages = [];
             document.getElementById('product-title').value = product.title || '';
             document.getElementById('product-category').value = (product.category || 'gpu').toLowerCase();
             document.getElementById('product-cooling-type').value = product.coolingType || '';
@@ -468,7 +479,51 @@
             updateBenchmarkVisibility();
             updateCoolingTypeVisibility();
             updateParsedBenchmark();
+            renderSelectedImagesPreview();
             updatePreview();
+        }
+
+        function handleProductImagesChange(event) {
+            const incoming = Array.from(event.target.files || []);
+            const total = existingProductImages.length + selectedProductImages.length + incoming.length;
+            if (total > 6) {
+                alert('每個商品最多 6 張圖片');
+                event.target.value = '';
+                return;
+            }
+            const invalid = incoming.find(file => !file.type.startsWith('image/') || file.size > 5 * 1024 * 1024);
+            if (invalid) {
+                alert('只能上傳 5MB 以內的圖片檔案');
+                event.target.value = '';
+                return;
+            }
+            selectedProductImages = selectedProductImages.concat(incoming);
+            event.target.value = '';
+            renderSelectedImagesPreview();
+            updatePreview();
+        }
+
+        function removeSelectedImage(index) {
+            selectedProductImages.splice(index, 1);
+            renderSelectedImagesPreview();
+            updatePreview();
+        }
+
+        function renderSelectedImagesPreview() {
+            const container = document.getElementById('selected-images-preview');
+            if (!container) return;
+            const existing = existingProductImages.map(src => `
+                <div style="position:relative;width:72px;height:54px;border-radius:8px;overflow:hidden;border:1px solid #dbe6f3;">
+                    <img src="${escapeHtml(src)}" alt="既有圖片" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+            `).join('');
+            const pending = selectedProductImages.map((file, index) => `
+                <div style="position:relative;width:72px;height:54px;border-radius:8px;overflow:hidden;border:1px solid #dbe6f3;">
+                    <img src="${escapeHtml(URL.createObjectURL(file))}" alt="待上傳圖片" style="width:100%;height:100%;object-fit:cover;">
+                    <button type="button" onclick="removeSelectedImage(${index})" style="position:absolute;right:2px;top:2px;border:0;border-radius:999px;background:#ef4444;color:#fff;width:20px;height:20px;cursor:pointer;">×</button>
+                </div>
+            `).join('');
+            container.innerHTML = existing + pending || '<span class="nmd-muted">尚未選擇圖片</span>';
         }
 
         function updateParsedBenchmark() {
@@ -518,7 +573,9 @@
         }
 
         function updatePreview() {
-            const image = document.getElementById('product-image').value.trim();
+            const image = selectedProductImages[0]
+                ? URL.createObjectURL(selectedProductImages[0])
+                : (existingProductImages[0] || document.getElementById('product-image').value.trim());
             const category = document.getElementById('product-category').value.toLowerCase();
             const log = document.getElementById('product-benchmark-log').value || '';
             const parsed = parseBenchmarkScore(log, category);
@@ -654,11 +711,30 @@
             const result = await res.json();
 
             if (result.success) {
+                const productId = editingProductId || result.product_id;
+                if (selectedProductImages.length && productId) {
+                    const uploadResult = await uploadProductImages(productId, seller);
+                    if (!uploadResult.success) {
+                        alert(uploadResult.message || '商品已儲存，但圖片上傳失敗');
+                        return;
+                    }
+                }
                 alert(editingProductId ? '商品已更新' : '商品已新增');
                 window.location.href = '/products.html';
             } else {
                 alert(result.message || '送出失敗');
             }
+        }
+
+        async function uploadProductImages(productId, seller) {
+            const formData = new FormData();
+            formData.append('seller', seller);
+            selectedProductImages.forEach(file => formData.append('images', file));
+            const res = await fetch(getApiUrl(`/api/products/${productId}/images`), {
+                method: 'POST',
+                body: formData
+            });
+            return res.json();
         }
 
         function numberOrNull(value) {

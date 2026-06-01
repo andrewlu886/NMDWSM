@@ -92,33 +92,18 @@ const demoUsers = [
 ];
 
 function demoImage(category, title) {
-  const palette = {
-    gpu: ['#0f172a', '#38bdf8'],
-    cpu: ['#1e293b', '#f59e0b'],
-    mb: ['#111827', '#22c55e'],
-    ram: ['#1f2937', '#a78bfa'],
-    ssd: ['#0f766e', '#5eead4'],
-    hdd: ['#334155', '#94a3b8'],
-    cooler: ['#075985', '#7dd3fc'],
-    case: ['#374151', '#d1d5db'],
-    psu: ['#3f3f46', '#facc15']
+  const imageMap = {
+    gpu: '/assets/products/gpu.png',
+    cpu: '/assets/products/cpu.png',
+    mb: '/assets/products/mb.png',
+    ram: '/assets/products/ram.png',
+    ssd: '/assets/products/ssd.png',
+    hdd: '/assets/products/hdd.png',
+    cooler: '/assets/products/cooler.png',
+    case: '/assets/products/case.png',
+    psu: '/assets/products/psu.png'
   };
-  const [bg, accent] = palette[category] || ['#334155', '#60a5fa'];
-  const safeTitle = String(title || 'PC Part')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .slice(0, 42);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450">
-    <rect width="600" height="450" fill="${bg}"/>
-    <rect x="70" y="82" width="460" height="286" rx="28" fill="#ffffff" opacity="0.1"/>
-    <rect x="110" y="125" width="380" height="150" rx="18" fill="${accent}" opacity="0.82"/>
-    <circle cx="180" cy="200" r="44" fill="#020617" opacity="0.55"/>
-    <circle cx="420" cy="200" r="44" fill="#020617" opacity="0.55"/>
-    <rect x="150" y="300" width="300" height="18" rx="9" fill="#ffffff" opacity="0.35"/>
-    <text x="300" y="390" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="700">${safeTitle}</text>
-  </svg>`;
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  return imageMap[category] || '/assets/products/gpu.png';
 }
 
 const demoProducts = [

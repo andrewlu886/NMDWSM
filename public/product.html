@@ -11,6 +11,14 @@
         .step { background:#fff; border:1px solid var(--nmd-border); border-radius:12px; padding:12px; text-align:center; color:var(--nmd-muted); font-weight:900; }
         .step.active { background:var(--nmd-blue-soft); color:var(--nmd-blue); border-color:#a9d4fb; }
         .product-photo { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:18px; background:#eef2f7; border:1px solid #edf1f5; }
+        .gallery { position:relative; }
+        .gallery-btn { position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; border:0; border-radius:999px; background:rgba(15,23,42,.72); color:#fff; font-size:1.4rem; cursor:pointer; display:grid; place-items:center; }
+        .gallery-btn.prev { left:12px; }
+        .gallery-btn.next { right:12px; }
+        .gallery-count { position:absolute; right:14px; bottom:14px; background:rgba(15,23,42,.72); color:#fff; border-radius:999px; padding:5px 10px; font-weight:900; font-size:.85rem; }
+        .gallery-thumbs { display:flex; gap:8px; overflow-x:auto; padding:2px; }
+        .gallery-thumb { width:72px; height:54px; object-fit:cover; border-radius:8px; border:2px solid transparent; cursor:pointer; background:#eef2f7; flex:0 0 auto; }
+        .gallery-thumb.active { border-color:var(--nmd-blue); }
         .image-note, .info-box, .seller-box, .verify-box { background:#f8fbff; border:1px solid var(--nmd-border); border-radius:14px; padding:16px; }
         .detail-stack { display:grid; gap:16px; align-content:start; }
         .title { margin:0; color:var(--nmd-text); font-size:clamp(1.8rem,3vw,2.35rem); line-height:1.25; }
@@ -60,6 +68,7 @@
 
     <script>
         let product = null;
+        let currentImageIndex = 0;
 
         window.onload = async function() {
             setupUser();
@@ -93,9 +102,18 @@
         }
 
         function renderProduct() {
+            const images = productImages();
             document.getElementById('product-detail').innerHTML = `
                 <div class="detail-stack">
-                    <img class="product-photo" src="${escapeHtml(product.image || placeholderImage())}" alt="${escapeHtml(product.title)}">
+                    <div class="gallery">
+                        <img id="main-product-photo" class="product-photo" src="${escapeHtml(images[currentImageIndex])}" alt="${escapeHtml(product.title)}">
+                        ${images.length > 1 ? `
+                            <button class="gallery-btn prev" onclick="changeImage(-1)" aria-label="上一張">‹</button>
+                            <button class="gallery-btn next" onclick="changeImage(1)" aria-label="下一張">›</button>
+                            <div class="gallery-count">${currentImageIndex + 1} / ${images.length}</div>
+                        ` : ''}
+                    </div>
+                    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((src, index) => `<img class="gallery-thumb ${index === currentImageIndex ? 'active' : ''}" src="${escapeHtml(src)}" alt="商品圖片 ${index + 1}" onclick="setImage(${index})">`).join('')}</div>` : ''}
                     <div class="image-note nmd-muted">二手零件建議面交測試，確認外觀、序號、配件與實際運作狀況後再完成交易。</div>
                 </div>
                 <div class="nmd-card nmd-card-pad detail-stack">
@@ -119,6 +137,25 @@
                     <div class="verify-box"><span>燒機驗證</span><strong>未來可接入測試資料</strong><div class="nmd-muted" style="margin-top:6px;">本階段先保留擴充位置，不影響目前交易流程展示。</div></div>
                 </div>
             `;
+        }
+
+        function productImages() {
+            const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+            if (!images.length && product.image) images.push(product.image);
+            if (!images.length) images.push(placeholderImage());
+            if (currentImageIndex >= images.length) currentImageIndex = 0;
+            return images;
+        }
+
+        function changeImage(delta) {
+            const images = productImages();
+            currentImageIndex = (currentImageIndex + delta + images.length) % images.length;
+            renderProduct();
+        }
+
+        function setImage(index) {
+            currentImageIndex = index;
+            renderProduct();
         }
 
         async function addToCart() {

@@ -149,6 +149,15 @@ function initDatabase() {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
           );
+
+          CREATE TABLE IF NOT EXISTS product_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER NOT NULL,
+            image_url TEXT NOT NULL,
+            sort_order INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+          );
         `;
 
         db.exec(initSql, (err) => {
@@ -184,6 +193,14 @@ function initDatabase() {
               FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
               FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
             )`;
+            const createProductImages = `CREATE TABLE IF NOT EXISTS product_images (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              product_id INTEGER NOT NULL,
+              image_url TEXT NOT NULL,
+              sort_order INTEGER DEFAULT 0,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+            )`;
             let chain = Promise.resolve();
             migrations.forEach((sql) => {
               chain = chain.then(() => new Promise((migrationResolve) => {
@@ -193,6 +210,12 @@ function initDatabase() {
             chain
               .then(() => new Promise((migrationResolve, migrationReject) => {
                 db.run(createTransactionComments, (migrationErr) => {
+                  if (migrationErr) migrationReject(migrationErr);
+                  else migrationResolve();
+                });
+              }))
+              .then(() => new Promise((migrationResolve, migrationReject) => {
+                db.run(createProductImages, (migrationErr) => {
                   if (migrationErr) migrationReject(migrationErr);
                   else migrationResolve();
                 });
@@ -351,6 +374,34 @@ const Product = {
                     JOIN users u ON p.seller_id = u.id 
                     WHERE p.status = 'active' AND (p.title LIKE ? OR p.description LIKE ?)
                     ORDER BY p.created_at DESC LIMIT 30`, [`%${keyword}%`, `%${keyword}%`]);
+  }
+};
+
+const ProductImage = {
+  async getByProduct(productId) {
+    return runQuery(
+      'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, id ASC',
+      [productId]
+    );
+  },
+
+  async countByProduct(productId) {
+    const row = await runQueryOne('SELECT COUNT(*) AS count FROM product_images WHERE product_id = ?', [productId]);
+    return row ? row.count : 0;
+  },
+
+  async add(productId, imageUrl, sortOrder) {
+    return runUpdate(
+      'INSERT INTO product_images (product_id, image_url, sort_order) VALUES (?, ?, ?)',
+      [productId, imageUrl, sortOrder]
+    );
+  },
+
+  async seedFromProductImage(productId, imageUrl) {
+    if (!imageUrl) return;
+    const existing = await this.countByProduct(productId);
+    if (existing > 0) return;
+    await this.add(productId, imageUrl, 0);
   }
 };
 
@@ -606,6 +657,7 @@ module.exports = {
   runUpdate,
   User,
   Product,
+  ProductImage,
   Post,
   Transaction,
   TransactionComment,

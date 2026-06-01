@@ -15,6 +15,7 @@ const db = require('./db.js');
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
 const USERS_FILE = path.join(__dirname, 'users.json');
+const UPLOADS_DIR = path.join(__dirname, 'uploads', 'products');
 const BLOCKED_STATIC_EXTENSIONS = new Set(['.db', '.sqlite', '.sqlite3']);
 const BLOCKED_STATIC_FILES = new Set(['users.json', 'products.json', 'posts.json']);
 // JSON 檔僅保留作為備份或測試資料，正式資料來源統一使用 SQLite。
@@ -75,6 +76,55 @@ function parseJsonBody(req) {
             } catch (error) {
                 reject(error);
             }
+        });
+        req.on('error', reject);
+    });
+}
+
+function parseMultipartForm(req) {
+    return new Promise((resolve, reject) => {
+        const contentType = req.headers['content-type'] || '';
+        const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
+        if (!boundaryMatch) return reject(new Error('Missing multipart boundary'));
+        const boundary = Buffer.from(`--${boundaryMatch[1] || boundaryMatch[2]}`);
+        const chunks = [];
+
+        req.on('data', chunk => chunks.push(chunk));
+        req.on('end', () => {
+            const body = Buffer.concat(chunks);
+            const fields = {};
+            const files = [];
+            let start = body.indexOf(boundary);
+
+            while (start !== -1) {
+                start += boundary.length;
+                if (body[start] === 45 && body[start + 1] === 45) break;
+                if (body[start] === 13 && body[start + 1] === 10) start += 2;
+
+                const headerEnd = body.indexOf(Buffer.from('\r\n\r\n'), start);
+                if (headerEnd === -1) break;
+                const headerText = body.slice(start, headerEnd).toString('utf8');
+                let contentStart = headerEnd + 4;
+                let next = body.indexOf(boundary, contentStart);
+                if (next === -1) break;
+                let contentEnd = next;
+                if (body[contentEnd - 2] === 13 && body[contentEnd - 1] === 10) contentEnd -= 2;
+
+                const name = headerText.match(/name="([^"]+)"/)?.[1];
+                const filename = headerText.match(/filename="([^"]*)"/)?.[1];
+                const mimeType = headerText.match(/content-type:\s*([^\r\n]+)/i)?.[1]?.trim() || '';
+                const data = body.slice(contentStart, contentEnd);
+
+                if (name && filename) {
+                    files.push({ field: name, filename, mimeType, data });
+                } else if (name) {
+                    fields[name] = data.toString('utf8');
+                }
+
+                start = next;
+            }
+
+            resolve({ fields, files });
         });
         req.on('error', reject);
     });
@@ -157,6 +207,16 @@ function formatProduct(product) {
         benchmarkCombined: product.benchmark_combined || null,
         createdAt: product.created_at
     };
+}
+
+async function formatProductWithImages(product) {
+    const formatted = formatProduct(product);
+    const rows = await db.ProductImage.getByProduct(product.id);
+    const images = rows.map(row => row.image_url);
+    if (!images.length && formatted.image) images.push(formatted.image);
+    formatted.images = [...new Set(images.filter(Boolean))];
+    if (!formatted.image && formatted.images.length) formatted.image = formatted.images[0];
+    return formatted;
 }
 function parseBenchmarkScore(log, category) {
     if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null, mismatch: false };
@@ -265,6 +325,13 @@ function formatTransactionComment(row) {
 async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
     const user = await findRequestUser(body.userEmail || body.userId || parsedUrl.searchParams.get('userEmail') || parsedUrl.searchParams.get('userId'));
     return user;
+}
+
+function safeUploadName(originalName, index) {
+    const ext = path.extname(originalName || '').toLowerCase();
+    const allowed = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+    if (!allowed.has(ext)) return '';
+    return `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}${ext}`;
 }
 
 function validateTransactionTransition(transaction, user, nextStatus) {
@@ -1332,7 +1399,7 @@ const server = http.createServer(async(req, res) => {
                 products = products.filter(product => product.status === statusFilter);
             }
 
-            sendJson(res, 200, products.map(formatProduct));
+            sendJson(res, 200, await Promise.all(products.map(formatProductWithImages)));
         } catch (error) {
             console.error('讀取商品錯誤:', error);
             sendJson(res, 500, { success: false, message: '伺服器錯誤' });
@@ -1347,7 +1414,7 @@ const server = http.createServer(async(req, res) => {
 
             await db.Product.incrementViews(productId);
             product.views = (product.views || 0) + 1;
-            sendJson(res, 200, formatProduct(product));
+            sendJson(res, 200, await formatProductWithImages(product));
         } catch (error) {
             console.error('讀取單一商品錯誤:', error);
             sendJson(res, 500, { success: false, message: '伺服器錯誤' });
@@ -1369,6 +1436,47 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 200, { success: true, message: '商品狀態已更新' });
         } catch (error) {
             sendJson(res, 500, { success: false, message: '商品狀態更新失敗' });
+        }
+
+    } else if (/^\/api\/products\/\d+\/images$/.test(pathname) && req.method === 'POST') {
+        setCorsHeaders(res);
+        const productId = parseInt(pathname.split('/')[3], 10);
+        try {
+            const product = await db.Product.findById(productId);
+            const { fields, files } = await parseMultipartForm(req);
+            const user = await findRequestUser(fields.seller || fields.userEmail);
+            if (!user) return sendJson(res, 400, { success: false, message: '請先登入賣家帳號' });
+            if (!product || product.seller_id !== user.id) return sendJson(res, 403, { success: false, message: '只能上傳自己的商品圖片' });
+
+            const existingCount = await db.ProductImage.countByProduct(productId);
+            const imageFiles = files.filter(file => file.field === 'images' || file.field === 'image');
+            if (!imageFiles.length) return sendJson(res, 400, { success: false, message: '請選擇圖片檔案' });
+            if (existingCount + imageFiles.length > 6) return sendJson(res, 400, { success: false, message: '每個商品最多 6 張圖片' });
+
+            const productDir = path.join(UPLOADS_DIR, String(productId));
+            fs.mkdirSync(productDir, { recursive: true });
+            const saved = [];
+
+            for (let i = 0; i < imageFiles.length; i += 1) {
+                const file = imageFiles[i];
+                if (!file.mimeType.startsWith('image/')) return sendJson(res, 400, { success: false, message: '只能上傳圖片檔案' });
+                if (file.data.length > 5 * 1024 * 1024) return sendJson(res, 400, { success: false, message: '單張圖片不可超過 5MB' });
+                const fileName = safeUploadName(file.filename, existingCount + i);
+                if (!fileName) return sendJson(res, 400, { success: false, message: '只支援 jpg、png、webp 圖片' });
+                fs.writeFileSync(path.join(productDir, fileName), file.data);
+                const imageUrl = `/uploads/products/${productId}/${fileName}`;
+                await db.ProductImage.add(productId, imageUrl, existingCount + i);
+                saved.push(imageUrl);
+            }
+
+            if (existingCount === 0 && saved.length) {
+                await db.runUpdate('UPDATE products SET image_url = ? WHERE id = ?', [saved[0], productId]);
+            }
+
+            sendJson(res, 200, { success: true, images: saved });
+        } catch (error) {
+            console.error('商品圖片上傳失敗:', error);
+            sendJson(res, 500, { success: false, message: '圖片上傳失敗' });
         }
 
     } else if (pathname.startsWith('/api/products/') && req.method === 'PUT') {
@@ -1969,7 +2077,11 @@ const server = http.createServer(async(req, res) => {
         const contentType = {
             '.html': 'text/html',
             '.css': 'text/css',
-            '.js': 'text/javascript'
+            '.js': 'text/javascript',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.webp': 'image/webp'
         }[ext] || 'text/plain';
 
         fs.readFile(safeFilePath, (err, data) => {
