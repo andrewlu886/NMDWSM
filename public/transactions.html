@@ -13,9 +13,25 @@
         }
 
         .container {
-            max-width: 1180px;
+            max-width: 1260px;
             margin: 2rem auto;
             padding: 0 20px;
+        }
+
+        .transaction-layout {
+            display: grid;
+            grid-template-columns: 240px minmax(0, 1fr);
+            gap: 28px;
+            align-items: start;
+        }
+
+        .transaction-main {
+            min-width: 0;
+        }
+
+        .transaction-sidebar {
+            position: sticky;
+            top: 152px;
         }
 
         .dropdown-menu {
@@ -460,6 +476,14 @@
         }
 
         @media (max-width: 980px) {
+            .transaction-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .transaction-sidebar {
+                position: static;
+            }
+
             .buyer-toolbar {
                 align-items: flex-start;
                 flex-direction: column;
@@ -573,35 +597,48 @@
         </nav>
     </header>
 
-    <main class="container">
-        <div class="buyer-toolbar">
-            <div class="buyer-title">
-                <h1 id="page-title">購買清單</h1>
-                <p id="page-desc">查看你的二手零件購買紀錄，包含待付款、待出貨與已完成訂單。</p>
+    <main class="container transaction-layout">
+        <aside class="nmd-card nmd-card-pad seller-sidebar transaction-sidebar">
+            <h2>交易中心</h2>
+            <a id="side-buyer-link" href="/transactions?role=buyer" class="seller-side-link active">購買清單</a>
+            <a id="side-seller-link" href="/transactions?role=seller" class="seller-side-link">我的銷售</a>
+            <a href="/products.html" class="seller-side-link">我的商品</a>
+            <a href="/seller#product-form-section" class="seller-side-link">新增商品</a>
+            <a href="/scrape" class="seller-side-link">市價查詢</a>
+            <a href="/#recommend" class="seller-side-link">智慧推薦</a>
+            <a href="/forum" class="seller-side-link">討論區</a>
+        </aside>
+
+        <div class="transaction-main">
+            <div class="buyer-toolbar">
+                <div class="buyer-title">
+                    <h1 id="page-title">購買清單</h1>
+                    <p id="page-desc">查看你的二手零件購買紀錄，包含待付款、待出貨與已完成訂單。</p>
+                </div>
+                <div class="role-switch" aria-label="交易角色切換">
+                    <button id="buyer-tab" class="active" type="button" onclick="switchRole('buyer')">我是買家</button>
+                    <button id="seller-tab" type="button" onclick="switchRole('seller')">我是賣家</button>
+                </div>
             </div>
-            <div class="role-switch" aria-label="交易角色切換">
-                <button id="buyer-tab" class="active" type="button" onclick="switchRole('buyer')">我是買家</button>
-                <button id="seller-tab" type="button" onclick="switchRole('seller')">我是賣家</button>
-            </div>
+
+            <section id="wallet-card" class="wallet-card" aria-label="展示用虛擬餘額">
+                <div>
+                    <div class="wallet-label">展示用虛擬餘額</div>
+                    <div id="wallet-balance" class="wallet-balance">NT$ 0</div>
+                    <div class="wallet-note">此餘額只保存在本瀏覽器，用於展示付款、扣款與退貨流程，不代表真實金流。</div>
+                </div>
+                <button class="wallet-reset-btn" type="button" onclick="resetWallet()">重置為 NT$ 1,000,000</button>
+            </section>
+
+            <section class="order-shell">
+                <div id="status-tabs" class="status-tabs"></div>
+                <div class="summary-row">
+                    <span id="summary">正在載入購買紀錄...</span>
+                    <span>數量預設 1，總價依交易金額顯示</span>
+                </div>
+                <div id="orders-container" class="empty">正在載入購買紀錄...</div>
+            </section>
         </div>
-
-        <section id="wallet-card" class="wallet-card" aria-label="展示用虛擬餘額">
-            <div>
-                <div class="wallet-label">展示用虛擬餘額</div>
-                <div id="wallet-balance" class="wallet-balance">NT$ 0</div>
-                <div class="wallet-note">此餘額只保存在本瀏覽器，用於展示付款、扣款與退貨流程，不代表真實金流。</div>
-            </div>
-            <button class="wallet-reset-btn" type="button" onclick="resetWallet()">重置為 NT$ 1,000,000</button>
-        </section>
-
-        <section class="order-shell">
-            <div id="status-tabs" class="status-tabs"></div>
-            <div class="summary-row">
-                <span id="summary">正在載入購買紀錄...</span>
-                <span>數量預設 1，總價依交易金額顯示</span>
-            </div>
-            <div id="orders-container" class="empty">正在載入購買紀錄...</div>
-        </section>
     </main>
 
     <script>
@@ -633,6 +670,9 @@
             document.getElementById('user-profile').style.display = 'flex';
             document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
 
+            const initialRole = new URLSearchParams(window.location.search).get('role');
+            if (initialRole === 'seller') currentRole = 'seller';
+            syncRoleUi();
             renderStatusTabs();
             initWallet();
             await updateCartCount();
@@ -651,15 +691,22 @@
         async function switchRole(role) {
             currentRole = role;
             currentStatus = 'all';
+            syncRoleUi();
+            renderWallet();
+            renderStatusTabs();
+            await loadOrders();
+        }
+
+        function syncRoleUi() {
+            const role = currentRole;
             document.getElementById('buyer-tab').classList.toggle('active', role === 'buyer');
             document.getElementById('seller-tab').classList.toggle('active', role === 'seller');
+            document.getElementById('side-buyer-link').classList.toggle('active', role === 'buyer');
+            document.getElementById('side-seller-link').classList.toggle('active', role === 'seller');
             document.getElementById('page-title').innerText = role === 'buyer' ? '購買清單' : '我的銷售';
             document.getElementById('page-desc').innerText = role === 'buyer'
                 ? '查看你的二手零件購買紀錄，包含待付款、待出貨與已完成訂單。'
                 : '查看買家送出的交易紀錄，賣家完整流程可在下一階段再擴充。';
-            renderWallet();
-            renderStatusTabs();
-            await loadOrders();
         }
 
         function switchStatus(status) {

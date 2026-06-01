@@ -272,9 +272,9 @@
                                 <span class="nmd-pill" id="preview-location">廠商品牌</span>
                                 <span class="nmd-pill" id="preview-usage">遊戲</span>
                                 <span class="nmd-pill" id="preview-benchmark">未提供分數</span>
-                                <span class="nmd-pill" id="preview-benchmark-read">R:-</span>
-                                <span class="nmd-pill" id="preview-benchmark-write">W:-</span>
-                                <span class="nmd-pill" id="preview-benchmark-combined">C:-</span>
+                                <span class="nmd-pill" id="preview-benchmark-read" style="display:none;">R:-</span>
+                                <span class="nmd-pill" id="preview-benchmark-write" style="display:none;">W:-</span>
+                                <span class="nmd-pill" id="preview-benchmark-combined" style="display:none;">C:-</span>
                                 <span class="nmd-pill gray" id="preview-benchmark-raw">未提供 log</span>
                                 <span class="nmd-pill success">已驗證零件</span>
                             </div>
@@ -600,10 +600,17 @@
                 document.getElementById('product-benchmark-score').value = parsed.best || '';
             }
 
-            document.getElementById('preview-benchmark-read').innerText = `R:${parsed.read || '-'}`;
-            document.getElementById('preview-benchmark-write').innerText = `W:${parsed.write || '-'}`;
-            document.getElementById('preview-benchmark-combined').innerText = `C:${parsed.combined || '-'}`;
+            setPreviewMetric('preview-benchmark-read', 'R', parsed.read);
+            setPreviewMetric('preview-benchmark-write', 'W', parsed.write);
+            setPreviewMetric('preview-benchmark-combined', 'C', parsed.combined);
             document.getElementById('preview-benchmark-raw').innerText = log ? (log.length > 30 ? `${log.slice(0, 30)}...` : log) : '未提供 log';
+        }
+
+        function setPreviewMetric(id, label, value) {
+            const el = document.getElementById(id);
+            const hasValue = value !== null && value !== undefined && value !== '';
+            el.style.display = hasValue ? '' : 'none';
+            if (hasValue) el.innerText = `${label}:${value}`;
         }
 
         function parseBenchmarkScore(log, category) {

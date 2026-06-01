@@ -32,16 +32,16 @@
             <aside class="nmd-card nmd-card-pad seller-nav">
                 <h2>賣家中心</h2>
                 <a href="/seller">賣家首頁</a>
-                <a href="/transactions">我的銷售</a>
+                <a href="/transactions?role=seller">我的銷售</a>
                 <a href="/products.html" class="active">我的商品</a>
-                <a href="/seller#product-workspace">新增商品</a>
+                <a href="/seller#product-form-section">新增商品</a>
                 <a href="/scrape">市價查詢</a>
                 <a href="/forum">討論區</a>
             </aside>
             <section>
                 <div class="nmd-hero">
                     <div><h1>商品管理</h1><p>管理上架中、已售出與已下架的二手零件。</p></div>
-                    <a class="nmd-btn" href="/seller#product-workspace">新增商品</a>
+                    <a class="nmd-btn" href="/seller#product-form-section">新增商品</a>
                 </div>
                 <div class="toolbar">
                     <select id="status-filter" class="nmd-field" onchange="renderProducts()"><option value="all">全部狀態</option><option value="active">上架中</option><option value="sold">已售出</option><option value="inactive">已下架</option></select>
