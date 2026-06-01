@@ -1978,13 +1978,10 @@ const server = http.createServer(async(req, res) => {
             allResults = allResults.concat(shopeeData);
         }
 
-        // ... (底下繼續接你原本處理 allResults 的邏輯)
         // ==========================================
         // 核心邏輯：三向關鍵字過濾器 + 智慧防呆機制
         // ==========================================
     
-       // const includeStr = parsedUrl.query.include || '';
-        //const categoriesStr = parsedUrl.query.categories || '';
         const includeWords = includeStr.split(/[\s,]+/).filter(w => w);
         let excludeWords = excludeStr.split(/[\s,]+/).filter(w => w); 
         const categoryWords = categoriesStr.split(',').filter(w => w);
@@ -1993,7 +1990,6 @@ const server = http.createServer(async(req, res) => {
         let minPriceThreshold = 0;
 
         // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾與整機
-
         if (/\d[06]\d0/.test(keyword)) {
             minPriceThreshold = 1000;
             const autoExcludes = [
