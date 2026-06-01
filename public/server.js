@@ -643,8 +643,8 @@ async function scrapeCoolpc(keyword) {
 
         console.log(`[原價屋] 搜尋完成，找到 ${results.length} 筆`);
         
-        // 回傳前 30 筆
-        return results.slice(0, 30); 
+        // 回傳前 99 筆
+        return results.slice(0, 99); 
     } catch (error) {
         console.error(`原價屋爬蟲失敗: ${error.message}`);
         return [{ platform: '原價屋', name: '錯誤: 取得失敗', price: 'N/A', url: 'https://www.coolpc.com.tw/evaluate.php' }];
@@ -682,7 +682,7 @@ async function scrapeSinya(keyword) {
         });
 
         console.log(`[欣亞] API 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 12); // 回傳前 12 筆
+        return results.slice(0, 99); // 回傳前 99 筆
 
     } catch (error) {
         console.error(`欣亞 API 爬蟲失敗: ${error.message}`);
@@ -708,8 +708,8 @@ async function scrapeRuten(keyword) {
             return [];
         }
 
-        // 取前 12 個 ID，並組成 "id1,id2,id3..." 的格式
-        const itemIds = searchRows.slice(0, 12).map(row => row.Id || row.GoodsNo).filter(id => id).join(',');
+        // 取前 99 個 ID，並組成 "id1,id2,id3..." 的格式
+        const itemIds = searchRows.slice(0, 99).map(row => row.Id || row.GoodsNo).filter(id => id).join(',');
 
         if (!itemIds) return [];
 
@@ -784,7 +784,7 @@ async function scrapePChome(keyword) {
         });
 
         console.log(`[PChome] 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 12);
+        return results.slice(0, 99);
 
     } catch (error) {
         console.error(`PChome 爬蟲失敗: ${error.message}`);
@@ -840,7 +840,7 @@ async function scrapeMomo(keyword) {
             });
         });
         console.log(`[Momo] 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 12);
+        return results.slice(0, 99);
 
     } catch (error) {
         console.error(`Momo 爬蟲失敗: ${error.message}`);
@@ -848,7 +848,7 @@ async function scrapeMomo(keyword) {
     }
 }
 
-// 9. 美國 Newegg 爬蟲邏輯 (Puppeteer 版 - 3C 硬體權威)
+// 7. 美國 Newegg 爬蟲邏輯 
 async function scrapeNewegg(keyword) {
     console.log(`[Newegg] 啟動隱形瀏覽器搜尋美國硬體: ${keyword}`);
     let browser;
@@ -885,7 +885,7 @@ async function scrapeNewegg(keyword) {
         });
 
         console.log(`[Newegg] 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 10);
+        return results.slice(0, 99);
 
     } catch (error) {
         console.error(`❌ Newegg 爬蟲失敗: ${error.message}`);
@@ -895,7 +895,7 @@ async function scrapeNewegg(keyword) {
     }
 }
 
-// 12. 台灣 Yahoo 購物中心爬蟲邏輯 (特徵錨點抓取法 - 升級版)
+// 8. 台灣 Yahoo 購物中心爬蟲邏輯
 async function scrapeYahoo(keyword) {
     console.log(`[Yahoo購物] 啟動隱形瀏覽器搜尋: ${keyword}`);
     let browser;
@@ -1600,7 +1600,6 @@ const server = http.createServer(async(req, res) => {
                 products = await db.Product.getActive();
             }
             
-            // 為了相容前端原本預期的 JSON 屬性名稱，我們將資料庫欄位映射回原格式
             const formattedProducts = products.map(p => ({
                 id: p.id,
                 title: p.title,
@@ -1993,13 +1992,21 @@ const server = http.createServer(async(req, res) => {
         const includeWords = includeStr.split(/[\s,]+/).filter(w => w);
         let excludeWords = excludeStr.split(/[\s,]+/).filter(w => w); 
         const categoryWords = categoriesStr.split(',').filter(w => w);
-
-        // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾
+        // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾與整機
         if (/\d[06]\d0/.test(keyword)) {
-            const autoExcludes = ['風扇','Kg','碗','無線','GHz','不鏽鋼','鞋','題','衣','包','墊','筆','袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼'];
+            const autoExcludes = [
+                'Kg','架','折疊','會議','眼鏡','Kg', '碗', '無線', 'GHz', '不鏽鋼', '鞋', '題', '衣', '包', '墊', '筆', '袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼',
+                //'風扇',
+                'Fan', 'Cooler', 'Liquid', 'Heatsink',           // 排除散熱器
+                'Cable', 'Adapter', 'Extension', 'Bracket',      // 排除線材與支架
+                'Case', 'Chassis', 'Enclosure',                  // 排除空機殼
+                'Sticker', 'Skin', 'Decal',                      // 排除貼紙
+            ]
             autoExcludes.forEach(ex => {
                 if (!excludeWords.includes(ex)) {
+                    // 同時加入小寫版本，增加攔截率
                     excludeWords.push(ex);
+                    excludeWords.push(ex.toLowerCase()); 
                 }
             });
             console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞: ${autoExcludes.join(', ')}`);
