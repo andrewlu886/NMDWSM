@@ -666,24 +666,20 @@ async function scrapeSinya(keyword) {
         });
 
         let results = [];
-        
-        // 資料在 response.data.data 裡面
         const items = response.data.data || []; 
-
         items.forEach(item => {
-            results.push({
-                platform: '欣亞',
-                // 根據回傳的 JSON 解析
-                name: item.prod_name, 
-                // 將數字價格轉成有逗號的字串
-                price: item.price ? item.price.toLocaleString() : '請至官網確認',
-                url: item.prod_id ? `https://www.sinya.com.tw/prod/${item.prod_id}` : `https://www.sinya.com.tw/search?keyword=${encodeURIComponent(keyword)}`
-            });
+            if (item && item.prod_name && item.prod_name.toLowerCase().includes(keyword.toLowerCase())) {
+                results.push({
+                    platform: '欣亞',
+                    name: item.prod_name, 
+                    price: item.price ? item.price.toLocaleString() : '請至官網確認',
+                    url: item.prod_id ? `https://www.sinya.com.tw/prod/${item.prod_id}` : `https://www.sinya.com.tw/search?keyword=${encodeURIComponent(keyword)}`
+                });
+            }
         });
 
-        console.log(`[欣亞] API 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 99); // 回傳前 99 筆
-
+        console.log(`[欣亞] API 搜尋完成，過濾後找到 ${results.length} 筆`);
+        return results.slice(0, 99); 
     } catch (error) {
         console.error(`欣亞 API 爬蟲失敗: ${error.message}`);
         return [{ platform: '欣亞', name: '錯誤: 取得失敗 (API 異常)', price: 'N/A', url: 'https://www.sinya.com.tw/' }];
@@ -1989,15 +1985,20 @@ const server = http.createServer(async(req, res) => {
     
        // const includeStr = parsedUrl.query.include || '';
         //const categoriesStr = parsedUrl.query.categories || '';
-
         const includeWords = includeStr.split(/[\s,]+/).filter(w => w);
         let excludeWords = excludeStr.split(/[\s,]+/).filter(w => w); 
         const categoryWords = categoriesStr.split(',').filter(w => w);
+
+        // 💰 新增：預設沒有最低價限制
+        let minPriceThreshold = 0;
+
         // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾與整機
+
         if (/\d[06]\d0/.test(keyword)) {
+            minPriceThreshold = 1000;
             const autoExcludes = [
                 'Kg','架','折疊','會議','眼鏡','Kg', '碗', '無線', 'GHz', '不鏽鋼', '鞋', '題', '衣', '包', '墊', '筆', '袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼',
-                ' 金牌',' 銀牌',' 銅牌',
+                ' 金牌',' 銀牌',' 銅牌','顯卡風扇',
                 'Fan', 'Cooler', 'Liquid', 'Heatsink',           // 排除散熱器
                 'Cable', 'Adapter', 'Extension', 'Bracket',      // 排除線材與支架
                 'Case', 'Chassis', 'Enclosure',                  // 排除空機殼
@@ -2010,7 +2011,8 @@ const server = http.createServer(async(req, res) => {
                     excludeWords.push(ex.toLowerCase()); 
                 }
             });
-            console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞: ${autoExcludes.join(', ')}`);
+            console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞`);
+            //console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞: ${autoExcludes.join(', ')}`);
         }
 
         if (includeWords.length > 0 || excludeWords.length > 0 || categoryWords.length > 0) {
@@ -2029,7 +2031,17 @@ const server = http.createServer(async(req, res) => {
                 return isIncludeMatch && isExcludeMatch && isCategoryMatch;
             });
         }
-        
+        // 2. 執行全新的「價格守門員」過濾
+        if (minPriceThreshold > 0) {
+            allResults = allResults.filter(item => {
+                // 將含有貨幣符號或逗號的字串 (例如 "1,406 元") 轉成純數字 1406
+                const cleanPriceStr = String(item.price).replace(/[^0-9]/g, '');
+                const numericPrice = cleanPriceStr ? parseInt(cleanPriceStr, 10) : 0;
+                
+                // 只保留價格大於或等於門檻的商品
+                return numericPrice >= minPriceThreshold;
+            });
+        }
         // 價格排序 (由低到高)
         allResults.sort((a, b) => {
             const parsePrice = (priceStr) => {
