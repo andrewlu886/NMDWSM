@@ -643,8 +643,8 @@ async function scrapeCoolpc(keyword) {
 
         console.log(`[原價屋] 搜尋完成，找到 ${results.length} 筆`);
         
-        // 回傳前 30 筆
-        return results.slice(0, 30); 
+        // 回傳前 99 筆
+        return results.slice(0, 99); 
     } catch (error) {
         console.error(`原價屋爬蟲失敗: ${error.message}`);
         return [{ platform: '原價屋', name: '錯誤: 取得失敗', price: 'N/A', url: 'https://www.coolpc.com.tw/evaluate.php' }];
@@ -666,24 +666,20 @@ async function scrapeSinya(keyword) {
         });
 
         let results = [];
-        
-        // 資料在 response.data.data 裡面
         const items = response.data.data || []; 
-
         items.forEach(item => {
-            results.push({
-                platform: '欣亞',
-                // 根據回傳的 JSON 解析
-                name: item.prod_name, 
-                // 將數字價格轉成有逗號的字串
-                price: item.price ? item.price.toLocaleString() : '請至官網確認',
-                url: item.prod_id ? `https://www.sinya.com.tw/prod/${item.prod_id}` : `https://www.sinya.com.tw/search?keyword=${encodeURIComponent(keyword)}`
-            });
+            if (item && item.prod_name && item.prod_name.toLowerCase().includes(keyword.toLowerCase())) {
+                results.push({
+                    platform: '欣亞',
+                    name: item.prod_name, 
+                    price: item.price ? item.price.toLocaleString() : '請至官網確認',
+                    url: item.prod_id ? `https://www.sinya.com.tw/prod/${item.prod_id}` : `https://www.sinya.com.tw/search?keyword=${encodeURIComponent(keyword)}`
+                });
+            }
         });
 
-        console.log(`[欣亞] API 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 12); // 回傳前 12 筆
-
+        console.log(`[欣亞] API 搜尋完成，過濾後找到 ${results.length} 筆`);
+        return results.slice(0, 99); 
     } catch (error) {
         console.error(`欣亞 API 爬蟲失敗: ${error.message}`);
         return [{ platform: '欣亞', name: '錯誤: 取得失敗 (API 異常)', price: 'N/A', url: 'https://www.sinya.com.tw/' }];
@@ -708,8 +704,8 @@ async function scrapeRuten(keyword) {
             return [];
         }
 
-        // 取前 12 個 ID，並組成 "id1,id2,id3..." 的格式
-        const itemIds = searchRows.slice(0, 12).map(row => row.Id || row.GoodsNo).filter(id => id).join(',');
+        // 取前 99 個 ID，並組成 "id1,id2,id3..." 的格式
+        const itemIds = searchRows.slice(0, 99).map(row => row.Id || row.GoodsNo).filter(id => id).join(',');
 
         if (!itemIds) return [];
 
@@ -784,7 +780,7 @@ async function scrapePChome(keyword) {
         });
 
         console.log(`[PChome] 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 12);
+        return results.slice(0, 99);
 
     } catch (error) {
         console.error(`PChome 爬蟲失敗: ${error.message}`);
@@ -840,7 +836,7 @@ async function scrapeMomo(keyword) {
             });
         });
         console.log(`[Momo] 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 12);
+        return results.slice(0, 99);
 
     } catch (error) {
         console.error(`Momo 爬蟲失敗: ${error.message}`);
@@ -848,7 +844,7 @@ async function scrapeMomo(keyword) {
     }
 }
 
-// 9. 美國 Newegg 爬蟲邏輯 (Puppeteer 版 - 3C 硬體權威)
+// 7. 美國 Newegg 爬蟲邏輯 
 async function scrapeNewegg(keyword) {
     console.log(`[Newegg] 啟動隱形瀏覽器搜尋美國硬體: ${keyword}`);
     let browser;
@@ -885,7 +881,7 @@ async function scrapeNewegg(keyword) {
         });
 
         console.log(`[Newegg] 搜尋完成，找到 ${results.length} 筆`);
-        return results.slice(0, 10);
+        return results.slice(0, 99);
 
     } catch (error) {
         console.error(`❌ Newegg 爬蟲失敗: ${error.message}`);
@@ -895,7 +891,7 @@ async function scrapeNewegg(keyword) {
     }
 }
 
-// 12. 台灣 Yahoo 購物中心爬蟲邏輯 (特徵錨點抓取法 - 升級版)
+// 8. 台灣 Yahoo 購物中心爬蟲邏輯
 async function scrapeYahoo(keyword) {
     console.log(`[Yahoo購物] 啟動隱形瀏覽器搜尋: ${keyword}`);
     let browser;
@@ -1600,7 +1596,6 @@ const server = http.createServer(async(req, res) => {
                 products = await db.Product.getActive();
             }
             
-            // 為了相容前端原本預期的 JSON 屬性名稱，我們將資料庫欄位映射回原格式
             const formattedProducts = products.map(p => ({
                 id: p.id,
                 title: p.title,
@@ -1931,78 +1926,89 @@ const server = http.createServer(async(req, res) => {
     else if (pathname === '/api/scrape' && req.method === 'GET') {
         setCorsHeaders(res);
         const getParam = (key) => parsedUrl.query ? parsedUrl.query[key] : parsedUrl.searchParams?.get(key);
+        
         const keyword = getParam('keyword');
-        const platform = getParam('platform') || 'all';
+        // 接收前端傳來的逗號字串 (例如 "coolpc,sinya")
+        const platformParam = getParam('platform') || 'all'; 
         const excludeStr = getParam('exclude') || ''; 
         const includeStr = getParam('include') || ''; 
-        const categoriesStr = getParam('categories') || ''; 
+        const categoriesStr = getParam('categories') || ''
         if (!keyword) {
             res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
             return res.end(JSON.stringify({ success: false, message: "請輸入搜尋關鍵字" }));
         }
         console.log(`[系統] 收到搜尋請求: ${keyword}`);
-        
+
+        const requestedPlatforms = platformParam.split(',');
+        const isAll = requestedPlatforms.includes('all');
+
         let allResults = [];
-        if (platform === 'all' || platform === 'coolpc') {
+        
+        // 根據解開的陣列，精準觸發爬蟲
+        if (isAll || requestedPlatforms.includes('coolpc')) {
             const coolpcData = await scrapeCoolpc(keyword);
             allResults = allResults.concat(coolpcData);
         }
-        if (platform === 'all' || platform === 'sinya') {
+        if (isAll || requestedPlatforms.includes('sinya')) {
             const sinyaData = await scrapeSinya(keyword);
             allResults = allResults.concat(sinyaData);
         }
-        if (platform === 'all' || platform === 'ruten') {
+        if (isAll || requestedPlatforms.includes('ruten')) {
             const rutenData = await scrapeRuten(keyword);
             allResults = allResults.concat(rutenData);
         }
-        if (platform === 'all' || platform === 'pchome') {
+        if (isAll || requestedPlatforms.includes('pchome')) {
             const pchomeData = await scrapePChome(keyword);
             allResults = allResults.concat(pchomeData);
         }
-        if (platform === 'all' || platform === 'momo') {
+        if (isAll || requestedPlatforms.includes('momo')) {
             const momoData = await scrapeMomo(keyword);
             allResults = allResults.concat(momoData);
         }
-        if (platform === 'all' || platform === 'newegg') {
+        if (isAll || requestedPlatforms.includes('newegg')) {
             const neweggData = await scrapeNewegg(keyword);
             allResults = allResults.concat(neweggData);
-        }/*
-        if (platform === 'all' || platform === 'amazon') {
-            const amazonData = await scrapeAmazon(keyword);
-            allResults = allResults.concat(amazonData);
         }
-        if (platform === 'all' || platform === 'ebay') {
-            const ebayData = await scrapeEbay(keyword);
-            allResults = allResults.concat(ebayData);
-        }
-        if (platform === 'all' || platform === 'zol') {
-            const zolData = await scrapeZOL(keyword);
-            allResults = allResults.concat(zolData);
-        }*/
-        if (platform === 'all' || platform === 'yahoo') {
+        if (isAll || requestedPlatforms.includes('yahoo')) {
             const yahooData = await scrapeYahoo(keyword);
             allResults = allResults.concat(yahooData);
         }
+        if (isAll || requestedPlatforms.includes('shopee')) {
+            const shopeeData = await scrapeShopee(keyword);
+            allResults = allResults.concat(shopeeData);
+        }
+
         // ==========================================
         // 核心邏輯：三向關鍵字過濾器 + 智慧防呆機制
         // ==========================================
     
-       // const includeStr = parsedUrl.query.include || '';
-        //const categoriesStr = parsedUrl.query.categories || '';
-
         const includeWords = includeStr.split(/[\s,]+/).filter(w => w);
         let excludeWords = excludeStr.split(/[\s,]+/).filter(w => w); 
         const categoryWords = categoriesStr.split(',').filter(w => w);
 
-        // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾
+        // 💰 新增：預設沒有最低價限制
+        let minPriceThreshold = 0;
+
+        // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾與整機
         if (/\d[06]\d0/.test(keyword)) {
-            const autoExcludes = ['風扇','Kg','碗','無線','GHz','不鏽鋼','鞋','題','衣','包','墊','筆','袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼'];
+            minPriceThreshold = 1000;
+            const autoExcludes = [
+                'Kg','架','折疊','會議','眼鏡','Kg', '碗', '無線', 'GHz', '不鏽鋼', '鞋', '題', '衣', '包', '墊', '筆', '袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼',
+                ' 金牌',' 銀牌',' 銅牌','顯卡風扇',
+                'Fan', 'Cooler', 'Liquid', 'Heatsink',           // 排除散熱器
+                'Cable', 'Adapter', 'Extension', 'Bracket',      // 排除線材與支架
+                'Case', 'Chassis', 'Enclosure',                  // 排除空機殼
+                'Sticker', 'Skin', 'Decal',                      // 排除貼紙
+            ]
             autoExcludes.forEach(ex => {
                 if (!excludeWords.includes(ex)) {
+                    // 同時加入小寫版本，增加攔截率
                     excludeWords.push(ex);
+                    excludeWords.push(ex.toLowerCase()); 
                 }
             });
-            console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞: ${autoExcludes.join(', ')}`);
+            console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞`);
+            //console.log(`[系統防呆] 偵測到顯卡型號特徵，已自動加入排除詞: ${autoExcludes.join(', ')}`);
         }
 
         if (includeWords.length > 0 || excludeWords.length > 0 || categoryWords.length > 0) {
@@ -2021,12 +2027,15 @@ const server = http.createServer(async(req, res) => {
                 return isIncludeMatch && isExcludeMatch && isCategoryMatch;
             });
         }
-        // ==========================================
-        if (excludeStr) {
-            const excludeWords = excludeStr.split(/[, ]+/).filter(w => w);
+        // 2. 執行全新的「價格守門員」過濾
+        if (minPriceThreshold > 0) {
             allResults = allResults.filter(item => {
-                const nameLower = item.name.toLowerCase();
-                return !excludeWords.some(ex => nameLower.includes(ex.toLowerCase()));
+                // 將含有貨幣符號或逗號的字串 (例如 "1,406 元") 轉成純數字 1406
+                const cleanPriceStr = String(item.price).replace(/[^0-9]/g, '');
+                const numericPrice = cleanPriceStr ? parseInt(cleanPriceStr, 10) : 0;
+                
+                // 只保留價格大於或等於門檻的商品
+                return numericPrice >= minPriceThreshold;
             });
         }
         // 價格排序 (由低到高)

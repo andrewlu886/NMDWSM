@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>賣家中心 | 一次買夠二手交易平台</title>
     <link rel="stylesheet" href="/style.css">
+    <style>
+        #product-desc {
+            min-height: 220px;
+            resize: vertical;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -234,10 +240,7 @@
                                         <input type="hidden" id="product-benchmark-score">
                                     </div>
 
-                                    <div class="nmd-full">
-                                        <label class="nmd-label" for="product-image">商品圖片網址</label>
-                                        <input class="nmd-field" type="url" id="product-image" placeholder="https://...jpg" oninput="updatePreview()">
-                                    </div>
+                                    <input type="hidden" id="product-image">
 
                                     <div class="nmd-full">
                                         <label class="nmd-label" for="product-images">商品圖片上傳（最多 6 張）</label>
@@ -247,13 +250,10 @@
 
                                     <div class="nmd-full">
                                         <label class="nmd-label" for="product-desc">商品描述</label>
-                                        <textarea class="nmd-field" id="product-desc" placeholder="請描述使用時間、配件、外觀狀況、保固與交易建議..." required></textarea>
+                                        <textarea class="nmd-field" id="product-desc" placeholder="請描述規格、使用時間、配件、外觀狀況、保固與交易建議..." required></textarea>
                                     </div>
 
-                                    <div class="nmd-full">
-                                        <label class="nmd-label" for="product-specs">商品規格</label>
-                                        <textarea class="nmd-field" id="product-specs" placeholder="例如：750W、80 Plus Gold、全模組、ATX 尺寸、保固至 2027/05"></textarea>
-                                    </div>
+                                    <input type="hidden" id="product-specs">
                                 </div>
 
                                 <button type="submit" id="submit-btn" class="nmd-btn seller-submit-btn">送出商品</button>
@@ -266,7 +266,6 @@
                             <h3 class="seller-preview-title" id="preview-title">商品名稱</h3>
                             <div class="nmd-price seller-preview-price" id="preview-price">NT$ 0</div>
                             <p id="preview-desc" class="nmd-muted">商品描述會顯示在這裡。</p>
-                            <p id="preview-specs" class="nmd-muted">商品規格會顯示在這裡。</p>
                             <div class="nmd-pills">
                                 <span class="nmd-pill" id="preview-condition">正常使用</span>
                                 <span class="nmd-pill" id="preview-category">顯示卡 GPU</span>
@@ -328,7 +327,7 @@
         };
 
         function bindPreview() {
-            ['product-title', 'product-price', 'product-desc', 'product-specs', 'product-condition', 'product-location', 'product-usage', 'product-quantity', 'product-cooling-type'].forEach(id => {
+            ['product-title', 'product-price', 'product-desc', 'product-condition', 'product-location', 'product-usage', 'product-quantity', 'product-cooling-type'].forEach(id => {
                 const el = document.getElementById(id);
                 el.addEventListener('input', updatePreview);
                 el.addEventListener('change', updatePreview);
@@ -463,9 +462,9 @@
             document.getElementById('product-category').value = (product.category || 'gpu').toLowerCase();
             document.getElementById('product-cooling-type').value = product.coolingType || '';
             document.getElementById('product-price').value = product.price || '';
-            document.getElementById('product-desc').value = product.desc || '';
-            document.getElementById('product-specs').value = product.specs || '';
-            document.getElementById('product-image').value = product.image || '';
+            document.getElementById('product-desc').value = mergeProductCopy(product.specs, product.desc);
+            document.getElementById('product-specs').value = '';
+            document.getElementById('product-image').value = existingProductImages[0] || product.image || '';
             document.getElementById('product-benchmark-log').value = product.benchmarkLog || '';
             document.getElementById('product-benchmark-score').value = product.benchmarkScore || '';
             document.getElementById('product-benchmark-read').value = product.benchmarkRead || '';
@@ -526,6 +525,10 @@
             container.innerHTML = existing + pending || '<span class="nmd-muted">尚未選擇圖片</span>';
         }
 
+        function mergeProductCopy(specs, desc) {
+            return [specs, desc].map(text => String(text || '').trim()).filter(Boolean).join('\n\n');
+        }
+
         function updateParsedBenchmark() {
             const log = document.getElementById('product-benchmark-log').value || '';
             const category = document.getElementById('product-category').value.toLowerCase();
@@ -584,7 +587,6 @@
             document.getElementById('preview-title').innerText = document.getElementById('product-title').value || '商品名稱';
             document.getElementById('preview-price').innerText = `NT$ ${formatPrice(document.getElementById('product-price').value)}`;
             document.getElementById('preview-desc').innerText = document.getElementById('product-desc').value || '商品描述會顯示在這裡。';
-            document.getElementById('preview-specs').innerText = document.getElementById('product-specs').value || '商品規格會顯示在這裡。';
             document.getElementById('preview-condition').innerText = document.getElementById('product-condition').selectedOptions[0].text;
             document.getElementById('preview-category').innerText = categoryLabel(category, document.getElementById('product-cooling-type').value);
             document.getElementById('preview-location').innerText = document.getElementById('product-location').value || '廠商品牌';
@@ -688,8 +690,8 @@
                 coolingType: document.getElementById('product-cooling-type').value,
                 price: document.getElementById('product-price').value.trim(),
                 desc: document.getElementById('product-desc').value.trim(),
-                specs: document.getElementById('product-specs').value.trim(),
-                image: document.getElementById('product-image').value.trim(),
+                specs: '',
+                image: existingProductImages[0] || document.getElementById('product-image').value.trim(),
                 benchmarkLog: document.getElementById('product-benchmark-log').value.trim(),
                 benchmarkScore: numberOrNull(document.getElementById('product-benchmark-score').value),
                 benchmarkRead: numberOrNull(document.getElementById('product-benchmark-read').value),

@@ -26,7 +26,9 @@
         .info-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
         .info-box span, .seller-box span, .verify-box span { display:block; color:var(--nmd-muted); font-size:.86rem; font-weight:900; margin-bottom:6px; }
         .description, .specs { white-space:pre-wrap; line-height:1.85; }
-        .specs { background:#fff; border:1px solid var(--nmd-border); border-radius:14px; padding:16px; }
+        .product-copy { background:#fff; border:1px solid var(--nmd-border); border-radius:14px; padding:18px; display:grid; gap:18px; }
+        .product-copy h2 { margin:0 0 10px; }
+        .product-copy-section + .product-copy-section { border-top:1px solid var(--nmd-border); padding-top:18px; }
         .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .action-grid .wide { grid-column:1/-1; }
         @media (max-width:620px){ .steps,.info-grid,.action-grid{grid-template-columns:1fr;} .action-grid .wide{grid-column:auto;} }
@@ -132,11 +134,22 @@
                         <div class="info-box"><span>商品狀態</span><strong>${product.status === 'active' ? '可購買' : '暫不可購買'}</strong></div>
                     </div>
                     <div class="seller-box"><span>賣家名稱</span><strong>${escapeHtml(product.seller || '平台使用者')}</strong></div>
-                    <div class="specs"><h2>商品規格</h2>${escapeHtml(product.specs || '賣家尚未提供商品規格。')}</div>
-                    <div class="nmd-card-pad description" style="padding:0;"><h2>商品描述</h2>${escapeHtml(product.desc || '賣家尚未提供商品描述。')}</div>
-                    <div class="verify-box"><span>燒機驗證</span><strong>未來可接入測試資料</strong><div class="nmd-muted" style="margin-top:6px;">本階段先保留擴充位置，不影響目前交易流程展示。</div></div>
+                    <div class="product-copy">
+                        <section class="product-copy-section description">
+                            <h2>商品描述</h2>
+                            ${escapeHtml(combinedDescription())}
+                        </section>
+                        <section class="product-copy-section verify-box">
+                            <span>燒機驗證</span><strong>未來可接入測試資料</strong><div class="nmd-muted" style="margin-top:6px;">本階段先保留擴充位置，不影響目前交易流程展示。</div>
+                        </section>
+                    </div>
                 </div>
             `;
+        }
+
+        function combinedDescription() {
+            const parts = [product.specs, product.desc].map(text => String(text || '').trim()).filter(Boolean);
+            return parts.length ? parts.join('\n\n') : '賣家尚未提供商品描述。';
         }
 
         function productImages() {
