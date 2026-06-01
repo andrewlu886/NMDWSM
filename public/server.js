@@ -634,7 +634,7 @@ async function scrapeCoolpc(keyword) {
                 
                 results.push({
                     platform: '原價屋',
-                    name: text.substring(0, 125) + '...', // 名稱過長截斷為 60 字
+                    name: text.substring(0, 125) + '...', // 名稱過長截斷為 125 字
                     price: price,
                     url: 'https://www.coolpc.com.tw/evaluate.php'
                 });
@@ -1986,9 +1986,37 @@ const server = http.createServer(async(req, res) => {
         let excludeWords = excludeStr.split(/[\s,]+/).filter(w => w); 
         const categoryWords = categoriesStr.split(',').filter(w => w);
 
-        // 💰 新增：預設沒有最低價限制
-        let minPriceThreshold = 0;
+        // 預設沒有最低價限制
+        const minPriceThreshold = 0;
 
+        // 排除詞「多向同義詞」自動擴充
+        // 為了避免大小寫問題，我們先把現有的排除詞全部轉成小寫來檢查
+        const currentExcludesLower = excludeWords.map(w => w.toLowerCase());
+        
+        // 建立同義詞字典：只要命中陣列裡的任何一個字，就把整個陣列的字都加入黑名單
+        const synonymGroups = [
+            ['w11', 'win11', 'windows11', 'windows 11'],
+            ['w10', 'win10', 'windows10', 'windows 10']
+        ];
+
+        synonymGroups.forEach(group => {
+            // 檢查使用者輸入的排除詞中，是否包含這個群組的任何一個字
+            const isMatch = group.some(synonym => currentExcludesLower.includes(synonym));
+            if (isMatch) {
+                let addedWords = [];
+                group.forEach(synonym => {
+                    // 如果原本的排除清單沒有這個同義詞，就把它補上去
+                    if (!currentExcludesLower.includes(synonym) && !excludeWords.includes(synonym)) {
+                        excludeWords.push(synonym);
+                        addedWords.push(synonym);
+                    }
+                });
+                // 有擴充新的詞才印出 log，避免洗版
+                if (addedWords.length > 0) {
+                    console.log(`[系統防呆] 偵測到同義詞，已自動擴充封殺: ${addedWords.join(', ')}`);
+                }
+            }
+        });
         // 智慧防呆：偵測到如 4060, 3060, 1060, 6600 等型號，自動排除周邊垃圾與整機
         if (/\d[06]\d0/.test(keyword)) {
             minPriceThreshold = 1000;
