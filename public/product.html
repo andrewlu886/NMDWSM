@@ -7,9 +7,6 @@
     <link rel="stylesheet" href="/style.css">
     <style>
         body { background: radial-gradient(circle at 90% 5%, rgba(47,143,216,.13), transparent 28rem), var(--nmd-bg); }
-        .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
-        .step { background:#fff; border:1px solid var(--nmd-border); border-radius:12px; padding:12px; text-align:center; color:var(--nmd-muted); font-weight:900; }
-        .step.active { background:var(--nmd-blue-soft); color:var(--nmd-blue); border-color:#a9d4fb; }
         .product-photo { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:18px; background:#eef2f7; border:1px solid #edf1f5; }
         .gallery { position:relative; }
         .gallery-btn { position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; border:0; border-radius:999px; background:rgba(15,23,42,.72); color:#fff; font-size:1.4rem; cursor:pointer; display:grid; place-items:center; }
@@ -32,7 +29,7 @@
         .product-copy-section + .product-copy-section { border-top:1px solid var(--nmd-border); padding-top:18px; }
         .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .action-grid .wide { grid-column:1/-1; }
-        @media (max-width:620px){ .steps,.info-grid,.action-grid{grid-template-columns:1fr;} .action-grid .wide{grid-column:auto;} }
+        @media (max-width:620px){ .info-grid,.action-grid{grid-template-columns:1fr;} .action-grid .wide{grid-column:auto;} }
     </style>
 </head>
 <body>
@@ -63,9 +60,6 @@
     </header>
 
     <main class="nmd-page">
-        <div class="steps">
-            <div class="step active">1 商品詳情</div><div class="step">2 購物車</div><div class="step">3 結帳確認</div><div class="step">4 購買清單</div>
-        </div>
         <section id="product-detail" class="nmd-grid-product">載入商品中...</section>
     </main>
 
