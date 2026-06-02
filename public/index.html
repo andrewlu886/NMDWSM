@@ -320,9 +320,9 @@
                 
                 const result = await response.json();
 
-                // 新增：判斷是否需要顯示低預算警告 (假設 3A 遊戲主機/筆電低於 20,000 元效能較吃力)
+                // 新增：判斷是否需要顯示低預算警告
                 let warningHtml = '';
-                const minGamingBudget = 20000; 
+                const minGamingBudget = 30000; 
                 if (usage === 'gaming' && productType !== 'component' && parseInt(budget) < minGamingBudget) {
                     warningHtml = `
                         <div style="background-color: #fff3cd; color: #856404; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ffeeba; font-size: 0.95rem;">
