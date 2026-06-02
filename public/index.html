@@ -300,7 +300,7 @@
             async function runRecommend() {
             const budget = document.getElementById('budget').value;
             const usage = document.getElementById('usage').value;
-            const productType = document.getElementById('productType').value; // 新增抓取商品種類
+            const productType = document.getElementById('productType').value; 
 
             if(!budget) return alert('請輸入預算');
 
@@ -313,19 +313,28 @@
                 const response = await fetch('/api/recommend', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // 把 productType 也包進 JSON 傳給後端
                     body: JSON.stringify({ budget: parseInt(budget), usage: usage, productType: productType }) 
                 });
 
                 if (!response.ok) throw new Error('API 回應錯誤');
                 
-                // 2. 解析後端傳回來的新 JSON 格式 (包含 suggestedPrice 與 recommendations 清單)
                 const result = await response.json();
 
-                // 3. 重新構建 HTML 渲染畫面
+                // 新增：判斷是否需要顯示低預算警告 (假設 3A 遊戲主機/筆電低於 20,000 元效能較吃力)
+                let warningHtml = '';
+                const minGamingBudget = 20000; 
+                if (usage === 'gaming' && productType !== 'component' && parseInt(budget) < minGamingBudget) {
+                    warningHtml = `
+                        <div style="background-color: #fff3cd; color: #856404; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ffeeba; font-size: 0.95rem;">
+                            ⚠️ <strong>溫馨提醒：</strong> 您的預算 (NT$ ${parseInt(budget).toLocaleString()}) 執行 3A 遊戲大作可能較為吃力。若以下推薦機型仍無法滿足需求，建議適度提高預算或考慮降低遊戲畫質。
+                        </div>
+                    `;
+                }
+
+                // 3. 重新構建 HTML 渲染畫面 (將 warningHtml 放在最上面)
                 let htmlContent = `
+                    ${warningHtml}
                     <h3 style="color: #2c3e50; margin-top: 0; font-size: 1.1rem;">🎯 系統即時分析結果</h3>
-                    
                     <strong>🏆 最佳推薦主機 (Top 3)：</strong>
                     <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
                 `;

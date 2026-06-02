@@ -1150,18 +1150,23 @@ const server = http.createServer(async(req, res) => {
                     if (isNaN(cleanPrice) || cleanPrice === 0 || cleanPrice > budget || cleanPrice < minPrice) {
                         continue; 
                     }
-
+                    if (usage === 'gaming' && item.name.includes('文書')) {
+                        continue;
+                    }
                     // 1. 萃取所有硬體特徵
                     let cpu = extractCPU(item.name);
                     let gpu = extractGPU(item.name);
-                    let ram = extractRAM(item.name); // 🟢 新增：萃取記憶體
-                    let os = extractOS(item.name);   // 🟢 新增：萃取 OS
+                    let ram = extractRAM(item.name); 
+                    let os = extractOS(item.name);  
                     
                     // 防呆：整機或筆電必須要有 CPU 或 GPU
                     if (productType !== 'component' && cpu === "UNKNOWN" && gpu === "UNKNOWN") {
                         continue; 
                     }
-
+                    // 新增：當選擇 3A 遊戲專用的整機/筆電時，排除沒有抓到獨立顯卡 (GPU) 的商品
+                    if (usage === 'gaming' && productType !== 'component' && gpu === "UNKNOWN") {
+                        continue;
+                    }
                     let cpuScore = getDynamicCPUScore(cpu);
                     let gpuScore = getDynamicGPUScore(gpu);
                     // 2. 計算核心分數 (Base Score)
@@ -1997,6 +2002,12 @@ const server = http.createServer(async(req, res) => {
         const synonymGroups = [
             ['w11', 'win11', 'windows11', 'windows 11'],
             ['w10', 'win10', 'windows10', 'windows 10']
+
+            // 筆電同義詞 (包含常見的中文簡稱、全名與英文)
+            ['筆電', '筆記型電腦', '筆記本', 'laptop', 'notebook'],
+            
+            // 主機/桌機同義詞 (包含常見的中文簡稱、全名與英文)
+            ['主機', '桌機', '桌上型電腦', '套裝機', 'desktop', 'pc']
         ];
 
         synonymGroups.forEach(group => {
