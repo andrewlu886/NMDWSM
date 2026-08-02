@@ -3,129 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>會員中心 | 一次買夠二手交易平台</title>
+    <title>會員資料 | 一次買夠</title>
     <link rel="stylesheet" href="/style.css">
     <style>
         body { background: var(--nmd-bg); }
-        .account-layout { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:24px; align-items:start; }
-        .metric-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
-        .metric strong { display:block; color:var(--nmd-blue); font-size:2rem; margin-bottom:6px; }
-        .favorite-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
-        .favorite img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:14px 14px 0 0; background:#eef2f7; }
-        .favorite-body { padding:14px; }
-        @media(max-width:900px){ .account-layout,.metric-grid{grid-template-columns:1fr;} }
+        .account-grid { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:24px; align-items:start; }
+        .profile-name { font-size:1.5rem; font-weight:800; color:var(--nmd-blue); margin:0 0 8px; }
+        .profile-email { color:var(--nmd-muted); overflow-wrap:anywhere; }
+        .post-count { font-size:2.4rem; font-weight:800; color:var(--nmd-blue); }
+        @media(max-width:760px){ .account-grid{grid-template-columns:1fr;} }
     </style>
 </head>
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">一次買夠二手交易平台</a>
-            <div class="search-wrapper"><input type="text" class="nav-search" placeholder="搜尋商品..." onkeydown="handleSearch(event)"><button class="search-btn" onclick="triggerSearch()">搜尋</button></div>
+            <a href="/" class="logo">一次買夠</a>
+            <div class="search-wrapper"><input type="text" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)"><button class="search-btn" onclick="triggerSearch()">搜尋</button></div>
             <div class="header-actions">
-                <a href="/cart" class="cart-link" title="購物車">購物車<span id="cart-count" class="cart-count">0</span></a>
-                <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
-                <div id="user-profile"><div class="avatar">U</div><span id="user-display-name" style="color:white;font-size:.95rem;">載入中...</span><div class="dropdown-menu"><a href="/account.html">我的帳戶</a><a href="/transactions">購買清單</a><a href="#" onclick="logout()">登出</a></div></div>
+                <div id="user-profile" style="display:flex;"><div class="avatar">U</div><span id="user-display-name" style="color:white;font-size:.95rem;">載入中...</span><div class="dropdown-menu"><a href="/account.html">會員資料</a><a href="#" onclick="logout()">登出</a></div></div>
             </div>
         </div>
-        <nav class="main-nav"><a href="/">首頁</a><a href="/marketplace">商城</a><a href="/#recommend">智慧推薦</a><a href="/forum">討論區</a><a href="/scrape">市價查詢</a><a href="/seller">賣家中心</a></nav>
+        <nav class="main-nav"><a href="/">首頁</a><a href="/#recommend">智慧推薦</a><a href="/forum">討論區</a><a href="/scrape">市價查詢</a><a href="/benchmark-instructions.html">跑分教學</a></nav>
     </header>
 
     <main class="nmd-page">
-        <div class="nmd-hero"><div><h1>會員中心</h1><p>管理帳戶資料、收藏商品與近期交易摘要。</p></div></div>
-        <div class="account-layout">
-            <section>
-                <div class="metric-grid">
-                    <div class="nmd-card nmd-card-pad metric"><strong id="active-products">0</strong><span>上架商品</span></div>
-                    <div class="nmd-card nmd-card-pad metric"><strong id="sold-products">0</strong><span>已售出</span></div>
-                    <div class="nmd-card nmd-card-pad metric"><strong id="post-count">0</strong><span>討論貼文</span></div>
-                    <div class="nmd-card nmd-card-pad metric"><strong id="favorite-count">0</strong><span>收藏商品</span></div>
-                </div>
-                <section class="nmd-card nmd-card-pad">
-                    <h2>收藏商品</h2>
-                    <div id="favorites-container" class="favorite-grid">載入收藏中...</div>
-                </section>
+        <div class="nmd-hero"><div><h1>會員資料</h1><p>管理你的顯示名稱與論壇身分。</p></div></div>
+        <div class="account-grid">
+            <section class="nmd-card nmd-card-pad">
+                <p id="profile-name" class="profile-name">載入中...</p>
+                <p id="profile-email" class="profile-email"></p>
+                <hr style="border:0;border-top:1px solid #edf1f5;margin:24px 0;">
+                <h2>修改顯示名稱</h2>
+                <p class="nmd-muted">這個名稱會顯示在你的論壇文章與回覆旁。</p>
+                <input id="account-name-input" class="nmd-field" maxlength="30" placeholder="輸入新的名稱">
+                <button class="nmd-btn" style="margin-top:12px;" onclick="saveName()">儲存名稱</button>
+                <p id="save-message" class="nmd-muted" aria-live="polite"></p>
             </section>
             <aside class="nmd-card nmd-card-pad">
-                <h2>帳戶資料</h2>
-                <div class="nmd-summary-line"><span>Email</span><strong id="account-email">載入中...</strong></div>
-                <div class="nmd-summary-line"><span>使用者名稱</span><strong id="account-name">載入中...</strong></div>
-                <label class="nmd-label" for="account-name-input" style="margin-top:18px;">修改使用者名稱</label>
-                <input id="account-name-input" class="nmd-field" maxlength="30" placeholder="輸入新的名稱">
-                <button class="nmd-btn" style="width:100%;margin-top:12px;" onclick="saveAccountName()">儲存名稱</button>
-                <div id="name-message" class="nmd-muted" style="margin-top:10px;"></div>
+                <h2>論壇參與</h2>
+                <div id="post-count" class="post-count">0</div>
+                <p class="nmd-muted">已發表討論文章</p>
+                <a class="nmd-btn secondary" href="/forum">前往討論區</a>
             </aside>
         </div>
     </main>
 
     <script>
-        window.onload = async function() {
-            const userEmail = localStorage.getItem('userEmail');
-            const userName = localStorage.getItem('userName');
-            if (!userEmail) { window.location.href = '/login'; return; }
-            document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('user-profile').style.display = 'flex';
-            document.getElementById('user-display-name').innerText = userName || userEmail.split('@')[0];
-            document.getElementById('account-email').innerText = userEmail;
-            document.getElementById('account-name').innerText = userName || userEmail.split('@')[0];
-            document.getElementById('account-name-input').value = userName || userEmail.split('@')[0];
-            await updateCartCount();
-            await loadStats(userEmail);
-            await loadFavorites(userEmail);
-        };
+        const userEmail = localStorage.getItem('userEmail');
+        const userName = localStorage.getItem('userName');
+        if (!userEmail) window.location.href = '/login';
 
-        async function saveAccountName() {
-            const userEmail = localStorage.getItem('userEmail');
-            const username = document.getElementById('account-name-input').value.trim();
-            const message = document.getElementById('name-message');
-            if (!username) { message.innerText = '請輸入使用者名稱'; return; }
-            const res = await fetch('/api/account/name', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ userEmail, username }) });
-            const result = await res.json();
-            if (!result.success) { message.innerText = result.message || '更新失敗'; return; }
-            localStorage.setItem('userName', result.username);
-            document.getElementById('account-name').innerText = result.username;
-            document.getElementById('user-display-name').innerText = result.username;
-            message.innerText = '使用者名稱已更新';
+        document.getElementById('profile-email').textContent = userEmail || '';
+        setDisplayedName(userName || (userEmail ? userEmail.split('@')[0] : ''));
+        loadStats();
+
+        function setDisplayedName(name) {
+            document.getElementById('profile-name').textContent = name;
+            document.getElementById('user-display-name').textContent = name;
+            document.getElementById('account-name-input').value = name;
         }
 
-        async function loadStats(userEmail) {
+        async function saveName() {
+            const username = document.getElementById('account-name-input').value.trim();
+            const message = document.getElementById('save-message');
+            if (!username) { message.textContent = '請輸入顯示名稱。'; return; }
+            const res = await fetch('/api/account/name', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ userEmail, username }) });
+            const result = await res.json();
+            if (!res.ok || !result.success) { message.textContent = result.message || '儲存失敗。'; return; }
+            localStorage.setItem('userName', result.username);
+            setDisplayedName(result.username);
+            message.textContent = '名稱已更新。';
+        }
+
+        async function loadStats() {
             const res = await fetch(`/api/account/stats?userEmail=${encodeURIComponent(userEmail)}`);
             const result = await res.json();
-            if (!result.success) return;
-            document.getElementById('active-products').innerText = result.data.activeProducts;
-            document.getElementById('sold-products').innerText = result.data.soldProducts;
-            document.getElementById('post-count').innerText = result.data.posts;
-            document.getElementById('favorite-count').innerText = result.data.favorites;
+            if (res.ok && result.success) document.getElementById('post-count').textContent = result.data.posts || 0;
         }
 
-        async function loadFavorites(userEmail) {
-            const res = await fetch(`/api/favorites?userEmail=${encodeURIComponent(userEmail)}`);
-            const result = await res.json();
-            const favorites = result.success ? result.data : [];
-            const container = document.getElementById('favorites-container');
-            if (!favorites.length) { container.innerHTML = '<div class="nmd-empty">目前沒有收藏商品。</div>'; return; }
-            container.innerHTML = favorites.map(product => `
-                <article class="nmd-card favorite">
-                    <img src="${escapeHtml(product.image || placeholderImage())}" alt="${escapeHtml(product.title)}">
-                    <div class="favorite-body">
-                        <strong>${escapeHtml(product.title)}</strong>
-                        <div class="nmd-price" style="margin:8px 0;">NT$ ${Number(product.price || 0).toLocaleString()}</div>
-                        <a class="nmd-btn secondary" href="/product?id=${product.id}">查看商品</a>
-                    </div>
-                </article>`).join('');
-        }
-
-        async function updateCartCount() {
-            const userEmail = localStorage.getItem('userEmail');
-            const res = await fetch(`/api/cart?userEmail=${encodeURIComponent(userEmail)}`);
-            const result = await res.json();
-            const items = result.success ? result.data : [];
-            document.getElementById('cart-count').innerText = items.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 1), 0);
-        }
-
-        function placeholderImage(){ return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 450%22%3E%3Crect width=%22600%22 height=%22450%22 fill=%22%23edf2f7%22/%3E%3Ctext x=%22300%22 y=%22235%22 text-anchor=%22middle%22 fill=%22%23667285%22 font-size=%2230%22%3ENo Image%3C/text%3E%3C/svg%3E'; }
-        function triggerSearch(){ const q=document.querySelector('.nav-search').value.trim(); if(q) window.location.href=`/marketplace?q=${encodeURIComponent(q)}`; }
-        function handleSearch(event){ if(event.key==='Enter') triggerSearch(); }
-        function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function handleSearch(event){ if(event.key === 'Enter') triggerSearch(); }
+        function triggerSearch(){ const q=document.querySelector('.nav-search').value.trim(); if(q) window.location.href=`/scrape?keyword=${encodeURIComponent(q)}`; }
         function logout(){ localStorage.removeItem('userEmail'); localStorage.removeItem('userName'); window.location.href='/'; }
     </script>
 </body>

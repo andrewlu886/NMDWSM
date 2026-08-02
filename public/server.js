@@ -1,7 +1,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
 
 // 引入網路爬蟲相關套件
 const axios = require('axios');
@@ -14,31 +13,19 @@ const db = require('./db.js');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
-const USERS_FILE = path.join(__dirname, 'users.json');
-const UPLOADS_DIR = path.join(__dirname, 'uploads', 'products');
 const BLOCKED_STATIC_EXTENSIONS = new Set(['.db', '.sqlite', '.sqlite3']);
 const BLOCKED_STATIC_FILES = new Set(['users.json', 'products.json', 'posts.json']);
-// JSON 檔僅保留作為備份或測試資料，正式資料來源統一使用 SQLite。
-// --- 資料庫與使用者相關初始化 ---
+const LEGACY_PAGE_ROUTES = new Set([
+    '/marketplace', '/marketplace.html', '/seller', '/seller.html',
+    '/products', '/products.html', '/product', '/product.html',
+    '/cart', '/cart.html', '/checkout', '/checkout.html',
+    '/transactions', '/transactions.html'
+]);
+const LEGACY_API_PREFIXES = ['/api/products', '/api/favorites', '/api/cart', '/api/transactions'];
 
-// 1. 初始化使用者資料
-function loadUsers() {
-    try {
-        if (fs.existsSync(USERS_FILE)) {
-            const data = fs.readFileSync(USERS_FILE, 'utf8');
-            const parsed = JSON.parse(data);
-            console.log(`Loaded ${Object.keys(parsed).length} users from users.json`);
-            return parsed;
-        }
-    } catch (error) {
-        console.error('Error reading users.json:', error.message);
-    }
-    return { 'test@example.com': '12345678' };
+function isLegacyApiPath(pathname) {
+    return LEGACY_API_PREFIXES.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/'));
 }
-let registeredUsers = loadUsers();
-
-// 舊版 posts.json 不再作為正式論壇資料來源。
-
 // --- SQLite 資料庫初始化 ---
 db.initDatabase().then(() => {
     console.log('✅ 資料庫已連接');
@@ -81,55 +68,6 @@ function parseJsonBody(req) {
     });
 }
 
-function parseMultipartForm(req) {
-    return new Promise((resolve, reject) => {
-        const contentType = req.headers['content-type'] || '';
-        const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
-        if (!boundaryMatch) return reject(new Error('Missing multipart boundary'));
-        const boundary = Buffer.from(`--${boundaryMatch[1] || boundaryMatch[2]}`);
-        const chunks = [];
-
-        req.on('data', chunk => chunks.push(chunk));
-        req.on('end', () => {
-            const body = Buffer.concat(chunks);
-            const fields = {};
-            const files = [];
-            let start = body.indexOf(boundary);
-
-            while (start !== -1) {
-                start += boundary.length;
-                if (body[start] === 45 && body[start + 1] === 45) break;
-                if (body[start] === 13 && body[start + 1] === 10) start += 2;
-
-                const headerEnd = body.indexOf(Buffer.from('\r\n\r\n'), start);
-                if (headerEnd === -1) break;
-                const headerText = body.slice(start, headerEnd).toString('utf8');
-                let contentStart = headerEnd + 4;
-                let next = body.indexOf(boundary, contentStart);
-                if (next === -1) break;
-                let contentEnd = next;
-                if (body[contentEnd - 2] === 13 && body[contentEnd - 1] === 10) contentEnd -= 2;
-
-                const name = headerText.match(/name="([^"]+)"/)?.[1];
-                const filename = headerText.match(/filename="([^"]*)"/)?.[1];
-                const mimeType = headerText.match(/content-type:\s*([^\r\n]+)/i)?.[1]?.trim() || '';
-                const data = body.slice(contentStart, contentEnd);
-
-                if (name && filename) {
-                    files.push({ field: name, filename, mimeType, data });
-                } else if (name) {
-                    fields[name] = data.toString('utf8');
-                }
-
-                start = next;
-            }
-
-            resolve({ fields, files });
-        });
-        req.on('error', reject);
-    });
-}
-
 function encodeJsonList(items) {
     return JSON.stringify(normalizeAttachmentList(items));
 }
@@ -149,10 +87,6 @@ async function findRequestUser(identifier) {
         return db.User.findById(Number(identifier));
     }
     return db.User.findByEmail(identifier);
-}
-
-async function getCartUser(parsedUrl, body = {}) {
-    return findRequestUser(body.userId || body.userEmail || parsedUrl.searchParams.get('userId') || parsedUrl.searchParams.get('userEmail'));
 }
 
 function formatDbReply(reply) {
@@ -181,181 +115,9 @@ async function formatDbPost(post) {
     };
 }
 
-function formatProduct(product) {
-    return {
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        category: product.category,
-        desc: product.description,
-        specs: product.specs || '',
-        coolingType: product.cooling_type || '',
-        image: product.image_url,
-        seller: product.seller_name || product.seller_email || product.seller_id,
-        sellerEmail: product.seller_email,
-        sellerId: product.seller_id,
-        condition: product.condition || 'used',
-        status: product.status || 'active',
-        location: product.location || '',
-        usageTag: product.usage_tag || '',
-        negotiable: Boolean(product.negotiable),
-        views: product.views || 0,
-        benchmarkLog: product.benchmark_log || '',
-        benchmarkScore: product.benchmark_score || null,
-        benchmarkRead: product.benchmark_read || null,
-        benchmarkWrite: product.benchmark_write || null,
-        benchmarkCombined: product.benchmark_combined || null,
-        createdAt: product.created_at
-    };
-}
-
-async function formatProductWithImages(product) {
-    const formatted = formatProduct(product);
-    const rows = await db.ProductImage.getByProduct(product.id);
-    const images = rows.map(row => row.image_url);
-    if (!images.length && formatted.image) images.push(formatted.image);
-    formatted.images = [...new Set(images.filter(Boolean))];
-    if (!formatted.image && formatted.images.length) formatted.image = formatted.images[0];
-    return formatted;
-}
-function parseBenchmarkScore(log, category) {
-    if (!log || typeof log !== 'string') return { read: null, write: null, combined: null, best: null, mismatch: false };
-    category = String(category || '').toLowerCase();
-
-    function extractNumberWithUnit(patterns) {
-        for (const p of patterns) {
-            const re = new RegExp(p + '\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(mb/s|gb/s|mbps|gbps|mb|gb|ms|s)?', 'i');
-            const m = log.match(re);
-            if (m && m[1]) return Number(m[1]);
-        }
-        return null;
-    }
-
-    const looksLikeCPU = /\b(cpu|processor|occt cpu|prime95|fpu|stresscpu)\b/i.test(log);
-    const looksLikeRAM = /\b(memory|ram|bandwidth|read\s*mb\/s|write\s*mb\/s|occt memory)\b/i.test(log);
-
-    if (category === 'cpu') {
-        if (!looksLikeCPU && looksLikeRAM) return { read: null, write: null, combined: null, best: null, mismatch: true };
-        function findCpuLabel(label) {
-            const re = new RegExp(label.replace(/\s+/g, '\\s*') + '\\s*:', 'i');
-            const m = log.match(re);
-            if (m) {
-                // capture number after the label and colon
-                const after = log.slice(m.index + m[0].length);
-                const numMatch = after.match(/\s*(\d+(?:\.\d+)?)/);
-                return numMatch ? Number(numMatch[1]) : null;
-            }
-            return null;
-        }
-        const t1_sse = findCpuLabel('1 threads, SSE');
-        const t12_sse = findCpuLabel('12 threads, SSE');
-        const t1_avx = findCpuLabel('1 threads, AVX');
-        const t12_avx = findCpuLabel('12 threads, AVX');
-        if (t1_sse || t12_sse || t1_avx || t12_avx) {
-            return {
-                cpu_t1_sse: t1_sse || null,
-                cpu_t12_sse: t12_sse || null,
-                cpu_t1_avx: t1_avx || null,
-                cpu_t12_avx: t12_avx || null,
-                read: t1_sse || null,
-                write: t12_sse || null,
-                combined: t1_avx || null,
-                best: null,
-                mismatch: false
-            };
-        }
-        let score = null;
-        const scoreRe = /(?:score|total score|overall)[:\-]?\s*(\d+(?:\.\d+)?)/i;
-        const m = log.match(scoreRe);
-        if (m && m[1]) score = Number(m[1]);
-        if (!score) {
-            const g = log.match(/(\d+(?:\.\d+)?)\s*(gflops|gflop)/i);
-            if (g && g[1]) score = Number(g[1]);
-        }
-        if (!score) {
-            const nums = [...log.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => Number(m[1]));
-            if (nums.length) score = nums.slice().sort((a,b)=>b-a)[0];
-        }
-        return { read: null, write: null, combined: null, best: score || null, mismatch: false };
-    }
-
-    if (category === 'ram') {
-        if (!looksLikeRAM && looksLikeCPU) return { read: null, write: null, combined: null, best: null, mismatch: true };
-        const read = extractNumberWithUnit(['read', 'memory read', 'bandwidth read', 'read bandwidth']);
-        const write = extractNumberWithUnit(['write', 'memory write', 'bandwidth write', 'write bandwidth']);
-        let combined = extractNumberWithUnit(['combined', 'overall', 'total']);
-        if (!combined && read && write) combined = ((read + write) / 2);
-        return { read: read || null, write: write || null, combined: combined || null, best: combined || read || write || null, mismatch: false };
-    }
-
-    // generic fallback
-    const genericRead = extractNumberWithUnit(['read', 'seq read', 'sequential read']);
-    const genericWrite = extractNumberWithUnit(['write', 'seq write', 'sequential write']);
-    const genericCombined = extractNumberWithUnit(['combined', 'overall', 'total score']);
-    const best = genericCombined || genericRead || genericWrite || null;
-    return { read: genericRead || null, write: genericWrite || null, combined: genericCombined || null, best, mismatch: false };
-}
-
-function formatTransaction(row) {
-    return {
-        id: row.id,
-        productId: row.product_id,
-        title: row.product_title,
-        image: row.image_url,
-        price: row.price,
-        status: row.status,
-        note: row.note || '',
-        seller: row.seller_name,
-        buyer: row.buyer_name,
-        createdAt: row.created_at
-    };
-}
-
-function formatTransactionComment(row) {
-    return {
-        id: row.id,
-        transactionId: row.transaction_id,
-        author: row.author_name || row.author_email,
-        authorEmail: row.author_email,
-        content: row.content,
-        createdAt: row.created_at
-    };
-}
-
 async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
     const user = await findRequestUser(body.userEmail || body.userId || parsedUrl.searchParams.get('userEmail') || parsedUrl.searchParams.get('userId'));
     return user;
-}
-
-function safeUploadName(originalName, index) {
-    const ext = path.extname(originalName || '').toLowerCase();
-    const allowed = new Set(['.jpg', '.jpeg', '.png', '.webp']);
-    if (!allowed.has(ext)) return '';
-    return `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}${ext}`;
-}
-
-function validateTransactionTransition(transaction, user, nextStatus) {
-    const currentStatus = transaction.status || 'pending';
-    const isBuyer = transaction.buyer_id === user.id;
-    const isSeller = transaction.seller_id === user.id;
-
-    if (['cancelled', 'refund', 'refunded'].includes(currentStatus)) {
-        return '此交易流程已結束，無法再更新';
-    }
-    if (nextStatus === 'paid') {
-        return isBuyer && currentStatus === 'pending' ? '' : '只有買家可以付款待付款訂單';
-    }
-    if (nextStatus === 'cancelled') {
-        return isBuyer && currentStatus === 'pending' ? '' : '只有買家可以取消待付款訂單';
-    }
-    if (nextStatus === 'refund') {
-        return isBuyer && ['paid', 'completed'].includes(currentStatus) ? '' : '只有買家可以退貨已付款或已完成訂單';
-    }
-    if (nextStatus === 'completed') {
-        return isSeller && currentStatus === 'paid' ? '' : '只有賣家可以將待出貨訂單標記為已完成';
-    }
-
-    return '交易狀態不正確';
 }
 
 // --- 智慧推薦功能實作 ---
@@ -976,30 +738,6 @@ async function scrapeYahoo(keyword) {
         if (browser) await browser.close();
     }
 }
-// 總和爬蟲執行函式
-async function performScraping(platform, keyword) {
-        let tasks = [];
-        if (platform === 'all' || platform === 'coolpc') tasks.push(scrapeCoolpc(keyword));
-        if (platform === 'all' || platform === 'sinya')  tasks.push(scrapeSinya(keyword));
-        if (platform === 'all' || platform === 'ruten')  tasks.push(scrapeRuten(keyword));
-        if (platform === 'all' || platform === 'pchome') tasks.push(scrapePChome(keyword));
-        if (platform === 'all' || platform === 'momo')   tasks.push(scrapeMomo(keyword));
-        if (platform === 'all' || platform === 'shopee') tasks.push(scrapeShopee(keyword));
-        if (platform === 'all' || platform === 'amazon') tasks.push(scrapeAmazon(keyword));
-        if (platform === 'all' || platform === '1688')  tasks.push(scrape1688(keyword));
-        if (platform === 'all' || platform === 'newegg') tasks.push(scrapeNewegg(keyword));
-        if (platform === 'all' || platform === 'ebay')   tasks.push(scrapeEbay(keyword));
-        if (platform === 'all' || platform === 'zol')    tasks.push(scrapeZOL(keyword));
-        if (platform === 'all' || platform === 'yahoo') tasks.push(scrapeYahoo(keyword));
-        if (platform === 'all' || platform === 'etmall') tasks.push(scrapeETMall(keyword));
-        
-        // 等待所有爬蟲任務完成
-        const resultsArray = await Promise.all(tasks);
-        // 將二維陣列扁平化為一維陣列
-        let allResults = resultsArray.flat(); 
-        return allResults; 
-}
-
 // --- 輔助函式 ---
 function setCorsHeaders(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -1340,483 +1078,6 @@ const server = http.createServer(async(req, res) => {
     }
 
     // --- 專題版商品/收藏/模擬交易 API ---
-    } else if (pathname === '/api/products' && req.method === 'POST') {
-        setCorsHeaders(res);
-        try {
-            const body = await parseJsonBody(req);
-            const { seller, title, category, price, desc, specs, coolingType, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
-            const user = await db.User.findByEmail(seller);
-            const parsedPrice = parseInt(price, 10);
-
-            if (!user) return sendJson(res, 404, { success: false, message: '找不到賣家帳號' });
-            if (!title || !category || Number.isNaN(parsedPrice)) {
-                return sendJson(res, 400, { success: false, message: '商品名稱、分類與價格不能為空' });
-            }
-
-            const scores = parseBenchmarkScore(benchmarkLog, category);
-            if (scores && scores.mismatch) return sendJson(res, 400, { success: false, message: '跑分 log 與分類不符' });
-            const result = await db.Product.create({
-                seller_id: user.id,
-                title,
-                description: desc || '',
-                specs: specs || '',
-                cooling_type: category === 'cooler' ? (coolingType || '') : '',
-                category,
-                price: parsedPrice,
-                condition,
-                image_url: image || null,
-                benchmark_log: benchmarkLog || null,
-                benchmark_score: scores.best,
-                benchmark_read: scores.read,
-                benchmark_write: scores.write,
-                benchmark_combined: scores.combined,
-                location,
-                usage_tag: usageTag,
-                negotiable,
-                status
-            });
-
-            sendJson(res, 200, { success: true, message: '商品上架成功', product_id: result.id });
-        } catch (error) {
-            console.error('新增商品錯誤:', error);
-            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
-        }
-
-    } else if (pathname === '/api/products' && req.method === 'GET') {
-        setCorsHeaders(res);
-        try {
-            const sellerEmail = parsedUrl.searchParams.get('seller');
-            const statusFilter = parsedUrl.searchParams.get('status');
-            let products = [];
-
-            if (sellerEmail) {
-                const user = await db.User.findByEmail(sellerEmail);
-                if (user) products = await db.Product.findBySeller(user.id);
-            } else {
-                products = await db.Product.getActive();
-            }
-
-            if (statusFilter && statusFilter !== 'all') {
-                products = products.filter(product => product.status === statusFilter);
-            }
-
-            sendJson(res, 200, await Promise.all(products.map(formatProductWithImages)));
-        } catch (error) {
-            console.error('讀取商品錯誤:', error);
-            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
-        }
-
-    } else if (pathname.match(/^\/api\/products\/\d+$/) && req.method === 'GET') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3]);
-        try {
-            const product = await db.Product.findById(productId);
-            if (!product) return sendJson(res, 404, { success: false, message: '找不到商品' });
-
-            await db.Product.incrementViews(productId);
-            product.views = (product.views || 0) + 1;
-            sendJson(res, 200, await formatProductWithImages(product));
-        } catch (error) {
-            console.error('讀取單一商品錯誤:', error);
-            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
-        }
-
-    } else if (/^\/api\/products\/\d+\/status$/.test(pathname) && req.method === 'POST') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3]);
-        try {
-            const body = await parseJsonBody(req);
-            const user = await findRequestUser(body.seller || body.userEmail);
-            const allowed = ['active', 'sold', 'inactive'];
-            if (!user || !allowed.includes(body.status)) {
-                return sendJson(res, 400, { success: false, message: '狀態或賣家資料不正確' });
-            }
-
-            const result = await db.Product.updateStatus(productId, user.id, body.status);
-            if (!result.changes) return sendJson(res, 403, { success: false, message: '只能管理自己的商品' });
-            sendJson(res, 200, { success: true, message: '商品狀態已更新' });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '商品狀態更新失敗' });
-        }
-
-    } else if (/^\/api\/products\/\d+\/images$/.test(pathname) && req.method === 'POST') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3], 10);
-        try {
-            const product = await db.Product.findById(productId);
-            const { fields, files } = await parseMultipartForm(req);
-            const user = await findRequestUser(fields.seller || fields.userEmail);
-            if (!user) return sendJson(res, 400, { success: false, message: '請先登入賣家帳號' });
-            if (!product || product.seller_id !== user.id) return sendJson(res, 403, { success: false, message: '只能上傳自己的商品圖片' });
-
-            const existingCount = await db.ProductImage.countByProduct(productId);
-            const imageFiles = files.filter(file => file.field === 'images' || file.field === 'image');
-            if (!imageFiles.length) return sendJson(res, 400, { success: false, message: '請選擇圖片檔案' });
-            if (existingCount + imageFiles.length > 6) return sendJson(res, 400, { success: false, message: '每個商品最多 6 張圖片' });
-
-            const productDir = path.join(UPLOADS_DIR, String(productId));
-            fs.mkdirSync(productDir, { recursive: true });
-            const saved = [];
-
-            for (let i = 0; i < imageFiles.length; i += 1) {
-                const file = imageFiles[i];
-                if (!file.mimeType.startsWith('image/')) return sendJson(res, 400, { success: false, message: '只能上傳圖片檔案' });
-                if (file.data.length > 5 * 1024 * 1024) return sendJson(res, 400, { success: false, message: '單張圖片不可超過 5MB' });
-                const fileName = safeUploadName(file.filename, existingCount + i);
-                if (!fileName) return sendJson(res, 400, { success: false, message: '只支援 jpg、png、webp 圖片' });
-                fs.writeFileSync(path.join(productDir, fileName), file.data);
-                const imageUrl = `/uploads/products/${productId}/${fileName}`;
-                await db.ProductImage.add(productId, imageUrl, existingCount + i);
-                saved.push(imageUrl);
-            }
-
-            if (existingCount === 0 && saved.length) {
-                await db.runUpdate('UPDATE products SET image_url = ? WHERE id = ?', [saved[0], productId]);
-            }
-
-            sendJson(res, 200, { success: true, images: saved });
-        } catch (error) {
-            console.error('商品圖片上傳失敗:', error);
-            sendJson(res, 500, { success: false, message: '圖片上傳失敗' });
-        }
-
-    } else if (pathname.startsWith('/api/products/') && req.method === 'PUT') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3]);
-        try {
-            const body = await parseJsonBody(req);
-            const { seller, title, category, price, desc, specs, coolingType, image, benchmarkLog, condition, location, usageTag, negotiable, status } = body;
-            const user = await db.User.findByEmail(seller);
-            const product = await db.Product.findById(productId);
-            const parsedPrice = parseInt(price, 10);
-
-            if (!user) return sendJson(res, 400, { success: false, message: '缺少賣家帳號' });
-            if (!product || product.seller_id !== user.id) return sendJson(res, 403, { success: false, message: '只能修改自己的商品' });
-            if (!title || !category || Number.isNaN(parsedPrice)) return sendJson(res, 400, { success: false, message: '商品資料不完整' });
-
-            const scores = parseBenchmarkScore(benchmarkLog, category);
-            if (scores && scores.mismatch) return sendJson(res, 400, { success: false, message: '跑分 log 與分類不符' });
-            await db.Product.update(productId, {
-                title,
-                category,
-                price: parsedPrice,
-                description: desc || '',
-                specs: specs || '',
-                cooling_type: category === 'cooler' ? (coolingType || '') : '',
-                image_url: image || null,
-                benchmark_log: benchmarkLog || null,
-                benchmark_score: scores.best,
-                benchmark_read: scores.read,
-                benchmark_write: scores.write,
-                benchmark_combined: scores.combined,
-                condition,
-                location,
-                usage_tag: usageTag,
-                negotiable,
-                status
-            });
-
-            sendJson(res, 200, { success: true, message: '商品已更新' });
-        } catch (error) {
-            console.error('更新商品錯誤:', error);
-            sendJson(res, 500, { success: false, message: '伺服器錯誤' });
-        }
-
-    } else if (pathname.startsWith('/api/products/') && req.method === 'DELETE') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3]);
-        try {
-            const userEmail = parsedUrl.searchParams.get('seller') || parsedUrl.searchParams.get('userEmail');
-            const user = await findRequestUser(userEmail);
-            if (!user) return sendJson(res, 400, { success: false, message: '缺少賣家帳號' });
-
-            const result = await db.Product.updateStatus(productId, user.id, 'inactive');
-            if (!result.changes) return sendJson(res, 403, { success: false, message: '只能下架自己的商品' });
-            sendJson(res, 200, { success: true, message: '商品已下架' });
-        } catch (error) {
-            console.error('下架商品錯誤:', error);
-            sendJson(res, 500, { success: false, message: '下架商品失敗' });
-        }
-
-    // --- 商品 API (新增 / 讀取) ---
-    } else if (pathname === '/api/products' && req.method === 'POST') {
-        setCorsHeaders(res);
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', async () => {
-            try {
-                const { seller, title, category, price, desc, specs, coolingType, image, benchmarkLog } = JSON.parse(body);
-                console.log(`🛒 準備新增商品: ${title}, 賣家: ${seller}`);
-                
-                // 透過 email 找出對應使用者的 ID (seller_id)
-                const user = await db.User.findByEmail(seller);
-                if (!user) {
-                    console.log('❌ 新增商品失敗: 找不到賣家帳號 (可能是該信箱未在 SQLite 註冊，請先登出再重新註冊/登入)');
-                    res.writeHead(404, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: '找不到賣家帳號' }));
-                }
-                
-                // 寫入 SQLite 資料庫
-                const scores = parseBenchmarkScore(benchmarkLog, category);
-                if (scores && scores.mismatch) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: '跑分 log 與分類不符' }));
-                }
-                const result = await db.Product.create({
-                    seller_id: user.id,
-                    title: title,
-                    description: desc || '',
-                    specs: specs || '',
-                    cooling_type: category === 'cooler' ? (coolingType || '') : '',
-                    category: category || '未分類',
-                    price: parseInt(price, 10),
-                    condition: 'unknown',
-                    image_url: image || null,
-                    benchmark_log: benchmarkLog || null,
-                    benchmark_score: scores.best,
-                    benchmark_read: scores.read,
-                    benchmark_write: scores.write,
-                    benchmark_combined: scores.combined
-                });
-                console.log(`✅ 商品已成功寫入 SQLite 資料庫！(商品 ID: ${result.id})`);
-                
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true, message: '上架成功' }));
-            } catch (error) {
-                console.error('❌ 新增商品錯誤:', error);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
-            }
-        });
-
-    } else if (pathname === '/api/products' && req.method === 'GET') {
-        setCorsHeaders(res);
-        const sellerEmail = parsedUrl.searchParams.get('seller');
-        try {
-            let products = [];
-            if (sellerEmail) {
-                const user = await db.User.findByEmail(sellerEmail);
-                if (user) products = await db.Product.findBySeller(user.id);
-            } else {
-                products = await db.Product.getActive();
-            }
-            
-            const formattedProducts = products.map(p => ({
-                id: p.id,
-                title: p.title,
-                price: p.price,
-                category: p.category,
-                desc: p.description,
-                specs: p.specs || '',
-                coolingType: p.cooling_type || '',
-                image: p.image_url,
-                seller: p.seller_name || sellerEmail
-            }));
-            
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(formattedProducts));
-        } catch (error) {
-            console.error('❌ 讀取商品錯誤:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
-        }
-
-    // --- 商品 API (單一商品) ---
-    } else if (pathname.match(/^\/api\/products\/\d+$/) && req.method === 'GET') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3]);
-        try {
-            const product = await db.Product.findById(productId);
-            if (product) {
-                const formattedProduct = {
-                    id: product.id,
-                    title: product.title,
-                    price: product.price,
-                    category: product.category,
-                    desc: product.description,
-                    specs: product.specs || '',
-                    coolingType: product.cooling_type || '',
-                    image: product.image_url,
-                    seller: product.seller_name || product.seller_id
-                };
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(formattedProduct));
-            } else {
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: '找不到商品' }));
-            }
-        } catch (error) {
-            console.error('❌ 讀取單一商品錯誤:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
-        }
-
-    // --- 商品 API (刪除) ---
-    } else if (pathname.startsWith('/api/products/') && req.method === 'DELETE') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3]);
-        try {
-            await db.runUpdate('DELETE FROM products WHERE id = ?', [productId]);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, message: '商品已刪除' }));
-        } catch (error) {
-            console.error('❌ 刪除商品錯誤:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: '刪除商品失敗' }));
-        }
-
-    // --- 商品 API (修改) ---
-    } else if (pathname.startsWith('/api/products/') && req.method === 'PUT') {
-        setCorsHeaders(res);
-        const productId = parseInt(pathname.split('/')[3]);
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', async () => {
-            try {
-                const { title, category, price, desc, specs, coolingType, image, benchmarkLog } = JSON.parse(body);
-                
-                const scores = parseBenchmarkScore(benchmarkLog, category);
-                if (scores && scores.mismatch) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: '跑分 log 與分類不符' }));
-                }
-                await db.runUpdate(
-                    'UPDATE products SET title = ?, category = ?, price = ?, description = ?, specs = ?, cooling_type = ?, image_url = ?, benchmark_log = ?, benchmark_score = ?, benchmark_read = ?, benchmark_write = ?, benchmark_combined = ? WHERE id = ?',
-                    [title, category, parseInt(price, 10), desc || '', specs || '', category === 'cooler' ? (coolingType || '') : '', image || null, benchmarkLog || null, scores.best, scores.read, scores.write, scores.combined, productId]
-                );
-                
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true, message: '商品已更新' }));
-            } catch (error) {
-                console.error('❌ 更新商品錯誤:', error);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: '伺服器錯誤' }));
-            }
-        });
-        
-    } else if (pathname === '/api/favorites' && req.method === 'GET') {
-        setCorsHeaders(res);
-        try {
-            const user = await requireUserFromBodyOrQuery(parsedUrl);
-            if (!user) return sendJson(res, 400, { success: false, message: '缺少使用者' });
-            const favorites = await db.Favorite.getByUser(user.id);
-            sendJson(res, 200, { success: true, data: favorites.map(formatProduct) });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '讀取收藏失敗' });
-        }
-
-    } else if (pathname === '/api/favorites' && req.method === 'POST') {
-        setCorsHeaders(res);
-        try {
-            const body = await parseJsonBody(req);
-            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
-            if (!user || !body.productId) return sendJson(res, 400, { success: false, message: '缺少必要參數' });
-            await db.Favorite.add(user.id, body.productId);
-            sendJson(res, 200, { success: true, message: '已加入收藏' });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '加入收藏失敗' });
-        }
-
-    } else if (pathname.startsWith('/api/favorites/') && req.method === 'DELETE') {
-        setCorsHeaders(res);
-        try {
-            const productId = parseInt(pathname.split('/')[3]);
-            const user = await requireUserFromBodyOrQuery(parsedUrl);
-            if (!user || !productId) return sendJson(res, 400, { success: false, message: '缺少必要參數' });
-            await db.Favorite.remove(user.id, productId);
-            sendJson(res, 200, { success: true, message: '已取消收藏' });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '取消收藏失敗' });
-        }
-
-    } else if (pathname === '/api/transactions' && req.method === 'GET') {
-        setCorsHeaders(res);
-        try {
-            const user = await requireUserFromBodyOrQuery(parsedUrl);
-            const role = parsedUrl.searchParams.get('role') || 'buyer';
-            if (!user) return sendJson(res, 400, { success: false, message: '缺少使用者' });
-            const rows = role === 'seller' ? await db.Transaction.getBySeller(user.id) : await db.Transaction.getByBuyer(user.id);
-            sendJson(res, 200, { success: true, data: rows.map(formatTransaction) });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '讀取交易失敗' });
-        }
-
-    } else if (pathname === '/api/transactions' && req.method === 'POST') {
-        setCorsHeaders(res);
-        try {
-            const body = await parseJsonBody(req);
-            const buyer = await requireUserFromBodyOrQuery(parsedUrl, body);
-            const product = await db.Product.findById(body.productId);
-            if (!buyer || !product) return sendJson(res, 400, { success: false, message: '找不到買家或商品' });
-            if (product.status !== 'active') return sendJson(res, 400, { success: false, message: '商品目前不能購買' });
-            if (product.seller_id === buyer.id) return sendJson(res, 400, { success: false, message: '不能購買自己的商品' });
-
-            const result = await db.Transaction.create({
-                product_id: product.id,
-                buyer_id: buyer.id,
-                seller_id: product.seller_id,
-                price: product.price,
-                status: 'pending',
-                note: body.note || '買家提出購買需求'
-            });
-            sendJson(res, 200, { success: true, message: '已送出購買需求', transaction_id: result.id });
-        } catch (error) {
-            console.error('建立交易錯誤:', error);
-            sendJson(res, 500, { success: false, message: '建立交易失敗' });
-        }
-
-    } else if (pathname.startsWith('/api/transactions/') && req.method === 'PUT') {
-        setCorsHeaders(res);
-        try {
-            const transactionId = parseInt(pathname.split('/')[3]);
-            const body = await parseJsonBody(req);
-            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
-            const allowed = ['paid', 'completed', 'cancelled', 'refund'];
-            if (!user || !allowed.includes(body.status)) return sendJson(res, 400, { success: false, message: '交易狀態不正確' });
-            const transaction = await db.Transaction.findForUser(transactionId, user.id);
-            if (!transaction) return sendJson(res, 403, { success: false, message: '無法更新這筆交易' });
-            const transitionError = validateTransactionTransition(transaction, user, body.status);
-            if (transitionError) return sendJson(res, 400, { success: false, message: transitionError });
-            const result = await db.Transaction.updateStatus(transactionId, user.id, body.status);
-            if (!result.changes) return sendJson(res, 403, { success: false, message: '無法更新這筆交易' });
-            sendJson(res, 200, { success: true, message: '交易狀態已更新' });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '更新交易失敗' });
-        }
-
-    } else if (/^\/api\/transactions\/\d+\/comments$/.test(pathname) && req.method === 'GET') {
-        setCorsHeaders(res);
-        try {
-            const transactionId = parseInt(pathname.split('/')[3]);
-            const user = await requireUserFromBodyOrQuery(parsedUrl);
-            if (!user) return sendJson(res, 400, { success: false, message: '請先登入' });
-
-            const comments = await db.TransactionComment.getByTransaction(transactionId, user.id);
-            if (!comments) return sendJson(res, 403, { success: false, message: '無法查看這筆交易留言' });
-            sendJson(res, 200, { success: true, data: comments.map(formatTransactionComment) });
-        } catch (error) {
-            console.error('讀取交易留言失敗:', error);
-            sendJson(res, 500, { success: false, message: '讀取留言失敗' });
-        }
-
-    } else if (/^\/api\/transactions\/\d+\/comments$/.test(pathname) && req.method === 'POST') {
-        setCorsHeaders(res);
-        try {
-            const transactionId = parseInt(pathname.split('/')[3]);
-            const body = await parseJsonBody(req);
-            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
-            const content = String(body.content || '').trim();
-            if (!user) return sendJson(res, 400, { success: false, message: '請先登入' });
-            if (!content) return sendJson(res, 400, { success: false, message: '請輸入留言內容' });
-
-            const result = await db.TransactionComment.create(transactionId, user.id, content);
-            if (!result) return sendJson(res, 403, { success: false, message: '無法在這筆交易留言' });
-            sendJson(res, 200, { success: true, message: '留言已送出', id: result.id });
-        } catch (error) {
-            console.error('新增交易留言失敗:', error);
-            sendJson(res, 500, { success: false, message: '新增留言失敗' });
-        }
-
     } else if (pathname === '/api/account/stats' && req.method === 'GET') {
         setCorsHeaders(res);
         try {
@@ -1827,7 +1088,6 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 500, { success: false, message: '讀取統計失敗' });
         }
 
-    // --- 購物車 API ---
     } else if (pathname === '/api/account/name' && req.method === 'PUT') {
         setCorsHeaders(res);
         try {
@@ -1837,97 +1097,24 @@ const server = http.createServer(async(req, res) => {
             if (!user) return sendJson(res, 400, { success: false, message: '請先登入' });
             if (!username) return sendJson(res, 400, { success: false, message: '請輸入使用者名稱' });
             if (username.length > 30) return sendJson(res, 400, { success: false, message: '使用者名稱請勿超過 30 個字' });
-
             await db.User.updateUsername(user.id, username);
             sendJson(res, 200, { success: true, message: '使用者名稱已更新', username });
         } catch (error) {
-            console.error('更新使用者名稱失敗:', error);
             sendJson(res, 500, { success: false, message: '更新使用者名稱失敗' });
         }
 
-    } else if (pathname === '/api/cart' && req.method === 'GET') {
+    } else if (isLegacyApiPath(pathname)) {
         setCorsHeaders(res);
-        try {
-            const user = await getCartUser(parsedUrl);
-            if (!user) {
-                return sendJson(res, 400, { success: false, message: "缺少或找不到使用者" });
-            }
+        sendJson(res, 404, { success: false, message: '此功能已停止提供' });
 
-            const items = await db.Cart.getByUser(user.id);
-            sendJson(res, 200, { success: true, data: items });
-        } catch (error) {
-            console.error('❌ 讀取購物車錯誤:', error);
-            sendJson(res, 500, { success: false, message: "讀取購物車失敗" });
-        }
+    } else if (LEGACY_PAGE_ROUTES.has(pathname)) {
+        res.writeHead(302, { Location: '/' });
+        res.end();
 
-    } else if (pathname === '/api/cart' && req.method === 'POST') {
-        setCorsHeaders(res);
-        try {
-            const body = await parseJsonBody(req);
-            const user = await getCartUser(parsedUrl, body);
-            const { productId } = body;
-            if (!user || !productId) {
-                return sendJson(res, 400, { success: false, message: "缺少必要參數" });
-            }
+    } else if (pathname.startsWith('/uploads/products/')) {
+        sendJson(res, 404, { success: false, message: '檔案不存在' });
 
-            await db.Cart.add(user.id, productId);
-            sendJson(res, 200, { success: true, message: "已加入購物車" });
-        } catch (error) {
-            console.error('❌ 加入購物車錯誤:', error);
-            sendJson(res, 500, { success: false, message: "加入購物車失敗" });
-        }
-
-    } else if (pathname === '/api/cart/clear' && req.method === 'POST') {
-        setCorsHeaders(res);
-        try {
-            const body = await parseJsonBody(req);
-            const user = await getCartUser(parsedUrl, body);
-            if (!user) {
-                return sendJson(res, 400, { success: false, message: "缺少或找不到使用者" });
-            }
-
-            await db.Cart.clear(user.id);
-            sendJson(res, 200, { success: true, message: "購物車已清空" });
-        } catch (error) {
-            console.error('❌ 清空購物車錯誤:', error);
-            sendJson(res, 500, { success: false, message: "清空購物車失敗" });
-        }
-
-    } else if (pathname.startsWith('/api/cart/') && req.method === 'PUT') {
-        setCorsHeaders(res);
-        const cartItemId = parseInt(pathname.split('/')[3]);
-        try {
-            const body = await parseJsonBody(req);
-            const user = await getCartUser(parsedUrl, body);
-            const quantity = parseInt(body.quantity, 10);
-            if (!user || Number.isNaN(quantity)) {
-                return sendJson(res, 400, { success: false, message: "缺少必要參數" });
-            }
-
-            await db.Cart.updateQuantity(cartItemId, user.id, quantity);
-            sendJson(res, 200, { success: true, message: "購物車數量已更新" });
-        } catch (error) {
-            console.error('❌ 更新購物車數量錯誤:', error);
-            sendJson(res, 500, { success: false, message: "更新購物車失敗" });
-        }
-
-    } else if (pathname.startsWith('/api/cart/') && req.method === 'DELETE') {
-        setCorsHeaders(res);
-        const cartItemId = parseInt(pathname.split('/')[3]);
-        try {
-            const user = await getCartUser(parsedUrl);
-            if (!user) {
-                return sendJson(res, 400, { success: false, message: "缺少或找不到使用者" });
-            }
-
-            await db.Cart.remove(cartItemId, user.id);
-            sendJson(res, 200, { success: true, message: "已從購物車中移除" });
-        } catch (error) {
-            console.error('❌ 移除購物車商品錯誤:', error);
-            sendJson(res, 500, { success: false, message: "移除商品失敗" });
-        }
-
-    }// 1. 爬蟲 API 路由
+    }// 1. 爬蟲 API 路由    }// 1. 爬蟲 API 路由
     else if (pathname === '/api/scrape' && req.method === 'GET') {
         setCorsHeaders(res);
         const getParam = (key) => parsedUrl.query ? parsedUrl.query[key] : parsedUrl.searchParams?.get(key);
@@ -1978,11 +1165,6 @@ const server = http.createServer(async(req, res) => {
             const yahooData = await scrapeYahoo(keyword);
             allResults = allResults.concat(yahooData);
         }
-        if (isAll || requestedPlatforms.includes('shopee')) {
-            const shopeeData = await scrapeShopee(keyword);
-            allResults = allResults.concat(shopeeData);
-        }
-
         // ==========================================
         // 核心邏輯：三向關鍵字過濾器 + 智慧防呆機制
         // ==========================================
@@ -1992,7 +1174,7 @@ const server = http.createServer(async(req, res) => {
         const categoryWords = categoriesStr.split(',').filter(w => w);
 
         // 預設沒有最低價限制
-        const minPriceThreshold = 0;
+        let minPriceThreshold = 0;
 
         // 排除詞「多向同義詞」自動擴充
         // 為了避免大小寫問題，我們先把現有的排除詞全部轉成小寫來檢查
@@ -2101,12 +1283,6 @@ const server = http.createServer(async(req, res) => {
         if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
         else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
         else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
-        else if (pathname === '/seller') filePath = path.join(__dirname, 'seller.html');
-        else if (pathname === '/marketplace') filePath = path.join(__dirname, 'marketplace.html');
-        else if (pathname === '/cart') filePath = path.join(__dirname, 'cart.html');
-        else if (pathname === '/checkout') filePath = path.join(__dirname, 'checkout.html');
-        else if (pathname === '/product') filePath = path.join(__dirname, 'product.html');
-        else if (pathname === '/transactions') filePath = path.join(__dirname, 'transactions.html');
 
         const safeFilePath = path.resolve(filePath);
         if (!safeFilePath.startsWith(PUBLIC_DIR + path.sep) && safeFilePath !== PUBLIC_DIR) {
@@ -2152,7 +1328,6 @@ server.listen(PORT, () => {
     ▶️ 測試首頁: http://localhost:${PORT}
     ▶️ 登入頁面: http://localhost:${PORT}/login
     ▶️ 論壇頁面: http://localhost:${PORT}/forum
-    ▶️ 賣家頁面: http://localhost:${PORT}/seller  
     ▶️ 測試 API: http://localhost:${PORT}/api
     ==========================================
     `);
