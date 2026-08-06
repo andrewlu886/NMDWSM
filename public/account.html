@@ -85,5 +85,6 @@
         function triggerSearch(){ const q=document.querySelector('.nav-search').value.trim(); if(q) window.location.href=`/scrape?keyword=${encodeURIComponent(q)}`; }
         function logout(){ localStorage.removeItem('userEmail'); localStorage.removeItem('userName'); window.location.href='/'; }
     </script>
+    <script src="/chat-widget.js"></script>
 </body>
 </html>
