@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>會員資料 | 一次買夠</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="./style.css">
     <style>
         body { background: var(--nmd-bg); }
         .account-grid { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:24px; align-items:start; }
@@ -85,6 +85,6 @@
         function triggerSearch(){ const q=document.querySelector('.nav-search').value.trim(); if(q) window.location.href=`/scrape?keyword=${encodeURIComponent(q)}`; }
         function logout(){ localStorage.removeItem('userEmail'); localStorage.removeItem('userName'); window.location.href='/'; }
     </script>
-    <script src="/chat-widget.js"></script>
+    <script src="./chat-widget.js"></script>
 </body>
 </html>
