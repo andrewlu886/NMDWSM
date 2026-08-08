@@ -7,18 +7,121 @@
     <!-- 引入 SheetJS 用於讀取 Excel 檔案 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        /* ==========================================
+           全域與排版設定
+           ========================================== */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
             color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
         .container {
             max-width: 800px;
-            margin: 0 auto;
+            margin: 40px auto;
+            padding: 0 20px;
         }
-        .header {
+
+        /* ==========================================
+           網站導覽列 (Header & Nav) 樣式
+           ========================================== */
+        header {
+            width: 100%;
+        }
+        .header-main {
+            background-color: #121212; /* 深色頂部背景 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 40px;
+        }
+        .logo {
+            color: #3498db;
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .search-wrapper {
+            display: flex;
+            align-items: center;
+            background-color: #242424;
+            border-radius: 30px;
+            padding: 5px 15px;
+            width: 45%;
+            max-width: 500px;
+            border: 1px solid #333;
+        }
+        .nav-search {
+            background: transparent;
+            border: none;
+            color: #fff;
+            width: 100%;
+            padding: 5px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .nav-search::placeholder {
+            color: #777;
+        }
+        .search-btn {
+            background: transparent;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1.1rem;
+            margin: 0;
+            width: auto;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .auth-btn {
+            background-color: #174291; /* 藍色按鈕背景 */
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 25px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            transition: background 0.3s;
+        }
+        .auth-btn:hover {
+            background-color: #11316b;
+        }
+        #user-profile {
+            display: none; /* 未登入預設隱藏 */
+            align-items: center;
+            color: #fff;
+            cursor: pointer;
+            position: relative;
+        }
+        .main-nav {
+            background-color: #174291; /* 深藍色導覽列 */
+            display: flex;
+            justify-content: center;
+            padding: 12px 0;
+        }
+        .main-nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 20px;
+            font-weight: 400;
+            font-size: 0.95rem;
+            transition: opacity 0.3s;
+        }
+        .main-nav a:hover {
+            opacity: 0.8;
+        }
+
+        /* ==========================================
+           卡片與工具區塊樣式
+           ========================================== */
+        .header-title {
             text-align: center;
             margin-bottom: 30px;
         }
@@ -29,7 +132,7 @@
             padding: 25px;
             margin-bottom: 30px;
         }
-        h2 {
+        .card h2 {
             margin-top: 0;
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
@@ -45,7 +148,7 @@
             font-weight: bold;
             color: #555;
         }
-        select, input[type="text"], input[type="number"] {
+        .card select, .card input[type="text"], .card input[type="number"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -53,7 +156,8 @@
             font-size: 1rem;
             box-sizing: border-box;
         }
-        button {
+        /* 限制按鈕樣式只在工具卡片內生效，避免干擾 Header */
+        .card button {
             background-color: #3498db;
             color: #fff;
             border: none;
@@ -65,7 +169,7 @@
             transition: background 0.3s;
             margin-top: 10px;
         }
-        button:hover {
+        .card button:hover {
             background-color: #2980b9;
         }
         .result-box {
@@ -79,13 +183,6 @@
         .result-box strong {
             font-size: 1.2rem;
             color: #e74c3c;
-        }
-        .nav-back {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
         }
         .excel-details {
             background: #fdfbf7; 
@@ -118,114 +215,184 @@
             .component-grid {
                 grid-template-columns: 1fr;
             }
+            .header-main {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .search-wrapper {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <a href="/" class="nav-back">← 返回主頁</a>
-    
-    <div class="header">
-        <h1>🛠️ 裝機實用工具</h1>
-        <p>快速計算主機瓦數，一鍵尋找各廠牌驅動程式與說明書</p>
-    </div>
+    <!-- ==========================================
+         全站導覽列 Header
+         ========================================== -->
+    <header>
+        <div class="header-main">
+            <a href="/" class="logo">⚡ 一次買夠</a>
+            
+            <div class="search-wrapper">
+                <input type="text" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)">
+                <button class="search-btn" onclick="triggerSearch()">🔍</button>
+            </div>
 
-    <!-- 區塊 1：瓦數計算機 -->
-    <div class="card">
-        <h2>⚡ 電源瓦數計算機</h2>
+            <div class="header-actions">
+                <div id="auth-section">
+                    <a href="/login" class="auth-btn">登入 / 註冊</a>
+                </div>
+                
+                <!-- 登入後顯示的會員頭像與下拉選單區塊 -->
+                <div id="user-profile">
+                    <div class="avatar">👤</div>
+                    <span id="user-display-name">載入中...</span>
+                    <!-- 隱藏的下拉選單可透過 JS 展開 -->
+                    <div class="dropdown-menu" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); z-index: 1000;">
+                        <a href="/account.html" style="display:block; padding:5px 0; color:#333; text-decoration:none;">我的帳戶</a>
+                        <a href="#" onclick="logout()" style="display:block; padding:5px 0; color:red; text-decoration:none;">登出</a>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <div class="form-group">
-            <label>處理器 (CPU) 型號</label>
-            <select id="cpu-power" onchange="autoCalculate()">
-                <!-- 預留給 Excel 動態載入，目前提供預設選項 -->
-                <option value="65">入門級 (約 65W)</option>
-                <option value="125">中高階 (約 125W)</option>
-                <option value="250">旗艦級 (約 250W+)</option>
-            </select>
-            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇估算值。</p>
+        <nav class="main-nav">
+            <a href="/">首頁</a>
+            <a href="/#recommend">智慧推薦</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/benchmark-instructions.html">跑分教學</a>
+            <a href="/tools">零件查詢與瓦數計算工具</a>
+        </nav>
+    </header>
+
+    <!-- ==========================================
+         主要工具區塊
+         ========================================== -->
+    <div class="container">
+        
+        <div class="header-title">
+            <h1>🛠️ 裝機實用工具</h1>
+            <p>快速計算主機瓦數，一鍵尋找各廠牌驅動程式與說明書</p>
         </div>
 
-        <div class="form-group">
-            <label>顯示卡 (GPU) 型號</label>
-            <select id="gpu-power" disabled>
-                <option value="">讀取資料庫中...</option>
-            </select>
-            <div id="loading-msg">正在自動載入 CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx...</div>
-        </div>
-
-        <!-- 顯示卡詳細規格區塊 -->
-        <div id="excel-result" class="result-box excel-details">
-            <p>品牌： <span id="ex-brand">-</span></p>
-            <p>顯示卡型號： <span id="ex-model">-</span></p>
-            <p>架構 / 系列： <span id="ex-arch">-</span></p>
-            <p>最早年份： <span id="ex-year">-</span></p>
-            <p>官方功耗 TDP/TGP (W)： <span id="ex-tdp">-</span></p>
-            <p>官方建議 PSU 瓦數 (W)： <span id="ex-psu">-</span></p>
-            <p>電源介面 / 建議備註： <span id="ex-notes">-</span></p>
-        </div>
-
-        <!-- 細部零件區塊 -->
-        <div class="component-grid">
+        <!-- 區塊 1：瓦數計算機 -->
+        <div class="card">
+            <h2>⚡ 電源瓦數計算機</h2>
+            
             <div class="form-group">
-                <label>主機板 (Motherboard)</label>
-                <select id="mb-power" onchange="autoCalculate()">
-                    <option value="25">標準主機板 (M-ATX / ATX) - 約 25W</option>
-                    <option value="40">高階主機板 (E-ATX / 旗艦供電) - 約 40W</option>
-                    <option value="15">ITX 迷你主機板 - 約 15W</option>
+                <label>處理器 (CPU) 型號</label>
+                <select id="cpu-power" onchange="autoCalculate()">
+                    <!-- 預留給 Excel 動態載入，目前提供預設選項 -->
+                    <option value="65">入門級 (約 65W)</option>
+                    <option value="125">中高階 (約 125W)</option>
+                    <option value="250">旗艦級 (約 250W+)</option>
                 </select>
+                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇估算值。</p>
             </div>
 
             <div class="form-group">
-                <label>散熱風扇與系統 (Cooling)</label>
-                <select id="fan-power" onchange="autoCalculate()">
-                    <option value="15">基本風冷 (CPU風扇 + 少量系統風扇) - 約 15W</option>
-                    <option value="30">高階風冷 (塔散 + 多顆系統風扇) - 約 30W</option>
-                    <option value="45">一體式水冷 (水泵 + ARGB 風扇群) - 約 45W</option>
+                <label>顯示卡 (GPU) 型號</label>
+                <select id="gpu-power" disabled>
+                    <option value="">讀取資料庫中...</option>
                 </select>
+                <div id="loading-msg">正在自動載入 CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx...</div>
+            </div>
+
+            <!-- 顯示卡詳細規格區塊 -->
+            <div id="excel-result" class="result-box excel-details">
+                <p>品牌： <span id="ex-brand">-</span></p>
+                <p>顯示卡型號： <span id="ex-model">-</span></p>
+                <p>架構 / 系列： <span id="ex-arch">-</span></p>
+                <p>最早年份： <span id="ex-year">-</span></p>
+                <p>官方功耗 TDP/TGP (W)： <span id="ex-tdp">-</span></p>
+                <p>官方建議 PSU 瓦數 (W)： <span id="ex-psu">-</span></p>
+                <p>電源介面 / 建議備註： <span id="ex-notes">-</span></p>
+            </div>
+
+            <!-- 細部零件區塊 -->
+            <div class="component-grid">
+                <div class="form-group">
+                    <label>主機板 (Motherboard)</label>
+                    <select id="mb-power" onchange="autoCalculate()">
+                        <option value="25">標準主機板 (M-ATX / ATX) - 約 25W</option>
+                        <option value="40">高階主機板 (E-ATX / 旗艦供電) - 約 40W</option>
+                        <option value="15">ITX 迷你主機板 - 約 15W</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>散熱風扇與系統 (Cooling)</label>
+                    <select id="fan-power" onchange="autoCalculate()">
+                        <option value="15">基本風冷 (CPU風扇 + 少量系統風扇) - 約 15W</option>
+                        <option value="30">高階風冷 (塔散 + 多顆系統風扇) - 約 30W</option>
+                        <option value="45">一體式水冷 (水泵 + ARGB 風扇群) - 約 45W</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>儲存硬碟數量 (HDD / SSD 總數)</label>
+                    <input type="number" id="hdd-count" min="0" max="20" value="1" onchange="autoCalculate()" onkeyup="autoCalculate()">
+                    <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 單顆硬碟以 10W 作為安全估算值。</p>
+                </div>
             </div>
             
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label>儲存硬碟數量 (HDD / SSD 總數)</label>
-                <input type="number" id="hdd-count" min="0" max="20" value="1" onchange="autoCalculate()" onkeyup="autoCalculate()">
-                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 單顆硬碟以 10W 作為安全估算值。</p>
+            <button onclick="calculatePower()">計算建議瓦數</button>
+            
+            <div id="power-result" class="result-box">
+                系統滿載預估功耗：<span id="total-watt">0</span> W <br>
+                電源供應器 (PSU) 建議選購：<strong><span id="recommend-watt">0</span> W 以上</strong>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">* 建議瓦數已加入安全冗餘 (預估功耗 x 1.3 倍)。<strong>若顯示卡原廠建議瓦數較高，系統將優先採納原廠建議</strong>，確保高負載下系統穩定並保留升級空間。</p>
             </div>
         </div>
-        
-        <button onclick="calculatePower()">計算建議瓦數</button>
-        
-        <div id="power-result" class="result-box">
-            系統滿載預估功耗：<span id="total-watt">0</span> W <br>
-            電源供應器 (PSU) 建議選購：<strong><span id="recommend-watt">0</span> W 以上</strong>
-            <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">* 建議瓦數已加入安全冗餘 (預估功耗 x 1.3 倍)。<strong>若顯示卡原廠建議瓦數較高，系統將優先採納原廠建議</strong>，確保高負載下系統穩定並保留升級空間。</p>
-        </div>
-    </div>
 
-    <!-- 區塊 2：官網查詢 -->
-    <div class="card">
-        <h2>🔍 驅動程式與說明書查詢</h2>
-        <p style="color: #666; font-size: 0.9rem;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
-        <div class="form-group">
-            <label>廠牌 (品牌)</label>
-            <select id="brand-select">
-                <option value="ASUS 華碩">ASUS 華碩</option>
-                <option value="MSI 微星">MSI 微星</option>
-                <option value="GIGABYTE 技嘉">GIGABYTE 技嘉</option>
-                <option value="ASRock 華擎">ASRock 華擎</option>
-                <option value="Intel">Intel</option>
-                <option value="AMD">AMD</option>
-                <option value="NVIDIA">NVIDIA</option>
-            </select>
+        <!-- 區塊 2：官網查詢 -->
+        <div class="card">
+            <h2>🔍 驅動程式與說明書查詢</h2>
+            <p style="color: #666; font-size: 0.9rem;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
+            <div class="form-group">
+                <label>廠牌 (品牌)</label>
+                <select id="brand-select">
+                    <option value="ASUS 華碩">ASUS 華碩</option>
+                    <option value="MSI 微星">MSI 微星</option>
+                    <option value="GIGABYTE 技嘉">GIGABYTE 技嘉</option>
+                    <option value="ASRock 華擎">ASRock 華擎</option>
+                    <option value="Intel">Intel</option>
+                    <option value="AMD">AMD</option>
+                    <option value="NVIDIA">NVIDIA</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>產品型號 (如：B650M AORUS ELITE 或 RTX 4060)</label>
+                <input type="text" id="model-input" placeholder="請輸入完整產品型號...">
+            </div>
+            <button onclick="searchOfficial()">前往搜尋原廠資源</button>
         </div>
-        <div class="form-group">
-            <label>產品型號 (如：B650M AORUS ELITE 或 RTX 4060)</label>
-            <input type="text" id="model-input" placeholder="請輸入完整產品型號...">
-        </div>
-        <button onclick="searchOfficial()">前往搜尋原廠資源</button>
     </div>
-</div>
 
 <script>
+    // ==========================================
+    // 頂部導覽列搜尋框的空函數 (避免錯誤)
+    // ==========================================
+    function handleSearch(event) {
+        if (event.key === "Enter") {
+            triggerSearch();
+        }
+    }
+    function triggerSearch() {
+        const query = document.querySelector('.nav-search').value;
+        if(query) {
+            // 在此處加入全站搜尋的跳轉邏輯
+            // window.location.href = `/search?q=${encodeURIComponent(query)}`;
+            alert("目前搜尋: " + query);
+        }
+    }
+    function logout() {
+        alert("已登出帳號");
+        // 加入登出邏輯
+    }
+
     // ==========================================
     // 全域變數
     // ==========================================
@@ -236,11 +403,6 @@
     let cpuExcelData = [];
     let currentCpuTdp = 0; 
     
-    // (預留) 若未來需要讀取 CPU 的 Excel，可將讀取邏輯寫在此函數內
-    function loadCpuData() {
-        // fetch('CPU_Data.xlsx').then(...) 
-    }
-
     // ==========================================
     // 精準取值函數
     // ==========================================
@@ -384,7 +546,7 @@
         
         let recommendW = Math.ceil((totalW * 1.3) / 50) * 50; 
         
-        if(recommendW < 200) recommendW = 300;
+        if(recommendW < 400) recommendW = 400;
 
         if(currentGpuPsu > recommendW) {
             recommendW = currentGpuPsu;
@@ -416,7 +578,6 @@
         const encodedModel = encodeURIComponent(model);
         let targetUrl = "";
 
-        // 依據選擇的品牌，構建直接跳轉至其台灣官網搜尋頁面的 URL
         if (brand.includes("ASUS")) {
             targetUrl = `https://www.asus.com/tw/searchresult?searchType=products&searchKey=${encodedModel}`;
         } else if (brand.includes("MSI")) {
@@ -433,7 +594,6 @@
             targetUrl = `https://www.nvidia.com/zh-tw/search/?q=${encodedModel}`;
         }
 
-        // 開啟新分頁
         if (targetUrl) {
             window.open(targetUrl, '_blank');
         }

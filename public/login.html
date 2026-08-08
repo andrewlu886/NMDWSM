@@ -6,73 +6,94 @@
     <title>會員中心 - 一次買夠</title>
     <link rel="stylesheet" href="./style.css">
     <style>
+        /* 1. 修正 body 樣式，移除 flex 佈局 */
         body {
+            margin: 0;
+            background-color: var(--bg-color, #121416); /* 加入預設深色背景 */
+            color: #e5e7eb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* 2. 新增一個外層容器來專門讓登入框置中 */
+        .login-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: var(--bg-color);
+            min-height: calc(100vh - 60px); /* 扣除 header 大約的高度 */
+            padding: 20px;
         }
+
+        /* 3. 根據截圖，將登入框改為深色樣式 */
         .login-container {
-            background: white;
+            background: #181a1f; 
             width: 400px;
             padding: 2.5rem;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
         }
+
         .logo {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
             display: block;
             text-decoration: none;
         }
+
         .tabs {
             display: flex;
             margin-bottom: 2rem;
-            border-bottom: 2px solid #eee;
+            border-bottom: 1px solid #333;
         }
+
         .tab {
             flex: 1;
             padding: 10px;
             cursor: pointer;
             font-weight: bold;
-            color: #999;
+            color: #888;
             transition: 0.3s;
         }
+
         .tab.active {
-            color: var(--secondary-color);
-            border-bottom: 2px solid var(--secondary-color);
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
         }
+
         .form-group {
             text-align: left;
             margin-bottom: 1.2rem;
         }
+
         .form-group label {
             display: block;
             font-size: 14px;
-            margin-bottom: 5px;
-            color: #666;
+            margin-bottom: 8px;
+            color: #aaa;
         }
+
         .form-group input {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
+            background-color: #121416;
+            color: #fff;
+            border: 1px solid #333;
             border-radius: 6px;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 14px;
         }
+
         .form-group input:focus {
             outline: none;
-            border-color: var(--secondary-color);
+            border-color: #3498db;
         }
+
         .btn {
             width: 100%;
             padding: 12px;
-            background-color: var(--secondary-color);
+            background-color: #1f6b9c;
             color: white;
             border: none;
             border-radius: 6px;
@@ -82,68 +103,101 @@
             margin-top: 10px;
             transition: background 0.3s;
         }
+
         .btn:hover {
-            background-color: #2980b9;
+            background-color: #16527a;
         }
+
         .footer-links {
             margin-top: 1.5rem;
             font-size: 13px;
-            color: #888;
+            text-align: center;
         }
+
         .footer-links a {
-            color: var(--secondary-color);
+            color: #3498db;
             text-decoration: none;
         }
+
         /* 初始隱藏註冊表單 */
         #register-form {
             display: none;
         }
+
+        /* 若你的 style.css 沒寫到導覽列，可以參考加上這段 (類似第二張圖的藍色 bar) */
+        /*
+        .main-nav {
+            background-color: #1a4b8c;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px 0;
+        }
+        .main-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
+        */
     </style>
 </head>
 <body>
+    <header>
+        <nav class="main-nav">
+            <a href="/">首頁</a>
+            <a href="/#recommend">智慧推薦</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/benchmark-instructions.html">跑分教學</a>
+            <a href="/tools">零件查詢與瓦數計算工具</a>
+        </nav>
+    </header>
 
-    <div class="login-container">
-        <a href="/" class="logo">一次買夠 | 會員中心</a>
-        
-        <div class="tabs">
-            <div class="tab active" id="tab-login" onclick="switchTab('login')">登入</div>
-            <div class="tab" id="tab-register" onclick="switchTab('register')">註冊</div>
+    <!-- 用新增的 login-wrapper 包住登入區塊，這樣置中才不會影響到 header -->
+    <div class="login-wrapper">
+        <div class="login-container">
+            <a href="/" class="logo">一次買夠 | 會員中心</a>
+            
+            <div class="tabs">
+                <div class="tab active" id="tab-login" onclick="switchTab('login')">登入</div>
+                <div class="tab" id="tab-register" onclick="switchTab('register')">註冊</div>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>電子郵件 / 帳號</label>
+                    <input type="text" id="login-email" placeholder="請輸入您的帳號" required>
+                </div>
+                <div class="form-group">
+                    <label>密碼</label>
+                    <input type="password" id="login-password" placeholder="請輸入密碼" required>
+                </div>
+                <button type="submit" class="btn">立即登入</button>
+                <div class="footer-links">
+                    <a href="#">忘記密碼？</a>
+                </div>
+            </form>
+
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>全名</label>
+                    <input type="text" id="reg-name" placeholder="例如：王小明" required>
+                </div>
+                <div class="form-group">
+                    <label>電子郵件</label>
+                    <input type="email" id="reg-email" placeholder="您的@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>密碼</label>
+                    <input type="password" id="reg-password" placeholder="至少 8 位字元" required>
+                </div>
+                <div class="form-group">
+                    <label>確認密碼</label>
+                    <input type="password" id="reg-confirm" placeholder="再次輸入密碼" required>
+                </div>
+                <button type="submit" class="btn">建立帳號</button>
+            </form>
         </div>
-
-        <form id="login-form" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label>電子郵件 / 帳號</label>
-                <input type="text" id="login-email" placeholder="請輸入您的帳號" required>
-            </div>
-            <div class="form-group">
-                <label>密碼</label>
-                <input type="password" id="login-password" placeholder="請輸入密碼" required>
-            </div>
-            <button type="submit" class="btn">立即登入</button>
-            <div class="footer-links">
-                <a href="#">忘記密碼？</a>
-            </div>
-        </form>
-
-        <form id="register-form" onsubmit="handleRegister(event)">
-            <div class="form-group">
-                <label>全名</label>
-                <input type="text" id="reg-name" placeholder="例如：王小明" required>
-            </div>
-            <div class="form-group">
-                <label>電子郵件</label>
-                <input type="email" id="reg-email" placeholder="您的@email.com" required>
-            </div>
-            <div class="form-group">
-                <label>密碼</label>
-                <input type="password" id="reg-password" placeholder="至少 8 位字元" required>
-            </div>
-            <div class="form-group">
-                <label>確認密碼</label>
-                <input type="password" id="reg-confirm" placeholder="再次輸入密碼" required>
-            </div>
-            <button type="submit" class="btn" style="background-color: var(--primary-color);">建立帳號</button>
-        </form>
     </div>
 
     <script>
@@ -228,13 +282,13 @@
                 if (result.success) {
                     alert(result.message);
                     
-                    // 【新增】：把帳號記在瀏覽器裡，這樣回首頁才不會失憶
+                    // 把帳號記在瀏覽器裡，這樣回首頁才不會失憶
                     localStorage.setItem('userEmail', email); 
                     if (result.user && result.user.username) {
                         localStorage.setItem('userName', result.user.username);
                     }
                     
-                    // 【修改】：跳轉回根目錄首頁
+                    // 跳轉回根目錄首頁
                     window.location.href = '/'; 
                 } else {
                     alert('登入失敗：' + result.message);
