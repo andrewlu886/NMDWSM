@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>實用工具：瓦數計算 & 官網查詢</title>
+    <!-- 引入 SheetJS 用於讀取 Excel 檔案 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -43,7 +45,7 @@
             font-weight: bold;
             color: #555;
         }
-        select, input[type="text"] {
+        select, input[type="text"], input[type="number"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -61,6 +63,7 @@
             font-size: 1rem;
             width: 100%;
             transition: background 0.3s;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #2980b9;
@@ -84,6 +87,38 @@
             color: #3498db;
             font-weight: bold;
         }
+        .excel-details {
+            background: #fdfbf7; 
+            border-left: 5px solid #f39c12;
+            margin-bottom: 15px;
+        }
+        .excel-details p {
+            margin: 8px 0;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+        .excel-details p:last-child {
+            border-bottom: none;
+        }
+        .excel-details span {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        #loading-msg {
+            color: #e67e22;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 600px) {
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -99,44 +134,77 @@
     <!-- 區塊 1：瓦數計算機 -->
     <div class="card">
         <h2>⚡ 電源瓦數計算機</h2>
+        
         <div class="form-group">
-            <label>處理器 (CPU) 等級</label>
-            <select id="cpu-power">
-                <option value="65">入門級 (如 i3, i5 尾碼非K / Ryzen 3, 5) - 約 65W</option>
-                <option value="125">中高階 (如 i5-K, i7 / Ryzen 7) - 約 125W</option>
-                <option value="250">旗艦級 (如 i9 / Ryzen 9) - 約 250W+</option>
+            <label>處理器 (CPU) 型號</label>
+            <select id="cpu-power" onchange="autoCalculate()">
+                <!-- 預留給 Excel 動態載入，目前提供預設選項 -->
+                <option value="65">入門級 (約 65W)</option>
+                <option value="125">中高階 (約 125W)</option>
+                <option value="250">旗艦級 (約 250W+)</option>
             </select>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇估算值。</p>
         </div>
+
         <div class="form-group">
-            <label>顯示卡 (GPU) 等級</label>
-            <select id="gpu-power">
-                <option value="0">無獨立顯卡 (使用內顯) - 0W</option>
-                <option value="130">入門級 (如 RTX 3050, RX 6600) - 約 130W</option>
-                <option value="200">中階 (如 RTX 4060 Ti, RX 7600) - 約 200W</option>
-                <option value="300">高階 (如 RTX 4070 Ti, RX 7800 XT) - 約 300W</option>
-                <option value="450">旗艦級 (如 RTX 4090, RX 7900 XTX) - 約 450W+</option>
+            <label>顯示卡 (GPU) 型號</label>
+            <select id="gpu-power" disabled>
+                <option value="">讀取資料庫中...</option>
             </select>
+            <div id="loading-msg">正在自動載入 CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx...</div>
         </div>
-        <div class="form-group">
-            <label>其他周邊 (主機板/記憶體/硬碟/風扇)</label>
-            <select id="other-power">
-                <option value="50">基本配置 (少量風扇與硬碟) - 約 50W</option>
-                <option value="100">豐富配置 (水冷、多風扇、多硬碟) - 約 100W</option>
-            </select>
+
+        <!-- 顯示卡詳細規格區塊 -->
+        <div id="excel-result" class="result-box excel-details">
+            <p>品牌： <span id="ex-brand">-</span></p>
+            <p>顯示卡型號： <span id="ex-model">-</span></p>
+            <p>架構 / 系列： <span id="ex-arch">-</span></p>
+            <p>最早年份： <span id="ex-year">-</span></p>
+            <p>官方功耗 TDP/TGP (W)： <span id="ex-tdp">-</span></p>
+            <p>官方建議 PSU 瓦數 (W)： <span id="ex-psu">-</span></p>
+            <p>電源介面 / 建議備註： <span id="ex-notes">-</span></p>
         </div>
+
+        <!-- 細部零件區塊 -->
+        <div class="component-grid">
+            <div class="form-group">
+                <label>主機板 (Motherboard)</label>
+                <select id="mb-power" onchange="autoCalculate()">
+                    <option value="25">標準主機板 (M-ATX / ATX) - 約 25W</option>
+                    <option value="40">高階主機板 (E-ATX / 旗艦供電) - 約 40W</option>
+                    <option value="15">ITX 迷你主機板 - 約 15W</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>散熱風扇與系統 (Cooling)</label>
+                <select id="fan-power" onchange="autoCalculate()">
+                    <option value="15">基本風冷 (CPU風扇 + 少量系統風扇) - 約 15W</option>
+                    <option value="30">高階風冷 (塔散 + 多顆系統風扇) - 約 30W</option>
+                    <option value="45">一體式水冷 (水泵 + ARGB 風扇群) - 約 45W</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>儲存硬碟數量 (HDD / SSD 總數)</label>
+                <input type="number" id="hdd-count" min="0" max="20" value="1" onchange="autoCalculate()" onkeyup="autoCalculate()">
+                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 單顆硬碟以 10W 作為安全估算值。</p>
+            </div>
+        </div>
+        
         <button onclick="calculatePower()">計算建議瓦數</button>
         
         <div id="power-result" class="result-box">
             系統滿載預估功耗：<span id="total-watt">0</span> W <br>
             電源供應器 (PSU) 建議選購：<strong><span id="recommend-watt">0</span> W 以上</strong>
-            <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">* 建議瓦數已加入安全冗餘 (滿載功耗 x 1.3 倍) 並進位至常見規格，確保高負載下系統穩定並保留升級空間。</p>
+            <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">* 建議瓦數已加入安全冗餘 (預估功耗 x 1.3 倍)。<strong>若顯示卡原廠建議瓦數較高，系統將優先採納原廠建議</strong>，確保高負載下系統穩定並保留升級空間。</p>
         </div>
     </div>
 
     <!-- 區塊 2：官網查詢 -->
     <div class="card">
         <h2>🔍 驅動程式與說明書查詢</h2>
-        <p style="color: #666; font-size: 0.9rem;">輸入您的硬體型號，系統將為您生成精準的官方技術支援搜尋連結。</p>
+        <p style="color: #666; font-size: 0.9rem;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
         <div class="form-group">
             <label>廠牌 (品牌)</label>
             <select id="brand-select">
@@ -158,26 +226,184 @@
 </div>
 
 <script>
-    // 瓦數計算邏輯
-    function calculatePower() {
-        const cpu = parseInt(document.getElementById('cpu-power').value);
-        const gpu = parseInt(document.getElementById('gpu-power').value);
-        const other = parseInt(document.getElementById('other-power').value);
+    // ==========================================
+    // 全域變數
+    // ==========================================
+    let gpuExcelData = [];
+    let currentGpuTdp = 0;
+    let currentGpuPsu = 0;
+
+    let cpuExcelData = [];
+    let currentCpuTdp = 0; 
+    
+    // (預留) 若未來需要讀取 CPU 的 Excel，可將讀取邏輯寫在此函數內
+    function loadCpuData() {
+        // fetch('CPU_Data.xlsx').then(...) 
+    }
+
+    // ==========================================
+    // 精準取值函數
+    // ==========================================
+    function getCleanVal(row, possibleKeywords) {
+        for (let key in row) {
+            const cleanKey = key.replace(/\s+/g, '').toUpperCase();
+            for (let keyword of possibleKeywords) {
+                if (cleanKey.includes(keyword.toUpperCase())) {
+                    return row[key];
+                }
+            }
+        }
+        return null;
+    }
+
+    // ==========================================
+    // 自動讀取同資料夾的 Excel 檔案 (GPU)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", function() {
+        const filePath = 'CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx';
         
-        // 實際滿載功耗
-        const totalW = cpu + gpu + other;
-        // 建議購買瓦數 (抓 30% 安全餘裕)
+        fetch(filePath)
+            .then(response => {
+                if (!response.ok) throw new Error("找不到檔案");
+                return response.arrayBuffer();
+            })
+            .then(data => {
+                const workbook = XLSX.read(data, {type: 'array'});
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // 找出真正的標題列
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                let headerRowIndex = 0;
+                for(let i = 0; i < Math.min(10, rawData.length); i++) {
+                    const rowText = (rawData[i] || []).join('').replace(/\s/g, '');
+                    if(rowText.includes('顯示卡型號')) {
+                        headerRowIndex = i;
+                        break;
+                    }
+                }
+
+                gpuExcelData = XLSX.utils.sheet_to_json(worksheet, { 
+                    range: headerRowIndex, 
+                    defval: "" 
+                });
+                
+                document.getElementById('loading-msg').style.display = 'none';
+                populateExcelSelect();
+            })
+            .catch(error => {
+                console.error("載入 Excel 失敗:", error);
+                document.getElementById('loading-msg').innerHTML = '⚠️ 無法自動載入 Excel 檔案，請確認必須使用本機伺服器 (Local Server) 開啟網頁。';
+                document.getElementById('loading-msg').style.color = 'red';
+                const select = document.getElementById('gpu-power');
+                select.innerHTML = '<option value="">(讀取失敗)</option>';
+            });
+    });
+
+    // ==========================================
+    // 將資料寫入下拉選單並綁定事件 (GPU)
+    // ==========================================
+    function populateExcelSelect() {
+        const select = document.getElementById('gpu-power');
+        select.innerHTML = '<option value="-1">無獨立顯卡 (內顯) - 0W</option>';
+        select.disabled = false;
+
+        gpuExcelData.forEach((row, index) => {
+            const modelName = getCleanVal(row, ['顯示卡型號']) || `(無型號名稱 - Row ${index})`;
+            
+            if(modelName && modelName.includes('Row') === false && modelName.trim() !== '') {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = modelName;
+                select.appendChild(option);
+            }
+        });
+
+        select.addEventListener('change', function() {
+            const idx = this.value;
+            if (idx === "-1" || idx === "") {
+                document.getElementById('excel-result').style.display = 'none';
+                currentGpuTdp = 0;
+                currentGpuPsu = 0;
+                autoCalculate();
+                return;
+            }
+            
+            const row = gpuExcelData[idx];
+            
+            const brand = getCleanVal(row, ['品牌']);
+            const model = getCleanVal(row, ['顯示卡型號']);
+            const arch = getCleanVal(row, ['架構', '系列']);
+            const year = getCleanVal(row, ['最早年份', '年份']);
+            const tdp = getCleanVal(row, ['TDP', 'TGP', '官方功耗']);
+            const notes = getCleanVal(row, ['電源介面', '備註']);
+            const psu = getCleanVal(row, ['官方建議瓦數', '官方建議PSU', '建議瓦數', '建議電源', 'PSU']);
+
+            document.getElementById('ex-brand').innerText = brand || '無資料';
+            document.getElementById('ex-model').innerText = model || '無資料';
+            document.getElementById('ex-arch').innerText = arch || '無資料';
+            document.getElementById('ex-year').innerText = year || '無資料';
+            document.getElementById('ex-notes').innerText = notes || '無資料';
+
+            if (tdp) {
+                document.getElementById('ex-tdp').innerText = tdp + (String(tdp).includes('W') ? '' : ' W');
+                const tdpMatch = String(tdp).match(/\d+/); 
+                currentGpuTdp = tdpMatch ? parseInt(tdpMatch[0]) : 0; 
+            } else {
+                document.getElementById('ex-tdp').innerText = '無資料';
+                currentGpuTdp = 0;
+            }
+            
+            if (psu) {
+                document.getElementById('ex-psu').innerText = psu + (String(psu).includes('W') ? '' : ' W');
+                const psuMatch = String(psu).match(/\d+/);
+                currentGpuPsu = psuMatch ? parseInt(psuMatch[0]) : 0;
+            } else {
+                document.getElementById('ex-psu').innerText = '無資料';
+                currentGpuPsu = 0;
+            }
+
+            document.getElementById('excel-result').style.display = 'block';
+            autoCalculate();
+        });
+    }
+
+    // ==========================================
+    // 瓦數計算邏輯
+    // ==========================================
+    function calculatePower() {
+        const cpuW = currentCpuTdp > 0 ? currentCpuTdp : (parseInt(document.getElementById('cpu-power').value) || 0);
+        const gpuW = currentGpuTdp; 
+        
+        const mbW = parseInt(document.getElementById('mb-power').value) || 0;
+        const fanW = parseInt(document.getElementById('fan-power').value) || 0;
+        
+        const hddCount = parseInt(document.getElementById('hdd-count').value) || 0;
+        const hddW = hddCount * 10;
+        
+        const totalW = cpuW + gpuW + mbW + fanW + hddW;
+        
         let recommendW = Math.ceil((totalW * 1.3) / 50) * 50; 
         
-        // 基礎防呆，現今電供至少建議 400W 起跳
-        if(recommendW < 400) recommendW = 400;
+        if(recommendW < 200) recommendW = 300;
+
+        if(currentGpuPsu > recommendW) {
+            recommendW = currentGpuPsu;
+        }
 
         document.getElementById('total-watt').innerText = totalW;
         document.getElementById('recommend-watt').innerText = recommendW;
         document.getElementById('power-result').style.display = 'block';
     }
+    
+    function autoCalculate() {
+        if (document.getElementById('power-result').style.display === 'block') {
+            calculatePower();
+        }
+    }
 
-    // 驅動與說明書查詢邏輯 (透過 Google 加上 site 限定與關鍵字幫助精準搜尋)
+    // ==========================================
+    // 驅動與說明書查詢邏輯 (直接跳轉台灣官網搜尋)
+    // ==========================================
     function searchOfficial() {
         const brand = document.getElementById('brand-select').value;
         const model = document.getElementById('model-input').value.trim();
@@ -187,12 +413,30 @@
             return;
         }
 
-        // 組合搜尋關鍵字，例如: ASUS B650M 驅動程式 說明書 support
-        const query = `${brand} ${model} 驅動程式 說明書 support`;
-        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-        
+        const encodedModel = encodeURIComponent(model);
+        let targetUrl = "";
+
+        // 依據選擇的品牌，構建直接跳轉至其台灣官網搜尋頁面的 URL
+        if (brand.includes("ASUS")) {
+            targetUrl = `https://www.asus.com/tw/searchresult?searchType=products&searchKey=${encodedModel}`;
+        } else if (brand.includes("MSI")) {
+            targetUrl = `https://tw.msi.com/search/${encodedModel}`;
+        } else if (brand.includes("GIGABYTE")) {
+            targetUrl = `https://www.gigabyte.com/tw/Search?kw=${encodedModel}`;
+        } else if (brand.includes("ASRock")) {
+            targetUrl = `https://www.asrock.com/support/index.tw.asp?cat=ModelName&Model=${encodedModel}`;
+        } else if (brand.includes("Intel")) {
+            targetUrl = `https://www.intel.com.tw/content/www/tw/zh/search.html?ws=text#q=${encodedModel}`;
+        } else if (brand.includes("AMD")) {
+            targetUrl = `https://www.amd.com/zh-hant/search.html?q=${encodedModel}`;
+        } else if (brand.includes("NVIDIA")) {
+            targetUrl = `https://www.nvidia.com/zh-tw/search/?q=${encodedModel}`;
+        }
+
         // 開啟新分頁
-        window.open(googleSearchUrl, '_blank');
+        if (targetUrl) {
+            window.open(targetUrl, '_blank');
+        }
     }
 </script>
 

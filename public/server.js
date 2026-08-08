@@ -1076,7 +1076,7 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 500, { success: false, message: '文章更新失敗' });
         }
     }
-
+/*
     // --- 專題版商品/收藏/模擬交易 API ---
     } else if (pathname === '/api/account/stats' && req.method === 'GET') {
         setCorsHeaders(res);
@@ -1087,7 +1087,7 @@ const server = http.createServer(async(req, res) => {
         } catch (error) {
             sendJson(res, 500, { success: false, message: '讀取統計失敗' });
         }
-
+*/
     } else if (pathname === '/api/account/name' && req.method === 'PUT') {
         setCorsHeaders(res);
         try {
@@ -1282,7 +1282,7 @@ const server = http.createServer(async(req, res) => {
         if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
         else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
         else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
-
+        else if (pathname === '/tools') filePath = path.join(__dirname, 'tools.html');
         const safeFilePath = path.resolve(filePath);
         if (!safeFilePath.startsWith(PUBLIC_DIR + path.sep) && safeFilePath !== PUBLIC_DIR) {
             res.writeHead(403);
@@ -1329,6 +1329,7 @@ server.listen(PORT, () => {
     ▶️ 登入頁面: http://localhost:${PORT}/login
     ▶️ 論壇頁面: http://localhost:${PORT}/forum
     ▶️ 測試 API: http://localhost:${PORT}/api
+    ▶️ 工具頁面: http://localhost:${PORT}/tools
     ==========================================
     `);
 });
