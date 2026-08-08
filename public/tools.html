@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>實用工具：瓦數計算 & 官網查詢</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-left: 5px solid #3498db;
+            border-radius: 4px;
+            display: none;
+        }
+        .result-box strong {
+            font-size: 1.2rem;
+            color: #e74c3c;
+        }
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="nav-back">← 返回主頁</a>
+    
+    <div class="header">
+        <h1>🛠️ 裝機實用工具</h1>
+        <p>快速計算主機瓦數，一鍵尋找各廠牌驅動程式與說明書</p>
+    </div>
+
+    <!-- 區塊 1：瓦數計算機 -->
+    <div class="card">
+        <h2>⚡ 電源瓦數計算機</h2>
+        <div class="form-group">
+            <label>處理器 (CPU) 等級</label>
+            <select id="cpu-power">
+                <option value="65">入門級 (如 i3, i5 尾碼非K / Ryzen 3, 5) - 約 65W</option>
+                <option value="125">中高階 (如 i5-K, i7 / Ryzen 7) - 約 125W</option>
+                <option value="250">旗艦級 (如 i9 / Ryzen 9) - 約 250W+</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>顯示卡 (GPU) 等級</label>
+            <select id="gpu-power">
+                <option value="0">無獨立顯卡 (使用內顯) - 0W</option>
+                <option value="130">入門級 (如 RTX 3050, RX 6600) - 約 130W</option>
+                <option value="200">中階 (如 RTX 4060 Ti, RX 7600) - 約 200W</option>
+                <option value="300">高階 (如 RTX 4070 Ti, RX 7800 XT) - 約 300W</option>
+                <option value="450">旗艦級 (如 RTX 4090, RX 7900 XTX) - 約 450W+</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>其他周邊 (主機板/記憶體/硬碟/風扇)</label>
+            <select id="other-power">
+                <option value="50">基本配置 (少量風扇與硬碟) - 約 50W</option>
+                <option value="100">豐富配置 (水冷、多風扇、多硬碟) - 約 100W</option>
+            </select>
+        </div>
+        <button onclick="calculatePower()">計算建議瓦數</button>
+        
+        <div id="power-result" class="result-box">
+            系統滿載預估功耗：<span id="total-watt">0</span> W <br>
+            電源供應器 (PSU) 建議選購：<strong><span id="recommend-watt">0</span> W 以上</strong>
+            <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">* 建議瓦數已加入安全冗餘 (滿載功耗 x 1.3 倍) 並進位至常見規格，確保高負載下系統穩定並保留升級空間。</p>
+        </div>
+    </div>
+
+    <!-- 區塊 2：官網查詢 -->
+    <div class="card">
+        <h2>🔍 驅動程式與說明書查詢</h2>
+        <p style="color: #666; font-size: 0.9rem;">輸入您的硬體型號，系統將為您生成精準的官方技術支援搜尋連結。</p>
+        <div class="form-group">
+            <label>廠牌 (品牌)</label>
+            <select id="brand-select">
+                <option value="ASUS 華碩">ASUS 華碩</option>
+                <option value="MSI 微星">MSI 微星</option>
+                <option value="GIGABYTE 技嘉">GIGABYTE 技嘉</option>
+                <option value="ASRock 華擎">ASRock 華擎</option>
+                <option value="Intel">Intel</option>
+                <option value="AMD">AMD</option>
+                <option value="NVIDIA">NVIDIA</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>產品型號 (如：B650M AORUS ELITE 或 RTX 4060)</label>
+            <input type="text" id="model-input" placeholder="請輸入完整產品型號...">
+        </div>
+        <button onclick="searchOfficial()">前往搜尋原廠資源</button>
+    </div>
+</div>
+
+<script>
+    // 瓦數計算邏輯
+    function calculatePower() {
+        const cpu = parseInt(document.getElementById('cpu-power').value);
+        const gpu = parseInt(document.getElementById('gpu-power').value);
+        const other = parseInt(document.getElementById('other-power').value);
+        
+        // 實際滿載功耗
+        const totalW = cpu + gpu + other;
+        // 建議購買瓦數 (抓 30% 安全餘裕)
+        let recommendW = Math.ceil((totalW * 1.3) / 50) * 50; 
+        
+        // 基礎防呆，現今電供至少建議 400W 起跳
+        if(recommendW < 400) recommendW = 400;
+
+        document.getElementById('total-watt').innerText = totalW;
+        document.getElementById('recommend-watt').innerText = recommendW;
+        document.getElementById('power-result').style.display = 'block';
+    }
+
+    // 驅動與說明書查詢邏輯 (透過 Google 加上 site 限定與關鍵字幫助精準搜尋)
+    function searchOfficial() {
+        const brand = document.getElementById('brand-select').value;
+        const model = document.getElementById('model-input').value.trim();
+        
+        if (!model) {
+            alert('請輸入產品型號！');
+            return;
+        }
+
+        // 組合搜尋關鍵字，例如: ASUS B650M 驅動程式 說明書 support
+        const query = `${brand} ${model} 驅動程式 說明書 support`;
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        
+        // 開啟新分頁
+        window.open(googleSearchUrl, '_blank');
+    }
+</script>
+
+</body>
+</html>

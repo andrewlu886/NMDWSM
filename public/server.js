@@ -972,7 +972,7 @@ const server = http.createServer(async(req, res) => {
                         : prices[mid];
                 }
                 // ==========================================================
-                // 計算完畢，現在可以安全地回傳給前端了！
+                // 計算完畢，回傳給前端
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({
                     suggestedPrice: Math.round(medianPrice),
@@ -1114,7 +1114,7 @@ const server = http.createServer(async(req, res) => {
     } else if (pathname.startsWith('/uploads/products/')) {
         sendJson(res, 404, { success: false, message: '檔案不存在' });
 
-    }// 1. 爬蟲 API 路由    }// 1. 爬蟲 API 路由
+    }// 爬蟲 API 路由
     else if (pathname === '/api/scrape' && req.method === 'GET') {
         setCorsHeaders(res);
         const getParam = (key) => parsedUrl.query ? parsedUrl.query[key] : parsedUrl.searchParams?.get(key);
@@ -1279,7 +1279,6 @@ const server = http.createServer(async(req, res) => {
     // --- 靜態檔案路由 (網頁前端路由) ---
     } else {
         let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
-        
         if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
         else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
         else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
@@ -1321,6 +1320,7 @@ const server = http.createServer(async(req, res) => {
 });
 
 // --- 啟動伺服器 ---
+//GitHub\NMDWSM\public> node server.js
 server.listen(PORT, () => {
     console.log(`
     ==========================================
