@@ -860,7 +860,6 @@ const server = http.createServer(async(req, res) => {
                     scrapeMomo(searchKeyword),
                     scrapeYahoo(searchKeyword),
                     scrapeRuten(searchKeyword)
-                    // scrapeAmazon(searchKeyword),
                     // scrapeNewegg(searchKeyword),
                     // scrapeEbay(searchKeyword),
                     // scrape1688(searchKeyword),
@@ -1048,7 +1047,7 @@ const server = http.createServer(async(req, res) => {
             } catch (error) {
                 sendJson(res, 500, { success: false, message: '回覆發生錯誤' });
             }
-
+        
         // --- 論壇文章修改/刪除 API ---
 } else if (pathname.startsWith('/api/posts/') && (req.method === 'PUT' || req.method === 'DELETE')) {
     setCorsHeaders(res);
@@ -1076,18 +1075,6 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 500, { success: false, message: '文章更新失敗' });
         }
     }
-/*
-    // --- 專題版商品/收藏/模擬交易 API ---
-    } else if (pathname === '/api/account/stats' && req.method === 'GET') {
-        setCorsHeaders(res);
-        try {
-            const user = await requireUserFromBodyOrQuery(parsedUrl);
-            if (!user) return sendJson(res, 400, { success: false, message: '缺少使用者' });
-            sendJson(res, 200, { success: true, data: await db.Stats.getByUser(user.id) });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '讀取統計失敗' });
-        }
-*/
     } else if (pathname === '/api/account/name' && req.method === 'PUT') {
         setCorsHeaders(res);
         try {

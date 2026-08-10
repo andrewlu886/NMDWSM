@@ -304,8 +304,9 @@
             <div id="excel-result" class="result-box excel-details">
                 <p>品牌： <span id="ex-brand">-</span></p>
                 <p>顯示卡型號： <span id="ex-model">-</span></p>
-                <p>架構 / 系列： <span id="ex-arch">-</span></p>
-                <p>最早年份： <span id="ex-year">-</span></p>
+                <!-- 用 display: none 隱藏，避免 JavaScript 報錯 -->
+                <p style="display: none;">架構 / 系列： <span id="ex-arch">-</span></p>
+                <p style="display: none;">最早年份： <span id="ex-year">-</span></p>
                 <p>官方功耗 TDP/TGP (W)： <span id="ex-tdp">-</span></p>
                 <p>官方建議 PSU 瓦數 (W)： <span id="ex-psu">-</span></p>
                 <p>電源介面 / 建議備註： <span id="ex-notes">-</span></p>
