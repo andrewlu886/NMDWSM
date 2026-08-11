@@ -2,121 +2,235 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>會員中心 - 一次買夠</title>
+    <!-- 引入與全站統一的 Google 字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入自定義 CSS -->
     <link rel="stylesheet" href="./style.css">
     <style>
-        /* 1. 修正 body 樣式，移除 flex 佈局 */
-        body {
-            margin: 0;
-            background-color: var(--bg-color, #121416); /* 加入預設深色背景 */
-            color: #e5e7eb;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* 定義全站統一變數 - 已改為淺色模式 (Light Mode) */
+        :root {
+            --primary-blue: #3498db;      /* 亮藍色 (用於聚焦、頁籤、按鈕) */
+            --nav-bg: #1a4b8c;           /* 導覽列深藍色 bar (保留branding) */
+            --nav-hover: #2980b9;        /* 導覽列 Hover 色 */
+            
+            /* ▼▼▼ 底色調整核心 ▼▼▼ */
+            --bg-main: #ffffff;          /* 【新】全站背景純白 */
+            --card-bg: #ffffff;          /* 【新】卡片背景純白 */
+            --text-main: #1a1a1a;        /* 【新】主要文字變深黑 */
+            --text-muted: #666666;       /* 【新】次要文字變中灰 */
+            --input-bg: #fdfdfd;         /* 【新】輸入框背景極淡灰或純白 */
+            --border-color: #e1e1e1;     /* 【新】邊框變淺灰 */
         }
 
-        /* 2. 新增一個外層容器來專門讓登入框置中 */
+        body {
+            margin: 0;
+            background-color: var(--bg-main); /* 使用白色背景 */
+            color: var(--text-main);          /* 使用深色文字 */
+            font-family: 'Noto Sans TC', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased; /* 讓字體更清晰 */
+        }
+
+        /* --- 導覽列樣式 (保留深藍色Bar風格) --- */
+        header {
+            width: 100%;
+            background-color: var(--nav-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); /* 淺色模式下陰影稍微明顯一點 */
+            position: relative;
+            z-index: 100;
+        }
+
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 0 20px;
+            height: 60px; /* 固定高度 */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-nav a {
+            color: white; /* 導覽列文字仍維持白色 */
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+            white-space: nowrap;
+        }
+
+        .main-nav a:hover {
+            background-color: var(--nav-hover);
+            color: #fff;
+        }
+
+        /* 針對瓦數計算工具連結的樣式 */
+        .main-nav a[href="/tools"] {
+            background-color: rgba(255,255,255,0.1);
+        }
+        .main-nav a[href="/tools"]:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        /* --- 登入區塊外層容器 --- */
         .login-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: calc(100vh - 60px); /* 扣除 header 大約的高度 */
-            padding: 20px;
+            /* 扣除 header 高度，讓內容垂直置中 */
+            min-height: calc(100vh - 60px); 
+            padding: 40px 20px;
+            box-sizing: border-box;
+            background-color: var(--bg-main); /* 確保外部也是純白 */
         }
 
-        /* 3. 根據截圖，將登入框改為深色樣式 */
+        /* --- 登入/註冊卡片主體 (Light Card) --- */
         .login-container {
-            background: #181a1f; 
-            width: 400px;
+            background: var(--card-bg); /* 白色卡片 */
+            width: 100%;
+            max-width: 420px;
             padding: 2.5rem;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            /* 淺色模式下更柔和、層次感更好的陰影 */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
             text-align: center;
+            border: 1px solid var(--border-color); /* 淺灰邊框增加質感 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); /* 懸停時陰影更深 */
         }
 
-        .logo {
-            font-size: 20px;
+        .card-header-logo {
+            font-size: 22px;
             font-weight: bold;
-            color: #fff;
-            margin-bottom: 1.5rem;
+            color: var(--text-main); /* 【新】文字改為深色 */
+            margin-bottom: 2rem;
             display: block;
             text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .card-header-logo span {
+            color: var(--primary-blue);
+            font-weight: normal;
+            font-size: 16px;
+            margin-left: 5px;
         }
 
+        /* --- 頁籤樣式 --- */
         .tabs {
             display: flex;
             margin-bottom: 2rem;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .tab {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
             font-weight: bold;
-            color: #888;
-            transition: 0.3s;
+            color: #999; /* 未激活時淡灰 */
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+            font-size: 15px;
+        }
+
+        .tab:hover {
+            color: var(--text-main); /* 滑鼠懸停時變深色 */
         }
 
         .tab.active {
-            color: #3498db;
-            border-bottom: 2px solid #3498db;
+            color: var(--primary-blue); /* 激活時亮藍 */
+            border-bottom: 2px solid var(--primary-blue);
         }
 
+        /* --- 表單樣式 --- */
         .form-group {
             text-align: left;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.25rem;
         }
 
         .form-group label {
             display: block;
             font-size: 14px;
             margin-bottom: 8px;
-            color: #aaa;
+            color: var(--text-muted); /* 深灰標籤 */
+            font-weight: 500;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px;
-            background-color: #121416;
-            color: #fff;
-            border: 1px solid #333;
+            padding: 13px;
+            background-color: var(--input-bg); /* 極淡灰或純白輸入框 */
+            color: var(--text-main);       /* 【新】輸入文字變深黑 */
+            border: 1px solid var(--border-color); /* 淺灰邊框 */
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+        }
+
+        .form-group input::placeholder {
+            color: #ccc; /* 淺灰預設文字 */
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: var(--primary-blue);
+            background-color: #ffffff; /* 聚焦時改為純白 */
+            /* 聚焦時的藍色發光效果 */
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3); 
         }
 
+        /* --- 按鈕樣式 --- */
         .btn {
             width: 100%;
-            padding: 12px;
-            background-color: #1f6b9c;
+            padding: 13px;
+            background-color: #1f6b9c; /* 保留鮮明藍色按鈕 */
             color: white;
             border: none;
             border-radius: 6px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.3s;
+            margin-top: 15px;
+            transition: background 0.3s, transform 0.1s;
+            letter-spacing: 1px;
         }
 
         .btn:hover {
-            background-color: #16527a;
+            background-color: var(--primary-blue); /* Hover 時變更鮮明藍 */
+        }
+        
+        .btn:active {
+            transform: scale(0.98); /* 按下時的縮小反饋 */
         }
 
+        /* --- 底部連結 --- */
         .footer-links {
-            margin-top: 1.5rem;
+            margin-top: 1.8rem;
             font-size: 13px;
             text-align: center;
+            color: #888; /* 深灰色 */
         }
 
         .footer-links a {
-            color: #3498db;
+            color: var(--primary-blue);
             text-decoration: none;
+            margin: 0 5px;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #5dade2;
+            text-decoration: underline;
         }
 
         /* 初始隱藏註冊表單 */
@@ -124,25 +238,34 @@
             display: none;
         }
 
-        /* 若你的 style.css 沒寫到導覽列，可以參考加上這段 (類似第二張圖的藍色 bar) */
-        /*
-        .main-nav {
-            background-color: #1a4b8c;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 15px 0;
+        /* RWD 響應式微調 */
+        @media (max-width: 480px) {
+            .login-wrapper {
+                padding: 20px 10px;
+            }
+            .login-container {
+                padding: 1.5rem;
+            }
+            .main-nav {
+                gap: 5px;
+                padding: 0 10px;
+                justify-content: flex-start; /* 手機上靠左排列並允許捲動 */
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .main-nav a {
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+            .card-header-logo {
+                font-size: 18px;
+            }
         }
-        .main-nav a {
-            color: white;
-            text-decoration: none;
-            font-size: 15px;
-        }
-        */
     </style>
 </head>
 <body>
     <header>
+        <!-- 統一的全站導覽列 (保留深藍色 bar 風格) -->
         <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/#recommend">智慧推薦</a>
@@ -153,24 +276,27 @@
         </nav>
     </header>
 
-    <!-- 用新增的 login-wrapper 包住登入區塊，這樣置中才不會影響到 header -->
+    <!-- 白色底色的垂直置中容器 -->
     <div class="login-wrapper">
         <div class="login-container">
-            <a href="/" class="logo">一次買夠 | 會員中心</a>
+            <!-- 卡片內 Logo 改為深色 -->
+            <a href="/" class="card-header-logo">一次買夠 <span>| 會員中心</span></a>
             
+            <!-- 淺色頁籤切換 -->
             <div class="tabs">
                 <div class="tab active" id="tab-login" onclick="switchTab('login')">登入</div>
                 <div class="tab" id="tab-register" onclick="switchTab('register')">註冊</div>
             </div>
 
+            <!-- 登入表單 (深色文字) -->
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>電子郵件 / 帳號</label>
-                    <input type="text" id="login-email" placeholder="請輸入您的帳號" required>
+                    <input type="text" id="login-email" placeholder="請輸入您的帳號" required autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label>密碼</label>
-                    <input type="password" id="login-password" placeholder="請輸入密碼" required>
+                    <input type="password" id="login-password" placeholder="請輸入密碼" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn">立即登入</button>
                 <div class="footer-links">
@@ -178,6 +304,7 @@
                 </div>
             </form>
 
+            <!-- 註冊表單 (深色文字) -->
             <form id="register-form" onsubmit="handleRegister(event)">
                 <div class="form-group">
                     <label>全名</label>
@@ -185,15 +312,15 @@
                 </div>
                 <div class="form-group">
                     <label>電子郵件</label>
-                    <input type="email" id="reg-email" placeholder="您的@email.com" required>
+                    <input type="email" id="reg-email" placeholder="您的@email.com" required autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label>密碼</label>
-                    <input type="password" id="reg-password" placeholder="至少 8 位字元" required>
+                    <input type="password" id="reg-password" placeholder="至少 8 位字元" required autocomplete="new-password">
                 </div>
                 <div class="form-group">
                     <label>確認密碼</label>
-                    <input type="password" id="reg-confirm" placeholder="再次輸入密碼" required>
+                    <input type="password" id="reg-confirm" placeholder="再次輸入密碼" required autocomplete="new-password">
                 </div>
                 <button type="submit" class="btn">建立帳號</button>
             </form>
@@ -201,11 +328,14 @@
     </div>
 
     <script>
+        // 設定 API 基礎路徑 (保持不變)
         const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
 
         function getApiUrl(path) {
             return `${API_BASE}${path}`;
         }
+
+        // --- 介面交互邏輯 ---
 
         // 切換登入與註冊頁籤
         function switchTab(type) {
@@ -227,6 +357,7 @@
             }
         }
 
+        // --- 後端介接邏輯 (保持不變) ---
 
         // 處理註冊邏輯
         async function handleRegister(event) {
@@ -236,10 +367,14 @@
             const password = document.getElementById('reg-password').value;
             const confirmPassword = document.getElementById('reg-confirm').value;
 
+            if (password !== confirmPassword) {
+                alert('❌ 密碼與確認密碼不一致');
+                return;
+            }
+
             try {
                 console.log('📝 正在註冊帳號：', email);
                 
-                // 發送資料到後端
                 const response = await fetch(getApiUrl('/api/register'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -251,16 +386,14 @@
                 
                 if (result.success) {
                     alert('✅ ' + result.message);
-                    console.log('✅ 註冊成功，帳號已保存到資料庫');
                     // 註冊成功後切換到登入頁籤
                     setTimeout(() => switchTab('login'), 500);
                 } else {
                     alert('❌ 註冊失敗：' + result.message);
-                    console.log('❌ 註冊失敗詳情：', result);
                 }
             } catch (error) {
                 console.error('❌ 註冊請求出錯：', error);
-                alert('無法連接到服務器，請確保伺服器正在運行。');
+                alert('無法連接到服務器，請確保後端伺服器正在運行。');
             }
         }
 
@@ -271,7 +404,6 @@
             const password = document.getElementById('login-password').value;
 
             try {
-                // 發送資料到後端
                 const response = await fetch(getApiUrl('/api/login'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -280,25 +412,26 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    alert(result.message);
+                    alert('✅ ' + result.message);
                     
-                    // 把帳號記在瀏覽器裡，這樣回首頁才不會失憶
+                    // 儲存登入狀態到 localStorage
                     localStorage.setItem('userEmail', email); 
                     if (result.user && result.user.username) {
                         localStorage.setItem('userName', result.user.username);
                     }
                     
-                    // 跳轉回根目錄首頁
+                    // 跳轉回首頁
                     window.location.href = '/'; 
                 } else {
-                    alert('登入失敗：' + result.message);
+                    alert('❌ 登入失敗：' + result.message);
                 }
             } catch (error) {
                 console.error('登入請求錯誤：', error);
-                alert('無法連接到服務器，請確保伺服器正在運行。\n\n試試看用預設帳號登入：\n帳號：test@example.com\n密碼：12345678');
+                alert('無法連接到服務器，請確保後端伺服器正在運行。');
             }
         }
     </script>
+    <!-- 引入聊天小工具 (如果有) -->
     <script src="./chat-widget.js"></script>
 </body>
 </html>
