@@ -70,7 +70,7 @@ test.after(async () => {
 });
 
 test('保留的網站頁面可以開啟', async () => {
-  for (const pathname of ['/', '/login', '/account.html', '/forum', '/scrape', '/benchmark-instructions.html']) {
+  for (const pathname of ['/', '/login', '/account.html', '/forum', '/scrape', '/recommend.html', '/benchmark-instructions.html']) {
     const response = await request(pathname);
     assert.equal(response.status, 200, pathname);
   }
