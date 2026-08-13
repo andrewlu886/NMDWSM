@@ -465,8 +465,8 @@ if (result.recommendations && result.recommendations.length > 0) {
                                     </div>
                                     
                                     <!-- ⚡ 將瓦數計算連結放在這裡，並加上按鈕樣式 -->
-                                    <a href="/tools.html?model=${item.gpu}" target="_blank" style="text-decoration: none; background: #e8f4f8; color: #2980b9; padding: 4px 10px; border-radius: 4px; font-weight: bold; border: 1px solid #bce8f1; transition: 0.3s;">
-                                        ⚡ 計算 ${item.gpu} 瓦數
+                                    <a href="/tools.html?gpu=${encodeURIComponent(item.gpu)}&cpu=${encodeURIComponent(item.cpu)}" target="_blank" style="text-decoration: none; background: #e8f4f8; color: #2980b9; padding: 4px 10px; border-radius: 4px; font-weight: bold; border: 1px solid #bce8f1; transition: 0.3s; white-space: nowrap;">
+                                        ⚡ 計算整機建議瓦數
                                     </a>
                                 </div>
                             </div>

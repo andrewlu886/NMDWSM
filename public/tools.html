@@ -148,12 +148,13 @@
             font-weight: bold;
             color: #555;
         }
-        .card select, .card input[type="text"], .card input[type="number"] {
+        .card select, .card input {
             width: 100%;
-            padding: 10px;
+            padding: 12px 10px; /* 增加一點上下空間 */
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 1rem;
+            font-size: 1.15rem; /* 放大字體 */
+            font-family: inherit; /* 統一字型 */
             box-sizing: border-box;
         }
         /* 限制按鈕樣式只在工具卡片內生效，避免干擾 Header */
@@ -280,26 +281,24 @@
         <!-- 區塊 1：瓦數計算機 -->
         <div class="card">
             <h2>⚡ 電源瓦數計算機</h2>
-            
             <div class="form-group">
-                <label>處理器 (CPU) 型號</label>
-                <select id="cpu-power" onchange="autoCalculate()">
-                    <!-- 預留給 Excel 動態載入，目前提供預設選項 -->
-                    <option value="65">入門級 (約 65W)</option>
-                    <option value="125">中高階 (約 125W)</option>
-                    <option value="250">旗艦級 (約 250W+)</option>
-                </select>
-                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇估算值。</p>
-            </div>
+            <label>處理器 (CPU) 型號</label>
+            <!-- 改用 input + datalist 實現可搜尋與篩選功能 -->
+            <input list="cpu-list" id="cpu-power" placeholder="點擊選擇或輸入尋找 CPU 等級..." onchange="autoCalculate()">
+            <datalist id="cpu-list">
+                <option value="65W - 入門級 (如 Intel Core i3, i5 非K版 / AMD Ryzen 3, 5)"></option>
+                <option value="125W - 中高階 (如 Intel Core i5-K版, i7 / AMD Ryzen 7)"></option>
+                <option value="250W - 旗艦級 (如 Intel Core i9 / AMD Ryzen 9)"></option>
+            </datalist>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 程式碼已預留 Excel 讀取接口，可直接輸入關鍵字篩選估算值。</p>
+        </div>
 
-            <div class="form-group">
-                <label>顯示卡 (GPU) 型號</label>
-                <select id="gpu-power" disabled>
-                    <option value="">讀取資料庫中...</option>
-                </select>
-                <div id="loading-msg">正在自動載入 CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx...</div>
-            </div>
-
+        <div class="form-group">
+            <label>顯示卡 (GPU) 型號</label>
+            <input list="gpu-list" id="gpu-power" placeholder="讀取資料庫中..." disabled>
+            <datalist id="gpu-list"></datalist>
+            <div id="loading-msg">正在自動載入 CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx...</div>
+        </div>
             <!-- 顯示卡詳細規格區塊 -->
             <div id="excel-result" class="result-box excel-details">
                 <p>品牌： <span id="ex-brand">-</span></p>
@@ -469,25 +468,34 @@
     // ==========================================
     // 將資料寫入下拉選單並綁定事件 (GPU)
     // ==========================================
+    // ==========================================
+    // 將資料寫入下拉選單並綁定事件 (GPU)
+    // ==========================================
     function populateExcelSelect() {
-        const select = document.getElementById('gpu-power');
-        select.innerHTML = '<option value="-1">無獨立顯卡 (內顯) - 0W</option>';
-        select.disabled = false;
+        const input = document.getElementById('gpu-power');
+        const datalist = document.getElementById('gpu-list');
+        
+        datalist.innerHTML = '<option value="無獨立顯卡 (內顯) - 0W"></option>';
+        input.disabled = false;
+        input.placeholder = "點擊選擇或輸入尋找顯示卡型號...";
 
+        // 將 Excel 資料載入 datalist 供搜尋
         gpuExcelData.forEach((row, index) => {
-            const modelName = getCleanVal(row, ['顯示卡型號']) || `(無型號名稱 - Row ${index})`;
+            const modelName = getCleanVal(row, ['顯示卡型號']);
             
             if(modelName && modelName.includes('Row') === false && modelName.trim() !== '') {
                 const option = document.createElement('option');
-                option.value = index;
-                option.textContent = modelName;
-                select.appendChild(option);
+                option.value = modelName; // 使用者選中後 input 內顯示的值
+                datalist.appendChild(option);
             }
         });
 
-        select.addEventListener('change', function() {
-            const idx = this.value;
-            if (idx === "-1" || idx === "") {
+        // 監聽 input 內容改變 (包含點擊選項或輸入文字)
+        input.addEventListener('change', function() {
+            const val = this.value;
+            
+            // 處理無顯卡或清空輸入框的狀況
+            if (val === "無獨立顯卡 (內顯) - 0W" || val === "") {
                 document.getElementById('excel-result').style.display = 'none';
                 currentGpuTdp = 0;
                 currentGpuPsu = 0;
@@ -495,7 +503,11 @@
                 return;
             }
             
-            const row = gpuExcelData[idx];
+            // 從陣列中找出「顯示卡型號」完全符合使用者輸入的那一筆資料
+            const row = gpuExcelData.find(r => getCleanVal(r, ['顯示卡型號']) === val);
+            
+            // 若使用者只輸入一半還沒完整選擇，則先不執行畫面更新
+            if (!row) return;
             
             const brand = getCleanVal(row, ['品牌']);
             const model = getCleanVal(row, ['顯示卡型號']);
@@ -535,34 +547,51 @@
     }
 
     // ==========================================
-    // 🟢 新增：從網址參數抓取型號並自動觸發選擇與計算
+    // 從網址參數抓取 GPU 與 CPU 型號並自動觸發
     // ==========================================
     function autoSelectModelFromURL() {
-        // 抓取網址參數 (例如：tool.html?model=RTX 4060 或 ?gpu=4070)
         const urlParams = new URLSearchParams(window.location.search);
-        const queryModel = urlParams.get('model') || urlParams.get('gpu'); 
         
-        if (queryModel) {
-            // 1. 同時順便幫用戶填寫下方的「官網查詢」欄位
-            document.getElementById('model-input').value = queryModel;
+        // 1. 處理 GPU 自動配對
+        const queryGpu = urlParams.get('gpu') || urlParams.get('model'); 
+        if (queryGpu) {
+            // 順便幫用戶填寫下方的「官網查詢」欄位
+            document.getElementById('model-input').value = queryGpu;
 
-            const select = document.getElementById('gpu-power');
-            const options = select.options;
-            
-            // 轉小寫並去除所有空白，讓比對更聰明 (例如 rtx4060 能對應 RTX 4060)
-            const searchStr = queryModel.toLowerCase().replace(/\s+/g, ''); 
+            const selectGpu = document.getElementById('gpu-power');
+            const options = selectGpu.options;
+            const searchStr = queryGpu.toLowerCase().replace(/\s+/g, ''); 
 
             for (let i = 0; i < options.length; i++) {
                 const optText = options[i].textContent.toLowerCase().replace(/\s+/g, '');
-                
-                // 如果目標字串包含網址參數，或是網址參數包含目標字串，就視為匹配
                 if (optText.includes(searchStr) || (searchStr.length > 3 && searchStr.includes(optText))) {
-                    select.value = options[i].value;
-                    // 使用 JS 主動觸發 change 事件，連動顯示規格與瓦數計算
-                    select.dispatchEvent(new Event('change'));
-                    break; // 找到就停止迴圈
+                    selectGpu.value = options[i].value;
+                    selectGpu.dispatchEvent(new Event('change'));
+                    break; 
                 }
             }
+        }
+
+        // 2. 處理 CPU 自動分級
+        const queryCpu = urlParams.get('cpu');
+        if (queryCpu) {
+            const cpuStr = queryCpu.toLowerCase();
+            const selectCpu = document.getElementById('cpu-power');
+            
+            // 簡易的 CPU 功耗分級邏輯 (透過關鍵字判斷)
+            if (cpuStr.includes('i9') || cpuStr.includes('r9') || cpuStr.includes('threadripper') || cpuStr.includes('extreme')) {
+                // 旗艦級
+                selectCpu.value = "250"; 
+            } else if (cpuStr.includes('i7') || cpuStr.includes('r7') || cpuStr.includes('k')) {
+                // 中高階 (有 K 結尾的處理器通常功耗也較高，如 i5-13600K)
+                selectCpu.value = "125"; 
+            } else {
+                // 入門與主流級 (i3, i5, r3, r5 等)
+                selectCpu.value = "65";  
+            }
+            
+            // 觸發重新計算
+            selectCpu.dispatchEvent(new Event('change'));
         }
     }
 
