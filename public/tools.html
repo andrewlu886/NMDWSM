@@ -371,7 +371,6 @@
             <button onclick="searchOfficial()">前往搜尋原廠資源</button>
         </div>
     </div>
-
 <script>
     // ==========================================
     // 頂部導覽列搜尋框的空函數 (避免錯誤)
@@ -451,7 +450,12 @@
                 });
                 
                 document.getElementById('loading-msg').style.display = 'none';
+                
+                // 1. 建立下拉選單
                 populateExcelSelect();
+                
+                // 2. 🟢 嘗試從網址參數自動帶入型號
+                autoSelectModelFromURL();
             })
             .catch(error => {
                 console.error("載入 Excel 失敗:", error);
@@ -531,6 +535,38 @@
     }
 
     // ==========================================
+    // 🟢 新增：從網址參數抓取型號並自動觸發選擇與計算
+    // ==========================================
+    function autoSelectModelFromURL() {
+        // 抓取網址參數 (例如：tool.html?model=RTX 4060 或 ?gpu=4070)
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryModel = urlParams.get('model') || urlParams.get('gpu'); 
+        
+        if (queryModel) {
+            // 1. 同時順便幫用戶填寫下方的「官網查詢」欄位
+            document.getElementById('model-input').value = queryModel;
+
+            const select = document.getElementById('gpu-power');
+            const options = select.options;
+            
+            // 轉小寫並去除所有空白，讓比對更聰明 (例如 rtx4060 能對應 RTX 4060)
+            const searchStr = queryModel.toLowerCase().replace(/\s+/g, ''); 
+
+            for (let i = 0; i < options.length; i++) {
+                const optText = options[i].textContent.toLowerCase().replace(/\s+/g, '');
+                
+                // 如果目標字串包含網址參數，或是網址參數包含目標字串，就視為匹配
+                if (optText.includes(searchStr) || (searchStr.length > 3 && searchStr.includes(optText))) {
+                    select.value = options[i].value;
+                    // 使用 JS 主動觸發 change 事件，連動顯示規格與瓦數計算
+                    select.dispatchEvent(new Event('change'));
+                    break; // 找到就停止迴圈
+                }
+            }
+        }
+    }
+
+    // ==========================================
     // 瓦數計算邏輯
     // ==========================================
     function calculatePower() {
@@ -600,6 +636,5 @@
         }
     }
 </script>
-
 </body>
 </html>
