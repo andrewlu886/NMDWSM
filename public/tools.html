@@ -572,6 +572,12 @@
             
             // 若使用者只輸入一半還沒完整選擇，則先不執行畫面更新
             if (!row) return;
+
+            const loadingMessage = document.getElementById('loading-msg');
+            if (loadingMessage.dataset.matchWarning === 'true') {
+                loadingMessage.style.display = 'none';
+                delete loadingMessage.dataset.matchWarning;
+            }
             
             const brand = getCleanVal(row, ['品牌']);
             const model = getCleanVal(row, ['顯示卡型號']);
@@ -613,49 +619,83 @@
     // ==========================================
     // 從網址參數抓取 GPU 與 CPU 型號並自動觸發
     // ==========================================
+    function normalizeHardwareName(value) {
+        return String(value || '')
+            .toLowerCase()
+            .replace(/\b(nvidia|geforce|amd|radeon|graphics|gpu)\b/g, '')
+            .replace(/[^a-z0-9]+/g, '');
+    }
+
+    function findGpuRow(queryGpu) {
+        const query = normalizeHardwareName(queryGpu);
+        if (!query) return null;
+
+        const candidates = gpuExcelData
+            .map(row => ({ row, model: String(getCleanVal(row, ['顯示卡型號']) || '') }))
+            .filter(item => item.model.trim())
+            .map(item => ({ ...item, normalized: normalizeHardwareName(item.model) }))
+            .filter(item => item.normalized);
+
+        const exact = candidates.find(item => item.normalized === query);
+        if (exact) return exact.row;
+
+        const partialMatches = candidates
+            .filter(item => item.normalized.includes(query) || query.includes(item.normalized))
+            .sort((a, b) => Math.abs(a.normalized.length - query.length) - Math.abs(b.normalized.length - query.length));
+
+        return partialMatches.length ? partialMatches[0].row : null;
+    }
+
+    function getCpuTierValue(queryCpu) {
+        const cpu = String(queryCpu || '').toLowerCase();
+
+        if (/\b(i9|r9)\b/.test(cpu) || cpu.includes('ryzen 9') || cpu.includes('threadripper') || cpu.includes('extreme')) {
+            return '250W - 旗艦級 (如 Intel Core i9 / AMD Ryzen 9)';
+        }
+
+        if (/\b(i7|r7)\b/.test(cpu) || cpu.includes('ryzen 7') || /\d+k\b/.test(cpu)) {
+            return '125W - 中高階 (如 Intel Core i5-K版, i7 / AMD Ryzen 7)';
+        }
+
+        return '65W - 入門級 (如 Intel Core i3, i5 非K版 / AMD Ryzen 3, 5)';
+    }
+
     function autoSelectModelFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
+        const queryGpu = urlParams.get('gpu') || urlParams.get('model');
+        const queryCpu = urlParams.get('cpu');
+        let gpuMatched = !queryGpu;
         
         // 1. 處理 GPU 自動配對
-        const queryGpu = urlParams.get('gpu') || urlParams.get('model'); 
         if (queryGpu) {
-            // 順便幫用戶填寫下方的「官網查詢」欄位
             document.getElementById('model-input').value = queryGpu;
 
-            const selectGpu = document.getElementById('gpu-power');
-            const options = selectGpu.options;
-            const searchStr = queryGpu.toLowerCase().replace(/\s+/g, ''); 
-
-            for (let i = 0; i < options.length; i++) {
-                const optText = options[i].textContent.toLowerCase().replace(/\s+/g, '');
-                if (optText.includes(searchStr) || (searchStr.length > 3 && searchStr.includes(optText))) {
-                    selectGpu.value = options[i].value;
-                    selectGpu.dispatchEvent(new Event('change'));
-                    break; 
-                }
+            const matchedRow = findGpuRow(queryGpu);
+            if (matchedRow) {
+                const matchedModel = getCleanVal(matchedRow, ['顯示卡型號']);
+                const gpuInput = document.getElementById('gpu-power');
+                gpuInput.value = matchedModel;
+                gpuInput.dispatchEvent(new Event('change', { bubbles: true }));
+                gpuMatched = true;
+            } else {
+                const loadingMessage = document.getElementById('loading-msg');
+                loadingMessage.textContent = `找不到「${queryGpu}」的精確功耗資料，請手動選擇顯示卡後再計算。`;
+                loadingMessage.style.display = 'block';
+                loadingMessage.style.color = '#b45309';
+                loadingMessage.dataset.matchWarning = 'true';
             }
         }
 
         // 2. 處理 CPU 自動分級
-        const queryCpu = urlParams.get('cpu');
         if (queryCpu) {
-            const cpuStr = queryCpu.toLowerCase();
-            const selectCpu = document.getElementById('cpu-power');
-            
-            // 簡易的 CPU 功耗分級邏輯 (透過關鍵字判斷)
-            if (cpuStr.includes('i9') || cpuStr.includes('r9') || cpuStr.includes('threadripper') || cpuStr.includes('extreme')) {
-                // 旗艦級
-                selectCpu.value = "250"; 
-            } else if (cpuStr.includes('i7') || cpuStr.includes('r7') || cpuStr.includes('k')) {
-                // 中高階 (有 K 結尾的處理器通常功耗也較高，如 i5-13600K)
-                selectCpu.value = "125"; 
-            } else {
-                // 入門與主流級 (i3, i5, r3, r5 等)
-                selectCpu.value = "65";  
-            }
-            
-            // 觸發重新計算
-            selectCpu.dispatchEvent(new Event('change'));
+            const cpuInput = document.getElementById('cpu-power');
+            cpuInput.value = getCpuTierValue(queryCpu);
+            cpuInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // 有可用的 GPU 資料時，頁面開啟後直接顯示計算結果。
+        if ((queryGpu || queryCpu) && gpuMatched) {
+            calculatePower();
         }
     }
 

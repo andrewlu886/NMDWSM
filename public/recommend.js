@@ -73,6 +73,19 @@
             ];
             specs.forEach((spec) => addTextElement(tags, 'span', 'recommend-tag', spec));
             card.appendChild(tags);
+
+            const actions = document.createElement('div');
+            actions.className = 'recommend-result-actions';
+
+            const toolsLink = document.createElement('a');
+            toolsLink.className = 'recommend-tools-link';
+            toolsLink.href = `/tools.html?gpu=${encodeURIComponent(item.gpu || '')}&cpu=${encodeURIComponent(item.cpu || '')}`;
+            toolsLink.target = '_blank';
+            toolsLink.rel = 'noopener noreferrer';
+            toolsLink.textContent = '⚡ 計算整機建議瓦數';
+            actions.appendChild(toolsLink);
+            card.appendChild(actions);
+
             list.appendChild(card);
         });
 
