@@ -2,79 +2,97 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>實用工具：瓦數計算 & 官網查詢</title>
+    <!-- 引入與全站統一的 Google 字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- 引入 SheetJS 用於讀取 Excel 檔案 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* ==========================================
+           全站統一變數 (淺色模式 Light Mode)
+           ========================================== */
+        :root {
+            --primary-blue: #3498db;      /* 亮藍色 */
+            --nav-bg: #1a4b8c;           /* 導覽列深藍色 */
+            --nav-hover: #2980b9;        /* 導覽列 Hover 色 */
+            
+            --bg-main: #ffffff;          /* 全站背景純白 */
+            --card-bg: #ffffff;          /* 卡片背景純白 */
+            --text-main: #1a1a1a;        /* 主要文字變深黑 */
+            --text-muted: #666666;       /* 次要文字變中灰 */
+            --border-color: #e1e1e1;     /* 邊框淺灰 */
+            --accent-color: #e74c3c;     /* 強調色 (警告或重點) */
+        }
+
+        /* ==========================================
            全域與排版設定
            ========================================== */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            font-family: 'Noto Sans TC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 40px auto;
             padding: 0 20px;
         }
 
         /* ==========================================
-           網站導覽列 (Header & Nav) 樣式
+           網站導覽列 (Header & Nav) 樣式 - 深藍色風格
            ========================================== */
         header {
-            width: 100%;
+            background-color: var(--nav-bg);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         .header-main {
-            background-color: #121212; /* 深色頂部背景 */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
         }
         .logo {
-            color: #3498db;
-            font-size: 1.4rem;
+            color: white;
+            font-size: 1.5rem;
             font-weight: bold;
             text-decoration: none;
             display: flex;
             align-items: center;
+            letter-spacing: 1px;
         }
         .search-wrapper {
             display: flex;
-            align-items: center;
-            background-color: #242424;
-            border-radius: 30px;
-            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
             width: 45%;
-            max-width: 500px;
-            border: 1px solid #333;
+            max-width: 400px;
         }
         .nav-search {
-            background: transparent;
             border: none;
-            color: #fff;
-            width: 100%;
-            padding: 5px;
+            padding: 8px 12px;
             outline: none;
-            font-size: 0.95rem;
+            background: transparent;
+            color: white;
+            width: 100%;
         }
         .nav-search::placeholder {
-            color: #777;
+            color: rgba(255, 255, 255, 0.6);
         }
         .search-btn {
             background: transparent;
             border: none;
-            color: #999;
+            color: white;
+            padding: 0 10px;
             cursor: pointer;
-            padding: 5px;
-            font-size: 1.1rem;
-            margin: 0;
-            width: auto;
         }
         .header-actions {
             display: flex;
@@ -82,16 +100,9 @@
             position: relative;
         }
         .auth-btn {
-            background-color: #174291; /* 藍色按鈕背景 */
-            color: #fff;
+            color: white;
             text-decoration: none;
-            padding: 8px 25px;
-            border-radius: 30px;
-            font-size: 0.95rem;
-            transition: background 0.3s;
-        }
-        .auth-btn:hover {
-            background-color: #11316b;
+            font-weight: 500;
         }
         #user-profile {
             display: none; /* 未登入預設隱藏 */
@@ -99,23 +110,28 @@
             color: #fff;
             cursor: pointer;
             position: relative;
+            gap: 10px;
         }
         .main-nav {
-            background-color: #174291; /* 深藍色導覽列 */
             display: flex;
             justify-content: center;
-            padding: 12px 0;
+            gap: 15px;
+            padding: 0 20px;
+            background-color: rgba(0, 0, 0, 0.1); /* 區隔次要導覽列 */
+            height: 45px;
+            align-items: center;
         }
         .main-nav a {
-            color: #fff;
+            color: white;
             text-decoration: none;
-            margin: 0 20px;
-            font-weight: 400;
-            font-size: 0.95rem;
-            transition: opacity 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: 0.3s;
         }
-        .main-nav a:hover {
-            opacity: 0.8;
+        .main-nav a:hover, .main-nav a.active {
+            background-color: var(--nav-hover);
         }
 
         /* ==========================================
@@ -125,95 +141,136 @@
             text-align: center;
             margin-bottom: 30px;
         }
+        .header-title h1 {
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+        .header-title p {
+            color: var(--text-muted);
+            margin-top: 0;
+        }
+        
         .card {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* 加深陰影以利在白底中突顯 */
+            border: 1px solid var(--border-color); /* 淺灰邊框 */
+            padding: 30px;
             margin-bottom: 30px;
         }
         .card h2 {
             margin-top: 0;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--primary-blue);
             padding-bottom: 10px;
             display: inline-block;
+            font-size: 1.5rem;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
         }
         .card select, .card input[type="text"], .card input[type="number"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background-color: #fdfdfd;
+            border-radius: 6px;
             font-size: 1rem;
+            color: var(--text-main);
             box-sizing: border-box;
+            transition: 0.3s;
         }
-        /* 限制按鈕樣式只在工具卡片內生效，避免干擾 Header */
+        .card select:focus, .card input[type="text"]:focus, .card input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+            background-color: #fff;
+        }
+        
         .card button {
-            background-color: #3498db;
+            background-color: var(--primary-blue);
             color: #fff;
             border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
+            padding: 14px 20px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 1rem;
+            font-weight: bold;
             width: 100%;
-            transition: background 0.3s;
+            transition: 0.3s;
             margin-top: 10px;
         }
         .card button:hover {
-            background-color: #2980b9;
+            background-color: var(--nav-hover);
         }
+        
+        /* 結果顯示區塊 */
         .result-box {
             margin-top: 20px;
-            padding: 15px;
-            background: #e8f4f8;
-            border-left: 5px solid #3498db;
-            border-radius: 4px;
+            padding: 18px;
+            background: #f4f9fc;
+            border-left: 5px solid var(--primary-blue);
+            border-radius: 6px;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
             display: none;
+            color: var(--text-main);
         }
         .result-box strong {
-            font-size: 1.2rem;
-            color: #e74c3c;
+            font-size: 1.3rem;
+            color: var(--accent-color);
         }
+        
+        /* Excel 讀取詳細規格區塊 */
         .excel-details {
-            background: #fdfbf7; 
+            background: #fcfcfc; 
             border-left: 5px solid #f39c12;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .excel-details p {
-            margin: 8px 0;
-            border-bottom: 1px dashed #ccc;
-            padding-bottom: 5px;
+            margin: 10px 0;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 8px;
+            font-size: 0.95rem;
         }
         .excel-details p:last-child {
             border-bottom: none;
         }
         .excel-details span {
-            color: #2c3e50;
+            color: var(--primary-blue);
             font-weight: bold;
         }
+        
         #loading-msg {
             color: #e67e22;
             font-size: 0.9rem;
-            margin-top: 5px;
+            margin-top: 8px;
+            font-weight: 500;
         }
         .component-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
         }
-        @media (max-width: 600px) {
+        
+        /* ==========================================
+           RWD 適應手機版
+           ========================================== */
+        @media (max-width: 768px) {
             .component-grid {
                 grid-template-columns: 1fr;
+                gap: 10px;
             }
             .header-main {
                 flex-direction: column;
@@ -221,6 +278,12 @@
             }
             .search-wrapper {
                 width: 100%;
+                max-width: none;
+            }
+            .main-nav {
+                justify-content: flex-start;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
         }
     </style>
@@ -247,7 +310,7 @@
                 <!-- 登入後顯示的會員頭像與下拉選單區塊 -->
                 <div id="user-profile">
                     <div class="avatar">👤</div>
-                    <span id="user-display-name">載入中...</span>
+                    <span id="user-display-name" style="font-size: 0.95rem;">載入中...</span>
                     <!-- 隱藏的下拉選單可透過 JS 展開 -->
                     <div class="dropdown-menu" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1); z-index: 1000;">
                         <a href="/account.html" style="display:block; padding:5px 0; color:#333; text-decoration:none;">我的帳戶</a>
@@ -263,7 +326,7 @@
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/benchmark-instructions.html">跑分教學</a>
-            <a href="/tools">零件查詢與瓦數計算工具</a>
+            <a href="/tools" class="active">零件查詢與瓦數計算工具</a>
         </nav>
     </header>
 
@@ -289,7 +352,7 @@
                     <option value="125">中高階 (約 125W)</option>
                     <option value="250">旗艦級 (約 250W+)</option>
                 </select>
-                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇估算值。</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇估算值。</p>
             </div>
 
             <div class="form-group">
@@ -332,26 +395,27 @@
                     </select>
                 </div>
                 
-                <div class="form-group" style="grid-column: 1 / -1;">
+                <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
                     <label>儲存硬碟數量 (HDD / SSD 總數)</label>
                     <input type="number" id="hdd-count" min="0" max="20" value="1" onchange="autoCalculate()" onkeyup="autoCalculate()">
-                    <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">* 單顆硬碟以 10W 作為安全估算值。</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">* 單顆硬碟以 10W 作為安全估算值。</p>
                 </div>
             </div>
             
             <button onclick="calculatePower()">計算建議瓦數</button>
             
             <div id="power-result" class="result-box">
-                系統滿載預估功耗：<span id="total-watt">0</span> W <br>
+                系統滿載預估功耗：<span id="total-watt" style="font-weight:bold; color:var(--primary-blue);">0</span> W <br>
                 電源供應器 (PSU) 建議選購：<strong><span id="recommend-watt">0</span> W 以上</strong>
-                <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">* 建議瓦數已加入安全冗餘 (預估功耗 x 1.3 倍)。<strong>若顯示卡原廠建議瓦數較高，系統將優先採納原廠建議</strong>，確保高負載下系統穩定並保留升級空間。</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px; line-height: 1.5;">* 建議瓦數已加入安全冗餘 (預估功耗 x 1.3 倍)。<strong>若顯示卡原廠建議瓦數較高，系統將優先採納原廠建議</strong>，確保高負載下系統穩定並保留升級空間。</p>
             </div>
         </div>
 
         <!-- 區塊 2：官網查詢 -->
         <div class="card">
             <h2>🔍 驅動程式與說明書查詢</h2>
-            <p style="color: #666; font-size: 0.9rem;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
+            
             <div class="form-group">
                 <label>廠牌 (品牌)</label>
                 <select id="brand-select">
@@ -456,7 +520,7 @@
             .catch(error => {
                 console.error("載入 Excel 失敗:", error);
                 document.getElementById('loading-msg').innerHTML = '⚠️ 無法自動載入 Excel 檔案，請確認必須使用本機伺服器 (Local Server) 開啟網頁。';
-                document.getElementById('loading-msg').style.color = 'red';
+                document.getElementById('loading-msg').style.color = 'var(--accent-color)';
                 const select = document.getElementById('gpu-power');
                 select.innerHTML = '<option value="">(讀取失敗)</option>';
             });

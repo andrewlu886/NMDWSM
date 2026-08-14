@@ -2,17 +2,151 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>一次買夠 | 市價查詢</title>
+    <!-- 引入與全站統一的 Google 字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     <style>
+        /* --- 定義全站統一變數 (淺色模式) --- */
+        :root {
+            --primary-blue: #3498db;      /* 亮藍色 */
+            --nav-bg: #1a4b8c;           /* 導覽列深藍色 */
+            --nav-hover: #2980b9;        /* 導覽列 Hover 色 */
+            
+            --bg-main: #ffffff;          /* 全站背景純白 */
+            --card-bg: #ffffff;          /* 卡片背景純白 */
+            --text-main: #1a1a1a;        /* 主要文字變深黑 */
+            --text-muted: #666666;       /* 次要文字變中灰 */
+            --border-color: #e1e1e1;     /* 邊框淺灰 */
+            --accent-color: #e74c3c;     /* 強調色 (價格) */
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Noto Sans TC', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 導覽列樣式 (深藍色風格) --- */
+        header {
+            background-color: var(--nav-bg);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .search-wrapper {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-search {
+            border: none;
+            padding: 8px 12px;
+            outline: none;
+            background: transparent;
+            color: white;
+            width: 200px;
+        }
+        
+        .nav-search::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 0 10px;
+            cursor: pointer;
+        }
+
+        .auth-btn, .header-actions a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        #user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 0 20px;
+            background-color: rgba(0, 0, 0, 0.1); /* 讓次要導覽列稍微深一點點區隔 */
+            height: 45px;
+            align-items: center;
+        }
+
+        .main-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .main-nav a:hover, .main-nav a.active {
+            background-color: var(--nav-hover);
+        }
+
+        /* --- 頁面主要區塊 --- */
+        .container { 
+            max-width: 900px; 
+            margin: 2rem auto; 
+            padding: 0 20px; 
+        }
+
+        .page-title {
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
         /* 搜尋區塊 */
-        .container { max-width: 900px; margin: 2rem auto; padding: 0 20px; }
         .search-box {
-            background: white;
+            background: var(--card-bg);
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* 稍微明顯一點的陰影 */
+            border: 1px solid var(--border-color); /* 加上淺灰邊框 */
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -25,20 +159,24 @@
             flex-wrap: wrap;
             gap: 15px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
         }
+        
         .platform-options label {
             display: flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
             font-size: 0.95rem;
-            color: #333;
+            color: var(--text-main);
+            font-weight: 500;
         }
+
         .platform-options input[type="checkbox"] {
             cursor: pointer;
             width: 16px;
             height: 16px;
+            accent-color: var(--primary-blue); /* 改變核取方塊顏色 */
         }
 
         .input-group {
@@ -46,15 +184,27 @@
             gap: 15px;
             align-items: center;
         }
+
         .input-group input {
             flex: 1;
             padding: 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 1rem;
+            color: var(--text-main);
+            background-color: #fdfdfd;
+            transition: 0.3s;
         }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+            background-color: #fff;
+        }
+
         .btn-search {
-            background: var(--secondary-color, #3498db);
+            background: var(--primary-blue);
             color: white;
             border: none;
             padding: 12px 25px;
@@ -65,59 +215,79 @@
             transition: 0.3s;
             white-space: nowrap;
         }
-        .btn-search:hover { background: #2980b9; }
 
-        /* 結果顯示區塊 (改為條列式) */
-        #loading { display: none; text-align: center; margin: 2rem 0; color: #666; font-weight: bold; }
+        .btn-search:hover { background: var(--nav-hover); }
+
+        /* --- 結果顯示區塊 --- */
+        #loading { 
+            display: none; 
+            text-align: center; 
+            margin: 2rem 0; 
+            color: var(--text-muted); 
+            font-weight: bold; 
+        }
+
         .results-list {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
+
         .result-card {
-            background: white;
+            background: var(--card-bg);
             padding: 1.2rem 1.5rem;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-left: 5px solid var(--secondary-color, #3498db);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary-blue); /* 左側藍色飾條 */
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
             gap: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
         .result-info {
             display: flex;
             align-items: center;
             flex: 1;
             gap: 20px;
         }
+
         .result-card .platform { 
             font-size: 0.85rem; 
-            color: #7f8c8d; 
-            background: #ecf0f1; 
-            padding: 4px 10px; 
+            color: #555; 
+            background: #f0f2f5; 
+            padding: 5px 10px; 
             border-radius: 4px; 
             white-space: nowrap;
+            font-weight: bold;
         }
+
         .result-card h4 { 
             margin: 0; 
-            color: var(--primary-color, #2c3e50); 
-            font-size: 1.1rem; 
+            color: var(--text-main); 
+            font-size: 1.05rem; 
             line-height: 1.4; 
             flex: 1;
         }
+
         .result-card .price { 
-            color: var(--accent-color, #e74c3c); 
+            color: var(--accent-color); 
             font-size: 1.3rem; 
             font-weight: bold; 
             white-space: nowrap;
         }
         
-        /* 按鈕樣式 */
         .btn-link {
             text-align: center;
-            background: var(--primary-color, #2c3e50);
+            background: #2c3e50;
             color: white !important;
             text-decoration: none;
             padding: 10px 20px;
@@ -127,15 +297,48 @@
             transition: 0.2s;
             white-space: nowrap;
         }
-        .btn-link:hover { background: #34495e; opacity: 0.9; }
 
-        /* RWD 適應手機版 */
+        .btn-link:hover { 
+            background: #1a252f; 
+        }
+
+        /* --- RWD 適應手機版 --- */
         @media (max-width: 768px) {
-            .input-group { flex-direction: column; }
-            .btn-search { width: 100%; }
-            .result-card { flex-direction: column; align-items: flex-start; }
-            .result-info { flex-direction: column; align-items: flex-start; gap: 10px; width: 100%; }
-            .btn-link { width: 100%; box-sizing: border-box; }
+            .header-main {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .search-wrapper {
+                width: 100%;
+            }
+            .nav-search {
+                width: 100%;
+            }
+            .main-nav {
+                justify-content: flex-start;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .input-group { 
+                flex-direction: column; 
+            }
+            .btn-search { 
+                width: 100%; 
+            }
+            .result-card { 
+                flex-direction: column; 
+                align-items: flex-start; 
+            }
+            .result-info { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 10px; 
+                width: 100%; 
+            }
+            .btn-link { 
+                width: 100%; 
+                box-sizing: border-box; 
+            }
         }
     </style>
 </head>
@@ -158,10 +361,7 @@
                 <div id="user-profile" style="display:none;">
                     <div class="avatar">👤</div>
                     <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
-                    <div class="dropdown-menu">
-                        <a href="/account.html">我的帳戶</a>
-                        <a href="#" onclick="logout()">登出</a>
-                    </div>
+                    <!-- 這裡如果原本有下拉選單，可以透過 style.css 控制 -->
                 </div>
             </div>
         </div>
@@ -176,8 +376,8 @@
     </header>
 
     <div class="container">
-        <h2 style="color: var(--primary-color, #2c3e50); margin-bottom: 1rem;">全通路市價快搜</h2>
-        <p style="color: #666; margin-bottom: 2rem;">即時比對各通路價格，協助你掌握硬體行情與選購預算。</p>
+        <h2 class="page-title">全通路市價快搜</h2>
+        <p class="page-subtitle">即時比對各通路價格，協助你掌握硬體行情與選購預算。</p>
         
         <div class="search-box">
             <div class="platform-options" id="platform-checkboxes">
@@ -267,7 +467,7 @@
             loading.style.display = 'block';
 
             try {
-                // 發送請求至後端 API (將 selectedPlatforms 作為參數傳遞)
+                // 發送請求至後端 API
                 const response = await fetch(`/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${encodeURIComponent(selectedPlatforms)}&exclude=${encodeURIComponent(exclude)}`);
                 if (!response.ok) throw new Error('網路回應不正常');
                 
@@ -276,7 +476,7 @@
 
                 loading.style.display = 'none';
 
-                // 渲染結果 (改為條列式佈局)
+                // 渲染結果
                 if (result.success && result.data && result.data.length > 0) {
                     result.data.forEach(item => {
                         const card = document.createElement('div');
@@ -295,13 +495,13 @@
                         container.appendChild(card);
                     });
                 } else {
-                    container.innerHTML = '<p style="color: #666; text-align: center; width: 100%; padding: 2rem;">目前沒有找到相關結果，請更換關鍵字或減少排除條件再試一次。</p>';
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%; padding: 2rem;">目前沒有找到相關結果，請更換關鍵字或減少排除條件再試一次。</p>';
                 }
 
             } catch (error) {
                 loading.style.display = 'none';
                 console.error('Fetch 發生錯誤:', error);
-                container.innerHTML = '<p style="color: red; text-align: center; width: 100%; padding: 2rem;">連線失敗：請確認後端伺服器 (server.js) 是否已啟動。</p>';
+                container.innerHTML = '<p style="color: var(--accent-color); text-align: center; width: 100%; padding: 2rem;">連線失敗：請確認後端伺服器 (server.js) 是否已啟動。</p>';
             }
         }
     </script>
