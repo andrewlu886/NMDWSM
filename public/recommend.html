@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧推薦｜一次買夠</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        :root {
+            --recommend-blue: #2563eb;
+            --recommend-blue-dark: #1d4ed8;
+            --recommend-navy: #1e293b;
+            --recommend-muted: #64748b;
+            --recommend-border: #e2e8f0;
+            --recommend-bg: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            background: var(--recommend-bg);
+            color: var(--recommend-navy);
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+        }
+
+        .recommend-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+        }
+
+        .recommend-header-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            gap: 24px;
+        }
+
+        .recommend-logo {
+            color: var(--recommend-blue);
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .recommend-search {
+            position: relative;
+            display: flex;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .recommend-search input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 42px 10px 16px;
+            border: 1px solid var(--recommend-border);
+            border-radius: 999px;
+            background: #f1f5f9;
+            font: inherit;
+        }
+
+        .recommend-search button {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            width: 34px;
+            height: 34px;
+            border: 0;
+            background: transparent;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .recommend-login {
+            padding: 9px 20px;
+            border-radius: 999px;
+            background: var(--recommend-blue);
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .recommend-nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 11px 20px;
+            background: var(--recommend-blue);
+            white-space: nowrap;
+        }
+
+        .recommend-nav a {
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .recommend-nav a:hover,
+        .recommend-nav a.active {
+            color: #fff;
+        }
+
+        .recommend-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 70px;
+        }
+
+        .recommend-hero {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 28px;
+            padding: 46px 40px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #fff;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.15);
+        }
+
+        .recommend-hero::after {
+            content: '';
+            position: absolute;
+            right: -70px;
+            bottom: -100px;
+            width: 280px;
+            height: 280px;
+            border: 42px solid rgba(56, 189, 248, 0.12);
+            border-radius: 50%;
+        }
+
+        .recommend-eyebrow {
+            margin: 0 0 10px;
+            color: #7dd3fc;
+            font-size: 0.84rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+        }
+
+        .recommend-hero h1 {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 5vw, 3rem);
+            line-height: 1.25;
+        }
+
+        .recommend-hero p:last-child {
+            position: relative;
+            z-index: 1;
+            max-width: 650px;
+            margin: 0;
+            color: #cbd5e1;
+            line-height: 1.75;
+        }
+
+        .recommend-layout {
+            display: grid;
+            grid-template-columns: minmax(290px, 0.8fr) minmax(0, 1.35fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .recommend-card {
+            border: 1px solid var(--recommend-border);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06);
+        }
+
+        .recommend-form-card {
+            padding: 28px;
+        }
+
+        .recommend-card h2 {
+            margin: 0 0 7px;
+            font-size: 1.35rem;
+        }
+
+        .recommend-intro {
+            margin: 0 0 24px;
+            color: var(--recommend-muted);
+            font-size: 0.92rem;
+        }
+
+        .recommend-field {
+            margin-bottom: 18px;
+        }
+
+        .recommend-field label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .recommend-field select,
+        .recommend-field input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 14px;
+            border: 1px solid var(--recommend-border);
+            border-radius: 9px;
+            background: #f8fafc;
+            color: var(--recommend-navy);
+            font: inherit;
+        }
+
+        .recommend-field select:focus,
+        .recommend-field input:focus {
+            border-color: var(--recommend-blue);
+            outline: 3px solid rgba(37, 99, 235, 0.12);
+        }
+
+        .recommend-submit {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: var(--recommend-blue);
+            color: #fff;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+        }
+
+        .recommend-submit:hover {
+            background: var(--recommend-blue-dark);
+        }
+
+        .recommend-submit:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+        .recommend-results {
+            min-height: 430px;
+            padding: 28px;
+        }
+
+        .recommend-empty {
+            display: grid;
+            min-height: 340px;
+            place-content: center;
+            padding: 20px;
+            color: var(--recommend-muted);
+            text-align: center;
+        }
+
+        .recommend-empty-icon {
+            display: grid;
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 14px;
+            place-items: center;
+            border-radius: 16px;
+            background: #dbeafe;
+            color: var(--recommend-blue);
+            font-size: 1.55rem;
+        }
+
+        .recommend-result-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .recommend-result-item {
+            padding: 18px;
+            border: 1px solid var(--recommend-border);
+            border-radius: 13px;
+            background: #fff;
+        }
+
+        .recommend-result-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 13px;
+        }
+
+        .recommend-result-title {
+            color: var(--recommend-blue);
+            font-weight: 700;
+            line-height: 1.5;
+            text-decoration: none;
+        }
+
+        .recommend-result-price {
+            flex: 0 0 auto;
+            color: #b45309;
+            font-weight: 700;
+        }
+
+        .recommend-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .recommend-tag {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 0.8rem;
+        }
+
+        .recommend-warning,
+        .recommend-error {
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border-radius: 9px;
+            background: #fff7ed;
+            color: #9a3412;
+            font-size: 0.9rem;
+        }
+
+        .recommend-error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        @media (max-width: 760px) {
+            .recommend-header-main {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .recommend-search {
+                order: 3;
+                min-width: 100%;
+                max-width: none;
+            }
+
+            .recommend-nav {
+                justify-content: flex-start;
+                gap: 1.25rem;
+            }
+
+            .recommend-page {
+                padding: 20px 14px 60px;
+            }
+
+            .recommend-hero {
+                padding: 34px 24px;
+            }
+
+            .recommend-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .recommend-results {
+                min-height: 320px;
+            }
+
+            .recommend-result-head {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="./site-theme.css">
+</head>
+<body>
+    <header class="recommend-header">
+        <div class="recommend-header-main">
+            <a class="recommend-logo" href="/">⚡ 一次買夠</a>
+            <div class="recommend-search">
+                <input id="site-search" type="search" placeholder="查詢硬體市價…" aria-label="查詢硬體市價">
+                <button type="button" id="site-search-button" aria-label="搜尋">🔍</button>
+            </div>
+            <a class="recommend-login" href="/login">登入 / 註冊</a>
+        </div>
+        <nav class="recommend-nav" aria-label="主要導覽">
+            <a href="/">首頁</a>
+            <a class="active" href="/recommend.html">智慧推薦</a>
+            <a href="/forum">討論區</a>
+            <a href="/scrape">市價查詢</a>
+            <a href="/benchmark-instructions.html">跑分教學</a>
+            <a href="/tools">零件查詢與瓦數計算工具</a>
+        </nav>
+    </header>
+
+    <main class="recommend-page">
+        <section class="recommend-hero">
+            <p class="recommend-eyebrow">SMART HARDWARE GUIDE</p>
+            <h1>智慧硬體配置推薦</h1>
+            <p>告訴我們預算、用途與想找的商品類型，系統會整理目前市價資料，找出更適合你的硬體選擇。</p>
+        </section>
+
+        <div class="recommend-layout">
+            <section class="recommend-card recommend-form-card" aria-labelledby="recommend-form-title">
+                <h2 id="recommend-form-title">設定需求</h2>
+                <p class="recommend-intro">填寫三個條件，即可產生推薦清單。</p>
+                <form id="recommend-form">
+                    <div class="recommend-field">
+                        <label for="productType">商品種類</label>
+                        <select id="productType" name="productType">
+                            <option value="desktop">🖥️ 套裝主機（Desktop）</option>
+                            <option value="laptop">💻 筆記型電腦（Laptop）</option>
+                            <option value="component">🔧 電腦零件（CPU／顯示卡）</option>
+                        </select>
+                    </div>
+                    <div class="recommend-field">
+                        <label for="budget">預算範圍（NTD）</label>
+                        <input id="budget" name="budget" type="number" min="1" step="1000" placeholder="例如：35000" required>
+                    </div>
+                    <div class="recommend-field">
+                        <label for="usage">主要用途</label>
+                        <select id="usage" name="usage">
+                            <option value="gaming">🎮 3A 遊戲專用</option>
+                            <option value="office">💼 文書辦公／影音娛樂</option>
+                        </select>
+                    </div>
+                    <button class="recommend-submit" id="recommend-submit" type="submit">✨ 立即生成推薦清單</button>
+                </form>
+            </section>
+
+            <section class="recommend-card recommend-results" aria-labelledby="recommend-results-title">
+                <h2 id="recommend-results-title">推薦結果</h2>
+                <div id="result-display" aria-live="polite">
+                    <div class="recommend-empty">
+                        <span class="recommend-empty-icon" aria-hidden="true">✦</span>
+                        <strong>你的推薦清單會顯示在這裡</strong>
+                        <span>先在左側選擇條件，再開始產生推薦。</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="./recommend.js"></script>
+    <script src="./chat-widget.js"></script>
+</body>
+</html>

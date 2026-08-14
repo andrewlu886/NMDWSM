@@ -16,14 +16,19 @@
         ul { margin: 0; padding-left: 1.2rem; }
         @media (max-width: 780px) { .container { padding: 0 16px; } }
     </style>
+    <link rel="stylesheet" href="./site-theme.css">
 </head>
 <body>
     <header>
         <div class="header-main">
-            <a href="/" class="logo">一次買夠</a>
+            <a href="/" class="logo">⚡ 一次買夠</a>
+            <form class="search-wrapper" action="/scrape" method="get">
+                <input type="search" name="keyword" class="nav-search" placeholder="查詢硬體市價..." aria-label="查詢硬體市價">
+                <button class="search-btn" type="submit" aria-label="搜尋">🔍</button>
+            </form>
             <div class="header-actions"><a href="/" class="auth-btn">回到首頁</a></div>
         </div>
-        <nav class="main-nav"><a href="/">首頁</a><a href="/#recommend">智慧推薦</a><a href="/forum">討論區</a><a href="/scrape">市價查詢</a><a href="/benchmark-instructions.html" class="active">跑分教學</a></nav>
+        <nav class="main-nav"><a href="/">首頁</a><a href="/recommend.html">智慧推薦</a><a href="/forum">討論區</a><a href="/scrape">市價查詢</a><a href="/benchmark-instructions.html" class="active">跑分教學</a><a href="/tools">零件查詢與瓦數計算工具</a></nav>
     </header>
     <main class="container">
         <section class="panel">
@@ -54,7 +59,7 @@
                 跑分結果會受到驅動程式、散熱、功耗設定與背景程式影響。比較前請保持測試版本與設定一致，並避免只看單次最高分。
             </div>
 
-            <a href="/#recommend" class="btn-link">前往智慧推薦</a>
+                    <a href="/recommend.html" class="btn-link">前往智慧推薦</a>
         </section>
     </main>
     <script src="./chat-widget.js"></script>

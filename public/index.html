@@ -168,7 +168,7 @@
         .hero p { font-size: 1.1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto; }
         
         /* 功能卡片區 */
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+        .features { display: grid; grid-template-columns: 1fr; gap: 2rem; }
         .card { 
             background: var(--card-bg); 
             padding: 2rem; 
@@ -222,6 +222,7 @@
         .btn-action {
             display: block;
             width: 100%;
+            box-sizing: border-box;
             background: var(--primary-color);
             color: white;
             border: none;
@@ -268,6 +269,7 @@
             margin-bottom: 6px;
         }
     </style>
+    <link rel="stylesheet" href="./site-theme.css">
 </head>
 <body>
 
@@ -300,7 +302,7 @@
         
         <nav class="main-nav">
             <a href="/">首頁</a>
-            <a href="/#recommend">智慧推薦</a>
+            <a href="/recommend.html">智慧推薦</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/benchmark-instructions.html">跑分教學</a>
@@ -322,30 +324,6 @@
                 <a class="btn-action" href="/benchmark-instructions.html" style="text-decoration:none;">📖 查看跑分教學</a>
             </div>
 
-            <div class="card">
-                <h3>AI 智慧配置推薦</h3>
-                <div class="form-group">
-                    <label>商品種類</label>
-                    <select id="productType">
-                        <option value="desktop">🖥️ 套裝主機 (Desktop)</option>
-                        <option value="laptop">💻 筆記型電腦 (Laptop)</option>
-                        <option value="component">⚙️ 核心零件 (CPU/顯卡)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>預算範圍 (NTD)</label>
-                    <input type="number" id="budget" placeholder="例如: 35000">
-                </div>
-                <div class="form-group">
-                    <label>主要用途</label>
-                    <select id="usage">
-                        <option value="gaming">🎮 3A 遊戲專用</option>
-                        <option value="office">💼 高性能文書/輕度影音</option>
-                    </select>
-                </div>
-                <button class="btn-action" onclick="runRecommend()">✨ 立即生成推薦清單</button>
-                <div id="result-display"></div>
-            </div>
         </section>
     </div>
 
@@ -433,8 +411,7 @@
                     <h4 style="color: var(--text-main); margin: 0 0 10px 0; font-size: 1.1rem;">🏆 最佳推薦清單 (Top 3)</h4>
                     <div style="display: flex; flex-direction: column; gap: 15px;">
                 `;
-
-                if (result.recommendations && result.recommendations.length > 0) {
+if (result.recommendations && result.recommendations.length > 0) {
                     result.recommendations.forEach((item, index) => {
                         const usageText = usage === 'gaming' ? '遊戲加權' : '工作加權';
                         
@@ -458,8 +435,17 @@
                                     <span class="tag-badge">💾 ${item.ram !== 'UNKNOWN' ? item.ram : 'RAM 依網頁為準'}</span>
                                     <span class="tag-badge">💻 ${item.os !== 'UNKNOWN' ? item.os : '系統依網頁為準'}</span>
                                 </div>
-                                <div style="font-size: 0.85rem; color: var(--text-muted); border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px;">
-                                    📊 AI 匹配分數：<strong>${item.matchScore.toFixed(0)}</strong> <span style="font-size: 0.8rem; opacity: 0.8;">(${usageText})</span>
+                                
+                                <!-- 左邊放分數，右邊放計算瓦數的按鈕 -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px;">
+                                    <div>
+                                        📊 AI 匹配分數：<strong>${item.matchScore.toFixed(0)}</strong> <span style="font-size: 0.8rem; opacity: 0.8;">(${usageText})</span>
+                                    </div>
+                                    
+                                    <!-- ⚡ 將瓦數計算連結放在這裡，並加上按鈕樣式 -->
+                                    <a href="/tools.html?gpu=${encodeURIComponent(item.gpu)}&cpu=${encodeURIComponent(item.cpu)}" target="_blank" style="text-decoration: none; background: #e8f4f8; color: #2980b9; padding: 4px 10px; border-radius: 4px; font-weight: bold; border: 1px solid #bce8f1; transition: 0.3s; white-space: nowrap;">
+                                        ⚡ 計算整機建議瓦數
+                                    </a>
                                 </div>
                             </div>
                         `;
@@ -470,7 +456,6 @@
                             目前市場上沒有找到符合您預算的機型。
                         </div>`;
                 }
-
                 htmlContent += '</div>';
                 res.innerHTML = htmlContent;
 

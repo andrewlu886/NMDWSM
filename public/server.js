@@ -1269,6 +1269,7 @@ const server = http.createServer(async(req, res) => {
         if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
         else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
         else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
+        else if (pathname === '/recommend') filePath = path.join(__dirname, 'recommend.html');
         else if (pathname === '/tools') filePath = path.join(__dirname, 'tools.html');
         const safeFilePath = path.resolve(filePath);
         if (!safeFilePath.startsWith(PUBLIC_DIR + path.sep) && safeFilePath !== PUBLIC_DIR) {
