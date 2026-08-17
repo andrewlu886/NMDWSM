@@ -129,3 +129,9 @@ test('舊交易 API 與商品圖片無法存取', async () => {
   assert.equal((await request('/does-not-exist')).status, 404);
   assert.equal((await request('/api/scrape')).status, 400);
 });
+
+test('市價查詢忽略未知平台並保留回應格式', async () => {
+  const response = await request('/api/scrape?keyword=RTX4060&platform=unknown');
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { success: true, data: [] });
+});
