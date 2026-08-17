@@ -1,4 +1,6 @@
-// --- AiService.js (Google Gemini 版本) ---
+// --- AiService.js (Google Gemini 版本 - CSV 試算表紀錄版) ---
+const fs = require('fs');
+const path = require('path');
 
 function parseJsonBody(req) {
     return new Promise((resolve, reject) => {
@@ -13,6 +15,13 @@ function parseJsonBody(req) {
         });
         req.on('error', reject);
     });
+}
+
+// 🌟 新增：處理 CSV 格式的小工具，避免逗號或換行破壞表格
+function escapeCSV(text) {
+    if (!text) return '""';
+    // 將內容轉為字串，把裡面的雙引號替換為兩個雙引號，最後在最外層包上雙引號
+    return `"${String(text).replace(/"/g, '""')}"`;
 }
 
 async function handle(req, res) {
@@ -97,6 +106,34 @@ async function handle(req, res) {
                 }
 
                 const answer = payload?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '抱歉，AI 沒有回覆內容。';
+
+                // ==========================================
+                // 🌟 新增：將對話紀錄寫入 CSV 試算表
+                // ==========================================
+                try {
+                    const userMessage = [...contents].reverse().find(m => m.role === 'user')?.parts[0]?.text || '未知問題';
+                    const timeString = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+                    const logPath = path.join(__dirname, 'chat_logs.csv');
+
+                    // 準備要寫入的一行資料 (時間, 問題, 回答)
+                    const csvLine = `${escapeCSV(timeString)},${escapeCSV(userMessage)},${escapeCSV(answer)}\n`;
+
+                    // 如果檔案不存在，先建立檔案並寫入標題列 (Header)
+                    if (!fs.existsSync(logPath)) {
+                        const header = '\uFEFF時間,使用者問題,AI回答\n'; // \uFEFF 是 BOM，讓 Excel 開啟時不會中文亂碼
+                        fs.writeFileSync(logPath, header);
+                    }
+
+                    // 將資料附加到檔案最後
+                    fs.appendFile(logPath, csvLine, (err) => {
+                        if (err) console.error('⚠️ 寫入 CSV 失敗:', err);
+                        else console.log(`✅ 紀錄已存入試算表 chat_logs.csv`);
+                    });
+                } catch (csvError) {
+                    console.error('⚠️ 處理 CSV 紀錄時發生錯誤:', csvError);
+                }
+                // ==========================================
+
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ success: true, answer }));
             } catch (error) {
@@ -123,5 +160,4 @@ async function handle(req, res) {
     }
 }
 
-// 匯出 handle 函式讓 server.js 可以呼叫
 module.exports = { handle };
