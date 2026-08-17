@@ -339,7 +339,7 @@
         
         <div class="header-title">
             <h1>🛠️ 裝機實用工具</h1>
-            <p>快速計算主機瓦數，一鍵尋找各廠牌驅動程式與說明書</p>
+            <p>快速計算主機瓦數，一鍵尋找各廠牌驅動程式</p>
         </div>
 
         <!-- 區塊 1：瓦數計算機 -->
@@ -412,7 +412,7 @@
 
         <!-- 區塊 2：官網查詢 -->
         <div class="card">
-            <h2>🔍 驅動程式與說明書查詢</h2>
+            <h2>🔍 驅動程式查詢</h2>
             <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
             
             <div class="form-group">
@@ -421,7 +421,8 @@
                     <option value="ASUS 華碩">ASUS 華碩</option>
                     <option value="MSI 微星">MSI 微星</option>
                     <option value="GIGABYTE 技嘉">GIGABYTE 技嘉</option>
-                    <option value="ASRock 華擎">ASRock 華擎</option>
+                    <option value="ASRock_BIOS">ASRock 華擎主機板</option>
+                    <option value="ASRock_顯卡驅動">ASRock 華擎顯卡</option>
                     <option value="Intel">Intel</option>
                     <option value="AMD">AMD</option>
                     <option value="NVIDIA">NVIDIA</option>
@@ -529,9 +530,6 @@
             });
     });
 
-    // ==========================================
-    // 將資料寫入下拉選單並綁定事件 (GPU)
-    // ==========================================
     // ==========================================
     // 將資料寫入下拉選單並綁定事件 (GPU)
     // ==========================================
@@ -734,14 +732,19 @@
     }
 
     // ==========================================
-    // 驅動與說明書查詢邏輯 (直接跳轉台灣官網搜尋)
+    // 驅動程式查詢邏輯 (NVIDIA/AMD 直達驅動專區，其餘跳轉搜尋)
     // ==========================================
     function searchOfficial() {
         const brand = document.getElementById('brand-select').value;
         const model = document.getElementById('model-input').value.trim();
         
-        if (!model) {
-            alert('請輸入產品型號！');
+        if (brand.includes("NVIDIA")) {
+            window.open("https://www.nvidia.com/zh-tw/geforce/drivers/", "_blank");
+            return;
+        }
+        
+        if (brand.includes("AMD")) {
+            window.open("https://www.amd.com/zh-tw/support/download/drivers.html", "_blank");
             return;
         }
 
@@ -749,19 +752,17 @@
         let targetUrl = "";
 
         if (brand.includes("ASUS")) {
-            targetUrl = `https://www.asus.com/tw/searchresult?searchType=products&searchKey=${encodedModel}`;
+            targetUrl = `https://www.asus.com/tw/support/download-center/`;
         } else if (brand.includes("MSI")) {
             targetUrl = `https://tw.msi.com/search/${encodedModel}`;
         } else if (brand.includes("GIGABYTE")) {
             targetUrl = `https://www.gigabyte.com/tw/Search?kw=${encodedModel}`;
-        } else if (brand.includes("ASRock")) {
-            targetUrl = `https://www.asrock.com/support/index.tw.asp?cat=ModelName&Model=${encodedModel}`;
+        } else if (brand.includes("ASRock_BIOS")) {
+            targetUrl = `https://www.asrock.com/support/index.tw.asp?cat=BIOS`;
+        } else if (brand.includes("ASRock_顯卡驅動")) {
+            targetUrl = `https://www.asrock.com/support/index.tw.asp?cat=Drivers`;
         } else if (brand.includes("Intel")) {
-            targetUrl = `https://www.intel.com.tw/content/www/tw/zh/search.html?ws=text#q=${encodedModel}`;
-        } else if (brand.includes("AMD")) {
-            targetUrl = `https://www.amd.com/zh-hant/search.html?q=${encodedModel}`;
-        } else if (brand.includes("NVIDIA")) {
-            targetUrl = `https://www.nvidia.com/zh-tw/search/?q=${encodedModel}`;
+            targetUrl = `https://www.intel.com.tw/content/www/tw/zh/search.html#q=${encodedModel}&cf-tabfilter=Downloads`;
         }
 
         if (targetUrl) {
