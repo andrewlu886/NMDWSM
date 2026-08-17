@@ -1,6 +1,20 @@
+// 1. 載入 dotenv 並支援 .env / key.env 兩種環境檔
+const dotenv = require('dotenv');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+
+const rootDir = path.resolve(__dirname, '..');
+const envCandidates = [
+    path.join(rootDir, '.env'),
+    path.join(rootDir, 'key.env')
+];
+
+for (const envFile of envCandidates) {
+    if (fs.existsSync(envFile)) {
+        dotenv.config({ path: envFile });
+    }
+}
 
 // SQLite 資料庫
 const db = require('./db.js');
@@ -323,6 +337,16 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 200, { success: true, message: '使用者名稱已更新', username });
         } catch (error) {
             sendJson(res, 500, { success: false, message: '更新使用者名稱失敗' });
+        }
+
+    } else if (pathname === '/api/chat' && req.method === 'POST') {
+        setCorsHeaders(res);
+        try {
+            const aiService = require('./AiService');
+            await aiService.handle(req, res, parsedUrl);
+        } catch (error) {
+            console.error('❌ /api/chat delegate error:', error);
+            sendJson(res, 500, { success: false, message: 'AI 聊天服務發生錯誤' });
         }
 
     } else if (isLegacyApiPath(pathname)) {
