@@ -339,9 +339,24 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 500, { success: false, message: '更新使用者名稱失敗' });
         }
 
-    } else if (pathname === '/api/chat' && req.method === 'POST') {
+    // 取得使用者統計資料（貼文數等）
+    } else if (pathname === '/api/account/stats' && req.method === 'GET') {
         setCorsHeaders(res);
         try {
+            const user = await requireUserFromBodyOrQuery(parsedUrl);
+            if (!user) return sendJson(res, 404, { success: false, message: '找不到使用者' });
+            const stats = await db.Stats.getByUser(user.id);
+            sendJson(res, 200, { success: true, data: stats });
+        } catch (error) {
+            console.error('❌ 取得使用者統計失敗:', error);
+            sendJson(res, 500, { success: false, message: '取得統計失敗' });
+        }
+
+    } else if ((pathname === '/api/chat' || pathname === '/api/chat/') && req.method === 'POST') {
+        setCorsHeaders(res);
+        // log incoming request for debugging client 403 issues
+        try {
+            console.log('→ Incoming /api/chat request', { url: req.url, method: req.method, headers: req.headers });
             const aiService = require('./AiService');
             await aiService.handle(req, res, parsedUrl);
         } catch (error) {

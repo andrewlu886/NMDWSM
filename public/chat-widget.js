@@ -2,7 +2,7 @@
     const widget = document.createElement('div');
     widget.className = 'ai-chat-widget';
     
-    // 1. 修改 HTML：移除尚未啟用的提示，改為綠色的連線中
+    // 1. 修改 HTML：渲染 UI 結構
     widget.innerHTML = `
         <section class="ai-chat-panel" id="ai-chat-panel" aria-label="AI 客服助手" aria-hidden="true">
             <header class="ai-chat-header">
@@ -45,7 +45,7 @@
     const messages = widget.querySelector('.ai-chat-messages');
     const submitBtn = form.querySelector('button[type="submit"]');
 
-    // 🌟 新增：用來記錄對話歷史的陣列 (讓 AI 記得前面的對話)
+    // 記錄對話歷史的陣列
     let chatHistory = [];
 
     function setOpen(isOpen) {
@@ -87,7 +87,7 @@
         }
     });
 
-    // 🌟 修改：處理表單送出邏輯，串接後端 API
+    // 處理表單送出邏輯，串接後端 /api/chat
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const text = input.value.trim();
@@ -114,7 +114,7 @@
         input.disabled = true;
         submitBtn.disabled = true;
 
-        // 顯示「思考中...」的動畫或文字
+        // 顯示「思考中...」提示
         const loadingMessage = document.createElement('div');
         loadingMessage.className = 'ai-chat-message assistant';
         loadingMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span><p class="loading-text">思考中...</p>';
@@ -122,26 +122,36 @@
         messages.scrollTop = messages.scrollHeight;
 
         try {
-            // --- 2. 發送請求到後端 ---
-            const response = await fetch('/api/chat', {
+            // --- 2. 發送請求到後端 (只發送最後 20 則歷史，避免 Token 過長) ---
+            const payloadMessages = chatHistory.slice(-20);
+            const apiUrl = (window.location && window.location.origin ? window.location.origin : '') + '/api/chat';
+            
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ messages: chatHistory })
+                body: JSON.stringify({ messages: payloadMessages })
             });
 
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                const rawText = await response.text().catch(() => '無法讀取回應');
+                throw new Error(`伺服器回應非 JSON (status ${response.status}): ${rawText}`);
+            }
 
             // 移除思考中訊息
-            messages.removeChild(loadingMessage);
+            if (loadingMessage.parentNode) {
+                messages.removeChild(loadingMessage);
+            }
 
             // --- 3. 顯示 AI 的回覆 ---
             const aiMessage = document.createElement('div');
             aiMessage.className = 'ai-chat-message assistant';
             
             const aiText = document.createElement('p');
-            // 加上 whiteSpace 設定，讓 AI 回覆的換行可以正常顯示
             aiText.style.whiteSpace = 'pre-wrap'; 
 
             if (data.success) {
@@ -150,7 +160,7 @@
                 chatHistory.push({ role: 'assistant', content: data.answer });
             } else {
                 aiText.textContent = `⚠️ 發生錯誤：${data.message}`;
-                // 發生錯誤時把剛剛的記錄移除，避免干擾下次對話
+                // 發生錯誤時把剛剛的使用者對話歷史移除，避免影響後續對話
                 chatHistory.pop(); 
             }
 
@@ -160,15 +170,18 @@
 
         } catch (error) {
             console.error('API 請求失敗:', error);
-            messages.removeChild(loadingMessage);
-            chatHistory.pop(); // 發生錯誤時移除歷史紀錄
+            if (loadingMessage.parentNode) {
+                messages.removeChild(loadingMessage);
+            }
+            chatHistory.pop(); // 發生錯誤時移除最後一筆紀錄
 
             const errorMessage = document.createElement('div');
             errorMessage.className = 'ai-chat-message assistant';
-            errorMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span><p>⚠️ 無法連線到伺服器，請確認網路或稍後再試。</p>';
+            const errText = (error && error.message) ? `⚠️ 無法連線到伺服器：${error.message}` : '⚠️ 無法連線到伺服器，請確認網路或稍後再試。';
+            errorMessage.innerHTML = `<span class="ai-chat-message-avatar" aria-hidden="true">AI</span><p>${errText}</p>`;
             messages.appendChild(errorMessage);
         } finally {
-            // --- 4. 解除鎖定輸入框 ---
+            // --- 4. 解除鎖定輸入框與聚焦 ---
             input.disabled = false;
             submitBtn.disabled = false;
             input.focus();
