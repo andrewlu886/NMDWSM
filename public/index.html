@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>一次買夠 | 電腦硬體選購助手</title>
-    <!-- 引入 Google 字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     <style>
-        /* --- 基礎色彩與變數設定 --- */
         :root {
-            --primary-color: #2563eb;      /* 科技藍 */
+            --primary-color: #2563eb;
             --primary-hover: #1d4ed8;
-            --secondary-color: #0ea5e9;    /* 亮藍色點綴 */
+            --secondary-color: #0ea5e9;
             --bg-light: #f8fafc;
             --text-main: #1e293b;
             --text-muted: #64748b;
@@ -21,6 +19,7 @@
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --glow-color: rgba(37, 99, 235, 0.25);
         }
 
         body {
@@ -30,15 +29,18 @@
             margin: 0;
             padding: 0;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        /* --- 頂部導覽列 (Header) 優化 --- */
         header {
-            background: #ffffff;
-            box-shadow: var(--shadow-sm);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: all 0.3s ease;
         }
         
         .header-main {
@@ -58,6 +60,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: transform 0.2s ease;
+        }
+        .logo:hover {
+            transform: scale(1.03);
         }
 
         .search-wrapper {
@@ -74,7 +80,7 @@
             border: 1px solid var(--border-color);
             border-radius: 20px;
             font-size: 0.95rem;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             background: #f1f5f9;
         }
 
@@ -82,19 +88,24 @@
             background: #ffffff;
             border-color: var(--primary-color);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 12px var(--glow-color);
         }
 
         .search-btn {
             position: absolute;
-            right: 10px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--text-muted);
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.2);
+            color: var(--primary-color);
         }
 
         .header-actions .auth-btn {
@@ -104,13 +115,15 @@
             border-radius: 20px;
             text-decoration: none;
             font-weight: 500;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
         }
         .header-actions .auth-btn:hover {
             background: var(--primary-hover);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
         }
 
-        /* 會員下拉選單 */
         #user-profile {
             display: none;
             align-items: center;
@@ -122,74 +135,150 @@
         .avatar { background: #e2e8f0; padding: 5px; border-radius: 50%; }
         
         .main-nav {
-            background: var(--primary-color);
+            background: linear-gradient(90deg, #1d4ed8, #2563eb, #0ea5e9);
+            background-size: 200% 200%;
+            animation: gradientMove 8s ease infinite;
             display: flex;
             justify-content: center;
             gap: 2rem;
             padding: 10px 0;
         }
         
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .main-nav a {
             color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.95rem;
-            transition: color 0.2s;
+            position: relative;
+            padding: 4px 0;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #ffffff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 2px;
         }
         
         .main-nav a:hover {
             color: #ffffff;
-            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
+        
+        .main-nav a:hover::after {
+            width: 100%;
         }
 
-        /* --- 主內容區 --- */
-        .container { max-width: 1100px; margin: 2rem auto; padding: 0 20px; }
+        .container { 
+            max-width: 1100px; 
+            margin: 2rem auto; 
+            padding: 0 20px;
+            animation: fadeInUp 0.6s ease-out;
+        }
         
-        /* Hero 區塊 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .hero {
             text-align: center;
-            padding: 4rem 2rem;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 4.5rem 2rem;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             color: white;
-            border-radius: 16px;
+            border-radius: 20px;
             margin-bottom: 3rem;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
         }
-        .hero::after {
+
+        .hero::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="2" fill="rgba(255,255,255,0.05)"/></svg>');
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 60%);
+            animation: pulseGlow 6s ease-in-out infinite alternate;
             pointer-events: none;
         }
-        .hero h1 { font-size: 2.5rem; margin-bottom: 15px; margin-top: 0; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .hero p { font-size: 1.1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto; }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.8) translate(-10%, -10%); }
+            100% { transform: scale(1.2) translate(10%, 10%); }
+        }
+
+        .hero h1 { 
+            font-size: 2.6rem; 
+            margin-bottom: 15px; 
+            margin-top: 0; 
+            font-weight: 700; 
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 1.15rem; color: #cbd5e1; max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
         
-        /* 功能卡片區 */
         .features { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        
         .card { 
             background: var(--card-bg); 
-            padding: 2rem; 
+            padding: 2.2rem; 
             border-radius: 16px; 
             box-shadow: var(--shadow-md); 
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s; 
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); 
             border: 1px solid var(--border-color); 
+            position: relative;
+            overflow: hidden;
         }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
         .card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: var(--shadow-lg); 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border-color: rgba(37, 99, 235, 0.3);
         }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
         .card h3 { 
             display: flex;
             align-items: center;
             gap: 10px;
             margin-top: 0; 
-            font-size: 1.3rem;
+            font-size: 1.35rem;
             color: var(--text-main);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
+        
         .card h3::before {
             content: '';
             display: block;
@@ -197,76 +286,52 @@
             height: 24px;
             background: var(--secondary-color);
             border-radius: 2px;
+            box-shadow: 0 0 8px var(--secondary-color);
         }
-        
-        /* 智慧推薦表單 */
-        .form-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; margin-bottom: 8px; font-size: 0.95rem; font-weight: 600; color: var(--text-main); }
-        input[type="number"], select { 
-            width: 100%; 
-            padding: 12px 15px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 1rem; 
-            transition: all 0.2s;
-            background-color: #f8fafc;
-        }
-        input[type="number"]:focus, select:focus { 
-            border-color: var(--primary-color); 
-            background-color: #ffffff;
-            outline: none; 
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
+
         .btn-action {
-            display: block;
+            display: inline-block;
             width: 100%;
             box-sizing: border-box;
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
             color: white;
             border: none;
-            padding: 14px;
+            padding: 14px 20px;
             font-size: 1.05rem;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: all 0.3s ease;
             text-align: center;
-        }
-        .btn-action:hover { background: var(--primary-hover); }
-        .btn-action:active { transform: scale(0.98); }
-
-        /* 結果顯示區塊 */
-        #result-display { 
-            margin-top: 25px; 
-            display: none; 
-            text-align: left; 
-            font-size: 0.95rem; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
         }
 
-        /* JavaScript 生成的卡片樣式補強 */
-        .result-card {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            margin-top: 15px;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
-            transition: border-color 0.2s;
+        .btn-action::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
         }
-        .result-card:hover {
-            border-color: var(--primary-color);
+
+        .btn-action:hover { 
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            transform: translateY(-2px);
         }
-        .tag-badge {
-            display: inline-block;
-            background: #f1f5f9;
-            color: var(--text-muted);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            margin-right: 6px;
-            margin-bottom: 6px;
+
+        .btn-action:hover::after {
+            left: 140%;
+        }
+
+        .btn-action:active { 
+            transform: translateY(1px); 
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
     </style>
     <link rel="stylesheet" href="./site-theme.css">
@@ -278,7 +343,7 @@
             <a href="/" class="logo">⚡ 一次買夠</a>
             
             <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)">
+                <input type="text" class="nav-search" placeholder="搜尋顯示卡、CPU 或零件..." onkeydown="handleSearch(event)">
                 <button class="search-btn" onclick="triggerSearch()">🔍</button>
             </div>
 
@@ -287,11 +352,9 @@
                     <a href="/login" class="auth-btn">登入 / 註冊</a>
                 </div>
                 
-                <!-- 登入後顯示的會員頭像與下拉選單區塊 -->
                 <div id="user-profile">
                     <div class="avatar">👤</div>
                     <span id="user-display-name">載入中...</span>
-                    <!-- 隱藏的下拉選單可透過 JS 展開 -->
                     <div class="dropdown-menu" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px; box-shadow:var(--shadow-md);">
                         <a href="/account.html" style="display:block; padding:5px 0; color:#333; text-decoration:none;">我的帳戶</a>
                         <a href="#" onclick="logout()" style="display:block; padding:5px 0; color:red; text-decoration:none;">登出</a>
@@ -312,23 +375,21 @@
 
     <div class="container">
         <section class="hero">
-            <h1>讓電腦硬體選購更科學</h1>
-            <p>整合即時市價、規格分析與跑分知識，幫你在預算內找到最完美的電腦配置。</p>
+            <h1>組電腦免踩雷，價格效能一次比</h1>
+            <p>查即時市價、看跑分數據，在預算之內選出最適合的電腦配備。</p>
         </section>
 
         <section id="recommend" class="features">
             <div class="card">
-                <h3>硬體跑分與檢測</h3>
-                <p>了解如何透過壓力測試與跑分資料，精準判讀硬體效能與穩定性。</p>
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;">從 CPU、記憶體到顯示卡，依照教學取得可比較的測試結果，拒絕被行銷話術欺騙。</p>
+                <h3>硬體跑分與檢測指南</h3>
+                <p>學會用壓力測試與跑分數據，判讀硬體的實際效能與穩定度。</p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;">照著教學測試 CPU 與顯卡，用數據講話，買硬體不當冤大頭。</p>
                 <a class="btn-action" href="/benchmark-instructions.html" style="text-decoration:none;">📖 查看跑分教學</a>
             </div>
-
         </section>
     </div>
 
     <script>
-        // --- 登入狀態檢查 ---
         window.onload = function() {
             const loggedInUser = localStorage.getItem('userEmail');
             const userName = localStorage.getItem('userName');
@@ -338,22 +399,19 @@
                 document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
             }
             
-            // 簡易的選單開關邏輯
             document.getElementById('user-profile').addEventListener('click', function() {
                 const menu = this.querySelector('.dropdown-menu');
                 menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
             });
         };
 
-        // 登出功能
         function logout() {
             localStorage.removeItem('userEmail');
             localStorage.removeItem('userName');
-            alert('已成功登出！');
+            alert('已成功登出');
             window.location.reload();
         }
 
-        // --- 搜尋功能 ---
         function handleSearch(event) {
             if (event.key === 'Enter') {
                 triggerSearch();
@@ -366,7 +424,6 @@
                 window.location.href = `/scrape?keyword=${encodeURIComponent(input.value.trim())}`;
             }
         }
-
     </script>
     <script src="./chat-widget.js"></script>
 </body>
