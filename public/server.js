@@ -447,6 +447,7 @@ const server = http.createServer(async(req, res) => {
 });
 
 // --- 啟動伺服器 ---
+//安裝 npm install dotenv
 //GitHub\NMDWSM\public> node server.js
 server.listen(PORT, () => {
     console.log(`

@@ -466,7 +466,8 @@
 
     let cpuExcelData = [];
     let currentCpuTdp = 0; 
-    
+
+    let driverLinksData = [];
     // ==========================================
     // 精準取值函數
     // ==========================================
@@ -482,15 +483,16 @@
         return null;
     }
 
-    // ==========================================
-    // 自動讀取同資料夾的 Excel 檔案 (GPU)
+   // ==========================================
+    // 自動讀取同資料夾的 Excel 檔案 (瓦數資料庫 + 驅動連結)
     // ==========================================
     document.addEventListener("DOMContentLoaded", function() {
         const filePath = 'CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx';
         
+        // 1. 讀取瓦數計算資料庫
         fetch(filePath)
             .then(response => {
-                if (!response.ok) throw new Error("找不到檔案");
+                if (!response.ok) throw new Error("找不到瓦數資料庫檔案");
                 return response.arrayBuffer();
             })
             .then(data => {
@@ -514,19 +516,29 @@
                 });
                 
                 document.getElementById('loading-msg').style.display = 'none';
-                
-                // 1. 建立下拉選單
                 populateExcelSelect();
-                
-                // 2. 🟢 嘗試從網址參數自動帶入型號
-                autoSelectModelFromURL();
             })
             .catch(error => {
-                console.error("載入 Excel 失敗:", error);
+                console.error("載入瓦數 Excel 失敗:", error);
                 document.getElementById('loading-msg').innerHTML = '⚠️ 無法自動載入 Excel 檔案，請確認必須使用本機伺服器 (Local Server) 開啟網頁。';
-                document.getElementById('loading-msg').style.color = 'var(--accent-color)';
-                const select = document.getElementById('gpu-power');
-                select.innerHTML = '<option value="">(讀取失敗)</option>';
+                document.getElementById('loading-msg').style.color = 'red';
+            });
+
+        // 👇 2. 讀取專屬驅動程式下載網址 Excel
+        const driverLinkPath = 'GPU_Driver_Links-ExactFormat.xlsx';
+        fetch(driverLinkPath)
+            .then(response => {
+                if (!response.ok) throw new Error("找不到驅動連結檔案");
+                return response.arrayBuffer();
+            })
+            .then(data => {
+                const workbook = XLSX.read(data, {type: 'array'});
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                // 轉換為 JSON 格式儲存於全域變數
+                driverLinksData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+            })
+            .catch(error => {
+                console.error("載入驅動程式 Excel 失敗:", error);
             });
     });
 
@@ -737,7 +749,24 @@
     function searchOfficial() {
         const brand = document.getElementById('brand-select').value;
         const model = document.getElementById('model-input').value.trim();
+        // 👇 1. 優先比對 Excel 裡的專屬驅動程式連結
+        if (model && driverLinksData.length > 0) {
+            // 轉小寫並去除空白，提高防呆配對成功率
+            const searchStr = model.toLowerCase().replace(/\s+/g, '');
+            
+            const foundLink = driverLinksData.find(row => {
+                const rowModel = (row['顯示卡型號'] || '').toLowerCase().replace(/\s+/g, '');
+                return rowModel === searchStr || (rowModel.length > 3 && searchStr.includes(rowModel));
+            });
+
+            // 若找到且有專屬網址，直接開啟該網址並結束函式
+            if (foundLink && foundLink['專屬驅動程式下載網址']) {
+                window.open(foundLink['專屬驅動程式下載網址'], "_blank");
+                return;
+            }
+        }
         
+        // 2. 若 Excel 沒找到專屬連結，執行原本的直達驅動專區邏輯
         if (brand.includes("NVIDIA")) {
             window.open("https://www.nvidia.com/zh-tw/geforce/drivers/", "_blank");
             return;
