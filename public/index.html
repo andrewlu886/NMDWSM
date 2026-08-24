@@ -8,9 +8,11 @@
     <link rel="stylesheet" href="./style.css">
     <style>
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --secondary-color: #0ea5e9;
+            --primary-color: #2563eb;     /* 皇家藍 */
+            --primary-hover: #1d4ed8;     /* 深藍 */
+            --secondary-color: #0284c7;   /* 湛藍 */
+            --tertiary-color: #38bdf8;    /* 天藍 */
+            
             --bg-light: #f8fafc;
             --text-main: #1e293b;
             --text-muted: #64748b;
@@ -20,6 +22,10 @@
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
             --glow-color: rgba(37, 99, 235, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -32,15 +38,35 @@
             overflow-x: hidden;
         }
 
+        /* 頂部 Header 設定為 100% 滿版無縫貼合頂部與左右兩側 */
         header {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 1px 10px rgba(0,0,0,0.05);
             position: sticky;
             top: 0;
+            left: 0;
+            width: 100%;
             z-index: 100;
             transition: all 0.3s ease;
+        }
+
+        /* 最頂部的滿版藍色漸層彩條橫槓 */
+        header::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #1e3a8a, #2563eb, #0284c7, #38bdf8);
+            background-size: 200% 100%;
+            animation: topBarMove 4s ease infinite;
+        }
+
+        @keyframes topBarMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .header-main {
@@ -52,10 +78,13 @@
             padding: 15px 20px;
         }
 
+        /* Logo 藍色漸層文字 */
         .logo {
             font-size: 1.4rem;
             font-weight: 700;
-            color: var(--primary-color);
+            background: linear-gradient(to right, #1d4ed8, #0284c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -109,17 +138,16 @@
         }
 
         .header-actions .auth-btn {
-            background: var(--primary-color);
+            background: linear-gradient(135deg, #1d4ed8, #0284c7);
             color: white;
             padding: 8px 20px;
             border-radius: 20px;
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
         }
         .header-actions .auth-btn:hover {
-            background: var(--primary-hover);
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
             transform: translateY(-1px);
         }
@@ -134,14 +162,17 @@
         #user-display-name { color: var(--text-main) !important; font-weight: 500;}
         .avatar { background: #e2e8f0; padding: 5px; border-radius: 50%; }
         
+        /* 導覽列橫條設定為 100% 滿版填滿畫面兩端 */
         .main-nav {
-            background: linear-gradient(90deg, #1d4ed8, #2563eb, #0ea5e9);
-            background-size: 200% 200%;
-            animation: gradientMove 8s ease infinite;
+            width: 100%;
+            background: linear-gradient(90deg, #1e3a8a, #2563eb, #0284c7, #2563eb);
+            background-size: 300% 300%;
+            animation: gradientMove 10s ease infinite;
             display: flex;
             justify-content: center;
             gap: 2rem;
-            padding: 10px 0;
+            padding: 12px 0;
+            margin: 0;
         }
         
         @keyframes gradientMove {
@@ -151,7 +182,7 @@
         }
 
         .main-nav a {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.95rem;
@@ -175,6 +206,7 @@
         
         .main-nav a:hover {
             color: #ffffff;
+            text-shadow: 0 0 8px rgba(255,255,255,0.4);
         }
         
         .main-nav a:hover::after {
@@ -195,12 +227,13 @@
 
         .hero {
             text-align: center;
-            padding: 4.5rem 2rem;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            padding: 5.5rem 2rem; 
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 58, 138, 0.8) 100%), 
+                        url('https://images.unsplash.com/photo-1587202372634-32705e3bf49c?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
             color: white;
             border-radius: 20px;
             margin-bottom: 3rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
         }
@@ -212,14 +245,20 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 60%);
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 60%);
             animation: pulseGlow 6s ease-in-out infinite alternate;
             pointer-events: none;
+            z-index: 0; 
         }
 
         @keyframes pulseGlow {
             0% { transform: scale(0.8) translate(-10%, -10%); }
             100% { transform: scale(1.2) translate(10%, 10%); }
+        }
+
+        .hero h1, .hero p {
+            position: relative;
+            z-index: 1;
         }
 
         .hero h1 { 
@@ -228,11 +267,19 @@
             margin-top: 0; 
             font-weight: 700; 
             letter-spacing: -0.5px;
-            background: linear-gradient(to right, #ffffff, #93c5fd);
+            background: linear-gradient(to right, #ffffff, #93c5fd, #38bdf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
-        .hero p { font-size: 1.15rem; color: #cbd5e1; max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
+        
+        .hero p { 
+            font-size: 1.15rem; 
+            color: #f1f5f9; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
         
         .features { display: grid; grid-template-columns: 1fr; gap: 2rem; }
         
@@ -254,7 +301,7 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(90deg, #0284c7, #2563eb, #38bdf8);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -284,16 +331,16 @@
             display: block;
             width: 4px;
             height: 24px;
-            background: var(--secondary-color);
+            background: linear-gradient(to bottom, #1d4ed8, #38bdf8);
             border-radius: 2px;
-            box-shadow: 0 0 8px var(--secondary-color);
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
         }
 
         .btn-action {
             display: inline-block;
             width: 100%;
             box-sizing: border-box;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            background: linear-gradient(135deg, #1d4ed8, #0284c7);
             color: white;
             border: none;
             padding: 14px 20px;
@@ -305,7 +352,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .btn-action::after {
@@ -321,7 +368,7 @@
         }
 
         .btn-action:hover { 
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
             transform: translateY(-2px);
         }
 
