@@ -3,14 +3,12 @@
     const submitButton = document.getElementById('recommend-submit');
     const resultDisplay = document.getElementById('result-display');
     const searchInput = document.getElementById('site-search');
-    const searchButton = document.getElementById('site-search-button');
 
     function goToPriceSearch() {
         const keyword = searchInput.value.trim();
         if (keyword) window.location.href = `/scrape?keyword=${encodeURIComponent(keyword)}`;
     }
 
-    searchButton.addEventListener('click', goToPriceSearch);
     searchInput.addEventListener('keydown', (event) => {
         if (event.key === 'Enter') goToPriceSearch();
     });
@@ -82,7 +80,7 @@
             toolsLink.href = `/tools.html?gpu=${encodeURIComponent(item.gpu || '')}&cpu=${encodeURIComponent(item.cpu || '')}`;
             toolsLink.target = '_blank';
             toolsLink.rel = 'noopener noreferrer';
-            toolsLink.textContent = '⚡ 計算整機建議瓦數';
+            toolsLink.textContent = '計算整機建議瓦數';
             actions.appendChild(toolsLink);
             card.appendChild(actions);
 

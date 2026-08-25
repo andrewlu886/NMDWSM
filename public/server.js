@@ -352,6 +352,66 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 500, { success: false, message: '取得統計失敗' });
         }
 
+    } else if (pathname === '/api/valuation' && req.method === 'POST') {
+        setCorsHeaders(res);
+        try {
+            const payload = await parseJsonBody(req);
+            const requiredFields = ['category', 'brand', 'model', 'originalPrice', 'ageMonths', 'condition'];
+            const missingField = requiredFields.find(field => payload[field] === undefined || payload[field] === null || payload[field] === '');
+            if (missingField) {
+                return sendJson(res, 400, { success: false, message: '估價資料不完整，請檢查所有必填欄位。' });
+            }
+
+            const valuationApiUrl = String(process.env.VALUATION_API_URL || '').trim();
+            if (!valuationApiUrl) {
+                return sendJson(res, 503, {
+                    success: false,
+                    code: 'MODEL_NOT_CONFIGURED',
+                    message: '估價頁面已完成，尚未連接定價模型。請設定模型 API 位址。'
+                });
+            }
+
+            const headers = { 'Content-Type': 'application/json' };
+            const valuationApiKey = String(process.env.VALUATION_API_KEY || '').trim();
+            if (valuationApiKey) headers.Authorization = `Bearer ${valuationApiKey}`;
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), Number(process.env.VALUATION_TIMEOUT_MS || 15000));
+            let upstream;
+            try {
+                upstream = await fetch(valuationApiUrl, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+            } finally {
+                clearTimeout(timeout);
+            }
+
+            const rawResponse = await upstream.text();
+            let result;
+            try {
+                result = JSON.parse(rawResponse);
+            } catch {
+                return sendJson(res, 502, { success: false, message: '定價模型回傳了無法辨識的資料格式。' });
+            }
+
+            if (!upstream.ok) {
+                return sendJson(res, 502, {
+                    success: false,
+                    message: result.message || `定價模型服務錯誤（${upstream.status}）。`
+                });
+            }
+
+            sendJson(res, 200, result);
+        } catch (error) {
+            const message = error.name === 'AbortError'
+                ? '定價模型回應逾時，請稍後再試。'
+                : '無法連接定價模型，請確認模型服務正在執行。';
+            sendJson(res, 502, { success: false, message });
+        }
+
     } else if ((pathname === '/api/chat' || pathname === '/api/chat/') && req.method === 'POST') {
         setCorsHeaders(res);
         // log incoming request for debugging client 403 issues
@@ -410,6 +470,7 @@ const server = http.createServer(async(req, res) => {
         else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
         else if (pathname === '/recommend') filePath = path.join(__dirname, 'recommend.html');
         else if (pathname === '/tools') filePath = path.join(__dirname, 'tools.html');
+        else if (pathname === '/valuation') filePath = path.join(__dirname, 'valuation.html');
         const safeFilePath = path.resolve(filePath);
         if (!safeFilePath.startsWith(PUBLIC_DIR + path.sep) && safeFilePath !== PUBLIC_DIR) {
             res.writeHead(403);

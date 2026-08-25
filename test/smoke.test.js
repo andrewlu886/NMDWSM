@@ -35,7 +35,9 @@ test.before(async () => {
     env: {
       ...process.env,
       PORT: String(port),
-      DB_PATH: path.join(tempRoot, 'smoke.db')
+      DB_PATH: path.join(tempRoot, 'smoke.db'),
+      VALUATION_API_URL: '',
+      VALUATION_API_KEY: ''
     },
     stdio: ['ignore', 'ignore', 'pipe'],
     windowsHide: true
@@ -70,7 +72,7 @@ test.after(async () => {
 });
 
 test('保留的網站頁面可以開啟', async () => {
-  for (const pathname of ['/', '/login', '/account.html', '/forum', '/scrape', '/recommend.html', '/benchmark-instructions.html']) {
+  for (const pathname of ['/', '/login', '/account.html', '/forum', '/scrape', '/recommend.html', '/benchmark-instructions.html', '/tools', '/valuation.html', '/valuation']) {
     const response = await request(pathname);
     assert.equal(response.status, 200, pathname);
   }
@@ -134,4 +136,18 @@ test('市價查詢忽略未知平台並保留回應格式', async () => {
   const response = await request('/api/scrape?keyword=RTX4060&platform=unknown');
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { success: true, data: [] });
+});
+
+test('二手硬體估價頁預留模型串接介面', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'cpu',
+    brand: 'Intel',
+    model: 'Core i5-13400F',
+    originalPrice: 6500,
+    ageMonths: 18,
+    warrantyMonths: 6,
+    condition: 'good'
+  });
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).code, 'MODEL_NOT_CONFIGURED');
 });
