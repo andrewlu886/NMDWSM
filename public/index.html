@@ -51,23 +51,6 @@
             z-index: 100;
             transition: all 0.3s ease;
         }
-
-        /* 最頂部的滿版藍色漸層彩條橫槓 */
-        header::before {
-            content: '';
-            display: block;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #1e3a8a, #2563eb, #0284c7, #38bdf8);
-            background-size: 200% 100%;
-            animation: topBarMove 4s ease infinite;
-        }
-
-        @keyframes topBarMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
         
         .header-main {
             display: flex;
@@ -225,17 +208,50 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* --- 大標題區塊與 RGB 特效 --- */
         .hero {
             text-align: center;
             padding: 5.5rem 2rem; 
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 58, 138, 0.8) 100%), 
-                        url('https://images.unsplash.com/photo-1587202372634-32705e3bf49c?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
             color: white;
             border-radius: 20px;
             margin-bottom: 3rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
+            
+            /* 加入透明邊框，為了讓背景底下的漸層露出來 */
+            border: 4px solid transparent;
+
+            /* 拆分為三層背景：深色遮罩、圖片層、RGB漸層跑馬燈邊框 */
+            background-image: 
+                linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 58, 138, 0.8) 100%), 
+                url('https://images.unsplash.com/photo-1587202372634-32705e3bf49c?q=80&w=1200&auto=format&fit=crop'),
+                linear-gradient(90deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-position: center, center, 0% 50%;
+            background-size: cover, cover, 200% 100%;
+            background-repeat: no-repeat;
+            background-clip: padding-box, padding-box, border-box;
+            background-origin: padding-box, padding-box, border-box;
+            
+            /* 加上 RGB 邊框與光暈的動畫 */
+            animation: rgbBorderMove 3s linear infinite, rgbGlow 3s linear infinite;
+        }
+
+        /* RGB 邊框顏色流動動畫 */
+        @keyframes rgbBorderMove {
+            0% { background-position: center, center, 0% 50%; }
+            100% { background-position: center, center, 200% 50%; }
+        }
+
+        /* RGB 邊框陰影外發光循環動畫 */
+        @keyframes rgbGlow {
+            0%   { box-shadow: 0 0 18px #ff0000, inset 0 0 8px #ff0000; }
+            14%  { box-shadow: 0 0 18px #ff7300, inset 0 0 8px #ff7300; }
+            28%  { box-shadow: 0 0 18px #fffb00, inset 0 0 8px #fffb00; }
+            42%  { box-shadow: 0 0 18px #48ff00, inset 0 0 8px #48ff00; }
+            57%  { box-shadow: 0 0 18px #00ffd5, inset 0 0 8px #00ffd5; }
+            71%  { box-shadow: 0 0 18px #002bff, inset 0 0 8px #002bff; }
+            85%  { box-shadow: 0 0 18px #7a00ff, inset 0 0 8px #7a00ff; }
+            100% { box-shadow: 0 0 18px #ff0000, inset 0 0 8px #ff0000; }
         }
 
         .hero::before {
