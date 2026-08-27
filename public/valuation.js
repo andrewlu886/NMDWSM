@@ -15,6 +15,20 @@ const formMessage = document.getElementById('form-message');
 const modelBadge = document.getElementById('model-badge');
 const resultEmpty = document.getElementById('result-empty');
 const resultContent = document.getElementById('result-content');
+const fieldGroups = document.querySelectorAll('.valuation-dynamic-group');
+
+function updateCategoryFields() {
+    const selectedCategory = categoryInput.value;
+
+    fieldGroups.forEach(group => {
+        group.setAttribute('hidden', 'hidden');
+    });
+
+    const activeGroup = document.getElementById(`${selectedCategory}-fields`);
+    if (activeGroup) {
+        activeGroup.removeAttribute('hidden');
+    }
+}
 
 document.querySelectorAll('.category-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -23,10 +37,18 @@ document.querySelectorAll('.category-tab').forEach(tab => {
             item.classList.toggle('active', selected);
             item.setAttribute('aria-selected', String(selected));
         });
-        categoryInput.value = tab.dataset.category;
-        document.getElementById('result-category').textContent = categoryNames[tab.dataset.category];
+
+        const selectedCategory = tab.getAttribute('data-category');
+        if (categoryInput) {
+            categoryInput.value = selectedCategory;
+        }
+
+        document.getElementById('result-category').textContent = categoryNames[selectedCategory];
+        updateCategoryFields();
     });
 });
+
+updateCategoryFields();
 
 form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -35,14 +57,20 @@ form.addEventListener('submit', async event => {
     submitButton.querySelector('span').textContent = '模型估價中...';
 
     const data = new FormData(form);
+    const category = data.get('category'); // 取得當前的分類
+
+    // 動態組合對應分類的 payload 資料
     const payload = {
-        category: data.get('category'),
+        category: category,
         brand: String(data.get('brand') || '').trim(),
         model: String(data.get('model') || '').trim(),
-        originalPrice: Number(data.get('originalPrice')),
-        ageMonths: Number(data.get('ageMonths')),
-        warrantyMonths: Number(data.get('warrantyMonths') || 0),
-        condition: data.get('condition')
+        originalPrice: Number(data.get(`${category}OriginalPrice`)),
+        warrantyMonths: Number(data.get(`${category}WarrantyMonths`) || 0),
+        // 滑鼠與鍵盤專屬欄位
+        usageCondition: data.get(`${category}UsageCondition`),
+        appearanceCondition: data.get(`${category}AppearanceCondition`),
+        // RAM 專屬欄位
+        specialCondition: data.get(`${category}SpecialCondition`)
     };
 
     try {

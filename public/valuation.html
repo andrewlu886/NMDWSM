@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="./valuation.css">
     <link rel="stylesheet" href="./site-theme.css">
+    <!-- 確保隱藏屬性絕對生效 -->
+    <style>
+        .valuation-dynamic-group[hidden] {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -28,7 +34,7 @@
                 </div>
             </div>
         </div>
-        <nav class="main-nav" aria-label="主要導覽">
+        <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/recommend.html">智慧推薦</a>
             <a href="/valuation.html" class="active">二手硬體估價</a>
@@ -48,63 +54,117 @@
             </div>
         </section>
 
-        <section class="valuation-card" aria-labelledby="valuation-heading">
+        <section class="valuation-card">
             <div class="valuation-heading-row">
                 <div>
-                    <h2 id="valuation-heading">選擇硬體種類</h2>
+                    <h2>選擇硬體種類</h2>
                     <p>先選擇分類，再填寫模型需要的基本資料。</p>
                 </div>
                 <span class="model-badge" id="model-badge">模型待連接</span>
             </div>
 
-            <div class="category-tabs" role="tablist" aria-label="硬體種類">
-                <button type="button" class="category-tab active" role="tab" aria-selected="true" data-category="cpu">CPU</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="gpu">顯示卡</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="ram">記憶體</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="ssd">SSD</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="motherboard">主機板</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="mouse">滑鼠</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="keyboard">鍵盤</button>
+            <!-- 移除了 SSD，保留 CPU, GPU, RAM, 主機板, 滑鼠, 鍵盤 -->
+            <div class="category-tabs" role="tablist">
+                <button type="button" class="category-tab active" role="tab" data-category="cpu">CPU</button>
+                <button type="button" class="category-tab" role="tab" data-category="gpu">顯示卡</button>
+                <button type="button" class="category-tab" role="tab" data-category="motherboard">主機板</button>
+                <button type="button" class="category-tab" role="tab" data-category="ram">記憶體</button>
+                <button type="button" class="category-tab" role="tab" data-category="mouse">滑鼠</button>
+                <button type="button" class="category-tab" role="tab" data-category="keyboard">鍵盤</button>
             </div>
 
             <div class="valuation-layout">
                 <form id="valuation-form" class="valuation-form">
                     <input type="hidden" id="category" name="category" value="cpu">
 
+                    <!-- 通用基礎欄位：型號與品牌 -->
                     <div class="field full-width">
                         <label for="model">完整型號</label>
                         <input id="model" name="model" type="text" required placeholder="例如：Intel Core i5-13400F">
-                        <span class="field-hint">請盡量輸入完整型號，估價結果會更準確。</span>
                     </div>
-
                     <div class="field">
                         <label for="brand">品牌</label>
                         <input id="brand" name="brand" type="text" required placeholder="例如：Intel">
                     </div>
 
-                    <div class="field">
-                        <label for="original-price">新品參考價（NTD）</label>
-                        <input id="original-price" name="originalPrice" type="number" min="0" step="1" required placeholder="例如：6500">
+                    <!-- 1. CPU / 一般核心硬體專屬區塊 -->
+                    <div id="cpu-fields" class="valuation-dynamic-group full-width">
+                        <div class="field">
+                            <label>原始價格（NTD）</label>
+                            <input name="cpuOriginalPrice" type="number" min="0" step="1" placeholder="例如：6500">
+                        </div>
+                        <div class="field">
+                            <label>保固月份（到保固期還有多久）</label>
+                            <input name="cpuWarrantyMonths" type="number" min="0" step="1" value="0">
+                        </div>
                     </div>
 
-                    <div class="field">
-                        <label for="age-months">使用時間（月）</label>
-                        <input id="age-months" name="ageMonths" type="number" min="0" max="240" step="1" required placeholder="例如：18">
+                    <!-- 2. RAM 專屬區塊 -->
+                    <div id="ram-fields" class="valuation-dynamic-group full-width" hidden>
+                        <div class="field">
+                            <label>原始價格（NTD）</label>
+                            <input name="ramOriginalPrice" type="number" min="0" step="1">
+                        </div>
+                        <div class="field full-width">
+                            <label>特殊的規格或損耗（非功能性故障）</label>
+                            <input name="ramSpecialCondition" type="text" placeholder="例如：散熱片輕微刮傷、RGB 燈效偏黃...">
+                        </div>
                     </div>
 
-                    <div class="field">
-                        <label for="warranty-months">剩餘保固（月）</label>
-                        <input id="warranty-months" name="warrantyMonths" type="number" min="0" max="120" step="1" value="0">
+                    <!-- 3. 滑鼠專屬區塊 -->
+                    <div id="mouse-fields" class="valuation-dynamic-group full-width" hidden>
+                        <div class="field">
+                            <label>原始價格（NTD）</label>
+                            <input name="mouseOriginalPrice" type="number" min="0" step="1">
+                        </div>
+                        <div class="field">
+                            <label>保固月份（到保固期還有多久）</label>
+                            <input name="mouseWarrantyMonths" type="number" min="0" step="1" value="0">
+                        </div>
+                        <div class="field full-width">
+                            <label>使用損耗程度</label>
+                            <select name="mouseUsageCondition">
+                                <option value="good">正常</option>
+                                <option value="minor">輕微損耗 (如：微動偏軟)</option>
+                                <option value="heavy">嚴重損耗 (如：連點、滾輪失靈)</option>
+                            </select>
+                        </div>
+                        <div class="field full-width">
+                            <label>外觀損耗程度</label>
+                            <select name="mouseAppearanceCondition">
+                                <option value="good">正常痕跡</option>
+                                <option value="minor">輕微打油/掉漆</option>
+                                <option value="heavy">嚴重破損/發黏</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="field full-width">
-                        <label for="condition">商品狀況</label>
-                        <select id="condition" name="condition" required>
-                            <option value="excellent">近全新，外觀與功能正常</option>
-                            <option value="good" selected>正常使用，有輕微使用痕跡</option>
-                            <option value="fair">明顯使用痕跡，功能正常</option>
-                            <option value="needs_repair">功能異常或需要維修</option>
-                        </select>
+                    <!-- 4. 鍵盤專屬區塊 -->
+                    <div id="keyboard-fields" class="valuation-dynamic-group full-width" hidden>
+                        <div class="field">
+                            <label>原始價格（NTD）</label>
+                            <input name="keyboardOriginalPrice" type="number" min="0" step="1">
+                        </div>
+                        <div class="field">
+                            <label>保固月份（到保固期還有多久）</label>
+                            <input name="keyboardWarrantyMonths" type="number" min="0" step="1" value="0">
+                        </div>
+                        <div class="field full-width">
+                            <label>使用損耗程度</label>
+                            <select name="keyboardUsageCondition">
+                                <option value="good">正常</option>
+                                <option value="minor">輕微損耗 (如：個別按鍵手感變差)</option>
+                                <option value="heavy">嚴重損耗 (如：卡鍵、失靈)</option>
+                            </select>
+                        </div>
+                        <div class="field full-width">
+                            <label>外觀損耗程度</label>
+                            <select name="keyboardAppearanceCondition">
+                                <option value="good">正常痕跡</option>
+                                <option value="minor">鍵帽打油/輕微掉字</option>
+                                <option value="heavy">外殼破損/生鏽</option>
+                            </select>
+                        </div>
                     </div>
 
                     <button class="valuation-submit full-width" id="valuation-submit" type="submit">
@@ -113,6 +173,7 @@
                     <p class="form-message full-width" id="form-message" aria-live="polite"></p>
                 </form>
 
+                <!-- 右側估價結果 -->
                 <aside class="valuation-result" aria-live="polite">
                     <div class="result-empty" id="result-empty">
                         <span class="result-icon">⌁</span>
@@ -120,21 +181,12 @@
                         <p>完成左側欄位後，模型估價會顯示在這裡。</p>
                     </div>
                     <div class="result-content" id="result-content" hidden>
-                        <p class="result-label">模型估計價格</p>
+                        <!-- 加上 result-category -->
+                        <p class="result-label">模型估計價格 (<span id="result-category">CPU</span>)</p> 
                         <p class="result-price" id="result-price">NT$ 0</p>
-                        <div class="result-range">
-                            <span>建議價格區間</span>
-                            <strong id="result-range">—</strong>
-                        </div>
-                        <div class="result-meta">
-                            <span>硬體種類</span>
-                            <strong id="result-category">CPU</strong>
-                        </div>
-                        <div class="result-meta">
-                            <span>模型信心度</span>
-                            <strong id="result-confidence">—</strong>
-                        </div>
-                        <p class="result-note">估價僅供行情參考，實際價格仍會受到配件完整度、保固與市場供需影響。</p>
+                        <!-- 加上 result-range 與 result-confidence -->
+                        <p>價格區間: <span id="result-range">未提供</span></p>
+                        <p>模型信心度: <span id="result-confidence">未提供</span></p>
                     </div>
                 </aside>
             </div>
