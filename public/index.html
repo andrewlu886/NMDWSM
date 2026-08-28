@@ -170,21 +170,22 @@
             font-weight: 500;
             font-size: 0.95rem;
             position: relative;
-            padding: 4px 0;
+            padding: 6px 0; /* 增加留白，讓加粗的底線有足夠空間顯示 */
             transition: color 0.3s ease;
         }
 
+        /* ----- 底邊選取特效加粗且保留特效 ----- */
         .main-nav a::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: 0; /* 對齊至 padding 底部，確保不會被切掉 */
             left: 50%;
-            width: 0;
-            height: 2px;
+            width: 0;  /* 預設為 0，透過 hover 觸發展開特效 */
+            height: 4px; /* 將特效加粗為 4px */
             background: #ffffff;
             transition: all 0.3s ease;
             transform: translateX(-50%);
-            border-radius: 2px;
+            border-radius: 4px; /* 圓潤效果 */
         }
         
         .main-nav a:hover {
@@ -193,7 +194,7 @@
         }
         
         .main-nav a:hover::after {
-            width: 100%;
+            width: 100%; /* 滑鼠移入時底線展開 */
         }
 
         .container { 
