@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>討論區 | 一次買夠</title>
-    <!-- 引入與 index.html 相同的 Google 字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     <style>
@@ -34,6 +33,32 @@
         }
 
         /* --- 主導覽列 (Main Nav) 狀態修正 --- */
+        .main-nav a {
+            position: relative;
+            padding: 6px 0; /* 增加留白，讓加粗的底線有足夠空間顯示 */
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        /* ----- 底邊選取特效加粗且保留特效 ----- */
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0; /* 對齊至 padding 底部 */
+            left: 50%;
+            width: 0;  /* 預設為 0，透過 hover 觸發展開特效 */
+            height: 4px; /* 特效加粗為 4px */
+            background: #ffffff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 4px; /* 圓潤效果 */
+        }
+
+        .main-nav a:hover::after,
+        .main-nav a.active::after {
+            width: 100%; /* 滑鼠移入，或是目前所在頁面（active）時展開底線 */
+        }
+
         .main-nav a.active {
             color: #ffffff !important; /* 確保白色文字 */
             text-shadow: 0 0 8px rgba(255,255,255,0.4);
@@ -314,7 +339,7 @@
             .btn { width: auto; font-size: 0.9rem; padding: 8px 16px;}
         }
 
-        /* --- 登入 / 註冊 按鈕文字顏色修正 (大約第 230 行) --- */
+        /* --- 登入 / 註冊 按鈕文字顏色修正 --- */
         .auth-btn {
             color: #ffffff !important; /* 強制設定為白色 */
             text-decoration: none;     /* 移除超連結底線 */
