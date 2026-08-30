@@ -1,4 +1,40 @@
 (function () {
+    // --- 0. 動態注入 CSS 樣式 ---
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* 按鈕樣式：用於將 Markdown 連結轉換為視覺化導航按鈕 */
+        .ai-valuation-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background-color: #2563eb; /* 主題藍色 */
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .ai-valuation-btn:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        
+        .ai-valuation-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* 確保連結換行，視覺上更像獨立按鈕 */
+        .ai-chat-message.assistant p a.ai-valuation-btn {
+            display: block;
+            width: fit-content;
+        }
+    `;
+    document.head.appendChild(style);
+
     const widget = document.createElement('div');
     widget.className = 'ai-chat-widget';
     
@@ -147,16 +183,33 @@
                 messages.removeChild(loadingMessage);
             }
 
-            // --- 3. 顯示 AI 的回覆 ---
+            // --- 3. 顯示 AI 的回覆與解析 Markdown 按鈕 ---
             const aiMessage = document.createElement('div');
             aiMessage.className = 'ai-chat-message assistant';
             
             const aiText = document.createElement('p');
+            // 保留原本文字的換行格式，但允許內部 HTML 渲染
             aiText.style.whiteSpace = 'pre-wrap'; 
 
             if (data.success) {
-                aiText.textContent = data.answer;
-                // 將 AI 回覆加入歷史紀錄
+                // 安全跳脫一般文字，防止 XSS，但容許後續注入 a 標籤
+                const escapeHTML = (str) => {
+                    const div = document.createElement('div');
+                    div.textContent = str;
+                    return div.innerHTML;
+                };
+                
+                let safeHTML = escapeHTML(data.answer);
+                
+                // 正規表達式解析 [按鈕文字](網址) 為帶有 class 的 a 標籤
+                safeHTML = safeHTML.replace(
+                    /\[([^\]]+)\]\(([^)]+)\)/g, 
+                    '<a href="$2" class="ai-valuation-btn" target="_blank" rel="noopener noreferrer">$1</a>'
+                );
+
+                aiText.innerHTML = safeHTML;
+                
+                // 將 AI 原始的文字回覆加入歷史紀錄，確保上下文不帶有 HTML
                 chatHistory.push({ role: 'assistant', content: data.answer });
             } else {
                 aiText.textContent = `⚠️ 發生錯誤：${data.message}`;
