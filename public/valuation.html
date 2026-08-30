@@ -444,7 +444,7 @@
 
                     // 2. 定義起價係數 (Start Ratio，t=0拆封時的殘值係數)
                     // 雙正常總合 = 1.0 (原價起算)
-                    // 雙輕微總合 = 0.58 (微調以符合目標 300 元)
+                    // 雙輕微總合 = 0.58 
                     let startApp = appearanceCondition === 'good' ? 0.6 : (appearanceCondition === 'minor' ? 0.33 : 0.15);
                     let startUsage = usageCondition === 'good' ? 0.4 : (usageCondition === 'minor' ? 0.25 : 0.1);
                     let startRatio = startApp + startUsage;
@@ -452,7 +452,7 @@
 
                     // 3. 邊際遞減運算
                     // 提高衰減常數 k，讓 24 個月時的折舊精準落在目標價位
-                    const k = 0.0435; 
+                    const k = 0.042; 
                     estimatedPrice = pFloor + (pStart - pFloor) * Math.exp(-k * t);
                 }
 
