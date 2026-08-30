@@ -13,6 +13,49 @@
         .valuation-dynamic-group[hidden] {
             display: none !important;
         }
+
+        /* 頂部導覽列：當前頁面與懸停/選擇其他標籤時皆顯示白色底線 */
+        .main-nav a.active,
+        .main-nav a:hover {
+            font-weight: bold !important;
+            border-bottom: 2px solid #ffffff !important;
+            padding-bottom: 4px;
+        }
+
+        /* 基礎標籤樣式調整：去除原本的按鈕框線與背景，為底線特效做準備 */
+        .category-tab {
+            background-color: transparent !important;
+            color: #6b7280 !important; /* 預設灰字 */
+            border: none !important;
+            border-bottom: 2px solid transparent !important;
+            box-shadow: none !important;
+            padding-bottom: 4px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* 分類標籤：懸停滑過特效 (改為底線特效) */
+        .category-tab:hover {
+            color: #2563eb !important;
+            border-bottom: 2px solid #2563eb !important;
+            font-weight: bold !important;
+        }
+
+        /* 分類標籤：點擊選中啟用特效 (改為底線特效) */
+        .category-tab.active {
+            color: #2563eb !important;
+            border-bottom: 2px solid #2563eb !important;
+            font-weight: bold !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* 輸入框點擊聚焦特效 (與 Login 表單一致) */
+        .field input:focus, .field select:focus, .nav-search:focus {
+            border-color: #3b82f6 !important;
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+            background-color: #ffffff !important;
+        }
     </style>
 </head>
 <body>
@@ -181,10 +224,8 @@
                         <p>完成左側欄位後，模型估價會顯示在這裡。</p>
                     </div>
                     <div class="result-content" id="result-content" hidden>
-                        <!-- 加上 result-category -->
-                        <p class="result-label">模型估計價格 (<span id="result-category">CPU</span>)</p> 
+                        <p class="result-label">模型估計價格 (<span id="result-category">CPU</span>)</p>
                         <p class="result-price" id="result-price">NT$ 0</p>
-                        <!-- 加上 result-range 與 result-confidence -->
                         <p>價格區間: <span id="result-range">未提供</span></p>
                         <p>模型信心度: <span id="result-confidence">未提供</span></p>
                     </div>

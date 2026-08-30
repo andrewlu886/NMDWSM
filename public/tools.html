@@ -14,41 +14,58 @@
            ========================================== */
         :root {
             --primary-blue: #3498db;      /* 亮藍色 */
-            --nav-bg: #1a4b8c;           /* 導覽列深藍色 */
+            --nav-bg: rgba(26, 75, 140, 0.85); /* 導覽列深藍色 (改為微透) */
             --nav-hover: #2980b9;        /* 導覽列 Hover 色 */
             
-            --bg-main: #ffffff;          /* 全站背景純白 */
-            --card-bg: #ffffff;          /* 卡片背景純白 */
+            --bg-main: #f4f7f6;          /* 全站背景 (改為漸層基礎) */
             --text-main: #1a1a1a;        /* 主要文字變深黑 */
             --text-muted: #666666;       /* 次要文字變中灰 */
-            --border-color: #e1e1e1;     /* 邊框淺灰 */
+            --border-color: rgba(225, 225, 225, 0.6); /* 邊框淺灰改為微透明 */
             --accent-color: #e74c3c;     /* 強調色 (警告或重點) */
         }
 
         /* ==========================================
-           全域與排版設定
+           全域與排版設定 (加入動態漸層背景)
            ========================================== */
         body {
             font-family: 'Noto Sans TC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-main);
             color: var(--text-main);
             margin: 0;
             padding: 0;
             -webkit-font-smoothing: antialiased;
+            /* 動態漸層背景 */
+            background: linear-gradient(-45deg, #f0f4f8, #e0eafc, #cfdef3, #e6e9f0);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .container {
             max-width: 900px;
             margin: 40px auto;
             padding: 0 20px;
+            position: relative;
+            z-index: 1;
         }
 
         /* ==========================================
-           網站導覽列 (Header & Nav) 樣式 - 深藍色風格
+           網站導覽列 (Header & Nav) 樣式 - 毛玻璃深藍色風格
            ========================================== */
         header {
             background-color: var(--nav-bg);
             color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         .header-main {
             display: flex;
@@ -66,26 +83,38 @@
             display: flex;
             align-items: center;
             letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+        
+        /* 搜尋框 - 質感立體與微透視 */
         .search-wrapper {
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05);
             width: 45%;
             max-width: 400px;
+            transition: all 0.3s ease;
+        }
+        .search-wrapper:focus-within {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 4px 12px rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.5);
         }
         .nav-search {
             border: none;
-            padding: 8px 12px;
+            padding: 10px 14px;
             outline: none;
             background: transparent;
             color: white;
             width: 100%;
+            font-size: 0.95rem;
         }
         .nav-search::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.7);
         }
         .search-btn {
             background: transparent;
@@ -94,6 +123,7 @@
             padding: 0 10px;
             cursor: pointer;
         }
+        
         .header-actions {
             display: flex;
             align-items: center;
@@ -103,6 +133,10 @@
             color: white;
             text-decoration: none;
             font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        .auth-btn:hover {
+            opacity: 0.8;
         }
         #user-profile {
             display: none; /* 未登入預設隱藏 */
@@ -112,12 +146,14 @@
             position: relative;
             gap: 10px;
         }
+        
+        /* 次要導覽列 - 展開底線動畫 */
         .main-nav {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 25px;
             padding: 0 20px;
-            background-color: rgba(0, 0, 0, 0.1); /* 區隔次要導覽列 */
+            background-color: rgba(0, 0, 0, 0.15);
             height: 45px;
             align-items: center;
         }
@@ -126,120 +162,181 @@
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 8px 4px;
+            position: relative;
             transition: 0.3s;
+            opacity: 0.85;
         }
         .main-nav a:hover, .main-nav a.active {
-            background-color: var(--nav-hover);
+            opacity: 1;
+            background-color: transparent; /* 移除原本的色塊背景 */
+        }
+        /* 展開底線動畫核心 */
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+            border-radius: 3px 3px 0 0;
+            box-shadow: 0 -1px 5px rgba(255,255,255,0.5);
+        }
+        .main-nav a:hover::after, .main-nav a.active::after {
+            width: 100%;
         }
 
         /* ==========================================
-           卡片與工具區塊樣式
+           卡片與工具區塊樣式 (毛玻璃、微透視與立體陰影)
            ========================================== */
         .header-title {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            position: relative;
         }
         .header-title h1 {
             color: var(--text-main);
             margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+            /* 移除原本的 text-shadow 發光特效 */
         }
         .header-title p {
             color: var(--text-muted);
             margin-top: 0;
+            font-size: 1.1rem;
         }
         
+        /* 毛玻璃卡片主體 */
         .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* 加深陰影以利在白底中突顯 */
-            border: 1px solid var(--border-color); /* 淺灰邊框 */
-            padding: 30px;
-            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.75); /* 半透明背景 */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 16px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.05),
+                0 5px 15px rgba(0, 0, 0, 0.03),
+                inset 0 0 2px 1px rgba(255, 255, 255, 0.9); /* 內部微光增加立體感 */
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 35px;
+            margin-bottom: 35px;
+            transform: translateY(0);
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
         }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                0 8px 20px rgba(0, 0, 0, 0.04),
+                inset 0 0 2px 1px rgba(255, 255, 255, 1);
+        }
+        
         .card h2 {
             margin-top: 0;
             color: var(--text-main);
-            border-bottom: 2px solid var(--primary-blue);
-            padding-bottom: 10px;
-            display: inline-block;
-            font-size: 1.5rem;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(to right, var(--primary-blue), transparent) 1;
+            padding-bottom: 12px;
+            font-size: 1.6rem;
+            margin-bottom: 25px;
         }
+        
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            color: var(--text-main);
+            color: #333;
             font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
+        
+        /* 輸入框也融入毛玻璃風格 */
         .card select, .card input {
             width: 100%;
-            padding: 12px 10px;
+            padding: 14px 12px;
             border: 1px solid var(--border-color);
-            background-color: #fdfdfd;
-            border-radius: 6px;
-            font-size: 1.15rem;
+            background-color: rgba(253, 253, 253, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 8px;
+            font-size: 1.05rem;
             font-family: inherit;
             color: var(--text-main);
             box-sizing: border-box;
-            transition: 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
         }
         .card select:focus, .card input[type="text"]:focus, .card input[type="number"]:focus {
             outline: none;
             border-color: var(--primary-blue);
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15), inset 0 1px 3px rgba(0,0,0,0.02);
+            background-color: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
         }
         
+        /* 特效按鈕 */
         .card button {
-            background-color: var(--primary-blue);
+            background: linear-gradient(135deg, var(--primary-blue), #2980b9, #1a4b8c);
+            background-size: 200% 200%;
             color: #fff;
             border: none;
-            padding: 14px 20px;
-            border-radius: 6px;
+            padding: 16px 20px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: bold;
+            letter-spacing: 1px;
             width: 100%;
-            transition: 0.3s;
-            margin-top: 10px;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: hidden;
         }
         .card button:hover {
-            background-color: var(--nav-hover);
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        }
+        .card button:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3);
         }
         
-        /* 結果顯示區塊 */
+        /* 結果顯示區塊 - 透視立體卡片 */
         .result-box {
-            margin-top: 20px;
-            padding: 18px;
-            background: #f4f9fc;
-            border-left: 5px solid var(--primary-blue);
-            border-radius: 6px;
-            border-top: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
+            margin-top: 25px;
+            padding: 22px;
+            background: rgba(244, 249, 252, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(255,255,255,0.6);
+            border-left: 6px solid var(--primary-blue);
             display: none;
             color: var(--text-main);
+            position: relative;
         }
         .result-box strong {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: var(--accent-color);
+            text-shadow: 0 1px 2px rgba(231, 76, 60, 0.2);
         }
         
         /* Excel 讀取詳細規格區塊 */
         .excel-details {
-            background: #fcfcfc; 
-            border-left: 5px solid #f39c12;
-            margin-bottom: 20px;
+            background: rgba(252, 252, 252, 0.65);
+            border-left: 6px solid #f39c12;
+            margin-bottom: 25px;
         }
         .excel-details p {
-            margin: 10px 0;
-            border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 8px;
+            margin: 12px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.08);
+            padding-bottom: 10px;
             font-size: 0.95rem;
         }
         .excel-details p:last-child {
@@ -248,21 +345,22 @@
         .excel-details span {
             color: var(--primary-blue);
             font-weight: bold;
+            font-size: 1.05rem;
         }
         
         #loading-msg {
             color: #e67e22;
             font-size: 0.9rem;
-            margin-top: 8px;
+            margin-top: 10px;
             font-weight: 500;
         }
         .component-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
+            gap: 25px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(0,0,0,0.06);
         }
         
         /* ==========================================
@@ -271,7 +369,7 @@
         @media (max-width: 768px) {
             .component-grid {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 15px;
             }
             .header-main {
                 flex-direction: column;
@@ -285,6 +383,10 @@
                 justify-content: flex-start;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                padding-bottom: 2px;
+            }
+            .card {
+                padding: 25px 20px;
             }
         }
     </style>
@@ -354,7 +456,8 @@
                     <option value="125 - 中高階 (約 125W)"></option>
                     <option value="250 - 旗艦級 (約 250W+)"></option>
                 </datalist>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇或輸入估算值；輸入時請以開頭數字（例如「65」）作為瓦數。</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇或輸入估算值；輸入時請以開頭數字（例如「65」）作為瓦數。</p>
+            </div>
 
         <div class="form-group">
             <label>顯示卡 (GPU) 型號</label>
@@ -397,7 +500,7 @@
                 <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
                     <label>儲存硬碟數量 (HDD / SSD 總數)</label>
                     <input type="number" id="hdd-count" min="0" max="20" value="1" onchange="autoCalculate()" onkeyup="autoCalculate()">
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">* 單顆硬碟以 10W 作為安全估算值。</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">* 單顆硬碟以 10W 作為安全估算值。</p>
                 </div>
             </div>
             
@@ -406,14 +509,14 @@
             <div id="power-result" class="result-box">
                 系統滿載預估功耗：<span id="total-watt" style="font-weight:bold; color:var(--primary-blue);">0</span> W <br>
                 電源供應器 (PSU) 建議選購：<strong><span id="recommend-watt">0</span> W 以上</strong>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px; line-height: 1.5;">* 建議瓦數已加入安全冗餘 (預估功耗 x 1.3 倍)。<strong>若顯示卡原廠建議瓦數較高，系統將優先採納原廠建議</strong>，確保高負載下系統穩定並保留升級空間。</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px; line-height: 1.6;">* 建議瓦數已加入安全冗餘 (預估功耗 x 1.3 倍)。<strong>若顯示卡原廠建議瓦數較高，系統將優先採納原廠建議</strong>，確保高負載下系統穩定並保留升級空間。</p>
             </div>
         </div>
 
         <!-- 區塊 2：官網查詢 -->
         <div class="card">
             <h2>驅動程式查詢</h2>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">輸入您的硬體型號，系統將為您生成精準的<strong>台灣官方技術支援</strong>搜尋連結。</p>
             
             <div class="form-group">
                 <label>廠牌 (品牌)</label>
@@ -465,7 +568,7 @@
     let currentGpuPsu = 0;
 
     let cpuExcelData = [];
-    let currentCpuTdp = 0; 
+    let currentCpuTdp = 0;
 
     let driverLinksData = [];
     // ==========================================
@@ -510,9 +613,9 @@
                     }
                 }
 
-                gpuExcelData = XLSX.utils.sheet_to_json(worksheet, { 
-                    range: headerRowIndex, 
-                    defval: "" 
+                gpuExcelData = XLSX.utils.sheet_to_json(worksheet, {
+                    range: headerRowIndex,
+                    defval: ""
                 });
                 
                 document.getElementById('loading-msg').style.display = 'none';
@@ -605,8 +708,8 @@
 
             if (tdp) {
                 document.getElementById('ex-tdp').innerText = tdp + (String(tdp).includes('W') ? '' : ' W');
-                const tdpMatch = String(tdp).match(/\d+/); 
-                currentGpuTdp = tdpMatch ? parseInt(tdpMatch[0]) : 0; 
+                const tdpMatch = String(tdp).match(/\d+/);
+                currentGpuTdp = tdpMatch ? parseInt(tdpMatch[0]) : 0;
             } else {
                 document.getElementById('ex-tdp').innerText = '無資料';
                 currentGpuTdp = 0;
@@ -714,7 +817,7 @@
     // ==========================================
     function calculatePower() {
         const cpuW = currentCpuTdp > 0 ? currentCpuTdp : (parseInt(document.getElementById('cpu-power').value) || 0);
-        const gpuW = currentGpuTdp; 
+        const gpuW = currentGpuTdp;
         
         const mbW = parseInt(document.getElementById('mb-power').value) || 0;
         const fanW = parseInt(document.getElementById('fan-power').value) || 0;
@@ -724,7 +827,7 @@
         
         const totalW = cpuW + gpuW + mbW + fanW + hddW;
         
-        let recommendW = Math.ceil((totalW * 1.3) / 50) * 50; 
+        let recommendW = Math.ceil((totalW * 1.3) / 50) * 50;
         
         if(recommendW < 400) recommendW = 400;
 
