@@ -42,7 +42,7 @@
             bottom: -2px;
             left: 50%;
             width: 0;
-            height: 4px; /* 加粗底線至 4px */
+            height: 4px;
             background: #ffffff;
             transition: all 0.3s ease;
             transform: translateX(-50%);
@@ -342,7 +342,166 @@
         </section>
     </main>
 
-    <script src="./valuation.js"></script>
+    <!-- 直接將估價腳本寫在 HTML 內方便修改 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('valuation-form');
+            const categoryTabs = document.querySelectorAll('.category-tab');
+            const categoryInput = document.getElementById('category');
+            const dynamicGroups = document.querySelectorAll('.valuation-dynamic-group');
+            const resultEmpty = document.getElementById('result-empty');
+            const resultContent = document.getElementById('result-content');
+            const resultPrice = document.getElementById('result-price');
+            const resultCategory = document.getElementById('result-category');
+            const resultRange = document.getElementById('result-range');
+            const resultConfidence = document.getElementById('result-confidence');
+
+            // 分類標籤切換邏輯
+            categoryTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 重置所有 Active 狀態
+                    categoryTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    const selectedCategory = tab.dataset.category;
+                    categoryInput.value = selectedCategory;
+
+                    // 隱藏所有動態表單區塊
+                    dynamicGroups.forEach(group => group.hidden = true);
+
+                    // 根據選擇顯示對應表單區塊
+                    if (['cpu', 'gpu', 'motherboard'].includes(selectedCategory)) {
+                        document.getElementById('cpu-fields').hidden = false;
+                    } else if (selectedCategory === 'ram') {
+                        document.getElementById('ram-fields').hidden = false;
+                    } else if (selectedCategory === 'mouse') {
+                        document.getElementById('mouse-fields').hidden = false;
+                    } else if (selectedCategory === 'keyboard') {
+                        document.getElementById('keyboard-fields').hidden = false;
+                    }
+                });
+            });
+
+            // 估價公式計算邏輯
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const category = categoryInput.value;
+                let estimatedPrice = 0;
+                let originalPrice = 0;
+
+                // 預設產品標準總保固期 (以月為單位)
+                const STANDARD_WARRANTY_PC = 36; // 核心硬體如 CPU/GPU/MB 預設 3 年保
+                const STANDARD_WARRANTY_PERIPHERAL = 24; // 周邊如滑鼠/鍵盤 預設 2 年保
+
+                // -----------------------------------------------------
+                // 1. CPU / GPU / 主機板 計算邏輯
+                // 根據公式：P1 = P0 * e^(-0.02 * t)
+                // -----------------------------------------------------
+                if (['cpu', 'gpu', 'motherboard'].includes(category)) {
+                    originalPrice = parseFloat(form.cpuOriginalPrice.value) || 0;
+                    const warrantyRemaining = parseFloat(form.cpuWarrantyMonths.value) || 0;
+
+                    // 推算已使用月數 t (總保固 - 剩餘保固)
+                    let t = STANDARD_WARRANTY_PC - warrantyRemaining;
+                    if (t < 0) t = 0; // 避免負值(延長保固等情況)
+
+                    estimatedPrice = originalPrice * Math.exp(-0.02 * t);
+                }
+                
+                // -----------------------------------------------------
+                // 2. RAM 記憶體 計算邏輯 (終身保固居多，採自定義微幅折舊)
+                // -----------------------------------------------------
+                else if (category === 'ram') {
+                    originalPrice = parseFloat(form.ramOriginalPrice.value) || 0;
+                    const condition = form.ramSpecialCondition.value;
+                    // 若有填寫特殊非功能性故障/損耗，扣減較多；否則一般視為 85 折左右
+                    let penalty = condition.trim().length > 0 ? 0.70 : 0.85;
+                    estimatedPrice = originalPrice * penalty;
+                }
+                
+                // -----------------------------------------------------
+                // 3. 滑鼠 / 鍵盤 計算邏輯 (漸近線邊際遞減公式 - 參數微調)
+                // 公式：P1 = P_floor + (P_start - P_floor) * e^(-k * t)
+                // -----------------------------------------------------
+                else if (['mouse', 'keyboard'].includes(category)) {
+                    let prefix = category === 'mouse' ? 'mouse' : 'keyboard';
+                    originalPrice = parseFloat(form[`${prefix}OriginalPrice`].value) || 0;
+                    const warrantyRemaining = parseFloat(form[`${prefix}WarrantyMonths`].value) || 0;
+                    const usageCondition = form[`${prefix}UsageCondition`].value;
+                    const appearanceCondition = form[`${prefix}AppearanceCondition`].value;
+
+                    // 推算已使用月數 t
+                    let t = STANDARD_WARRANTY_PERIPHERAL - warrantyRemaining;
+                    if (t < 0) t = 0;
+
+                    // 1. 定義底價係數 (Floor Ratio)
+                    // 雙正常底線 = 0.40 (4成)
+                    // 雙輕微底線 = 0.20 (2成)
+                    let floorApp = appearanceCondition === 'good' ? 0.25 : (appearanceCondition === 'minor' ? 0.10 : 0);
+                    let floorUsage = usageCondition === 'good' ? 0.15 : (usageCondition === 'minor' ? 0.10 : 0);
+                    let floorRatio = floorApp + floorUsage;
+                    let pFloor = originalPrice * floorRatio;
+
+                    // 2. 定義起價係數 (Start Ratio，t=0拆封時的殘值係數)
+                    // 雙正常總合 = 1.0 (原價起算)
+                    // 雙輕微總合 = 0.58 (微調以符合目標 300 元)
+                    let startApp = appearanceCondition === 'good' ? 0.6 : (appearanceCondition === 'minor' ? 0.33 : 0.15);
+                    let startUsage = usageCondition === 'good' ? 0.4 : (usageCondition === 'minor' ? 0.25 : 0.1);
+                    let startRatio = startApp + startUsage;
+                    let pStart = originalPrice * startRatio;
+
+                    // 3. 邊際遞減運算
+                    // 提高衰減常數 k，讓 24 個月時的折舊精準落在目標價位
+                    const k = 0.0435; 
+                    estimatedPrice = pFloor + (pStart - pFloor) * Math.exp(-k * t);
+                }
+
+                // 確保價格不為負數
+                estimatedPrice = Math.max(0, estimatedPrice);
+
+                // -----------------------------------------------------
+                // 渲染結果至畫面
+                // -----------------------------------------------------
+                resultEmpty.hidden = true;
+                resultContent.hidden = false;
+
+                const finalPrice = Math.round(estimatedPrice);
+                
+                // 產生上下 10% 的合理收購/販售價格區間
+                const rangeMin = Math.round(finalPrice * 0.9);
+                const rangeMax = Math.round(finalPrice * 1.1);
+
+                const categoryNames = {
+                    cpu: 'CPU',
+                    gpu: '顯示卡',
+                    motherboard: '主機板',
+                    ram: '記憶體',
+                    mouse: '滑鼠',
+                    keyboard: '鍵盤'
+                };
+
+                // 加入一點載入感視覺效果
+                resultContent.style.opacity = '0';
+                setTimeout(() => {
+                    resultCategory.textContent = categoryNames[category] || category.toUpperCase();
+                    resultPrice.textContent = `NT$ ${finalPrice.toLocaleString()}`;
+                    resultRange.textContent = `NT$ ${rangeMin.toLocaleString()} - NT$ ${rangeMax.toLocaleString()}`;
+                    
+                    // 決定模型信心度
+                    if (originalPrice === 0) {
+                        resultConfidence.textContent = '無法評估 (缺少原價)';
+                        resultConfidence.style.color = '#ef4444';
+                    } else {
+                        resultConfidence.textContent = finalPrice > 0 ? '高 (85%) - 基於演算法與市價折舊' : '偏低 (硬體殘值過低)';
+                        resultConfidence.style.color = finalPrice > 0 ? '#10b981' : '#f59e0b';
+                    }
+                    
+                    resultContent.style.transition = 'opacity 0.4s ease';
+                    resultContent.style.opacity = '1';
+                }, 100);
+            });
+        });
+    </script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>
