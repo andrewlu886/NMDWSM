@@ -8,33 +8,52 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     <style>
-        /* --- 定義全站統一變數 (淺色模式) --- */
+        /* --- 全站統一變數 (華麗高質感模式) --- */
         :root {
-            --primary-blue: #3498db;      /* 亮藍色 */
-            --nav-bg: #1a4b8c;           /* 導覽列深藍色 */
-            --nav-hover: #2980b9;        /* 導覽列 Hover 色 */
+            --primary-blue: #3498db;      
+            --primary-gradient: linear-gradient(135deg, #3498db, #8e44ad); /* 動態漸層色 */
+            --nav-bg-glass: rgba(26, 75, 140, 0.85); /* 毛玻璃深藍底色 */
             
-            --bg-main: #ffffff;          /* 全站背景純白 */
-            --card-bg: #ffffff;          /* 卡片背景純白 */
-            --text-main: #1a1a1a;        /* 主要文字變深黑 */
-            --text-muted: #666666;       /* 次要文字變中灰 */
-            --border-color: #e1e1e1;     /* 邊框淺灰 */
-            --accent-color: #e74c3c;     /* 強調色 (價格) */
+            --bg-main: #f4f7f9;          /* 帶有微灰的背景，襯托純白卡片 */
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #2c3e50;        
+            --text-muted: #7f8c8d;       
+            --border-color: #eaeaea;     
+            --accent-color: #e74c3c;     
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* 高級卡片陰影 */
         }
 
         body {
             margin: 0;
             background-color: var(--bg-main);
             color: var(--text-main);
-            font-family: 'Noto Sans TC', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Noto Sans TC', sans-serif;
             -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
         }
 
-        /* --- 導覽列樣式 (深藍色風格) --- */
+        /* --- 導覽列樣式 (動態漸層 + 毛玻璃) --- */
         header {
-            background-color: var(--nav-bg);
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            /* 動態漸層背景 */
+            background: linear-gradient(-45deg, #1a4b8c, #2980b9, #6a1b9a, #1a4b8c);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            
+            /* 毛玻璃特效 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .header-main {
@@ -50,133 +69,190 @@
             color: white;
             text-decoration: none;
             font-size: 1.5rem;
-            font-weight: bold;
+            font-weight: 700;
             letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .search-wrapper {
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
+            transition: 0.3s ease;
+        }
+
+        .search-wrapper:focus-within {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
         .nav-search {
             border: none;
-            padding: 8px 12px;
+            padding: 10px 16px;
             outline: none;
             background: transparent;
             color: white;
-            width: 200px;
+            width: 220px;
+            font-size: 0.95rem;
         }
         
         .nav-search::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .search-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 0 10px;
-            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .auth-btn, .header-actions a {
             color: white;
             text-decoration: none;
             font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
         }
 
         #user-profile {
             display: flex;
             align-items: center;
             gap: 10px;
-            position: relative;
             cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.2);
         }
 
         .main-nav {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 25px;
             padding: 0 20px;
-            background-color: rgba(0, 0, 0, 0.1); /* 讓次要導覽列稍微深一點點區隔 */
-            height: 45px;
+            background-color: rgba(0, 0, 0, 0.15); 
+            height: 50px;
             align-items: center;
         }
 
         .main-nav a {
-            color: white;
+            color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
-            padding: 6px 12px;
-            border-radius: 4px;
-            transition: 0.3s;
+            padding: 8px 4px;
+            position: relative;
+            transition: color 0.3s;
         }
 
         .main-nav a:hover, .main-nav a.active {
-            background-color: var(--nav-hover);
+            color: white;
         }
 
-        /* --- 頁面主要區塊 --- */
-        .container { 
-            max-width: 900px; 
-            margin: 2rem auto; 
-            padding: 0 20px; 
+        /* 展開底線動畫 (Active / Hover) */
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: #fff;
+            border-radius: 3px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform: translateX(-50%);
+            box-shadow: 0 0 8px rgba(255,255,255,0.8);
         }
 
-        .page-title {
+        .main-nav a:hover::after, .main-nav a.active::after {
+            width: 100%;
+        }
+
+        /* --- 頁面主要區塊與 Hero --- */
+        .nmd-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        .nmd-hero {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .nmd-hero h1 {
             color: var(--text-main);
+            font-size: 2.2rem;
             margin-bottom: 0.5rem;
-            font-size: 1.8rem;
+            font-weight: 700;
         }
 
-        .page-subtitle {
+        .nmd-hero p {
             color: var(--text-muted);
-            margin-bottom: 2rem;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
-        /* 搜尋區塊 */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 搜尋區塊 (高質感卡片風格) */
         .search-box {
             background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* 稍微明顯一點的陰影 */
-            border: 1px solid var(--border-color); /* 加上淺灰邊框 */
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 1);
+            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
             margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
         
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* 多選通路區塊 */
         .platform-options {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-            padding-bottom: 15px;
+            gap: 18px;
+            padding-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
         }
         
         .platform-options label {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             cursor: pointer;
             font-size: 0.95rem;
             color: var(--text-main);
             font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .platform-options label:hover {
+            background: #f0f4f8;
         }
 
         .platform-options input[type="checkbox"] {
             cursor: pointer;
-            width: 16px;
-            height: 16px;
-            accent-color: var(--primary-blue); /* 改變核取方塊顏色 */
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-blue);
         }
 
         .input-group {
@@ -187,70 +263,89 @@
 
         .input-group input {
             flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1.05rem;
             color: var(--text-main);
-            background-color: #fdfdfd;
-            transition: 0.3s;
+            background-color: #fafafa;
+            transition: all 0.3s;
         }
 
         .input-group input:focus {
             outline: none;
             border-color: var(--primary-blue);
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
             background-color: #fff;
         }
 
+        /* 特效按鈕 */
         .btn-search {
-            background: var(--primary-blue);
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 6px;
+            padding: 14px 32px;
+            border-radius: 12px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-            transition: 0.3s;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
             white-space: nowrap;
         }
 
-        .btn-search:hover { background: var(--nav-hover); }
+        .btn-search:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-search:active {
+            transform: translateY(0);
+        }
 
         /* --- 結果顯示區塊 --- */
         #loading { 
             display: none; 
             text-align: center; 
             margin: 2rem 0; 
-            color: var(--text-muted); 
-            font-weight: bold; 
+            color: var(--primary-blue); 
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
 
         .results-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.2rem;
         }
 
         .result-card {
             background: var(--card-bg);
-            padding: 1.2rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            border: 1px solid var(--border-color);
-            border-left: 5px solid var(--primary-blue); /* 左側藍色飾條 */
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid transparent;
+            border-left: 6px solid var(--primary-blue);
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
             gap: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
         }
 
         .result-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow);
+            border-color: rgba(52, 152, 219, 0.2);
         }
 
         .result-info {
@@ -262,82 +357,88 @@
 
         .result-card .platform { 
             font-size: 0.85rem; 
-            color: #555; 
-            background: #f0f2f5; 
-            padding: 5px 10px; 
-            border-radius: 4px; 
+            color: #fff; 
+            background: linear-gradient(135deg, #2c3e50, #34495e); 
+            padding: 6px 12px; 
+            border-radius: 20px; 
             white-space: nowrap;
-            font-weight: bold;
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .result-card h4 { 
             margin: 0; 
             color: var(--text-main); 
-            font-size: 1.05rem; 
-            line-height: 1.4; 
+            font-size: 1.1rem; 
+            line-height: 1.5; 
             flex: 1;
+            font-weight: 500;
         }
 
         .result-card .price { 
             color: var(--accent-color); 
-            font-size: 1.3rem; 
-            font-weight: bold; 
+            font-size: 1.4rem; 
+            font-weight: 700; 
             white-space: nowrap;
         }
         
         .btn-link {
             text-align: center;
-            background: #2c3e50;
-            color: white !important;
+            background: #f0f4f8;
+            color: #2c3e50 !important;
             text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 10px;
             font-size: 0.95rem;
-            font-weight: bold;
-            transition: 0.2s;
+            font-weight: 700;
+            transition: all 0.2s;
             white-space: nowrap;
+            border: 1px solid #dce4ec;
         }
 
         .btn-link:hover { 
-            background: #1a252f; 
+            background: var(--primary-blue); 
+            color: white !important;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
         }
 
-        /* --- RWD 適應手機版 --- */
+        /* --- RWD 手機版 --- */
         @media (max-width: 768px) {
             .header-main {
                 flex-direction: column;
                 gap: 15px;
+                padding: 15px;
             }
-            .search-wrapper {
-                width: 100%;
-            }
-            .nav-search {
+            .search-wrapper, .nav-search {
                 width: 100%;
             }
             .main-nav {
                 justify-content: flex-start;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                padding: 0 15px;
             }
             .input-group { 
                 flex-direction: column; 
             }
-            .btn-search { 
+            .btn-search, .btn-link { 
                 width: 100%; 
+                box-sizing: border-box;
             }
             .result-card { 
                 flex-direction: column; 
                 align-items: flex-start; 
+                padding: 1.2rem;
             }
             .result-info { 
                 flex-direction: column; 
                 align-items: flex-start; 
-                gap: 10px; 
-                width: 100%; 
+                gap: 12px;
+                width: 100%;
             }
-            .btn-link { 
-                width: 100%; 
-                box-sizing: border-box; 
+            .result-card .price {
+                align-self: flex-end;
             }
         }
     </style>
@@ -360,8 +461,7 @@
                 
                 <div id="user-profile" style="display:none;">
                     <div class="avatar">👤</div>
-                    <span id="user-display-name" style="color: white; font-size: 0.95rem;">載入中...</span>
-                    <!-- 這裡如果原本有下拉選單，可以透過 style.css 控制 -->
+                    <span id="user-display-name" style="color: white; font-size: 0.95rem; font-weight: 500;">載入中...</span>
                 </div>
             </div>
         </div>
@@ -403,7 +503,7 @@
             </div>
         </div>
 
-        <div id="loading">🚀 正在派遺爬蟲前往各大通路抓取資料，請稍候...</div>
+        <div id="loading">🚀 正在派遣爬蟲前往各大通路抓取資料，請稍候...</div>
         <div class="results-list" id="results-container"></div>
     </main>
 
@@ -454,7 +554,6 @@
             const container = document.getElementById('results-container');
             const loading = document.getElementById('loading');
             
-            // 取得所有勾選的通路
             const checkboxes = document.querySelectorAll('#platform-checkboxes input[type="checkbox"]:checked');
             const selectedPlatforms = Array.from(checkboxes).map(cb => cb.value).join(',');
 
@@ -468,12 +567,10 @@
                 return;
             }
 
-            // 初始化介面
             container.innerHTML = '';
             loading.style.display = 'block';
 
             try {
-                // 發送請求至後端 API
                 const response = await fetch(`/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${encodeURIComponent(selectedPlatforms)}&exclude=${encodeURIComponent(exclude)}`);
                 if (!response.ok) throw new Error('網路回應不正常');
                 
@@ -482,7 +579,6 @@
 
                 loading.style.display = 'none';
 
-                // 渲染結果
                 if (result.success && result.data && result.data.length > 0) {
                     result.data.forEach(item => {
                         const card = document.createElement('div');
@@ -501,13 +597,13 @@
                         container.appendChild(card);
                     });
                 } else {
-                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%; padding: 2rem;">目前沒有找到相關結果，請更換關鍵字或減少排除條件再試一次。</p>';
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%; padding: 2rem; font-size: 1.1rem; background: var(--card-bg); border-radius: 12px;">目前沒有找到相關結果，請更換關鍵字或減少排除條件再試一次。</p>';
                 }
 
             } catch (error) {
                 loading.style.display = 'none';
                 console.error('Fetch 發生錯誤:', error);
-                container.innerHTML = '<p style="color: var(--accent-color); text-align: center; width: 100%; padding: 2rem;">連線失敗：請確認後端伺服器 (server.js) 是否已啟動。</p>';
+                container.innerHTML = '<p style="color: var(--accent-color); text-align: center; width: 100%; padding: 2rem; font-size: 1.1rem; background: var(--card-bg); border-radius: 12px; font-weight: bold;">連線失敗：請確認後端伺服器 (server.js) 是否已啟動。</p>';
             }
         }
     </script>
