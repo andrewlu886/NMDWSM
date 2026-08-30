@@ -2,277 +2,385 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>會員中心 - 一次買夠</title>
-    <!-- 引入與全站統一的 Google 字體 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會員登入 | 一次買夠</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- 引入自定義 CSS -->
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./site-theme.css">
     <style>
-        /* 定義全站統一變數 - 已改為淺色模式 (Light Mode) */
+        /* --- 全站統一變數 (沿用你的新版型) --- */
         :root {
-            --primary-blue: #3498db;      /* 亮藍色 (用於聚焦、頁籤、按鈕) */
-            --nav-bg: #1a4b8c;           /* 導覽列深藍色 bar (保留branding) */
-            --nav-hover: #2980b9;        /* 導覽列 Hover 色 */
+            --primary-color: #2563eb;     /* 皇家藍 */
+            --primary-hover: #1d4ed8;     /* 深藍 */
+            --secondary-color: #0284c7;   /* 湛藍 */
+            --tertiary-color: #38bdf8;    /* 天藍 */
             
-            /* ▼▼▼ 底色調整核心 ▼▼▼ */
-            --bg-main: #ffffff;          /* 【新】全站背景純白 */
-            --card-bg: #ffffff;          /* 【新】卡片背景純白 */
-            --text-main: #1a1a1a;        /* 【新】主要文字變深黑 */
-            --text-muted: #666666;       /* 【新】次要文字變中灰 */
-            --input-bg: #fdfdfd;         /* 【新】輸入框背景極淡灰或純白 */
-            --border-color: #e1e1e1;     /* 【新】邊框變淺灰 */
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --glow-color: rgba(37, 99, 235, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
             margin: 0;
-            background-color: var(--bg-main); /* 使用白色背景 */
-            color: var(--text-main);          /* 使用深色文字 */
-            font-family: 'Noto Sans TC', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 0;
+            line-height: 1.6;
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased; /* 讓字體更清晰 */
         }
 
-        /* --- 導覽列樣式 (保留深藍色Bar風格) --- */
+        /* --- 頂部 Header --- */
         header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            left: 0;
             width: 100%;
-            background-color: var(--nav-bg);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2); /* 淺色模式下陰影稍微明顯一點 */
-            position: relative;
             z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 15px 20px;
         }
 
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #1d4ed8, #0284c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease;
+        }
+        .logo:hover {
+            transform: scale(1.03);
+        }
+
+        .search-wrapper {
+            display: flex;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .nav-search {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1.5px solid #3b82f6;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: var(--text-main);
+        }
+
+        .nav-search::placeholder { color: #64748b; }
+        .nav-search:focus {
+            background: #ffffff;
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .header-actions .auth-btn {
+            background: linear-gradient(135deg, #1d4ed8, #0284c7);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+        .header-actions .auth-btn:hover {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
+        }
+
+        #user-profile {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        #user-display-name { color: var(--text-main) !important; font-weight: 500;}
+        .avatar { background: #e2e8f0; padding: 5px; border-radius: 50%; }
+        
+        /* --- 動態漸層主導覽列 --- */
         .main-nav {
+            width: 100%;
+            background: linear-gradient(90deg, #1e3a8a, #2563eb, #0284c7, #2563eb);
+            background-size: 300% 300%;
+            animation: gradientMove 10s ease infinite;
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 15px;
-            padding: 0 20px;
-            height: 60px; /* 固定高度 */
-            max-width: 1200px;
-            margin: 0 auto;
+            gap: 2rem;
+            padding: 12px 0;
+            margin: 0;
+        }
+        
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .main-nav a {
-            color: white; /* 導覽列文字仍維持白色 */
+            color: rgba(255, 255, 255, 0.95);
             text-decoration: none;
-            font-size: 15px;
             font-weight: 500;
-            padding: 8px 12px;
+            font-size: 0.95rem;
+            position: relative;
+            padding: 6px 0;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0; 
+            height: 4px;
+            background: #ffffff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
             border-radius: 4px;
-            transition: background-color 0.3s, color 0.3s;
-            white-space: nowrap;
         }
-
+        
         .main-nav a:hover {
-            background-color: var(--nav-hover);
-            color: #fff;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
+        
+        .main-nav a:hover::after,
+        .main-nav a.active::after {
+            width: 100%; 
         }
 
-        /* 針對瓦數計算工具連結的樣式 */
-        .main-nav a[href="/tools"] {
-            background-color: rgba(255,255,255,0.1);
-        }
-        .main-nav a[href="/tools"]:hover {
-            background-color: rgba(255,255,255,0.2);
+        .main-nav a.active {
+            color: #ffffff !important;
+            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+            font-weight: 700;
         }
 
-        /* --- 登入區塊外層容器 --- */
+        /* --- 登入表單專區佈局 --- */
         .login-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 扣除 header 高度，讓內容垂直置中 */
-            min-height: calc(100vh - 60px); 
-            padding: 40px 20px;
-            box-sizing: border-box;
-            background-color: var(--bg-main); /* 確保外部也是純白 */
+            min-height: calc(100vh - 150px);
+            padding: 3rem 20px;
         }
 
-        /* --- 登入/註冊卡片主體 (Light Card) --- */
-        .login-container {
-            background: var(--card-bg); /* 白色卡片 */
-            width: 100%;
-            max-width: 420px;
-            padding: 2.5rem;
-            border-radius: 12px;
-            /* 淺色模式下更柔和、層次感更好的陰影 */
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            text-align: center;
-            border: 1px solid var(--border-color); /* 淺灰邊框增加質感 */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
+
+        .login-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 440px;
+            padding: 2.8rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg); /* 沿用新版型的陰影 */
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: fadeInUp 0.6s ease-out; /* 沿用新版型的進場動畫 */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, #0284c7, #2563eb, #38bdf8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
         .login-container:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15); /* 懸停時陰影更深 */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        .login-container:hover::before {
+            opacity: 1;
         }
 
         .card-header-logo {
-            font-size: 22px;
-            font-weight: bold;
-            color: var(--text-main); /* 【新】文字改為深色 */
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
             margin-bottom: 2rem;
             display: block;
             text-decoration: none;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
+        
         .card-header-logo span {
-            color: var(--primary-blue);
+            color: var(--primary-color);
             font-weight: normal;
-            font-size: 16px;
+            font-size: 1rem;
             margin-left: 5px;
         }
 
-        /* --- 頁籤樣式 --- */
+        /* 頁籤 */
         .tabs {
             display: flex;
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border-color);
         }
-
         .tab {
             flex: 1;
             padding: 12px;
             cursor: pointer;
             font-weight: bold;
-            color: #999; /* 未激活時淡灰 */
+            color: var(--text-muted);
             transition: all 0.3s;
             border-bottom: 2px solid transparent;
-            font-size: 15px;
+            font-size: 1rem;
         }
-
-        .tab:hover {
-            color: var(--text-main); /* 滑鼠懸停時變深色 */
-        }
-
+        .tab:hover { color: var(--text-main); }
         .tab.active {
-            color: var(--primary-blue); /* 激活時亮藍 */
-            border-bottom: 2px solid var(--primary-blue);
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
         }
 
-        /* --- 表單樣式 --- */
+        /* 表單與輸入框 */
         .form-group {
             text-align: left;
             margin-bottom: 1.25rem;
         }
-
         .form-group label {
             display: block;
-            font-size: 14px;
+            font-size: 0.9rem;
             margin-bottom: 8px;
-            color: var(--text-muted); /* 深灰標籤 */
+            color: var(--text-muted);
             font-weight: 500;
         }
-
         .form-group input {
             width: 100%;
-            padding: 13px;
-            background-color: var(--input-bg); /* 極淡灰或純白輸入框 */
-            color: var(--text-main);       /* 【新】輸入文字變深黑 */
-            border: 1px solid var(--border-color); /* 淺灰邊框 */
-            border-radius: 6px;
+            padding: 14px;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             box-sizing: border-box;
-            font-size: 14px;
-            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        .form-group input::placeholder {
-            color: #ccc; /* 淺灰預設文字 */
-        }
-
+        .form-group input::placeholder { color: #94a3b8; }
         .form-group input:focus {
             outline: none;
-            border-color: var(--primary-blue);
-            background-color: #ffffff; /* 聚焦時改為純白 */
-            /* 聚焦時的藍色發光效果 */
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3); 
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
 
-        /* --- 按鈕樣式 --- */
-        .btn {
+        /* 新版型專屬按鈕特效 */
+        .btn-submit {
+            display: inline-block;
             width: 100%;
-            padding: 13px;
-            background-color: #1f6b9c; /* 保留鮮明藍色按鈕 */
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #1d4ed8, #0284c7);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 14px 20px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 10px;
             cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.3s, transform 0.1s;
-            letter-spacing: 1px;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-blue); /* Hover 時變更鮮明藍 */
-        }
-        
-        .btn:active {
-            transform: scale(0.98); /* 按下時的縮小反饋 */
-        }
-
-        /* --- 底部連結 --- */
-        .footer-links {
-            margin-top: 1.8rem;
-            font-size: 13px;
+            transition: all 0.3s ease;
             text-align: center;
-            color: #888; /* 深灰色 */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            margin-top: 10px;
+        }
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 20%; height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
+        }
+        .btn-submit:hover { 
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+            transform: translateY(-2px);
+        }
+        .btn-submit:hover::after { left: 140%; }
+        .btn-submit:active { 
+            transform: translateY(1px); 
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
 
-        .footer-links a {
-            color: var(--primary-blue);
-            text-decoration: none;
-            margin: 0 5px;
-            transition: color 0.3s;
-        }
+        .footer-links { margin-top: 1.8rem; font-size: 0.9rem; color: var(--text-muted); }
+        .footer-links a { color: var(--primary-color); text-decoration: none; margin: 0 5px; transition: color 0.3s; }
+        .footer-links a:hover { color: var(--secondary-color); text-decoration: underline; }
         
-        .footer-links a:hover {
-            color: #5dade2;
-            text-decoration: underline;
-        }
-
-        /* 初始隱藏註冊表單 */
-        #register-form {
-            display: none;
-        }
-
-        /* RWD 響應式微調 */
-        @media (max-width: 480px) {
-            .login-wrapper {
-                padding: 20px 10px;
-            }
-            .login-container {
-                padding: 1.5rem;
-            }
-            .main-nav {
-                gap: 5px;
-                padding: 0 10px;
-                justify-content: flex-start; /* 手機上靠左排列並允許捲動 */
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .main-nav a {
-                font-size: 13px;
-                padding: 6px 8px;
-            }
-            .card-header-logo {
-                font-size: 18px;
-            }
-        }
+        #register-form { display: none; }
     </style>
-    <link rel="stylesheet" href="./site-theme.css">
 </head>
 <body>
+
     <header>
         <div class="header-main">
-            <a href="/" class="logo">一次買夠</a>
-            <form class="search-wrapper" action="/scrape" method="get">
-                <input type="search" name="keyword" class="nav-search" placeholder="查詢硬體市價..." aria-label="查詢硬體市價">
-            </form>
-            <div class="header-actions"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
+            <a href="/" class="logo">⚡ 一次買夠</a>
+            
+            <div class="search-wrapper">
+                <input type="text" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)" aria-label="查詢硬體市價">
+            </div>
+
+            <div class="header-actions">
+                <div id="auth-section">
+                    <a href="/login" class="auth-btn">登入 / 註冊</a>
+                </div>
+                
+                <div id="user-profile">
+                    <div class="avatar">👤</div>
+                    <span id="user-display-name">載入中...</span>
+                    <div class="dropdown-menu" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px; box-shadow:var(--shadow-md);">
+                        <a href="/account.html" style="display:block; padding:5px 0; color:#333; text-decoration:none;">我的帳戶</a>
+                        <a href="#" onclick="logout()" style="display:block; padding:5px 0; color:red; text-decoration:none;">登出</a>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        <!-- 取消首頁底線，將展開狀態移至最後的「會員中心」 -->
         <nav class="main-nav">
             <a href="/">首頁</a>
             <a href="/recommend.html">智慧推薦</a>
@@ -281,71 +389,101 @@
             <a href="/scrape">市價查詢</a>
             <a href="/benchmark-instructions.html">跑分教學</a>
             <a href="/tools">零件查詢與瓦數計算工具</a>
+            <!-- 這個項目保持預設展開，讓用戶知道身處會員頁面 -->
+            <a href="/login" class="active">會員中心</a>
         </nav>
     </header>
 
-    <!-- 白色底色的垂直置中容器 -->
+    <!-- 登入與註冊主體 -->
     <div class="login-wrapper">
         <div class="login-container">
-            <!-- 卡片內 Logo 改為深色 -->
             <a href="/" class="card-header-logo">一次買夠 <span>| 會員中心</span></a>
             
-            <!-- 淺色頁籤切換 -->
+            <!-- 頁籤切換 -->
             <div class="tabs">
-                <div class="tab active" id="tab-login" onclick="switchTab('login')">登入</div>
-                <div class="tab" id="tab-register" onclick="switchTab('register')">註冊</div>
+                <div class="tab active" id="tab-login" onclick="switchTab('login')">會員登入</div>
+                <div class="tab" id="tab-register" onclick="switchTab('register')">註冊帳號</div>
             </div>
 
-            <!-- 登入表單 (深色文字) -->
+            <!-- 登入表單 -->
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label>電子郵件 / 帳號</label>
+                    <label for="login-email">電子郵件 / 帳號</label>
                     <input type="text" id="login-email" placeholder="請輸入您的帳號" required autocomplete="username">
                 </div>
                 <div class="form-group">
-                    <label>密碼</label>
+                    <label for="login-password">密碼</label>
                     <input type="password" id="login-password" placeholder="請輸入密碼" required autocomplete="current-password">
                 </div>
-                <button type="submit" class="btn">立即登入</button>
+                <button type="submit" class="btn-submit">立即登入</button>
                 <div class="footer-links">
                     <a href="#">忘記密碼？</a>
                 </div>
             </form>
 
-            <!-- 註冊表單 (深色文字) -->
+            <!-- 註冊表單 -->
             <form id="register-form" onsubmit="handleRegister(event)">
                 <div class="form-group">
-                    <label>全名</label>
+                    <label for="reg-name">全名</label>
                     <input type="text" id="reg-name" placeholder="例如：王小明" required>
                 </div>
                 <div class="form-group">
-                    <label>電子郵件</label>
+                    <label for="reg-email">電子郵件</label>
                     <input type="email" id="reg-email" placeholder="您的@email.com" required autocomplete="email">
                 </div>
                 <div class="form-group">
-                    <label>密碼</label>
+                    <label for="reg-password">密碼</label>
                     <input type="password" id="reg-password" placeholder="至少 8 位字元" required autocomplete="new-password">
                 </div>
                 <div class="form-group">
-                    <label>確認密碼</label>
+                    <label for="reg-confirm">確認密碼</label>
                     <input type="password" id="reg-confirm" placeholder="再次輸入密碼" required autocomplete="new-password">
                 </div>
-                <button type="submit" class="btn">建立帳號</button>
+                <button type="submit" class="btn-submit">建立帳號</button>
             </form>
         </div>
     </div>
 
     <script>
-        // 設定 API 基礎路徑 (保持不變)
+        // API 路徑設定
         const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
+        function getApiUrl(path) { return `${API_BASE}${path}`; }
 
-        function getApiUrl(path) {
-            return `${API_BASE}${path}`;
+        // 會員狀態檢查與右上角頭像邏輯 (沿用新版型)
+        window.onload = function() {
+            const loggedInUser = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
+            if (loggedInUser) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
+            }
+            
+            document.getElementById('user-profile').addEventListener('click', function() {
+                const menu = this.querySelector('.dropdown-menu');
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            });
+        };
+
+        function logout() {
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            alert('已成功登出');
+            window.location.reload();
         }
 
-        // --- 介面交互邏輯 ---
+        // 搜尋列邏輯
+        function handleSearch(event) {
+            if (event.key === 'Enter') triggerSearch();
+        }
+        function triggerSearch() {
+            const input = document.querySelector('.nav-search');
+            if (input && input.value.trim()) {
+                window.location.href = `/scrape?keyword=${encodeURIComponent(input.value.trim())}`;
+            }
+        }
 
-        // 切換登入與註冊頁籤
+        // 登入與註冊頁籤切換
         function switchTab(type) {
             const loginForm = document.getElementById('login-form');
             const regForm = document.getElementById('register-form');
@@ -353,59 +491,15 @@
             const regTab = document.getElementById('tab-register');
 
             if (type === 'login') {
-                loginForm.style.display = 'block';
-                regForm.style.display = 'none';
-                loginTab.classList.add('active');
-                regTab.classList.remove('active');
+                loginForm.style.display = 'block'; regForm.style.display = 'none';
+                loginTab.classList.add('active'); regTab.classList.remove('active');
             } else {
-                loginForm.style.display = 'none';
-                regForm.style.display = 'block';
-                loginTab.classList.remove('active');
-                regTab.classList.add('active');
+                loginForm.style.display = 'none'; regForm.style.display = 'block';
+                loginTab.classList.remove('active'); regTab.classList.add('active');
             }
         }
 
-        // --- 後端介接邏輯 (保持不變) ---
-
-        // 處理註冊邏輯
-        async function handleRegister(event) {
-            event.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const confirmPassword = document.getElementById('reg-confirm').value;
-
-            if (password !== confirmPassword) {
-                alert('❌ 密碼與確認密碼不一致');
-                return;
-            }
-
-            try {
-                console.log('📝 正在註冊帳號：', email);
-                
-                const response = await fetch(getApiUrl('/api/register'), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password, confirmPassword })
-                });
-
-                const result = await response.json();
-                console.log('📡 後端回應：', result);
-                
-                if (result.success) {
-                    alert('✅ ' + result.message);
-                    // 註冊成功後切換到登入頁籤
-                    setTimeout(() => switchTab('login'), 500);
-                } else {
-                    alert('❌ 註冊失敗：' + result.message);
-                }
-            } catch (error) {
-                console.error('❌ 註冊請求出錯：', error);
-                alert('無法連接到服務器，請確保後端伺服器正在運行。');
-            }
-        }
-
-        // 處理登入邏輯
+        // 處理登入 API 請求
         async function handleLogin(event) {
             event.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -421,14 +515,10 @@
                 const result = await response.json();
                 if (result.success) {
                     alert('✅ ' + result.message);
-                    
-                    // 儲存登入狀態到 localStorage
                     localStorage.setItem('userEmail', email); 
                     if (result.user && result.user.username) {
                         localStorage.setItem('userName', result.user.username);
                     }
-                    
-                    // 跳轉回首頁
                     window.location.href = '/'; 
                 } else {
                     alert('❌ 登入失敗：' + result.message);
@@ -438,8 +528,41 @@
                 alert('無法連接到服務器，請確保後端伺服器正在運行。');
             }
         }
+
+        // 處理註冊 API 請求
+        async function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm').value;
+
+            if (password !== confirmPassword) {
+                alert('❌ 密碼與確認密碼不一致');
+                return;
+            }
+
+            try {
+                const response = await fetch(getApiUrl('/api/register'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, confirmPassword })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    setTimeout(() => switchTab('login'), 500);
+                } else {
+                    alert('❌ 註冊失敗：' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ 註冊請求出錯：', error);
+                alert('無法連接到服務器，請確保後端伺服器正在運行。');
+            }
+        }
     </script>
-    <!-- 引入聊天小工具 (如果有) -->
     <script src="./chat-widget.js"></script>
 </body>
 </html>

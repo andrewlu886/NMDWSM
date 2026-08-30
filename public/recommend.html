@@ -3,117 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧推薦｜一次買夠</title>
+    <title>智慧推薦 ｜ 一次買夠</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./site-theme.css">
     <style>
+        /* --- 全站統一變數 --- */
         :root {
-            --recommend-blue: #2563eb;
-            --recommend-blue-dark: #1d4ed8;
-            --recommend-navy: #1e293b;
-            --recommend-muted: #64748b;
-            --recommend-border: #e2e8f0;
-            --recommend-bg: #f8fafc;
+            --primary-color: #2563eb;     /* 皇家藍 */
+            --primary-hover: #1d4ed8;     /* 深藍 */
+            --secondary-color: #0284c7;   /* 湛藍 */
+            --tertiary-color: #38bdf8;    /* 天藍 */
+            
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
             margin: 0;
-            background: var(--recommend-bg);
-            color: var(--recommend-navy);
-            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            padding: 0;
+            background: var(--bg-light);
+            color: var(--text-main);
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .recommend-header {
+        /* --- 頂部 Header --- */
+        header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
             position: sticky;
             top: 0;
+            left: 0;
+            width: 100%;
             z-index: 100;
-            background: #fff;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
         }
-
-        .recommend-header-main {
+        
+        .header-main {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             max-width: 1100px;
             margin: 0 auto;
             padding: 15px 20px;
-            gap: 24px;
         }
 
-        .recommend-logo {
-            color: var(--recommend-blue);
+        .logo {
             font-size: 1.4rem;
             font-weight: 700;
+            background: linear-gradient(to right, #1d4ed8, #0284c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-decoration: none;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease;
+        }
+        .logo:hover {
+            transform: scale(1.03);
         }
 
-        .recommend-search {
-            position: relative;
+        .search-wrapper {
             display: flex;
             flex: 1;
             max-width: 400px;
+            margin: 0 20px;
+            position: relative;
         }
 
-        .recommend-search input {
+        .nav-search {
             width: 100%;
-            box-sizing: border-box;
-            padding: 10px 42px 10px 16px;
-            border: 1px solid var(--recommend-border);
-            border-radius: 999px;
-            background: #f1f5f9;
-            font: inherit;
+            padding: 10px 16px;
+            border: 1.5px solid #3b82f6;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            color: var(--text-main);
         }
 
-        .recommend-search button {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            width: 34px;
-            height: 34px;
-            border: 0;
-            background: transparent;
-            transform: translateY(-50%);
-            cursor: pointer;
+        .nav-search::placeholder { color: #64748b; }
+        .nav-search:focus {
+            background: #ffffff;
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
-        .recommend-login {
-            padding: 9px 20px;
-            border-radius: 999px;
-            background: var(--recommend-blue);
-            color: #fff;
-            font-weight: 600;
+        .header-actions .auth-btn {
+            background: linear-gradient(135deg, #1d4ed8, #0284c7);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
             text-decoration: none;
-            white-space: nowrap;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+        .header-actions .auth-btn:hover {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
         }
 
-        .recommend-nav {
+        #user-profile {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        #user-display-name { color: var(--text-main) !important; font-weight: 500;}
+        .avatar { background: #e2e8f0; padding: 5px; border-radius: 50%; }
+        
+        /* --- 動態漸層主導覽列 --- */
+        .main-nav {
+            width: 100%;
+            background: linear-gradient(90deg, #1e3a8a, #2563eb, #0284c7, #2563eb);
+            background-size: 300% 300%;
+            animation: gradientMove 10s ease infinite;
             display: flex;
             justify-content: center;
             gap: 2rem;
+            padding: 12px 0;
+            margin: 0;
             overflow-x: auto;
-            padding: 11px 20px;
-            background: var(--recommend-blue);
             white-space: nowrap;
         }
+        
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        .recommend-nav a {
-            color: rgba(255, 255, 255, 0.88);
-            font-size: 0.95rem;
-            font-weight: 600;
+        .main-nav a {
+            color: rgba(255, 255, 255, 0.95);
             text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            position: relative;
+            padding: 6px 0;
+            transition: color 0.3s ease;
         }
 
-        .recommend-nav a:hover,
-        .recommend-nav a.active {
-            color: #fff;
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0; 
+            height: 4px;
+            background: #ffffff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 4px;
+        }
+        
+        .main-nav a:hover {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
+        
+        .main-nav a:hover::after,
+        .main-nav a.active::after {
+            width: 100%; 
         }
 
+        .main-nav a.active {
+            color: #ffffff !important;
+            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+            font-weight: 700;
+        }
+
+        /* --- 智慧推薦頁面專屬區域 --- */
         .recommend-page {
             max-width: 1100px;
             margin: 0 auto;
             padding: 32px 20px 70px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .recommend-hero {
@@ -122,9 +209,9 @@
             margin-bottom: 28px;
             padding: 46px 40px;
             border-radius: 18px;
-            background: linear-gradient(135deg, #1e293b, #334155);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
             color: #fff;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.15);
+            box-shadow: var(--shadow-lg);
         }
 
         .recommend-hero::after {
@@ -150,7 +237,7 @@
             position: relative;
             z-index: 1;
             margin: 0 0 12px;
-            font-size: clamp(2rem, 5vw, 3rem);
+            font-size: clamp(2rem, 5vw, 2.6rem);
             line-height: 1.25;
         }
 
@@ -171,10 +258,15 @@
         }
 
         .recommend-card {
-            border: 1px solid var(--recommend-border);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
-            background: #fff;
-            box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06);
+            background: var(--card-bg);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .recommend-card:hover {
+            box-shadow: var(--shadow-lg);
         }
 
         .recommend-form-card {
@@ -184,23 +276,25 @@
         .recommend-card h2 {
             margin: 0 0 7px;
             font-size: 1.35rem;
+            color: var(--text-main);
         }
 
         .recommend-intro {
             margin: 0 0 24px;
-            color: var(--recommend-muted);
+            color: var(--text-muted);
             font-size: 0.92rem;
         }
 
         .recommend-field {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         .recommend-field label {
             display: block;
-            margin-bottom: 7px;
+            margin-bottom: 8px;
             font-size: 0.92rem;
             font-weight: 700;
+            color: var(--text-main);
         }
 
         .recommend-field select,
@@ -208,34 +302,58 @@
             width: 100%;
             box-sizing: border-box;
             padding: 13px 14px;
-            border: 1px solid var(--recommend-border);
-            border-radius: 9px;
-            background: #f8fafc;
-            color: var(--recommend-navy);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-light);
+            color: var(--text-main);
             font: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .recommend-field select:focus,
         .recommend-field input:focus {
-            border-color: var(--recommend-blue);
-            outline: 3px solid rgba(37, 99, 235, 0.12);
+            border-color: var(--primary-color);
+            background: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
 
+        /* 升級版特效按鈕 */
         .recommend-submit {
             width: 100%;
             box-sizing: border-box;
             padding: 14px 18px;
             border: 0;
-            border-radius: 9px;
-            background: var(--recommend-blue);
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1d4ed8, #0284c7);
             color: #fff;
             cursor: pointer;
             font: inherit;
             font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .recommend-submit::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 20%; height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
         }
 
         .recommend-submit:hover {
-            background: var(--recommend-blue-dark);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .recommend-submit:hover::after {
+            left: 140%;
         }
 
         .recommend-submit:disabled {
@@ -253,7 +371,7 @@
             min-height: 340px;
             place-content: center;
             padding: 20px;
-            color: var(--recommend-muted);
+            color: var(--text-muted);
             text-align: center;
         }
 
@@ -265,7 +383,7 @@
             place-items: center;
             border-radius: 16px;
             background: #dbeafe;
-            color: var(--recommend-blue);
+            color: var(--primary-color);
             font-size: 1.55rem;
         }
 
@@ -276,9 +394,15 @@
 
         .recommend-result-item {
             padding: 18px;
-            border: 1px solid var(--recommend-border);
-            border-radius: 13px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             background: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .recommend-result-item:hover {
+            border-color: rgba(37, 99, 235, 0.3);
+            box-shadow: var(--shadow-md);
         }
 
         .recommend-result-head {
@@ -289,7 +413,7 @@
         }
 
         .recommend-result-title {
-            color: var(--recommend-blue);
+            color: var(--primary-color);
             font-weight: 700;
             line-height: 1.5;
             text-decoration: none;
@@ -320,7 +444,7 @@
             justify-content: flex-end;
             margin-top: 15px;
             padding-top: 14px;
-            border-top: 1px dashed var(--recommend-border);
+            border-top: 1px dashed var(--border-color);
         }
 
         .recommend-tools-link {
@@ -398,19 +522,20 @@
         }
 
         @media (max-width: 760px) {
-            .recommend-header-main {
+            .header-main {
                 flex-wrap: wrap;
                 gap: 12px;
             }
 
-            .recommend-search {
+            .search-wrapper {
                 order: 3;
                 min-width: 100%;
-                max-width: none;
+                margin: 0;
             }
 
-            .recommend-nav {
+            .main-nav {
                 justify-content: flex-start;
+                padding: 10px 15px;
                 gap: 1.25rem;
             }
 
@@ -451,20 +576,36 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="./site-theme.css">
 </head>
 <body>
-    <header class="recommend-header">
-        <div class="recommend-header-main">
-            <a class="recommend-logo" href="/">一次買夠</a>
-            <div class="recommend-search">
-                <input id="site-search" type="search" placeholder="查詢硬體市價..." aria-label="查詢硬體市價">
+
+    <header>
+        <div class="header-main">
+            <a href="/" class="logo">⚡ 一次買夠</a>
+            
+            <div class="search-wrapper">
+                <input type="text" id="site-search" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)" aria-label="查詢硬體市價">
             </div>
-            <a class="recommend-login" href="/login">登入 / 註冊</a>
+
+            <div class="header-actions">
+                <div id="auth-section">
+                    <a href="/login" class="auth-btn">登入 / 註冊</a>
+                </div>
+                
+                <div id="user-profile">
+                    <div class="avatar">👤</div>
+                    <span id="user-display-name">載入中...</span>
+                    <div class="dropdown-menu" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px; box-shadow:var(--shadow-md); z-index:110;">
+                        <a href="/account.html" style="display:block; padding:5px 0; color:#333; text-decoration:none;">我的帳戶</a>
+                        <a href="#" onclick="logout()" style="display:block; padding:5px 0; color:red; text-decoration:none;">登出</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <nav class="recommend-nav" aria-label="主要導覽">
+        
+        <nav class="main-nav" aria-label="主要導覽">
             <a href="/">首頁</a>
-            <a class="active" href="/recommend.html">智慧推薦</a>
+            <a href="/recommend.html" class="active">智慧推薦</a>
             <a href="/valuation.html">二手硬體估價</a>
             <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
@@ -495,7 +636,7 @@
                     </div>
                     <div class="recommend-field">
                         <label for="budget">預算範圍（NTD）</label>
-                        <input id="budget" name="budget" type="number" min="1000"> 
+                        <input id="budget" name="budget" type="number" min="1000" placeholder="請輸入預算上限"> 
                     </div>
                     <div class="recommend-field">
                         <label for="usage">主要用途</label>
@@ -524,6 +665,45 @@
         </div>
     </main>
 
+    <script>
+        // 會員狀態與登入切換邏輯
+        window.addEventListener('DOMContentLoaded', () => {
+            const loggedInUser = localStorage.getItem('userEmail');
+            const userName = localStorage.getItem('userName');
+            if (loggedInUser) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('user-profile').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
+            }
+            
+            const profileArea = document.getElementById('user-profile');
+            if (profileArea) {
+                profileArea.addEventListener('click', function() {
+                    const menu = this.querySelector('.dropdown-menu');
+                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                });
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            alert('已成功登出');
+            window.location.reload();
+        }
+
+        // 頂部搜尋列邏輯
+        function handleSearch(event) {
+            if (event.key === 'Enter') triggerSearch();
+        }
+
+        function triggerSearch() {
+            const input = document.getElementById('site-search');
+            if (input && input.value.trim()) {
+                window.location.href = `/scrape?keyword=${encodeURIComponent(input.value.trim())}`;
+            }
+        }
+    </script>
     <script src="./recommend.js?v=20260814-1"></script>
     <script src="./chat-widget.js"></script>
 </body>
