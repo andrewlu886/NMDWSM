@@ -294,6 +294,16 @@
     background: #f8fbff;
 }
 
+.peripheral-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    padding: 18px;
+    border: 1px solid var(--site-border);
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
 .detected-hardware h3 {
     margin: 0 0 10px;
     font-size: 1rem;
@@ -428,5 +438,9 @@
     .detected-hardware dl div {
         grid-template-columns: 1fr;
         gap: 2px;
+    }
+
+    .peripheral-fields {
+        grid-template-columns: 1fr;
     }
 }

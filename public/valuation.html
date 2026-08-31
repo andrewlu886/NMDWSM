@@ -95,7 +95,7 @@
                         <span class="field-hint">請填已經過多久，不需要自行計算剩餘保固。</span>
                     </div>
 
-                    <div class="field">
+                    <div class="field" id="condition-field">
                         <label for="condition">商品狀況</label>
                         <select id="condition" name="condition" required>
                             <option value="like_new">近全新</option>
@@ -104,6 +104,25 @@
                             <option value="poor">狀況較差</option>
                         </select>
                     </div>
+
+                    <section class="peripheral-fields full-width" id="peripheral-fields" hidden>
+                        <div class="field">
+                            <label for="usage-condition">功能損耗程度</label>
+                            <select id="usage-condition" name="usageCondition">
+                                <option value="good">正常</option>
+                                <option value="minor">輕微損耗</option>
+                                <option value="heavy">嚴重損耗</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="appearance-condition">外觀損耗程度</label>
+                            <select id="appearance-condition" name="appearanceCondition">
+                                <option value="good">正常痕跡</option>
+                                <option value="minor">輕微打油／掉漆</option>
+                                <option value="heavy">嚴重破損／發黏</option>
+                            </select>
+                        </div>
+                    </section>
 
                     <div class="field full-width extension-field" id="extension-field" hidden>
                         <label for="extension-registered">是否完成延長保固登錄</label>
@@ -148,7 +167,7 @@
         </section>
     </main>
 
-    <script src="./valuation.js?v=20260831-3"></script>
+    <script src="./valuation.js?v=20260831-4"></script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>

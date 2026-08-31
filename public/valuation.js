@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
+    const conditionField = document.getElementById('condition-field');
+    const peripheralFields = document.getElementById('peripheral-fields');
+    const usageCondition = document.getElementById('usage-condition');
+    const appearanceCondition = document.getElementById('appearance-condition');
     let searchTimer;
     let searchController;
     let selectedModel = null;
@@ -193,6 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
             clearDetected();
             hideSuggestions();
             formMessage.textContent = '';
+            const isPeripheral = ['mouse', 'keyboard'].includes(tab.dataset.category);
+            conditionField.hidden = isPeripheral;
+            peripheralFields.hidden = !isPeripheral;
             const hasAutocomplete = tab.dataset.category === 'cpu';
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號。'
@@ -211,6 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
         submitButton.textContent = '處理中...';
         formMessage.textContent = '';
+        const isPeripheral = ['mouse', 'keyboard'].includes(categoryInput.value);
+        const conditionMap = { good: 'good', minor: 'fair', heavy: 'poor' };
         const payload = {
             category: categoryInput.value,
             brand: brandInput.value.trim(),
@@ -219,8 +228,15 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPrice: Number(document.getElementById('original-price').value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
-            condition: document.getElementById('condition').value,
-            details: {}
+            condition: isPeripheral
+                ? conditionMap[usageCondition.value]
+                : document.getElementById('condition').value,
+            details: isPeripheral
+                ? {
+                    usageCondition: usageCondition.value,
+                    appearanceCondition: appearanceCondition.value
+                }
+                : {}
         };
 
         try {

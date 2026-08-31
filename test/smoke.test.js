@@ -212,3 +212,21 @@ test('板卡品牌與延保登錄會套用不同保固規則', async () => {
   assert.equal(result.warranty.totalMonths, 36);
   assert.equal(result.warranty.registrationApplied, false);
 });
+
+test('滑鼠估價使用品牌分級、功能與外觀損耗公式', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'mouse',
+    brand: 'Logitech',
+    model: 'G Pro X Superlight 2',
+    originalPrice: 4000,
+    elapsedMonths: 12,
+    extensionRegistered: 'unknown',
+    condition: 'good',
+    details: { usageCondition: 'good', appearanceCondition: 'minor' }
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.pricingMode, 'test');
+  assert.equal(result.pricingFormula, 'peripheral_brand_tier');
+  assert.equal(result.formulaInput.elapsedMonths, 12);
+});
