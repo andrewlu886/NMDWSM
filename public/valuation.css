@@ -3,6 +3,57 @@
     --valuation-border: #dbeafe;
 }
 
+/* 估價頁原有的動態漸層導覽列 */
+.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 12px 0;
+    background: linear-gradient(90deg, #1e3a8a, #2563eb, #0284c7, #2563eb) !important;
+    background-size: 300% 300% !important;
+    animation: navGradientMove 10s ease infinite !important;
+}
+
+@keyframes navGradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.main-nav a {
+    position: relative;
+    padding: 6px 0;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.main-nav a::after {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 4px;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+    content: '';
+    transform: translateX(-50%);
+    transition: all 0.3s ease;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+    color: #fff !important;
+    font-weight: bold !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+.main-nav a:hover::after,
+.main-nav a.active::after {
+    width: 100%;
+}
+
 .valuation-page [hidden] {
     display: none !important;
 }
