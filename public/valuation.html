@@ -262,15 +262,6 @@
                             <input name="gpuUsageMonths" type="number" min="0" step="1" value="0">
                         </div>
                         <div class="field full-width">
-                            <label>顯示卡世代代號</label>
-                            <select name="gpuGen">
-                                <option value="7">當前最新世代 (如 RTX 40 / RX 7000 系列)</option>
-                                <option value="6">上一代 (如 RTX 30 / RX 6000 系列)</option>
-                                <option value="5">上兩代 (如 RTX 20 / RX 5000 系列)</option>
-                                <option value="4">更早期老卡</option>
-                            </select>
-                        </div>
-                        <div class="field full-width">
                             <label>顯存容量 (VRAM / GB)</label>
                             <input name="gpuVram" type="number" min="0" step="1" value="8" placeholder="例如：8, 12, 16, 24">
                         </div>
@@ -348,7 +339,7 @@
                     </div>
 
                     <button class="valuation-submit full-width" id="valuation-submit" type="submit">
-                        <span>✨ 開始估價</span>
+                        <span>開始估價</span>
                     </button>
                     <p class="form-message full-width" id="form-message" aria-live="polite"></p>
                 </form>
@@ -364,7 +355,6 @@
                         <p class="result-label">模型估計價格 (<span id="result-category">CPU</span>)</p>
                         <p class="result-price" id="result-price">NT$ 0</p>
                         <p>價格區間: <span id="result-range">未提供</span></p>
-                        <p>模型信心度: <span id="result-confidence">未提供</span></p>
                     </div>
                 </aside>
             </div>
@@ -393,6 +383,7 @@
                     document.getElementById(groupMap[selectedCategory]).hidden = false;
                 });
             });
+            // 1. 建立顯卡對應資料庫字典
             const GPU_DATABASE = {
                 "RX 9070 XT": { gen: 9, vram: 16, p0: 21990, c: 9500 },
                 "RX 9070": { gen: 9, vram: 16, p0: 18990, c: 8500 },
@@ -417,8 +408,34 @@
                 "RX 5700 XT": { gen: 5, vram: 8, p0: 14990, c: 2400 },
                 "RX 5700": { gen: 5, vram: 8, p0: 12990, c: 2100 },
                 "RX 5600 XT": { gen: 5, vram: 6, p0: 9990, c: 1800 },
-                "RX 580 (8G)": { gen: 4, vram: 8, p0: 8290, c: 1400 }
+                "RX 580": { gen: 4, vram: 8, p0: 8290, c: 1400 }
             };
+
+            // 2. 監聽「完整型號」輸入框，自動帶入數據
+            const modelInputEl = document.getElementById('model');
+            if (modelInputEl) {
+                modelInputEl.addEventListener('input', (e) => {
+                    const val = e.target.value.trim().toUpperCase();
+                    
+                    // 尋找符合的顯卡型號
+                    const matchedKey = Object.keys(GPU_DATABASE).find(key => val.includes(key));
+                    
+                    if (matchedKey) {
+                        const data = GPU_DATABASE[matchedKey];
+                        
+                        // 自動填入對應欄位
+                        const priceEl = form.querySelector('[name="gpuOriginalPrice"]');
+                        const floorEl = form.querySelector('[name="gpuFloorPrice"]');
+                        const genEl = form.querySelector('[name="gpuGen"]');
+                        const vramEl = form.querySelector('[name="gpuVram"]');
+                        
+                        if (priceEl) priceEl.value = data.p0;
+                        if (floorEl) floorEl.value = data.c;
+                        if (genEl) genEl.value = data.gen;
+                        if (vramEl) vramEl.value = data.vram;
+                    }
+                });
+            }
             // 2. 品牌分級常數字典 (更新版)
             const BRAND_TIERS = {
                 'S': { 
@@ -575,17 +592,7 @@
                     document.getElementById('result-category').textContent = categoryNames[category] || category.toUpperCase();
                     document.getElementById('result-price').textContent = `NT$ ${finalPrice.toLocaleString()}`;
                     document.getElementById('result-range').textContent = `NT$ ${rangeMin.toLocaleString()} - NT$ ${rangeMax.toLocaleString()}`;
-                    
-                    const confidenceEl = document.getElementById('result-confidence');
-                    if (originalPrice === 0) {
-                        confidenceEl.textContent = '無法評估 (缺少目前市價)';
-                        confidenceEl.style.color = '#ef4444';
-                    } else {
-                        const brandTierDesc = ['mouse', 'keyboard'].includes(category) ? ` (偵測為 ${getBrandTier(form.brand.value)} 級保值率)` : '';
-                        confidenceEl.textContent = finalPrice > 0 ? `高 (85%) - 基於動態算法${brandTierDesc}` : '偏低 (硬體殘值過低)';
-                        confidenceEl.style.color = finalPrice > 0 ? '#10b981' : '#f59e0b';
-                    }
-                    
+                
                     resultContent.style.transition = 'opacity 0.4s ease';
                     resultContent.style.opacity = '1';
                 }, 100);
