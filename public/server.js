@@ -20,6 +20,7 @@ for (const envFile of envCandidates) {
 const db = require('./db.js');
 const { searchProducts } = require('../src/services/search');
 const { getRecommendations } = require('../src/services/recommendation');
+const { TEST_WARNING, calculateTestValuation } = require('../src/services/valuation');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
@@ -352,64 +353,126 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 500, { success: false, message: '取得統計失敗' });
         }
 
+    } else if (pathname === '/api/valuation/models' && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
+            const query = String(parsedUrl.searchParams.get('q') || '').trim();
+            const brand = String(parsedUrl.searchParams.get('brand') || '').trim();
+            if (!['cpu', 'gpu'].includes(category)) {
+                return sendJson(res, 200, { success: true, data: [] });
+            }
+            if (!query) return sendJson(res, 200, { success: true, data: [] });
+            const data = await db.HardwareCatalog.searchModels({
+                category,
+                brand,
+                query,
+                limit: parsedUrl.searchParams.get('limit')
+            });
+            sendJson(res, 200, { success: true, data });
+        } catch (error) {
+            console.error('❌ 型號查詢失敗:', error);
+            sendJson(res, 500, { success: false, message: '型號資料暫時無法查詢。' });
+        }
+
     } else if (pathname === '/api/valuation' && req.method === 'POST') {
         setCorsHeaders(res);
         try {
             const payload = await parseJsonBody(req);
-            const requiredFields = ['category', 'brand', 'model', 'originalPrice', 'ageMonths', 'condition'];
+            const requiredFields = ['category', 'brand', 'model', 'originalPrice', 'elapsedMonths', 'condition'];
             const missingField = requiredFields.find(field => payload[field] === undefined || payload[field] === null || payload[field] === '');
             if (missingField) {
                 return sendJson(res, 400, { success: false, message: '估價資料不完整，請檢查所有必填欄位。' });
             }
+            const category = String(payload.category).trim().toLowerCase();
+            const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram', 'mouse', 'keyboard']);
+            const originalPrice = Number(payload.originalPrice);
+            const elapsedMonths = Number(payload.elapsedMonths);
+            if (!allowedCategories.has(category)) {
+                return sendJson(res, 400, { success: false, message: '不支援這個硬體分類。' });
+            }
+            if (!Number.isFinite(originalPrice) || originalPrice <= 0 || !Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
+                return sendJson(res, 400, { success: false, message: '新品參考價需大於 0，已過月份不可小於 0。' });
+            }
+            const extensionRegistered = ['yes', 'no', 'unknown'].includes(payload.extensionRegistered)
+                ? payload.extensionRegistered
+                : 'unknown';
+            const resolved = await db.HardwareCatalog.resolveValuationInput({
+                category,
+                brand: payload.brand,
+                model: payload.model,
+                modelId: payload.modelId,
+                elapsedMonths,
+                extensionRegistered
+            });
+            const formulaInput = {
+                category,
+                brand: resolved.canonicalBrand || String(payload.brand).trim(),
+                model: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
+                modelId: resolved.model ? resolved.model.id : null,
+                originalPrice,
+                elapsedMonths,
+                totalWarrantyMonths: resolved.warranty.totalMonths,
+                remainingWarrantyMonths: resolved.warranty.remainingMonths,
+                isWarrantyExpired: resolved.warranty.isExpired,
+                extensionRegistered,
+                condition: String(payload.condition),
+                details: payload.details && typeof payload.details === 'object' ? payload.details : {}
+            };
 
+            let pricingResult = null;
+            let fallbackReason = null;
             const valuationApiUrl = String(process.env.VALUATION_API_URL || '').trim();
-            if (!valuationApiUrl) {
-                return sendJson(res, 503, {
-                    success: false,
-                    code: 'MODEL_NOT_CONFIGURED',
-                    message: '估價頁面已完成，尚未連接定價模型。請設定模型 API 位址。'
-                });
+            if (valuationApiUrl) {
+                const headers = { 'Content-Type': 'application/json' };
+                const valuationApiKey = String(process.env.VALUATION_API_KEY || '').trim();
+                if (valuationApiKey) headers.Authorization = `Bearer ${valuationApiKey}`;
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), Number(process.env.VALUATION_TIMEOUT_MS || 15000));
+                try {
+                    const upstream = await fetch(valuationApiUrl, {
+                        method: 'POST', headers, body: JSON.stringify(formulaInput), signal: controller.signal
+                    });
+                    const result = await upstream.json();
+                    if (!upstream.ok || !Number.isFinite(Number(result.price))) {
+                        throw new Error(result.message || `HTTP ${upstream.status}`);
+                    }
+                    pricingResult = {
+                        success: true,
+                        pricingMode: process.env.VALUATION_PRICING_MODE === 'official' ? 'official' : 'test',
+                        warning: process.env.VALUATION_PRICING_MODE === 'official' ? null : TEST_WARNING,
+                        price: Math.max(0, Math.round(Number(result.price))),
+                        range: result.range || {
+                            min: Math.max(0, Math.round(Number(result.price) * 0.9)),
+                            max: Math.max(0, Math.round(Number(result.price) * 1.1))
+                        }
+                    };
+                } catch (error) {
+                    fallbackReason = '外部定價服務目前無法使用，已改用測試公式。';
+                    console.error('❌ 外部定價服務失敗，改用測試公式:', error.message);
+                } finally {
+                    clearTimeout(timeout);
+                }
             }
-
-            const headers = { 'Content-Type': 'application/json' };
-            const valuationApiKey = String(process.env.VALUATION_API_KEY || '').trim();
-            if (valuationApiKey) headers.Authorization = `Bearer ${valuationApiKey}`;
-
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), Number(process.env.VALUATION_TIMEOUT_MS || 15000));
-            let upstream;
-            try {
-                upstream = await fetch(valuationApiUrl, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
-                });
-            } finally {
-                clearTimeout(timeout);
-            }
-
-            const rawResponse = await upstream.text();
-            let result;
-            try {
-                result = JSON.parse(rawResponse);
-            } catch {
-                return sendJson(res, 502, { success: false, message: '定價模型回傳了無法辨識的資料格式。' });
-            }
-
-            if (!upstream.ok) {
-                return sendJson(res, 502, {
-                    success: false,
-                    message: result.message || `定價模型服務錯誤（${upstream.status}）。`
-                });
-            }
-
-            sendJson(res, 200, result);
+            if (!pricingResult) pricingResult = calculateTestValuation(formulaInput);
+            sendJson(res, 200, {
+                ...pricingResult,
+                fallbackReason,
+                hardware: {
+                    matched: Boolean(resolved.model),
+                    matchLevel: resolved.model ? 'exact_model' : 'category_default',
+                    requestedModel: String(payload.model).trim(),
+                    canonicalBrand: resolved.canonicalBrand || String(payload.brand).trim(),
+                    canonicalModel: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
+                    manufacturer: resolved.model ? resolved.model.manufacturer : null,
+                    series: resolved.model ? resolved.model.series : null
+                },
+                warranty: resolved.warranty,
+                formulaInput
+            });
         } catch (error) {
-            const message = error.name === 'AbortError'
-                ? '定價模型回應逾時，請稍後再試。'
-                : '無法連接定價模型，請確認模型服務正在執行。';
-            sendJson(res, 502, { success: false, message });
+            console.error('❌ 估價處理失敗:', error);
+            sendJson(res, 500, { success: false, message: '估價資料處理失敗，請稍後再試。' });
         }
 
     } else if ((pathname === '/api/chat' || pathname === '/api/chat/') && req.method === 'POST') {

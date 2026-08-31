@@ -1,159 +1,284 @@
+/* eslint-env browser */
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('valuation-form');
-    const categoryTabs = document.querySelectorAll('.category-tab');
     const categoryInput = document.getElementById('category');
-    const dynamicGroups = document.querySelectorAll('.valuation-dynamic-group');
-    const resultEmpty = document.getElementById('result-empty');
-    const resultContent = document.getElementById('result-content');
-    const resultPrice = document.getElementById('result-price');
-    const resultCategory = document.getElementById('result-category');
-    const resultRange = document.getElementById('result-range');
-    const resultConfidence = document.getElementById('result-confidence');
+    const modelInput = document.getElementById('model');
+    const modelIdInput = document.getElementById('model-id');
+    const brandInput = document.getElementById('brand');
+    const suggestions = document.getElementById('model-suggestions');
+    const modelHint = document.getElementById('model-hint');
+    const brandHint = document.getElementById('brand-hint');
+    const extensionField = document.getElementById('extension-field');
+    const extensionSelect = document.getElementById('extension-registered');
+    const elapsedMonthsInput = document.getElementById('elapsed-months');
+    const detectedPanel = document.getElementById('detected-hardware');
+    const submitButton = document.getElementById('valuation-submit');
+    const formMessage = document.getElementById('form-message');
+    let searchTimer;
+    let searchController;
+    let selectedModel = null;
 
-    // 分類標籤切換邏輯
-    categoryTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // 重置所有 Active 狀態
-            categoryTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            const selectedCategory = tab.dataset.category;
-            categoryInput.value = selectedCategory;
+    const categoryNames = {
+        cpu: 'CPU',
+        gpu: '顯示卡',
+        motherboard: '主機板',
+        ram: '記憶體',
+        mouse: '滑鼠',
+        keyboard: '鍵盤'
+    };
+    const matchLabels = {
+        exact_model: '精確型號',
+        series: '系列保固規則',
+        brand_category: '品牌分類保固規則',
+        category_default: '分類預設資料'
+    };
+    const fieldExamples = {
+        cpu: { brand: '例如：Intel、AMD', model: '例如：Intel Core Ultra 7 265K' },
+        gpu: { brand: '例如：ASUS、微星、技嘉', model: '例如：ASUS TUF Gaming RTX 4070 Super' },
+        motherboard: { brand: '例如：ASUS、微星、技嘉、華擎', model: '例如：ASUS TUF Gaming B650-Plus WiFi' },
+        ram: { brand: '例如：Kingston、威剛、芝奇', model: '例如：Kingston Fury Beast DDR5-6000 32GB' },
+        mouse: { brand: '例如：Logitech、Razer、ROG', model: '例如：Logitech G Pro X Superlight 2' },
+        keyboard: { brand: '例如：Keychron、Ducky、Logitech', model: '例如：Keychron K8 Pro' }
+    };
 
-            // 隱藏所有動態表單區塊
-            dynamicGroups.forEach(group => group.hidden = true);
+    function formatMoney(value) {
+        return `NT$ ${Number(value || 0).toLocaleString('zh-TW')}`;
+    }
 
-            // 根據選擇顯示對應表單區塊
-            if (['cpu', 'gpu', 'motherboard'].includes(selectedCategory)) {
-                document.getElementById('cpu-fields').hidden = false;
-            } else if (selectedCategory === 'ram') {
-                document.getElementById('ram-fields').hidden = false;
-            } else if (selectedCategory === 'mouse') {
-                document.getElementById('mouse-fields').hidden = false;
-            } else if (selectedCategory === 'keyboard') {
-                document.getElementById('keyboard-fields').hidden = false;
+    function formatWarranty(warranty) {
+        if (!warranty) return '尚未查詢';
+        if (warranty.type === 'limited_lifetime') return '有限終身保固（以原廠條款為準）';
+        if (warranty.isExpired) return `共 ${warranty.totalMonths} 個月，已過保 ${warranty.expiredByMonths} 個月`;
+        const extensionText = warranty.registrationApplied ? '（已計入登錄延保）' : '';
+        return `共 ${warranty.totalMonths} 個月，剩餘 ${warranty.remainingMonths} 個月${extensionText}`;
+    }
+
+    function showDetected(item) {
+        selectedModel = item;
+        detectedPanel.hidden = false;
+        document.getElementById('detected-model').textContent =
+            `${item.manufacturer} ${item.canonicalModel}`;
+        document.getElementById('detected-match').textContent =
+            matchLabels[item.warranty.matchLevel] || '型號資料已匹配';
+        extensionField.hidden = !item.warranty.extensionAvailable;
+        if (!item.warranty.extensionAvailable) extensionSelect.value = 'unknown';
+        updateDetectedWarranty();
+    }
+
+    function updateDetectedWarranty() {
+        if (!selectedModel) return;
+        const warranty = { ...selectedModel.warranty };
+        warranty.elapsedMonths = Math.max(0, Number(elapsedMonthsInput.value) || 0);
+        warranty.registrationApplied = Boolean(
+            warranty.extensionAvailable && extensionSelect.value === 'yes'
+        );
+        if (warranty.type === 'months') {
+            warranty.totalMonths = Number(warranty.baseMonths || 0) +
+                (warranty.registrationApplied ? Number(warranty.extensionMonths || 0) : 0);
+            warranty.remainingMonths = Math.max(warranty.totalMonths - warranty.elapsedMonths, 0);
+            warranty.expiredByMonths = Math.max(warranty.elapsedMonths - warranty.totalMonths, 0);
+            warranty.isExpired = warranty.elapsedMonths > warranty.totalMonths;
+        }
+        document.getElementById('detected-warranty').textContent = formatWarranty(warranty);
+    }
+
+    function clearDetected() {
+        selectedModel = null;
+        modelIdInput.value = '';
+        detectedPanel.hidden = true;
+        extensionField.hidden = true;
+        extensionSelect.value = 'unknown';
+    }
+
+    function hideSuggestions() {
+        suggestions.hidden = true;
+        suggestions.replaceChildren();
+    }
+
+    function renderSuggestions(items) {
+        suggestions.replaceChildren();
+        if (!items.length) {
+            const empty = document.createElement('p');
+            empty.className = 'model-suggestion-empty';
+            empty.textContent = '找不到精確型號，仍可使用分類預設保固進行測試。';
+            suggestions.appendChild(empty);
+            suggestions.hidden = false;
+            return;
+        }
+        items.forEach((item) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'model-suggestion';
+            button.setAttribute('role', 'option');
+            const title = document.createElement('strong');
+            title.textContent = `${item.manufacturer} ${item.canonicalModel}`;
+            const detail = document.createElement('span');
+            detail.textContent = `${item.series} · ${formatWarranty(item.warranty)}`;
+            button.append(title, detail);
+            button.addEventListener('click', () => {
+                modelInput.value = item.canonicalModel;
+                modelIdInput.value = item.id;
+                if (categoryInput.value === 'cpu') brandInput.value = item.manufacturer;
+                showDetected(item);
+                hideSuggestions();
+            });
+            suggestions.appendChild(button);
+        });
+        suggestions.hidden = false;
+    }
+
+    async function searchModels() {
+        const category = categoryInput.value;
+        const query = modelInput.value.trim();
+        if (category !== 'cpu' || query.length < 2) {
+            hideSuggestions();
+            return;
+        }
+        if (searchController) searchController.abort();
+        searchController = new AbortController();
+        const params = new URLSearchParams({
+            category,
+            q: query,
+            brand: brandInput.value.trim(),
+            limit: '8'
+        });
+        try {
+            const response = await fetch(`/api/valuation/models?${params}`, {
+                signal: searchController.signal
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.message || '型號查詢失敗');
+            renderSuggestions(result.data);
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                formMessage.textContent = '型號建議暫時無法載入，仍可手動填寫。';
             }
+        }
+    }
+
+    function scheduleSearch() {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(searchModels, 180);
+    }
+
+    modelInput.addEventListener('input', () => {
+        clearDetected();
+        scheduleSearch();
+    });
+    modelInput.addEventListener('focus', scheduleSearch);
+    brandInput.addEventListener('input', () => {
+        if (selectedModel) {
+            clearDetected();
+        }
+        scheduleSearch();
+    });
+    elapsedMonthsInput.addEventListener('input', updateDetectedWarranty);
+    extensionSelect.addEventListener('change', updateDetectedWarranty);
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('.model-search-field')) hideSuggestions();
+    });
+
+    document.querySelectorAll('.category-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.category-tab').forEach((item) => {
+                const active = item === tab;
+                item.classList.toggle('active', active);
+                item.setAttribute('aria-selected', String(active));
+            });
+            categoryInput.value = tab.dataset.category;
+            modelInput.value = '';
+            brandInput.value = '';
+            brandInput.placeholder = fieldExamples[tab.dataset.category].brand;
+            modelInput.placeholder = fieldExamples[tab.dataset.category].model;
+            clearDetected();
+            hideSuggestions();
+            formMessage.textContent = '';
+            const hasAutocomplete = tab.dataset.category === 'cpu';
+            modelHint.textContent = hasAutocomplete
+                ? '輸入至少 2 個字元即可搜尋型號。'
+                : tab.dataset.category === 'gpu'
+                    ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
+                    : '此分類尚未收錄型號，可手動輸入並使用分類預設保固。';
+            brandHint.textContent = tab.dataset.category === 'gpu'
+                ? '請填板卡品牌，例如 ASUS、微星、技嘉；不是 NVIDIA 或 AMD。'
+                : '請填產品外盒或本體標示的品牌。';
         });
     });
 
-    // 估價公式計算邏輯
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const category = categoryInput.value;
-        let estimatedPrice = 0;
-        let originalPrice = 0;
-
-        // 預設產品標準總保固期 (以月為單位)
-        const STANDARD_WARRANTY_PC = 36; // 核心硬體如 CPU/GPU/MB 預設 3 年保
-        const STANDARD_WARRANTY_PERIPHERAL = 24; // 周邊如滑鼠/鍵盤 預設 2 年保
-
-        // -----------------------------------------------------
-        // 1. CPU / GPU / 主機板 計算邏輯
-        // 根據 CPU.jpg 提供之公式：P1 = P0 * e^(-0.02 * t)
-        // -----------------------------------------------------
-        if (['cpu', 'gpu', 'motherboard'].includes(category)) {
-            originalPrice = parseFloat(form.cpuOriginalPrice.value) || 0;
-            const warrantyRemaining = parseFloat(form.cpuWarrantyMonths.value) || 0;
-
-            // 推算已使用月數 t (總保固 - 剩餘保固)
-            let t = STANDARD_WARRANTY_PC - warrantyRemaining;
-            if (t < 0) t = 0; // 避免負值(延長保固等情況)
-
-            estimatedPrice = originalPrice * Math.exp(-0.02 * t);
-        }
-        
-        // -----------------------------------------------------
-        // 2. RAM 記憶體 計算邏輯 (終身保固居多，採自定義微幅折舊)
-        // -----------------------------------------------------
-        else if (category === 'ram') {
-            originalPrice = parseFloat(form.ramOriginalPrice.value) || 0;
-            const condition = form.ramSpecialCondition.value;
-            // 若有填寫特殊非功能性故障/損耗，扣減較多；否則一般視為 85 折左右
-            let penalty = condition.trim().length > 0 ? 0.70 : 0.85;
-            estimatedPrice = originalPrice * penalty;
-        }
-        
-        // -----------------------------------------------------
-        // 3. 滑鼠 / 鍵盤 計算邏輯
-        // 根據 滑鼠.jpg / 鍵盤.jpg 提供之公式：
-        // P1 = P0 * e^(-0.014 * t) * C - P0 * (1 - e^(-0.021 * t))
-        // (耗損計算) - (保固消耗計算)
-        // -----------------------------------------------------
-        else if (['mouse', 'keyboard'].includes(category)) {
-            let prefix = category === 'mouse' ? 'mouse' : 'keyboard';
-            originalPrice = parseFloat(form[`${prefix}OriginalPrice`].value) || 0;
-            const warrantyRemaining = parseFloat(form[`${prefix}WarrantyMonths`].value) || 0;
-            const usageCondition = form[`${prefix}UsageCondition`].value;
-            const appearanceCondition = form[`${prefix}AppearanceCondition`].value;
-
-            // 推算已使用月數 t
-            let t = STANDARD_WARRANTY_PERIPHERAL - warrantyRemaining;
-            if (t < 0) t = 0;
-
-            // 外觀係數 C 對照表 (參考圖中筆記：99新=0.83, 95新=0.71, 9成新=0.55, 8成新=0.43)
-            let C = 0.75; // 預設「正常痕跡」(介於 95新~99新 之間)
-            if (appearanceCondition === 'minor') C = 0.55; // 輕微打油/掉漆 (~9成新)
-            if (appearanceCondition === 'heavy') C = 0.43; // 嚴重破損 (~8成新)
-
-            // 功能損耗進一步扣減係數
-            if (usageCondition === 'heavy') {
-                C -= 0.15;
-            } else if (usageCondition === 'minor') {
-                C -= 0.05;
-            }
-
-            // 確保 C 不會過低或變負數
-            C = Math.max(0.1, C);
-
-            // 套入公式
-            const wearTerm = Math.exp(-0.014 * t) * C;
-            const warrantyTerm = 1 - Math.exp(-0.021 * t);
-
-            estimatedPrice = (originalPrice * wearTerm) - (originalPrice * warrantyTerm);
-        }
-
-        // 確保價格不為負數
-        estimatedPrice = Math.max(0, estimatedPrice);
-
-        // -----------------------------------------------------
-        // 渲染結果至畫面
-        // -----------------------------------------------------
-        resultEmpty.hidden = true;
-        resultContent.hidden = false;
-
-        const finalPrice = Math.round(estimatedPrice);
-        
-        // 產生上下 10% 的合理收購/販售價格區間
-        const rangeMin = Math.round(finalPrice * 0.9);
-        const rangeMax = Math.round(finalPrice * 1.1);
-
-        const categoryNames = {
-            cpu: 'CPU',
-            gpu: '顯示卡',
-            motherboard: '主機板',
-            ram: '記憶體',
-            mouse: '滑鼠',
-            keyboard: '鍵盤'
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        submitButton.disabled = true;
+        submitButton.textContent = '處理中...';
+        formMessage.textContent = '';
+        const payload = {
+            category: categoryInput.value,
+            brand: brandInput.value.trim(),
+            model: modelInput.value.trim(),
+            modelId: modelIdInput.value ? Number(modelIdInput.value) : null,
+            originalPrice: Number(document.getElementById('original-price').value),
+            elapsedMonths: Number(document.getElementById('elapsed-months').value),
+            extensionRegistered: extensionSelect.value,
+            condition: document.getElementById('condition').value,
+            details: {}
         };
 
-        // 加入一點載入感視覺效果
-        resultContent.style.opacity = '0';
-        setTimeout(() => {
-            resultCategory.textContent = categoryNames[category] || category.toUpperCase();
-            resultPrice.textContent = `NT$ ${finalPrice.toLocaleString()}`;
-            resultRange.textContent = `NT$ ${rangeMin.toLocaleString()} - NT$ ${rangeMax.toLocaleString()}`;
-            
-            // 決定模型信心度
-            if (originalPrice === 0) {
-                resultConfidence.textContent = '無法評估 (缺少原價)';
-                resultConfidence.style.color = '#ef4444';
-            } else {
-                resultConfidence.textContent = finalPrice > 0 ? '高 (85%) - 基於演算法與市價折舊' : '偏低 (硬體殘值過低)';
-                resultConfidence.style.color = finalPrice > 0 ? '#10b981' : '#f59e0b';
-            }
-            
-            resultContent.style.transition = 'opacity 0.4s ease';
-            resultContent.style.opacity = '1';
-        }, 100);
+        try {
+            const response = await fetch('/api/valuation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.message || '估價失敗');
+
+            document.getElementById('result-empty').hidden = true;
+            document.getElementById('result-content').hidden = false;
+            const warning = document.getElementById('test-warning');
+            warning.hidden = result.pricingMode === 'official';
+            warning.textContent = result.warning || '';
+            document.getElementById('result-category').textContent = categoryNames[payload.category];
+            document.getElementById('result-price').textContent = formatMoney(result.price);
+            document.getElementById('result-range').textContent =
+                `${formatMoney(result.range.min)} – ${formatMoney(result.range.max)}`;
+            document.getElementById('result-model').textContent =
+                `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
+            document.getElementById('result-match').textContent = result.hardware.matched
+                ? `型號已匹配；保固採${matchLabels[result.warranty.matchLevel] || '已知規則'}`
+                : '找不到精確型號，使用分類預設資料';
+            document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
+            document.getElementById('result-note').textContent =
+                [result.fallbackReason, result.warranty.note].filter(Boolean).join(' ');
+            detectedPanel.hidden = false;
+            document.getElementById('detected-model').textContent =
+                `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
+            document.getElementById('detected-warranty').textContent = formatWarranty(result.warranty);
+            document.getElementById('detected-match').textContent =
+                matchLabels[result.warranty.matchLevel] || '資料已匹配';
+            extensionField.hidden = !result.warranty.extensionAvailable;
+        } catch (error) {
+            formMessage.textContent = error.message || '估價失敗，請稍後再試。';
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = '開始估價';
+        }
+    });
+
+    const loggedInUser = localStorage.getItem('userEmail');
+    const userName = localStorage.getItem('userName');
+    if (loggedInUser) {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('user-profile').style.display = 'flex';
+        document.getElementById('user-display-name').textContent = userName || loggedInUser.split('@')[0];
+    }
+    document.getElementById('user-profile').addEventListener('click', function () {
+        const menu = this.querySelector('.dropdown-menu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
+    document.getElementById('logout-link').addEventListener('click', (event) => {
+        event.preventDefault();
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        window.location.reload();
     });
 });

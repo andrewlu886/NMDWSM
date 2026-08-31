@@ -4,165 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>二手硬體估價 | 一次估夠</title>
-    <meta name="description" content="輸入硬體型號、使用時間與商品狀況，透過定價模型取得二手硬體價格評估。">
+    <meta name="description" content="查詢硬體型號、保固狀態並測試二手硬體估價流程。">
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="./valuation.css">
     <link rel="stylesheet" href="./site-theme.css">
-    <style>
-        /* 確保隱藏屬性絕對生效 */
-        .valuation-dynamic-group[hidden] {
-            display: none !important;
-        }
-
-        /* --- 動態漸層導覽列 --- */
-        .main-nav {
-            background: linear-gradient(90deg, #1e3a8a, #2563eb, #0284c7, #2563eb) !important;
-            background-size: 300% 300% !important;
-            animation: navGradientMove 10s ease infinite !important;
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            padding: 12px 0;
-        }
-        @keyframes navGradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .main-nav a {
-            color: rgba(255, 255, 255, 0.9) !important;
-            position: relative;
-            text-decoration: none;
-            padding: 6px 0;
-            transition: all 0.3s ease;
-        }
-        .main-nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 50%;
-            width: 0;
-            height: 4px;
-            background: #ffffff;
-            transition: all 0.3s ease;
-            transform: translateX(-50%);
-            border-radius: 4px;
-            box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
-        }
-        .main-nav a:hover, .main-nav a.active {
-            color: #ffffff !important;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-            font-weight: bold !important;
-        }
-        .main-nav a:hover::after, .main-nav a.active::after {
-            width: 100%;
-        }
-
-        /* --- Logo 微互動 --- */
-        .logo {
-            transition: transform 0.2s ease;
-            display: inline-block;
-        }
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        /* --- 卡片進場動畫與邊框 --- */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .valuation-card {
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.6s ease-out;
-            transition: all 0.3s ease;
-        }
-        .valuation-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #0284c7, #2563eb, #38bdf8);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .valuation-card:hover {
-            box-shadow: 0 12px 24px -5px rgba(0, 0, 0, 0.12);
-            border-color: rgba(37, 99, 235, 0.3);
-        }
-        .valuation-card:hover::before {
-            opacity: 1;
-        }
-
-        /* --- 分類標籤 --- */
-        .category-tab {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-        }
-        .category-tab:hover {
-            border-color: #2563eb !important;
-            color: #2563eb !important;
-            transform: translateY(-2px);
-        }
-        .category-tab.active {
-            background: linear-gradient(135deg, #1d4ed8, #0284c7) !important;
-            color: #ffffff !important;
-            border-color: transparent !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
-            transform: translateY(0);
-        }
-
-        /* --- 輸入框與按鈕 --- */
-        .field input, .field select, .nav-search {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .field input:focus, .field select:focus, .nav-search:focus {
-            border-color: #3b82f6 !important;
-            outline: none !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
-            background-color: #ffffff !important;
-        }
-
-        .valuation-submit {
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, #1d4ed8, #0284c7) !important;
-            color: #ffffff !important;
-            border: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            cursor: pointer;
-        }
-        .valuation-submit::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 20%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.35);
-            transform: rotate(30deg);
-            transition: all 0.6s ease;
-        }
-        .valuation-submit:hover {
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
-            transform: translateY(-2px);
-        }
-        .valuation-submit:hover::after {
-            left: 140%;
-        }
-        .valuation-submit:active {
-            transform: translateY(1px);
-        }
-
-        .result-content {
-            animation: fadeInUp 0.5s ease-out;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -183,7 +28,7 @@
                 </div>
             </div>
         </div>
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="主要導覽">
             <a href="/">首頁</a>
             <a href="/recommend.html">智慧推薦</a>
             <a href="/valuation.html" class="active">二手硬體估價</a>
@@ -198,8 +43,8 @@
         <section class="nmd-hero valuation-hero">
             <div>
                 <p class="valuation-eyebrow">HARDWARE VALUATION</p>
-                <h1>二手硬體估價模型</h1>
-                <p>填入硬體規格與使用狀況，由模型提供價格評估；本工具不包含商品刊登或交易功能。</p>
+                <h1>二手硬體估價</h1>
+                <p>辨識硬體型號與保固狀態，測試完整估價流程；本工具不包含商品刊登或交易功能。</p>
             </div>
         </section>
 
@@ -207,397 +52,103 @@
             <div class="valuation-heading-row">
                 <div>
                     <h2>選擇硬體種類</h2>
-                    <p>先選擇分類，再填寫模型需要的基本資料。</p>
+                    <p>CPU 提供型號建議，顯示卡與其他分類請手動輸入完整型號。</p>
                 </div>
-                <span class="model-badge" id="model-badge">模型待連接</span>
+                <span class="data-status-badge">測試估價</span>
             </div>
 
-            <!-- 分類標籤 -->
-            <div class="category-tabs" role="tablist">
-                <button type="button" class="category-tab active" role="tab" data-category="cpu">CPU</button>
-                <button type="button" class="category-tab" role="tab" data-category="gpu">顯示卡</button>
-                <button type="button" class="category-tab" role="tab" data-category="motherboard">主機板</button>
-                <button type="button" class="category-tab" role="tab" data-category="ram">記憶體</button>
-                <button type="button" class="category-tab" role="tab" data-category="mouse">滑鼠</button>
-                <button type="button" class="category-tab" role="tab" data-category="keyboard">鍵盤</button>
+            <div class="category-tabs" role="tablist" aria-label="硬體種類">
+                <button type="button" class="category-tab active" role="tab" aria-selected="true" data-category="cpu">CPU</button>
+                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="gpu">顯示卡</button>
+                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="motherboard">主機板</button>
+                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="ram">記憶體</button>
+                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="mouse">滑鼠</button>
+                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="keyboard">鍵盤</button>
             </div>
 
             <div class="valuation-layout">
-                <form id="valuation-form" class="valuation-form">
+                <form id="valuation-form" class="valuation-form" novalidate>
                     <input type="hidden" id="category" name="category" value="cpu">
+                    <input type="hidden" id="model-id" name="modelId">
 
-                    <!-- 通用基礎欄位：型號與品牌 -->
                     <div class="field full-width">
-                        <label for="model">完整型號</label>
-                        <input id="model" name="model" type="text" required placeholder="例如：Intel Core i5-13400F 或 ROG Gladius">
-                    </div>
-                    <div class="field">
                         <label for="brand">品牌</label>
-                        <input id="brand" name="brand" type="text" required placeholder="例如：ROG、Logitech...">
+                        <input id="brand" name="brand" type="text" required placeholder="例如：Intel、AMD">
+                        <span class="field-hint" id="brand-hint">CPU 可填 Intel／AMD；顯示卡請填 ASUS、微星等板卡品牌。</span>
                     </div>
 
-                    <!-- 1. 核心硬體專屬區塊 -->
-                    <div id="cpu-fields" class="valuation-dynamic-group full-width">
-                        <div class="field">
-                            <label>目前全新市價（NTD）</label>
-                            <input name="cpuOriginalPrice" type="number" min="0" step="1" placeholder="填入目前市場特價或原價">
-                        </div>
-                        <div class="field">
-                            <label>保固月份（到保固期還有多久）</label>
-                            <input name="cpuWarrantyMonths" type="number" min="0" step="1" value="0">
-                        </div>
-                    </div>
-                    <!-- 顯卡專屬區塊 -->
-                    <div id="gpu-fields" class="valuation-dynamic-group full-width" hidden>
-                        <div class="field">
-                            <label>發售原價 / 目前全新市價（NTD）</label>
-                            <input name="gpuOriginalPrice" type="number" min="0" step="1" placeholder="例如：15990">
-                        </div>
-                        <div class="field">
-                            <label>硬體保底底價 (C)</label>
-                            <input name="gpuFloorPrice" type="number" min="0" step="1" placeholder="例如：16G設8000，8G設3000">
-                        </div>
-                        <div class="field">
-                            <label>已使用時間（月）</label>
-                            <input name="gpuUsageMonths" type="number" min="0" step="1" value="0">
-                        </div>
-                        <div class="field full-width">
-                            <label>顯存容量 (VRAM / GB)</label>
-                            <input name="gpuVram" type="number" min="0" step="1" value="8" placeholder="例如：8, 12, 16, 24">
-                        </div>
-                    </div>
-                    <!-- 2. RAM 專屬區塊 -->
-                    <div id="ram-fields" class="valuation-dynamic-group full-width" hidden>
-                        <div class="field">
-                            <label>當初購得價格（NTD）</label>
-                            <input name="ramOriginalPrice" type="number" min="0" step="1" placeholder="填入當初購買的金額">
-                        </div>
-                        <div class="field">
-                            <label>已使用時間（月）</label>
-                            <input name="ramUsageMonths" type="number" min="0" step="1" value="0">
-                        </div>
-                        <div class="field full-width">
-                            <label>特殊的規格或損耗（非功能性故障）</label>
-                            <input name="ramSpecialCondition" type="text" placeholder="例如：散熱片輕微刮傷...">
-                        </div>
+                    <div class="field full-width model-search-field">
+                        <label for="model">完整型號</label>
+                        <input id="model" name="model" type="text" required autocomplete="off" aria-autocomplete="list" aria-controls="model-suggestions" placeholder="例如：Intel Core Ultra 7 265K">
+                        <div id="model-suggestions" class="model-suggestions" role="listbox" hidden></div>
+                        <span class="field-hint" id="model-hint">輸入至少 2 個字元即可搜尋型號。</span>
                     </div>
 
-                    <!-- 3. 滑鼠專屬區塊 -->
-                    <div id="mouse-fields" class="valuation-dynamic-group full-width" hidden>
-                        <div class="field">
-                            <label>目前全新市價（NTD）</label>
-                            <input name="mouseOriginalPrice" type="number" min="0" step="1" placeholder="若已停產請填原價">
-                        </div>
-                        <div class="field">
-                            <label>保固月份（到保固期還有多久）</label>
-                            <input name="mouseWarrantyMonths" type="number" min="0" step="1" value="0">
-                        </div>
-                        <div class="field full-width">
-                            <label>使用損耗程度</label>
-                            <select name="mouseUsageCondition">
-                                <option value="good">正常</option>
-                                <option value="minor">輕微損耗 (如：微動偏軟)</option>
-                                <option value="heavy">嚴重損耗 (如：連點、滾輪失靈)</option>
-                            </select>
-                        </div>
-                        <div class="field full-width">
-                            <label>外觀損耗程度</label>
-                            <select name="mouseAppearanceCondition">
-                                <option value="good">正常痕跡</option>
-                                <option value="minor">輕微打油/掉漆</option>
-                                <option value="heavy">嚴重破損/發黏</option>
-                            </select>
-                        </div>
+                    <div class="field">
+                        <label for="original-price">目前全新參考價（NTD）</label>
+                        <input id="original-price" name="originalPrice" type="number" min="1" step="1" required placeholder="例如：10200">
                     </div>
 
-                    <!-- 4. 鍵盤專屬區塊 -->
-                    <div id="keyboard-fields" class="valuation-dynamic-group full-width" hidden>
-                        <div class="field">
-                            <label>目前全新市價（NTD）</label>
-                            <input name="keyboardOriginalPrice" type="number" min="0" step="1" placeholder="若已停產請填原價">
-                        </div>
-                        <div class="field">
-                            <label>保固月份（到保固期還有多久）</label>
-                            <input name="keyboardWarrantyMonths" type="number" min="0" step="1" value="0">
-                        </div>
-                        <div class="field full-width">
-                            <label>使用損耗程度</label>
-                            <select name="keyboardUsageCondition">
-                                <option value="good">正常</option>
-                                <option value="minor">輕微損耗 (如：個別按鍵手感變差)</option>
-                                <option value="heavy">嚴重損耗 (如：卡鍵、失靈)</option>
-                            </select>
-                        </div>
-                        <div class="field full-width">
-                            <label>外觀損耗程度</label>
-                            <select name="keyboardAppearanceCondition">
-                                <option value="good">正常痕跡</option>
-                                <option value="minor">鍵帽打油/輕微掉字</option>
-                                <option value="heavy">外殼破損/生鏽</option>
-                            </select>
-                        </div>
+                    <div class="field">
+                        <label for="elapsed-months">購買／保固起算後已過月份</label>
+                        <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required value="0">
+                        <span class="field-hint">請填已經過多久，不需要自行計算剩餘保固。</span>
                     </div>
 
-                    <button class="valuation-submit full-width" id="valuation-submit" type="submit">
-                        <span>開始估價</span>
-                    </button>
+                    <div class="field">
+                        <label for="condition">商品狀況</label>
+                        <select id="condition" name="condition" required>
+                            <option value="like_new">近全新</option>
+                            <option value="good" selected>正常使用</option>
+                            <option value="fair">明顯使用痕跡</option>
+                            <option value="poor">狀況較差</option>
+                        </select>
+                    </div>
+
+                    <div class="field full-width extension-field" id="extension-field" hidden>
+                        <label for="extension-registered">是否完成延長保固登錄</label>
+                        <select id="extension-registered" name="extensionRegistered">
+                            <option value="unknown">不確定</option>
+                            <option value="no">沒有</option>
+                            <option value="yes">有，且已完成登錄</option>
+                        </select>
+                        <span class="field-hint">只有確認完成登錄時，才會把延長期限計入。</span>
+                    </div>
+
+                    <section id="detected-hardware" class="detected-hardware full-width" aria-live="polite" hidden>
+                        <h3>已辨識資料</h3>
+                        <dl>
+                            <div><dt>品牌與型號</dt><dd id="detected-model">—</dd></div>
+                            <div><dt>保固資訊</dt><dd id="detected-warranty">—</dd></div>
+                            <div><dt>資料匹配狀態</dt><dd id="detected-match">—</dd></div>
+                        </dl>
+                    </section>
+
+                    <button class="valuation-submit full-width" id="valuation-submit" type="submit">開始估價</button>
                     <p class="form-message full-width" id="form-message" aria-live="polite"></p>
                 </form>
 
-                <!-- 右側估價結果 -->
                 <aside class="valuation-result" aria-live="polite">
                     <div class="result-empty" id="result-empty">
-                        <span class="result-icon">⌁</span>
                         <h3>等待估價資料</h3>
-                        <p>完成左側欄位後，模型估價會顯示在這裡。</p>
+                        <p>完成左側欄位後，測試計算結果會顯示在這裡。</p>
                     </div>
                     <div class="result-content" id="result-content" hidden>
-                        <p class="result-label">模型估計價格 (<span id="result-category">CPU</span>)</p>
+                        <div class="test-warning" id="test-warning">目前使用測試公式，結果僅供功能測試，不代表實際市場價格。</div>
+                        <p class="result-label">測試計算結果（<span id="result-category">CPU</span>）</p>
                         <p class="result-price" id="result-price">NT$ 0</p>
-                        <p>價格區間: <span id="result-range">未提供</span></p>
+                        <div class="result-range"><span>測試區間</span><strong id="result-range">—</strong></div>
+                        <div class="result-meta"><span>辨識型號</span><strong id="result-model">—</strong></div>
+                        <div class="result-meta"><span>資料匹配狀態</span><strong id="result-match">—</strong></div>
+                        <div class="result-meta"><span>保固狀態</span><strong id="result-warranty">—</strong></div>
+                        <p class="result-note" id="result-note">保固為規則推定，最終以序號、發票與原廠判定為準。</p>
                     </div>
                 </aside>
             </div>
         </section>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('valuation-form');
-            const categoryInput = document.getElementById('category');
-            
-            // --- 1. UI 切換邏輯 ---
-            document.querySelectorAll('.category-tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.valuation-dynamic-group').forEach(g => g.hidden = true);
-                    
-                    const selectedCategory = e.target.dataset.category;
-                    e.target.classList.add('active');
-                    categoryInput.value = selectedCategory;
-
-                    const groupMap = {
-                        cpu: 'cpu-fields', gpu: 'gpu-fields', motherboard: 'cpu-fields',
-                        ram: 'ram-fields', mouse: 'mouse-fields', keyboard: 'keyboard-fields'
-                    };
-                    document.getElementById(groupMap[selectedCategory]).hidden = false;
-                });
-            });
-            // 1. 建立顯卡對應資料庫字典
-            const GPU_DATABASE = {
-                "RX 9070 XT": { gen: 9, vram: 16, p0: 21990, c: 9500 },
-                "RX 9070": { gen: 9, vram: 16, p0: 18990, c: 8500 },
-                "RX 9060 XT": { gen: 9, vram: 12, p0: 13990, c: 6000 },
-                "RX 9060": { gen: 9, vram: 8, p0: 9990, c: 4200 },
-                "RX 7900 XTX": { gen: 7, vram: 24, p0: 32990, c: 15000 },
-                "RX 7900 XT": { gen: 7, vram: 20, p0: 26990, c: 11000 },
-                "RX 7900 GRE": { gen: 7, vram: 16, p0: 18990, c: 8500 },
-                "RX 7800 XT": { gen: 7, vram: 16, p0: 17990, c: 8000 },
-                "RX 7700 XT": { gen: 7, vram: 12, p0: 15490, c: 6000 },
-                "RX 7600 XT": { gen: 7, vram: 16, p0: 11490, c: 5000 },
-                "RX 7600": { gen: 7, vram: 8, p0: 8990, c: 3500 },
-                "RX 6950 XT": { gen: 6, vram: 16, p0: 32990, c: 9500 },
-                "RX 6900 XT": { gen: 6, vram: 16, p0: 31990, c: 9000 },
-                "RX 6800 XT": { gen: 6, vram: 16, p0: 22990, c: 8000 },
-                "RX 6800": { gen: 6, vram: 16, p0: 19990, c: 7000 },
-                "RX 6750 XT": { gen: 6, vram: 12, p0: 16990, c: 5500 },
-                "RX 6700 XT": { gen: 6, vram: 12, p0: 15990, c: 5000 },
-                "RX 6650 XT": { gen: 6, vram: 8, p0: 11990, c: 3600 },
-                "RX 6600 XT": { gen: 6, vram: 8, p0: 12490, c: 3400 },
-                "RX 6600": { gen: 6, vram: 8, p0: 9990, c: 3000 },
-                "RX 5700 XT": { gen: 5, vram: 8, p0: 14990, c: 2400 },
-                "RX 5700": { gen: 5, vram: 8, p0: 12990, c: 2100 },
-                "RX 5600 XT": { gen: 5, vram: 6, p0: 9990, c: 1800 },
-                "RX 580": { gen: 4, vram: 8, p0: 8290, c: 1400 }
-            };
-
-            // 2. 監聽「完整型號」輸入框，自動帶入數據
-            const modelInputEl = document.getElementById('model');
-            if (modelInputEl) {
-                modelInputEl.addEventListener('input', (e) => {
-                    const val = e.target.value.trim().toUpperCase();
-                    
-                    // 尋找符合的顯卡型號
-                    const matchedKey = Object.keys(GPU_DATABASE).find(key => val.includes(key));
-                    
-                    if (matchedKey) {
-                        const data = GPU_DATABASE[matchedKey];
-                        
-                        // 自動填入對應欄位
-                        const priceEl = form.querySelector('[name="gpuOriginalPrice"]');
-                        const floorEl = form.querySelector('[name="gpuFloorPrice"]');
-                        const genEl = form.querySelector('[name="gpuGen"]');
-                        const vramEl = form.querySelector('[name="gpuVram"]');
-                        
-                        if (priceEl) priceEl.value = data.p0;
-                        if (floorEl) floorEl.value = data.c;
-                        if (genEl) genEl.value = data.gen;
-                        if (vramEl) vramEl.value = data.vram;
-                    }
-                });
-            }
-            // 2. 品牌分級常數字典 (更新版)
-            const BRAND_TIERS = {
-                'S': { 
-                    k: 0.03,
-                    startApp: { good: 0.60, minor: 0.45, heavy: 0.25 },
-                    startUsage: { good: 0.35, minor: 0.30, heavy: 0.15 },
-                    floorApp: { good: 0.25, minor: 0.15, heavy: 0.05 },
-                    floorUsage: { good: 0.15, minor: 0.10, heavy: 0.05 }
-                },
-                'A': { 
-                    k: 0.06,
-                    // 雙正常起價 0.90 (0.50+0.40), 雙嚴重起價 0.15 (0.07+0.08)
-                    startApp: { good: 0.50, minor: 0.35, heavy: 0.07 },
-                    startUsage: { good: 0.40, minor: 0.25, heavy: 0.08 },
-                    // 雙正常底價 0.40 (0.25+0.15), 雙嚴重底價 0.05 (0.02+0.03)
-                    floorApp: { good: 0.25, minor: 0.10, heavy: 0.02 },
-                    floorUsage: { good: 0.15, minor: 0.10, heavy: 0.03 }
-                },
-                'B': { 
-                    k: 0.10,
-                    startApp: { good: 0.40, minor: 0.25, heavy: 0.10 },
-                    startUsage: { good: 0.25, minor: 0.15, heavy: 0.05 },
-                    floorApp: { good: 0.10, minor: 0.05, heavy: 0.00 },
-                    floorUsage: { good: 0.05, minor: 0.05, heavy: 0.00 }
-                }
-            };
-            function getBrandTier(brandInput) {
-                const brand = brandInput.toLowerCase().trim();
-                // 匹配 S 級 (ROG, ASUS, Wooting 等信仰品牌)
-                if (/wooting|finalmouse|vaxee|zowie|hhkb|leopold|matrix|keycult|rog|asus/i.test(brand)) return 'S';
-                // 匹配 A 級 (Logitech, Razer 等主流品牌)
-                if (/logitech|logi|razer|keychron|ducky|steelseries|corsair|hyperx|akko/i.test(brand)) return 'A';
-                // 匹配 B 級 (常態跳水冷門品牌)
-                if (/lexma|bfriend|fantech|rapoo|dareu|e-yooso/i.test(brand)) return 'B';
-                return 'A'; // 預設防呆
-            }
-
-            // --- 3. 核心估價邏輯 ---
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const category = categoryInput.value;
-                let estimatedPrice = 0;
-                let originalPrice = 0;
-
-                // [一般硬體計算]
-                if (['cpu',  'motherboard'].includes(category)) {
-                    originalPrice = parseFloat(form.cpuOriginalPrice.value) || 0;
-                    const warrantyRemaining = parseFloat(form.cpuWarrantyMonths.value) || 0;
-                    const t = Math.max(0, 36 - warrantyRemaining);
-                    estimatedPrice = originalPrice * Math.exp(-0.02 * t);
-                }
-                // [GPU 計算：動態世代與顯存折舊模型]
-                else if (category === 'gpu') {
-                    // 從通用欄位抓取使用者輸入的型號，轉大寫並去除多餘空白
-                    const modelInput = form.model.value.trim().toUpperCase();
-                    
-                    // 模糊比對：檢查輸入字串是否包含資料庫內的型號關鍵字
-                    const matchedKey = Object.keys(GPU_DATABASE).find(key => modelInput.includes(key));
-                    const gpuData = matchedKey ? GPU_DATABASE[matchedKey] : null;
-
-                    // 自動優先讀取資料庫；若資料庫找不到該型號，則退回讀取表單輸入值或給予預設值
-                    originalPrice = gpuData ? gpuData.p0 : (parseFloat(form.gpuOriginalPrice.value) || 0);
-                    const C = gpuData ? gpuData.c : (parseFloat(form.gpuFloorPrice.value) || 0);
-                    const Gen = gpuData ? gpuData.gen : (parseInt(form.gpuGen.value) || 7);
-                    const VRAM = gpuData ? gpuData.vram : (parseFloat(form.gpuVram.value) || 8);
-                    const t = parseFloat(form.gpuUsageMonths.value) || 0;
-
-                    const k0 = -0.040;      // 落地折損 4%
-                    const G_latest = 9;     // 最新世代基準 (已同步更新為 9 代)
-                    const M = 0;            // 市場浮動係數 (可自行設定為全域變數)
-
-                    // 1. 計算複合動態月衰減率 (K)
-                    const K = 0.020 + 0.002 * (G_latest - Gen) - 0.0006 * (VRAM - 8);
-
-                    // 2. 套用漸近線模型
-                    const decayPrice = originalPrice * Math.exp(k0) * Math.exp(-K * t);
-
-                    // 3. 鐵底價防護與市場浮動
-                    estimatedPrice = Math.max(decayPrice, C) * (1 + M);
-                }
-                // [RAM 計算：最終公式 P1 = (P0 * e^K) * e^(∑ -0.11/i)]
-                else if (category === 'ram') {
-                    originalPrice = parseFloat(form.ramOriginalPrice.value) || 0;
-                    let months = parseFloat(form.ramUsageMonths.value) || 0; // 已使用時間月
-
-                    // 1. 判斷不同時期的漲價係數 K
-                    let K = 0;
-                    if (months === 0) {
-                        K = 0;
-                    } else if (months >= 1 && months <= 5) {
-                        K = 0.241;
-                    } else if (months >= 6 && months <= 8) {
-                        K = 0.465;
-                    } else if (months === 9) {
-                        K = 0.772;
-                    } else if (months >= 10) {
-                        K = 1.57;
-                    }
-
-                    // 2. 實作影像中的 Sigma (∑) 累加公式：∑(-0.11 / t)
-                    let decaySum = 0;
-                    for (let i = 1; i <= months; i++) {
-                        decaySum += (-0.11 / i);
-                    }
-
-                    // 3. 套用最終公式：P1 = (P0 * e^K) * e^(decaySum)
-                    const adjustedPrice = originalPrice * Math.exp(K); // 漲價校正
-                    estimatedPrice = adjustedPrice * Math.exp(decaySum); // 時間衰減
-
-                    // 4. 處理非功能性損耗扣減
-                    const hasSpecialDamage = form.ramSpecialCondition.value.trim().length > 0;
-                    if (hasSpecialDamage) {
-                        estimatedPrice *= 0.80;
-                    }
-                }
-                // [鍵鼠計算：導入品牌分級與漸近線公式]
-                else if (['mouse', 'keyboard'].includes(category)) {
-                    const prefix = category;
-                    originalPrice = parseFloat(form[`${prefix}OriginalPrice`].value) || 0;
-                    const warrantyRemaining = parseFloat(form[`${prefix}WarrantyMonths`].value) || 0;
-                    const usage = form[`${prefix}UsageCondition`].value;
-                    const appearance = form[`${prefix}AppearanceCondition`].value;
-                    
-                    const t = Math.max(0, 24 - warrantyRemaining);
-                    
-                    // 根據品牌名稱取得分級常數
-                    const userBrand = form.brand.value;
-                    const tierKey = getBrandTier(userBrand);
-                    const tier = BRAND_TIERS[tierKey];
-                    
-                    // 組合查表取得最終係數
-                    const startRatio = tier.startApp[appearance] + tier.startUsage[usage];
-                    const floorRatio = tier.floorApp[appearance] + tier.floorUsage[usage];
-                    
-                    const pStart = originalPrice * startRatio;
-                    const pFloor = originalPrice * floorRatio;
-                    
-                    // 套用漸近線邊際遞減公式
-                    estimatedPrice = pFloor + (pStart - pFloor) * Math.exp(-tier.k * t);
-                }
-
-                // --- 4. 畫面渲染 ---
-                const finalPrice = Math.max(0, Math.round(estimatedPrice));
-                const rangeMin = Math.round(finalPrice * 0.9);
-                const rangeMax = Math.round(finalPrice * 1.1);
-                const categoryNames = { cpu: 'CPU', gpu: '顯示卡', motherboard: '主機板', ram: '記憶體', mouse: '滑鼠', keyboard: '鍵盤' };
-
-                document.getElementById('result-empty').hidden = true;
-                const resultContent = document.getElementById('result-content');
-                resultContent.hidden = false;
-                resultContent.style.opacity = '0';
-
-                setTimeout(() => {
-                    document.getElementById('result-category').textContent = categoryNames[category] || category.toUpperCase();
-                    document.getElementById('result-price').textContent = `NT$ ${finalPrice.toLocaleString()}`;
-                    document.getElementById('result-range').textContent = `NT$ ${rangeMin.toLocaleString()} - NT$ ${rangeMax.toLocaleString()}`;
-                
-                    resultContent.style.transition = 'opacity 0.4s ease';
-                    resultContent.style.opacity = '1';
-                }, 100);
-            });
-        });
-    </script>
+    <script src="./valuation.js?v=20260831-3"></script>
+    <script src="./chat-widget.js"></script>
 </body>
 </html>
