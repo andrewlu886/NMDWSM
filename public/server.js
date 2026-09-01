@@ -388,6 +388,9 @@ const server = http.createServer(async(req, res) => {
             const brand = String(payload.brand || '').trim();
             const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram', 'mouse', 'keyboard']);
             const originalPrice = Number(payload.originalPrice);
+            const submittedWarrantyMonths = payload.totalWarrantyMonths === undefined || payload.totalWarrantyMonths === ''
+                ? null
+                : Number(payload.totalWarrantyMonths);
             const elapsedMonths = Number(payload.elapsedMonths);
             if (!allowedCategories.has(category)) {
                 return sendJson(res, 400, { success: false, message: '不支援這個硬體分類。' });
@@ -397,6 +400,10 @@ const server = http.createServer(async(req, res) => {
             }
             if (!Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
                 return sendJson(res, 400, { success: false, message: '已過月份不可小於 0。' });
+            }
+            if (submittedWarrantyMonths !== null &&
+                (!Number.isFinite(submittedWarrantyMonths) || submittedWarrantyMonths < 0)) {
+                return sendJson(res, 400, { success: false, message: '保固總月數不可小於 0。' });
             }
             const extensionRegistered = ['yes', 'no', 'unknown'].includes(payload.extensionRegistered)
                 ? payload.extensionRegistered
@@ -409,6 +416,24 @@ const server = http.createServer(async(req, res) => {
                 elapsedMonths,
                 extensionRegistered
             });
+            const warranty = submittedWarrantyMonths === null
+                ? resolved.warranty
+                : {
+                    ...resolved.warranty,
+                    type: 'months',
+                    baseMonths: submittedWarrantyMonths,
+                    extensionMonths: 0,
+                    totalMonths: submittedWarrantyMonths,
+                    elapsedMonths,
+                    remainingMonths: Math.max(submittedWarrantyMonths - elapsedMonths, 0),
+                    expiredByMonths: Math.max(elapsedMonths - submittedWarrantyMonths, 0),
+                    isExpired: elapsedMonths > submittedWarrantyMonths,
+                    extensionAvailable: false,
+                    registrationRequired: false,
+                    registrationApplied: false,
+                    matchLevel: 'user_input',
+                    note: '保固期限由使用者輸入，最終仍以購買證明與原廠判定為準。'
+                };
             if (!resolved.gpuPricing && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
                 return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
             }
@@ -419,9 +444,9 @@ const server = http.createServer(async(req, res) => {
                 modelId: resolved.model ? resolved.model.id : null,
                 originalPrice,
                 elapsedMonths,
-                totalWarrantyMonths: resolved.warranty.totalMonths,
-                remainingWarrantyMonths: resolved.warranty.remainingMonths,
-                isWarrantyExpired: resolved.warranty.isExpired,
+                totalWarrantyMonths: warranty.totalMonths,
+                remainingWarrantyMonths: warranty.remainingMonths,
+                isWarrantyExpired: warranty.isExpired,
                 extensionRegistered,
                 condition: String(payload.condition),
                 details: payload.details && typeof payload.details === 'object' ? payload.details : {}
@@ -478,7 +503,7 @@ const server = http.createServer(async(req, res) => {
                     manufacturer: resolved.model ? resolved.model.manufacturer : null,
                     series: resolved.model ? resolved.model.series : null
                 },
-                warranty: resolved.warranty,
+                    warranty,
                 formulaInput
             });
         } catch (error) {

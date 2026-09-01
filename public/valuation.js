@@ -11,13 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const brandHint = document.getElementById('brand-hint');
     const extensionField = document.getElementById('extension-field');
     const extensionSelect = document.getElementById('extension-registered');
-    const elapsedMonthsInput = document.getElementById('elapsed-months');
+    const totalWarrantyInput = document.getElementById('total-warranty-months');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
     const conditionField = document.getElementById('condition-field');
-    const ramFields = document.getElementById('ram-fields');
-    const ramSpecialCondition = document.getElementById('ram-special-condition');
     const originalPriceInput = document.getElementById('original-price');
     const originalPriceLabel = document.getElementById('original-price-label');
     const originalPriceHint = document.getElementById('original-price-hint');
@@ -40,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         exact_model: '精確型號',
         series: '系列保固規則',
         brand_category: '品牌分類保固規則',
-        category_default: '分類預設資料'
+        category_default: '分類預設資料',
+        user_input: '使用者填寫資料'
     };
     const fieldExamples = {
         cpu: { brand: '例如：Intel、AMD', model: '例如：Intel Core Ultra 7 265K' },
@@ -103,28 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
         detectedPanel.hidden = false;
         document.getElementById('detected-model').textContent =
             `${item.manufacturer} ${item.canonicalModel}`;
-        document.getElementById('detected-match').textContent =
-            matchLabels[item.warranty.matchLevel] || '型號資料已匹配';
         extensionField.hidden = !item.warranty.extensionAvailable;
         if (!item.warranty.extensionAvailable) extensionSelect.value = 'unknown';
-        updateDetectedWarranty();
-    }
-
-    function updateDetectedWarranty() {
-        if (!selectedModel) return;
-        const warranty = { ...selectedModel.warranty };
-        warranty.elapsedMonths = Math.max(0, Number(elapsedMonthsInput.value) || 0);
-        warranty.registrationApplied = Boolean(
-            warranty.extensionAvailable && extensionSelect.value === 'yes'
-        );
-        if (warranty.type === 'months') {
-            warranty.totalMonths = Number(warranty.baseMonths || 0) +
-                (warranty.registrationApplied ? Number(warranty.extensionMonths || 0) : 0);
-            warranty.remainingMonths = Math.max(warranty.totalMonths - warranty.elapsedMonths, 0);
-            warranty.expiredByMonths = Math.max(warranty.elapsedMonths - warranty.totalMonths, 0);
-            warranty.isExpired = warranty.elapsedMonths > warranty.totalMonths;
-        }
-        document.getElementById('detected-warranty').textContent = formatWarranty(warranty);
     }
 
     function clearDetected() {
@@ -225,8 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         scheduleSearch();
     });
-    elapsedMonthsInput.addEventListener('input', updateDetectedWarranty);
-    extensionSelect.addEventListener('change', updateDetectedWarranty);
     originalPriceInput.addEventListener('input', () => {
         delete originalPriceInput.dataset.autoFilled;
     });
@@ -246,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             brandInput.value = '';
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
+            totalWarrantyInput.value = '';
             brandInput.placeholder = fieldExamples[tab.dataset.category].brand;
             modelInput.placeholder = fieldExamples[tab.dataset.category].model;
             clearDetected();
@@ -257,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
             brandInput.required = isPeripheral;
             conditionField.hidden = isPeripheral;
             peripheralFields.hidden = !isPeripheral;
-            ramFields.hidden = tab.dataset.category !== 'ram';
             originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = isGpu
                 ? '新品參考價（未收錄型號使用）'
@@ -289,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
             model: modelInput.value.trim(),
             modelId: modelIdInput.value ? Number(modelIdInput.value) : null,
             originalPrice: Number(document.getElementById('original-price').value),
+            totalWarrantyMonths: Number(totalWarrantyInput.value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
             condition: isPeripheral
@@ -299,9 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     usageCondition: usageCondition.value,
                     appearanceCondition: appearanceCondition.value
                   }
-                : categoryInput.value === 'ram'
-                    ? { specialCondition: ramSpecialCondition.value.trim() }
-                    : {}
+                : {}
         };
 
         try {
@@ -324,18 +300,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 `${formatMoney(result.range.min)} – ${formatMoney(result.range.max)}`;
             document.getElementById('result-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
-            document.getElementById('result-match').textContent = result.hardware.matched
-                ? `型號已匹配；保固採${matchLabels[result.warranty.matchLevel] || '已知規則'}`
-                : '找不到精確型號，使用分類預設資料';
             document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
             document.getElementById('result-note').textContent =
                 [result.fallbackReason, result.warranty.note].filter(Boolean).join(' ');
             detectedPanel.hidden = false;
             document.getElementById('detected-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
-            document.getElementById('detected-warranty').textContent = formatWarranty(result.warranty);
-            document.getElementById('detected-match').textContent =
-                matchLabels[result.warranty.matchLevel] || '資料已匹配';
             extensionField.hidden = !result.warranty.extensionAvailable;
         } catch (error) {
             formMessage.textContent = error.message || '估價失敗，請稍後再試。';

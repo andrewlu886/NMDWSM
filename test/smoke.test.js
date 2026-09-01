@@ -78,6 +78,54 @@ test('保留的網站頁面可以開啟', async () => {
   }
 });
 
+test('跑分教學只從首頁內容進入，不出現在導覽列', () => {
+  const pages = [
+    'index.html', 'account.html', 'benchmark-instructions.html', 'forum.html',
+    'recommend.html', 'login.html', 'valuation.html', 'scrape.html', 'tools.html'
+  ];
+  for (const filename of pages) {
+    const html = fs.readFileSync(path.join(projectRoot, 'public', filename), 'utf8');
+    const navigation = html.match(/<nav[^>]*class="main-nav"[^>]*>([\s\S]*?)<\/nav>/);
+    assert.ok(navigation, `${filename} 應有主要導覽列`);
+    assert.doesNotMatch(navigation[1], /benchmark-instructions|跑分教學/, filename);
+  }
+
+  const homepage = fs.readFileSync(path.join(projectRoot, 'public', 'index.html'), 'utf8');
+  assert.match(homepage, /href="\/benchmark-instructions\.html"[^>]*>[^<]*查看跑分教學/);
+});
+
+test('估價辨識區只顯示辨識到的型號', () => {
+  const valuationPage = fs.readFileSync(path.join(projectRoot, 'public', 'valuation.html'), 'utf8');
+  const detectedSection = valuationPage.match(/<section id="detected-hardware"([\s\S]*?)<\/section>/);
+  assert.ok(detectedSection);
+  assert.match(detectedSection[1], /品牌與型號/);
+  assert.doesNotMatch(detectedSection[1], /保固資訊|資料匹配狀態/);
+  assert.doesNotMatch(valuationPage, /ram-special-condition|特殊規格或損耗/);
+  assert.match(valuationPage, /id="total-warranty-months"/);
+  assert.match(valuationPage, /id="elapsed-months"/);
+  assert.doesNotMatch(valuationPage, /id="total-warranty-months"[^>]*value=/);
+});
+
+test('估價採用使用者填寫的保固總月數與已使用月數', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'cpu',
+    brand: '',
+    model: 'Intel Core Ultra 7 265K',
+    originalPrice: 10200,
+    totalWarrantyMonths: 48,
+    elapsedMonths: 50,
+    extensionRegistered: 'unknown',
+    condition: 'good'
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.warranty.totalMonths, 48);
+  assert.equal(result.warranty.remainingMonths, 0);
+  assert.equal(result.warranty.expiredByMonths, 2);
+  assert.equal(result.warranty.matchLevel, 'user_input');
+  assert.equal(result.formulaInput.totalWarrantyMonths, 48);
+});
+
 test('帳號與論壇流程可以完成', async () => {
   const email = 'smoke@example.com';
   let response = await jsonRequest('POST', '/api/register', {

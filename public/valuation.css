@@ -304,6 +304,12 @@
     background: #f8fafc;
 }
 
+.warranty-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
 .detected-hardware h3 {
     margin: 0 0 10px;
     font-size: 1rem;
@@ -440,7 +446,8 @@
         gap: 2px;
     }
 
-    .peripheral-fields {
+    .peripheral-fields,
+    .warranty-fields {
         grid-template-columns: 1fr;
     }
 }
