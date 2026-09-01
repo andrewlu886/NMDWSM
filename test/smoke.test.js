@@ -138,16 +138,95 @@ test('市價查詢忽略未知平台並保留回應格式', async () => {
   assert.deepEqual(await response.json(), { success: true, data: [] });
 });
 
-test('二手硬體估價頁預留模型串接介面', async () => {
+test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
+  let response = await request('/api/valuation/models?category=cpu&q=265K&brand=Intel');
+  assert.equal(response.status, 200);
+  let result = await response.json();
+  assert.ok(result.data.some((item) => item.canonicalModel === 'Core Ultra 7 265K'));
+
+  response = await request('/api/valuation/models?category=gpu&q=RTX%205070&brand=ZOTAC');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  assert.ok(result.data.some((item) => item.canonicalModel === 'RTX 5070'));
+
+  response = await request('/api/valuation/models?category=gpu&q=RX%209070&brand=PowerColor');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  assert.ok(result.data.some((item) => item.canonicalModel === 'RX 9070 XT'));
+});
+
+test('測試估價使用已過月份並回傳保固狀態', async () => {
   const response = await jsonRequest('POST', '/api/valuation', {
     category: 'cpu',
     brand: 'Intel',
-    model: 'Core i5-13400F',
-    originalPrice: 6500,
-    ageMonths: 18,
-    warrantyMonths: 6,
+    model: 'Intel Core Ultra 7 265K',
+    originalPrice: 10200,
+    elapsedMonths: 50,
+    extensionRegistered: 'unknown',
     condition: 'good'
   });
-  assert.equal(response.status, 503);
-  assert.equal((await response.json()).code, 'MODEL_NOT_CONFIGURED');
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.pricingMode, 'test');
+  assert.equal(result.hardware.canonicalModel, 'Core Ultra 7 265K');
+  assert.equal(result.warranty.totalMonths, 36);
+  assert.equal(result.warranty.remainingMonths, 0);
+  assert.equal(result.warranty.expiredByMonths, 14);
+  assert.equal(result.formulaInput.elapsedMonths, 50);
+  assert.match(result.warning, /測試公式/);
+});
+
+test('未知型號使用分類預設保固', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'cpu', brand: 'Intel', model: '未知處理器', originalPrice: 5000,
+    elapsedMonths: 3, extensionRegistered: 'unknown', condition: 'good'
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.hardware.matched, false);
+  assert.equal(result.warranty.matchLevel, 'category_default');
+  assert.equal(result.warranty.totalMonths, 36);
+});
+
+test('板卡品牌與延保登錄會套用不同保固規則', async () => {
+  let response = await jsonRequest('POST', '/api/valuation', {
+    category: 'gpu', brand: 'ZOTAC', model: 'RTX 4070 Super', originalPrice: 20000,
+    elapsedMonths: 12, extensionRegistered: 'no', condition: 'good'
+  });
+  let result = await response.json();
+  assert.equal(result.warranty.totalMonths, 36);
+
+  response = await jsonRequest('POST', '/api/valuation', {
+    category: 'gpu', brand: 'ZOTAC', model: 'RTX 4070 Super', originalPrice: 20000,
+    elapsedMonths: 12, extensionRegistered: 'yes', condition: 'good'
+  });
+  result = await response.json();
+  assert.equal(result.warranty.totalMonths, 60);
+  assert.equal(result.warranty.registrationApplied, true);
+
+  response = await jsonRequest('POST', '/api/valuation', {
+    category: 'gpu', brand: 'ASUS', model: 'RTX 4070 Super', originalPrice: 20000,
+    elapsedMonths: 12, extensionRegistered: 'yes', condition: 'good'
+  });
+  result = await response.json();
+  assert.equal(result.warranty.totalMonths, 36);
+  assert.equal(result.warranty.registrationApplied, false);
+});
+
+test('滑鼠估價使用品牌分級、功能與外觀損耗公式', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'mouse',
+    brand: 'Logitech',
+    model: 'G Pro X Superlight 2',
+    originalPrice: 4000,
+    elapsedMonths: 12,
+    extensionRegistered: 'unknown',
+    condition: 'good',
+    details: { usageCondition: 'good', appearanceCondition: 'minor' }
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.pricingMode, 'test');
+  assert.equal(result.pricingFormula, 'peripheral_brand_tier');
+  assert.equal(result.formulaInput.elapsedMonths, 12);
 });
