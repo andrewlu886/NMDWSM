@@ -300,9 +300,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 `${formatMoney(result.range.min)} – ${formatMoney(result.range.max)}`;
             document.getElementById('result-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
-            document.getElementById('result-match').textContent = result.hardware.matched
-                ? `型號已匹配；保固採${matchLabels[result.warranty.matchLevel] || '已知規則'}`
-                : '找不到精確型號，使用分類預設資料';
             document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
             document.getElementById('result-note').textContent =
                 [result.fallbackReason, result.warranty.note].filter(Boolean).join(' ');
