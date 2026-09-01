@@ -75,6 +75,101 @@ function calculatePeripheralValuation(input) {
   };
 }
 
+function createResult(price, pricingFormula, calculation = null) {
+  const roundedPrice = Math.max(0, Math.round(price));
+  return {
+    success: true,
+    pricingMode: 'test',
+    pricingFormula,
+    warning: TEST_WARNING,
+    price: roundedPrice,
+    range: {
+      min: Math.round(roundedPrice * 0.9),
+      max: Math.round(roundedPrice * 1.1)
+    },
+    ...(calculation ? { calculation } : {})
+  };
+}
+
+function requireOriginalPrice(input) {
+  const originalPrice = Number(input.originalPrice);
+  if (!Number.isFinite(originalPrice) || originalPrice <= 0) {
+    throw new TypeError('新品參考價必須大於 0。');
+  }
+  return originalPrice;
+}
+
+function calculateCpuAndMotherboardValuation(input) {
+  const originalPrice = requireOriginalPrice(input);
+  const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
+  const monthlyDecayRate = 0.02;
+  return createResult(
+    originalPrice * Math.exp(-monthlyDecayRate * elapsedMonths),
+    'cpu_motherboard_exponential',
+    { originalPrice, elapsedMonths, monthlyDecayRate }
+  );
+}
+
+function calculateAmdGpuValuation(input) {
+  const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
+  const pricing = input.gpuPricing || {};
+  const generation = Number(pricing.generation);
+  const vramGb = Number(pricing.vramGb);
+  const originalPrice = Number(pricing.launchPriceNtd);
+  const floorPrice = Number(pricing.floorPriceNtd);
+  const latestGeneration = Number(pricing.latestGeneration);
+  const landingCoefficient = Number(pricing.landingCoefficient);
+  const marketFactor = Number(pricing.marketFactor);
+  const values = [generation, vramGb, originalPrice, floorPrice, latestGeneration, landingCoefficient, marketFactor];
+  if (values.some(value => !Number.isFinite(value)) || originalPrice <= 0 || floorPrice < 0) {
+    throw new TypeError('AMD 顯示卡定價參數不完整。');
+  }
+
+  const monthlyDecayRate = 0.020
+    + 0.002 * (latestGeneration - generation)
+    - 0.0006 * (vramGb - 8);
+  const decayPrice = originalPrice
+    * Math.exp(landingCoefficient)
+    * Math.exp(-monthlyDecayRate * elapsedMonths);
+  const price = Math.max(decayPrice, floorPrice) * (1 + marketFactor);
+  return createResult(price, pricing.modelVersion || 'amd_dynamic_v9', {
+    originalPrice,
+    floorPrice,
+    generation,
+    vramGb,
+    latestGeneration,
+    landingCoefficient,
+    monthlyDecayRate,
+    marketFactor,
+    elapsedMonths
+  });
+}
+
+function calculateRamValuation(input) {
+  const originalPrice = requireOriginalPrice(input);
+  const elapsedMonths = Math.max(0, Math.floor(Number(input.elapsedMonths) || 0));
+  let marketCorrection = 0;
+  if (elapsedMonths >= 1 && elapsedMonths <= 5) marketCorrection = 0.241;
+  else if (elapsedMonths >= 6 && elapsedMonths <= 8) marketCorrection = 0.465;
+  else if (elapsedMonths === 9) marketCorrection = 0.772;
+  else if (elapsedMonths >= 10) marketCorrection = 1.57;
+
+  let decaySum = 0;
+  for (let month = 1; month <= elapsedMonths; month += 1) {
+    decaySum += -0.11 / month;
+  }
+  const hasSpecialDamage = Boolean(String(input.details?.specialCondition || '').trim());
+  const damageFactor = hasSpecialDamage ? 0.8 : 1;
+  const price = originalPrice * Math.exp(marketCorrection) * Math.exp(decaySum) * damageFactor;
+  return createResult(price, 'ram_sigma_decay', {
+    originalPrice,
+    elapsedMonths,
+    marketCorrection,
+    decaySum,
+    damageFactor
+  });
+}
+
 function calculateTestValuation(input) {
   if (['mouse', 'keyboard'].includes(input.category)) {
     return calculatePeripheralValuation(input);
@@ -103,9 +198,26 @@ function calculateTestValuation(input) {
   };
 }
 
+function calculateValuation(input) {
+  if (['cpu', 'motherboard'].includes(input.category)) {
+    return calculateCpuAndMotherboardValuation(input);
+  }
+  if (input.category === 'gpu' && input.gpuPricing) {
+    return calculateAmdGpuValuation(input);
+  }
+  if (input.category === 'ram') {
+    return calculateRamValuation(input);
+  }
+  return calculateTestValuation(input);
+}
+
 module.exports = {
   TEST_WARNING,
+  calculateValuation,
   calculateTestValuation,
+  calculateCpuAndMotherboardValuation,
+  calculateAmdGpuValuation,
+  calculateRamValuation,
   calculatePeripheralValuation,
   getPeripheralBrandTier
 };

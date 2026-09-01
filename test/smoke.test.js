@@ -153,6 +153,58 @@ test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
   assert.equal(response.status, 200);
   result = await response.json();
   assert.ok(result.data.some((item) => item.canonicalModel === 'RX 9070 XT'));
+  const rx9070 = result.data.find((item) => item.canonicalModel === 'RX 9070');
+  assert.equal(rx9070.gpuPricing.launchPriceNtd, 18990);
+
+  response = await request('/api/valuation/models?category=gpu&q=ASUS%20TUF%20AMD%20Radeon%20RX%209070%20XT&brand=ASUS');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  const rx9070xt = result.data.find((item) => item.canonicalModel === 'RX 9070 XT');
+  assert.equal(rx9070xt.gpuPricing.launchPriceNtd, 21990);
+
+  response = await request('/api/valuation/models?category=gpu&q=RX%206950%20XT&brand=ASUS');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  assert.ok(result.data.some((item) => item.canonicalModel === 'RX 6950 XT'));
+});
+
+test('同學的 AMD 顯示卡動態定價公式可由 API 使用', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'gpu',
+    brand: 'ASUS',
+    model: 'AMD Radeon RX 9070 XT',
+    elapsedMonths: 12,
+    extensionRegistered: 'unknown',
+    condition: 'good'
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.pricingFormula, 'amd_dynamic_v9');
+  assert.equal(result.price, 17605);
+  assert.equal(result.hardware.canonicalModel, 'RX 9070 XT');
+  assert.equal(result.calculation.originalPrice, 21990);
+  assert.equal(result.calculation.floorPrice, 9500);
+});
+
+test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
+  let response = await jsonRequest('POST', '/api/valuation', {
+    category: 'cpu', brand: 'Intel', model: 'Core Ultra 7 265K', originalPrice: 10000,
+    elapsedMonths: 12, extensionRegistered: 'unknown', condition: 'good'
+  });
+  let result = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(result.pricingFormula, 'cpu_motherboard_exponential');
+  assert.equal(result.price, Math.round(10000 * Math.exp(-0.02 * 12)));
+
+  response = await jsonRequest('POST', '/api/valuation', {
+    category: 'ram', brand: 'Kingston', model: 'Fury DDR5', originalPrice: 3000,
+    elapsedMonths: 6, extensionRegistered: 'unknown', condition: 'good',
+    details: { specialCondition: '散熱片刮傷' }
+  });
+  result = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(result.pricingFormula, 'ram_sigma_decay');
+  assert.equal(result.calculation.damageFactor, 0.8);
 });
 
 test('測試估價使用已過月份並回傳保固狀態', async () => {

@@ -1,3 +1,5 @@
+const { amdGpuPricingModels } = require('./amd-gpu-pricing');
+
 const cpuModels = [
   [2020, 'Intel', 'Core 10th Gen', 'Core i3-10100F'],
   [2020, 'Intel', 'Core 10th Gen', 'Core i5-10400F'],
@@ -88,6 +90,23 @@ const gpuModels = [
   [2025, 'AMD', 'Radeon RX 9000', 'RX 9070 XT']
 ];
 
+const gpuModelKeys = new Set(gpuModels.map(([, manufacturer, , canonicalModel]) => `${manufacturer}:${canonicalModel}`));
+for (const item of amdGpuPricingModels) {
+  const key = `AMD:${item.canonicalModel}`;
+  if (gpuModelKeys.has(key)) continue;
+  const series = item.generation === 9
+    ? 'Radeon RX 9000'
+    : item.generation === 7
+      ? 'Radeon RX 7000'
+      : item.generation === 6
+        ? 'Radeon RX 6000'
+        : item.generation === 5
+          ? 'Radeon RX 5000'
+          : 'Radeon RX 500';
+  gpuModels.push([item.releaseYear, 'AMD', series, item.canonicalModel]);
+  gpuModelKeys.add(key);
+}
+
 const hardwareModels = [
   ...cpuModels.map(([releaseYear, manufacturer, series, canonicalModel]) => ({
     category: 'cpu', manufacturer, series, canonicalModel, releaseYear
@@ -132,4 +151,4 @@ const warrantyRules = [
   { key: 'ZOTAC-RTX50', category: 'gpu', brand: 'ZOTAC', matchType: 'series', matchValue: 'GeForce RTX 50', warrantyType: 'months', baseMonths: 36, extensionMonths: 24, registrationRequired: true, priority: 60, sourceUrl: 'https://www.zotac.com/tw/page/product-warranty-policy' }
 ];
 
-module.exports = { hardwareModels, brandAliases, warrantyRules };
+module.exports = { hardwareModels, brandAliases, warrantyRules, amdGpuPricingModels };

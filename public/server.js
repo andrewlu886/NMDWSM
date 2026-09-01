@@ -20,7 +20,7 @@ for (const envFile of envCandidates) {
 const db = require('./db.js');
 const { searchProducts } = require('../src/services/search');
 const { getRecommendations } = require('../src/services/recommendation');
-const { TEST_WARNING, calculateTestValuation } = require('../src/services/valuation');
+const { TEST_WARNING, calculateValuation } = require('../src/services/valuation');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
@@ -379,7 +379,7 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const payload = await parseJsonBody(req);
-            const requiredFields = ['category', 'brand', 'model', 'originalPrice', 'elapsedMonths', 'condition'];
+            const requiredFields = ['category', 'brand', 'model', 'elapsedMonths', 'condition'];
             const missingField = requiredFields.find(field => payload[field] === undefined || payload[field] === null || payload[field] === '');
             if (missingField) {
                 return sendJson(res, 400, { success: false, message: '估價資料不完整，請檢查所有必填欄位。' });
@@ -391,8 +391,8 @@ const server = http.createServer(async(req, res) => {
             if (!allowedCategories.has(category)) {
                 return sendJson(res, 400, { success: false, message: '不支援這個硬體分類。' });
             }
-            if (!Number.isFinite(originalPrice) || originalPrice <= 0 || !Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
-                return sendJson(res, 400, { success: false, message: '新品參考價需大於 0，已過月份不可小於 0。' });
+            if (!Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
+                return sendJson(res, 400, { success: false, message: '已過月份不可小於 0。' });
             }
             const extensionRegistered = ['yes', 'no', 'unknown'].includes(payload.extensionRegistered)
                 ? payload.extensionRegistered
@@ -405,6 +405,9 @@ const server = http.createServer(async(req, res) => {
                 elapsedMonths,
                 extensionRegistered
             });
+            if (!resolved.gpuPricing && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
+                return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
+            }
             const formulaInput = {
                 category,
                 brand: resolved.canonicalBrand || String(payload.brand).trim(),
@@ -419,6 +422,10 @@ const server = http.createServer(async(req, res) => {
                 condition: String(payload.condition),
                 details: payload.details && typeof payload.details === 'object' ? payload.details : {}
             };
+            if (resolved.gpuPricing) {
+                formulaInput.gpuPricing = resolved.gpuPricing;
+                formulaInput.originalPrice = resolved.gpuPricing.launchPriceNtd;
+            }
 
             let pricingResult = null;
             let fallbackReason = null;
@@ -454,7 +461,7 @@ const server = http.createServer(async(req, res) => {
                     clearTimeout(timeout);
                 }
             }
-            if (!pricingResult) pricingResult = calculateTestValuation(formulaInput);
+            if (!pricingResult) pricingResult = calculateValuation(formulaInput);
             sendJson(res, 200, {
                 ...pricingResult,
                 fallbackReason,

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelInput = document.getElementById('model');
     const modelIdInput = document.getElementById('model-id');
     const brandInput = document.getElementById('brand');
+    const brandField = document.getElementById('brand-field');
     const suggestions = document.getElementById('model-suggestions');
     const modelHint = document.getElementById('model-hint');
     const brandHint = document.getElementById('brand-hint');
@@ -15,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
     const conditionField = document.getElementById('condition-field');
+    const ramFields = document.getElementById('ram-fields');
+    const ramSpecialCondition = document.getElementById('ram-special-condition');
+    const originalPriceInput = document.getElementById('original-price');
+    const originalPriceLabel = document.getElementById('original-price-label');
+    const originalPriceHint = document.getElementById('original-price-hint');
     const peripheralFields = document.getElementById('peripheral-fields');
     const usageCondition = document.getElementById('usage-condition');
     const appearanceCondition = document.getElementById('appearance-condition');
@@ -47,6 +53,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function formatMoney(value) {
         return `NT$ ${Number(value || 0).toLocaleString('zh-TW')}`;
+    }
+
+    function normalizeModel(value) {
+        return String(value || '')
+            .normalize('NFKC')
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, '');
+    }
+
+    function clearAutoFilledPrice() {
+        if (originalPriceInput.dataset.autoFilled === 'amd') {
+            originalPriceInput.value = '';
+            delete originalPriceInput.dataset.autoFilled;
+        }
+    }
+
+    function applyAmdGpuPrice(items, query) {
+        hideSuggestions();
+        const normalizedQuery = normalizeModel(query);
+        const matched = items
+            .filter((item) => item.gpuPricing && normalizedQuery.includes(normalizeModel(item.canonicalModel)))
+            .sort((left, right) => normalizeModel(right.canonicalModel).length - normalizeModel(left.canonicalModel).length)[0];
+
+        if (!matched) {
+            clearAutoFilledPrice();
+            originalPriceHint.textContent = '尚未辨識到已收錄的 AMD 型號，請手動填寫新品參考價。';
+            return;
+        }
+
+        modelIdInput.value = matched.id;
+        originalPriceInput.value = matched.gpuPricing.launchPriceNtd;
+        originalPriceInput.dataset.autoFilled = 'amd';
+        originalPriceHint.textContent =
+            `已辨識 ${matched.canonicalModel}，自動填入新品參考價 ${formatMoney(matched.gpuPricing.launchPriceNtd)}。`;
+        showDetected(matched);
     }
 
     function formatWarranty(warranty) {
@@ -134,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchModels() {
         const category = categoryInput.value;
         const query = modelInput.value.trim();
-        if (category !== 'cpu' || query.length < 2) {
+        if (!['cpu', 'gpu'].includes(category) || query.length < 2) {
             hideSuggestions();
             return;
         }
@@ -152,7 +193,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || '型號查詢失敗');
-            renderSuggestions(result.data);
+            if (category === 'gpu') {
+                applyAmdGpuPrice(result.data, query);
+            } else {
+                renderSuggestions(result.data);
+            }
         } catch (error) {
             if (error.name !== 'AbortError') {
                 formMessage.textContent = '型號建議暫時無法載入，仍可手動填寫。';
@@ -166,7 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     modelInput.addEventListener('input', () => {
+        clearAutoFilledPrice();
         clearDetected();
+        if (categoryInput.value === 'gpu') {
+            originalPriceHint.textContent = '正在辨識 AMD 顯示卡型號…';
+        }
         scheduleSearch();
     });
     modelInput.addEventListener('focus', scheduleSearch);
@@ -178,6 +227,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     elapsedMonthsInput.addEventListener('input', updateDetectedWarranty);
     extensionSelect.addEventListener('change', updateDetectedWarranty);
+    originalPriceInput.addEventListener('input', () => {
+        delete originalPriceInput.dataset.autoFilled;
+    });
     document.addEventListener('click', (event) => {
         if (!event.target.closest('.model-search-field')) hideSuggestions();
     });
@@ -192,23 +244,34 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryInput.value = tab.dataset.category;
             modelInput.value = '';
             brandInput.value = '';
+            originalPriceInput.value = '';
+            delete originalPriceInput.dataset.autoFilled;
             brandInput.placeholder = fieldExamples[tab.dataset.category].brand;
             modelInput.placeholder = fieldExamples[tab.dataset.category].model;
             clearDetected();
             hideSuggestions();
             formMessage.textContent = '';
             const isPeripheral = ['mouse', 'keyboard'].includes(tab.dataset.category);
+            const isGpu = tab.dataset.category === 'gpu';
+            brandField.hidden = !isPeripheral;
+            brandInput.required = isPeripheral;
             conditionField.hidden = isPeripheral;
             peripheralFields.hidden = !isPeripheral;
+            ramFields.hidden = tab.dataset.category !== 'ram';
+            originalPriceInput.required = !isGpu;
+            originalPriceLabel.textContent = isGpu
+                ? '新品參考價（未收錄型號使用）'
+                : '目前全新參考價（NTD）';
+            originalPriceHint.textContent = isGpu
+                ? '已收錄的 AMD 型號會自動採用同學模型中的發售原價，可留空。'
+                : '';
             const hasAutocomplete = tab.dataset.category === 'cpu';
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號。'
                 : tab.dataset.category === 'gpu'
                     ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
                     : '此分類尚未收錄型號，可手動輸入並使用分類預設保固。';
-            brandHint.textContent = tab.dataset.category === 'gpu'
-                ? '請填板卡品牌，例如 ASUS、微星、技嘉；不是 NVIDIA 或 AMD。'
-                : '請填產品外盒或本體標示的品牌。';
+            brandHint.textContent = '請填產品外盒或本體標示的品牌。';
         });
     });
 
@@ -222,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const conditionMap = { good: 'good', minor: 'fair', heavy: 'poor' };
         const payload = {
             category: categoryInput.value,
-            brand: brandInput.value.trim(),
+            brand: isPeripheral ? brandInput.value.trim() : '',
             model: modelInput.value.trim(),
             modelId: modelIdInput.value ? Number(modelIdInput.value) : null,
             originalPrice: Number(document.getElementById('original-price').value),
@@ -235,8 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? {
                     usageCondition: usageCondition.value,
                     appearanceCondition: appearanceCondition.value
-                }
-                : {}
+                  }
+                : categoryInput.value === 'ram'
+                    ? { specialCondition: ramSpecialCondition.value.trim() }
+                    : {}
         };
 
         try {

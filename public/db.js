@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
-const { hardwareModels, brandAliases, warrantyRules } = require('../src/data/hardware-catalog');
+const { hardwareModels, brandAliases, warrantyRules, amdGpuPricingModels } = require('../src/data/hardware-catalog');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nmdwsm.db');
 let db = null;
@@ -97,6 +97,19 @@ function initDatabase() {
           source_checked_at TEXT
         );
 
+        CREATE TABLE IF NOT EXISTS hardware_gpu_pricing_models (
+          hardware_model_id INTEGER PRIMARY KEY,
+          generation INTEGER NOT NULL,
+          vram_gb REAL NOT NULL,
+          launch_price_ntd INTEGER NOT NULL,
+          floor_price_ntd INTEGER NOT NULL,
+          latest_generation INTEGER NOT NULL DEFAULT 9,
+          landing_coefficient REAL NOT NULL DEFAULT -0.040,
+          market_factor REAL NOT NULL DEFAULT 0,
+          model_version TEXT NOT NULL,
+          FOREIGN KEY (hardware_model_id) REFERENCES hardware_models(id) ON DELETE CASCADE
+        );
+
         CREATE INDEX IF NOT EXISTS idx_hardware_models_category_normalized
           ON hardware_models(category, normalized_model);
         CREATE INDEX IF NOT EXISTS idx_hardware_aliases_normalized
@@ -168,13 +181,48 @@ async function seedHardwareCatalog() {
         'SELECT id FROM hardware_models WHERE category = ? AND normalized_model = ?',
         [item.category, normalizedModel]
       );
-      for (const alias of [item.canonicalModel, `${item.manufacturer} ${item.canonicalModel}`]) {
+      const pricingItem = item.category === 'gpu' && item.manufacturer === 'AMD'
+        ? amdGpuPricingModels.find(candidate => candidate.canonicalModel === item.canonicalModel)
+        : null;
+      const aliases = [
+        item.canonicalModel,
+        `${item.manufacturer} ${item.canonicalModel}`,
+        ...(pricingItem ? pricingItem.aliases : [])
+      ];
+      for (const alias of aliases) {
         await runUpdate(
           `INSERT OR IGNORE INTO hardware_model_aliases
            (hardware_model_id, alias, normalized_alias) VALUES (?, ?, ?)`,
           [model.id, alias, normalizeHardwareText(alias)]
         );
       }
+    }
+
+    for (const item of amdGpuPricingModels) {
+      const model = await runQueryOne(
+        'SELECT id FROM hardware_models WHERE category = ? AND normalized_model = ?',
+        ['gpu', normalizeHardwareText(item.canonicalModel)]
+      );
+      if (!model) throw new Error(`找不到 AMD 顯示卡型號：${item.canonicalModel}`);
+      await runUpdate(
+        `INSERT INTO hardware_gpu_pricing_models
+         (hardware_model_id, generation, vram_gb, launch_price_ntd, floor_price_ntd,
+          latest_generation, landing_coefficient, market_factor, model_version)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(hardware_model_id) DO UPDATE SET
+           generation = excluded.generation,
+           vram_gb = excluded.vram_gb,
+           launch_price_ntd = excluded.launch_price_ntd,
+           floor_price_ntd = excluded.floor_price_ntd,
+           latest_generation = excluded.latest_generation,
+           landing_coefficient = excluded.landing_coefficient,
+           market_factor = excluded.market_factor,
+           model_version = excluded.model_version`,
+        [
+          model.id, item.generation, item.vramGb, item.launchPriceNtd, item.floorPriceNtd,
+          item.latestGeneration, item.landingCoefficient, item.marketFactor, item.modelVersion
+        ]
+      );
     }
 
     for (const [canonicalBrand, aliases] of Object.entries(brandAliases)) {
@@ -351,6 +399,25 @@ async function findHardwareModel({ category, modelId, model }) {
   return formatModel(row);
 }
 
+async function findGpuPricingModel(model) {
+  if (!model || model.category !== 'gpu' || model.manufacturer !== 'AMD') return null;
+  const row = await runQueryOne(
+    'SELECT * FROM hardware_gpu_pricing_models WHERE hardware_model_id = ?',
+    [model.id]
+  );
+  if (!row) return null;
+  return {
+    generation: row.generation,
+    vramGb: row.vram_gb,
+    launchPriceNtd: row.launch_price_ntd,
+    floorPriceNtd: row.floor_price_ntd,
+    latestGeneration: row.latest_generation,
+    landingCoefficient: row.landing_coefficient,
+    marketFactor: row.market_factor,
+    modelVersion: row.model_version
+  };
+}
+
 async function resolveWarranty({ category, brand, model, elapsedMonths = 0, extensionRegistered = 'unknown' }) {
   const canonicalBrand = await normalizeBrand(brand || (model && model.manufacturer));
   const rules = await runQuery(
@@ -410,21 +477,33 @@ const HardwareCatalog = {
       `SELECT DISTINCT hm.* FROM hardware_models hm
        LEFT JOIN hardware_model_aliases hma ON hma.hardware_model_id = hm.id
        WHERE hm.category = ?
-         AND (hm.normalized_model LIKE ? OR hma.normalized_alias LIKE ?)
+         AND (hm.normalized_model LIKE ? OR hma.normalized_alias LIKE ?
+              OR ? LIKE '%' || hm.normalized_model || '%'
+              OR ? LIKE '%' || hma.normalized_alias || '%')
        ORDER BY CASE WHEN hm.normalized_model LIKE ? THEN 0 ELSE 1 END,
                 hm.release_year DESC, hm.canonical_model ASC
        LIMIT ?`,
-      [category, `%${normalizedQuery}%`, `%${normalizedQuery}%`, `${normalizedQuery}%`, safeLimit]
+      [
+        category,
+        `%${normalizedQuery}%`,
+        `%${normalizedQuery}%`,
+        normalizedQuery,
+        normalizedQuery,
+        `${normalizedQuery}%`,
+        safeLimit
+      ]
     );
     return Promise.all(rows.map(async (row) => {
       const item = formatModel(row);
       item.warranty = await resolveWarranty({ category, brand, model: item, elapsedMonths: 0 });
+      item.gpuPricing = await findGpuPricingModel(item);
       return item;
     }));
   },
 
   async resolveValuationInput(input) {
     const model = await findHardwareModel(input);
+    const gpuPricing = await findGpuPricingModel(model);
     const warranty = await resolveWarranty({
       category: input.category,
       brand: input.brand,
@@ -432,7 +511,12 @@ const HardwareCatalog = {
       elapsedMonths: input.elapsedMonths,
       extensionRegistered: input.extensionRegistered
     });
-    return { model, warranty, canonicalBrand: await normalizeBrand(input.brand || (model && model.manufacturer)) };
+    return {
+      model,
+      gpuPricing,
+      warranty,
+      canonicalBrand: await normalizeBrand(input.brand || (model && model.manufacturer))
+    };
   }
 };
 
