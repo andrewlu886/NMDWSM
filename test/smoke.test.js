@@ -78,6 +78,22 @@ test('保留的網站頁面可以開啟', async () => {
   }
 });
 
+test('跑分教學只從首頁內容進入，不出現在導覽列', () => {
+  const pages = [
+    'index.html', 'account.html', 'benchmark-instructions.html', 'forum.html',
+    'recommend.html', 'login.html', 'valuation.html', 'scrape.html', 'tools.html'
+  ];
+  for (const filename of pages) {
+    const html = fs.readFileSync(path.join(projectRoot, 'public', filename), 'utf8');
+    const navigation = html.match(/<nav[^>]*class="main-nav"[^>]*>([\s\S]*?)<\/nav>/);
+    assert.ok(navigation, `${filename} 應有主要導覽列`);
+    assert.doesNotMatch(navigation[1], /benchmark-instructions|跑分教學/, filename);
+  }
+
+  const homepage = fs.readFileSync(path.join(projectRoot, 'public', 'index.html'), 'utf8');
+  assert.match(homepage, /href="\/benchmark-instructions\.html"[^>]*>[^<]*查看跑分教學/);
+});
+
 test('帳號與論壇流程可以完成', async () => {
   const email = 'smoke@example.com';
   let response = await jsonRequest('POST', '/api/register', {
