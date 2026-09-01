@@ -174,7 +174,11 @@ async function seedHardwareCatalog() {
            manufacturer = excluded.manufacturer,
            canonical_model = excluded.canonical_model,
            series = excluded.series,
-           release_year = excluded.release_year`,
+           release_year = excluded.release_year
+         WHERE hardware_models.manufacturer IS NOT excluded.manufacturer
+            OR hardware_models.canonical_model IS NOT excluded.canonical_model
+            OR hardware_models.series IS NOT excluded.series
+            OR hardware_models.release_year IS NOT excluded.release_year`,
         [item.category, item.manufacturer, item.canonicalModel, normalizedModel, item.series, item.releaseYear]
       );
       const model = await runQueryOne(
@@ -217,7 +221,15 @@ async function seedHardwareCatalog() {
            latest_generation = excluded.latest_generation,
            landing_coefficient = excluded.landing_coefficient,
            market_factor = excluded.market_factor,
-           model_version = excluded.model_version`,
+           model_version = excluded.model_version
+         WHERE hardware_gpu_pricing_models.generation IS NOT excluded.generation
+            OR hardware_gpu_pricing_models.vram_gb IS NOT excluded.vram_gb
+            OR hardware_gpu_pricing_models.launch_price_ntd IS NOT excluded.launch_price_ntd
+            OR hardware_gpu_pricing_models.floor_price_ntd IS NOT excluded.floor_price_ntd
+            OR hardware_gpu_pricing_models.latest_generation IS NOT excluded.latest_generation
+            OR hardware_gpu_pricing_models.landing_coefficient IS NOT excluded.landing_coefficient
+            OR hardware_gpu_pricing_models.market_factor IS NOT excluded.market_factor
+            OR hardware_gpu_pricing_models.model_version IS NOT excluded.model_version`,
         [
           model.id, item.generation, item.vramGb, item.launchPriceNtd, item.floorPriceNtd,
           item.latestGeneration, item.landingCoefficient, item.marketFactor, item.modelVersion
@@ -232,7 +244,9 @@ async function seedHardwareCatalog() {
            (canonical_brand, alias, normalized_alias) VALUES (?, ?, ?)
            ON CONFLICT(normalized_alias) DO UPDATE SET
              canonical_brand = excluded.canonical_brand,
-             alias = excluded.alias`,
+             alias = excluded.alias
+           WHERE hardware_brand_aliases.canonical_brand IS NOT excluded.canonical_brand
+              OR hardware_brand_aliases.alias IS NOT excluded.alias`,
           [canonicalBrand, alias, normalizeHardwareText(alias)]
         );
       }
@@ -258,7 +272,20 @@ async function seedHardwareCatalog() {
            valid_to = excluded.valid_to,
            priority = excluded.priority,
            source_url = excluded.source_url,
-           source_checked_at = excluded.source_checked_at`,
+           source_checked_at = excluded.source_checked_at
+         WHERE hardware_warranty_rules.category IS NOT excluded.category
+            OR hardware_warranty_rules.brand IS NOT excluded.brand
+            OR hardware_warranty_rules.match_type IS NOT excluded.match_type
+            OR hardware_warranty_rules.match_value IS NOT excluded.match_value
+            OR hardware_warranty_rules.warranty_type IS NOT excluded.warranty_type
+            OR hardware_warranty_rules.base_months IS NOT excluded.base_months
+            OR hardware_warranty_rules.extension_months IS NOT excluded.extension_months
+            OR hardware_warranty_rules.registration_required IS NOT excluded.registration_required
+            OR hardware_warranty_rules.valid_from IS NOT excluded.valid_from
+            OR hardware_warranty_rules.valid_to IS NOT excluded.valid_to
+            OR hardware_warranty_rules.priority IS NOT excluded.priority
+            OR hardware_warranty_rules.source_url IS NOT excluded.source_url
+            OR hardware_warranty_rules.source_checked_at IS NOT excluded.source_checked_at`,
         [
           rule.key, rule.category, rule.brand || null, rule.matchType, rule.matchValue || null,
           rule.warrantyType, rule.baseMonths ?? null, rule.extensionMonths || 0,
