@@ -171,7 +171,7 @@ test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
 test('同學的 AMD 顯示卡動態定價公式可由 API 使用', async () => {
   const response = await jsonRequest('POST', '/api/valuation', {
     category: 'gpu',
-    brand: 'ASUS',
+    brand: '',
     model: 'AMD Radeon RX 9070 XT',
     elapsedMonths: 12,
     extensionRegistered: 'unknown',
@@ -184,6 +184,22 @@ test('同學的 AMD 顯示卡動態定價公式可由 API 使用', async () => {
   assert.equal(result.hardware.canonicalModel, 'RX 9070 XT');
   assert.equal(result.calculation.originalPrice, 21990);
   assert.equal(result.calculation.floorPrice, 9500);
+});
+
+test('只有滑鼠與鍵盤估價需要品牌', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'mouse',
+    brand: '',
+    model: 'G Pro X Superlight 2',
+    originalPrice: 4990,
+    elapsedMonths: 6,
+    extensionRegistered: 'unknown',
+    condition: 'good',
+    details: { usageCondition: 'normal', appearanceCondition: 'minor' }
+  });
+  assert.equal(response.status, 400);
+  const result = await response.json();
+  assert.equal(result.message, '滑鼠與鍵盤估價需要填寫品牌。');
 });
 
 test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {

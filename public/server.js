@@ -379,17 +379,21 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const payload = await parseJsonBody(req);
-            const requiredFields = ['category', 'brand', 'model', 'elapsedMonths', 'condition'];
+            const requiredFields = ['category', 'model', 'elapsedMonths', 'condition'];
             const missingField = requiredFields.find(field => payload[field] === undefined || payload[field] === null || payload[field] === '');
             if (missingField) {
                 return sendJson(res, 400, { success: false, message: '估價資料不完整，請檢查所有必填欄位。' });
             }
             const category = String(payload.category).trim().toLowerCase();
+            const brand = String(payload.brand || '').trim();
             const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram', 'mouse', 'keyboard']);
             const originalPrice = Number(payload.originalPrice);
             const elapsedMonths = Number(payload.elapsedMonths);
             if (!allowedCategories.has(category)) {
                 return sendJson(res, 400, { success: false, message: '不支援這個硬體分類。' });
+            }
+            if (['mouse', 'keyboard'].includes(category) && !brand) {
+                return sendJson(res, 400, { success: false, message: '滑鼠與鍵盤估價需要填寫品牌。' });
             }
             if (!Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
                 return sendJson(res, 400, { success: false, message: '已過月份不可小於 0。' });
@@ -399,7 +403,7 @@ const server = http.createServer(async(req, res) => {
                 : 'unknown';
             const resolved = await db.HardwareCatalog.resolveValuationInput({
                 category,
-                brand: payload.brand,
+                brand,
                 model: payload.model,
                 modelId: payload.modelId,
                 elapsedMonths,
@@ -410,7 +414,7 @@ const server = http.createServer(async(req, res) => {
             }
             const formulaInput = {
                 category,
-                brand: resolved.canonicalBrand || String(payload.brand).trim(),
+                brand: resolved.canonicalBrand || brand,
                 model: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
                 modelId: resolved.model ? resolved.model.id : null,
                 originalPrice,
@@ -469,7 +473,7 @@ const server = http.createServer(async(req, res) => {
                     matched: Boolean(resolved.model),
                     matchLevel: resolved.model ? 'exact_model' : 'category_default',
                     requestedModel: String(payload.model).trim(),
-                    canonicalBrand: resolved.canonicalBrand || String(payload.brand).trim(),
+                    canonicalBrand: resolved.canonicalBrand || brand,
                     canonicalModel: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
                     manufacturer: resolved.model ? resolved.model.manufacturer : null,
                     series: resolved.model ? resolved.model.series : null
