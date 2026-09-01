@@ -83,17 +83,24 @@
                         <span class="field-hint" id="model-hint">輸入至少 2 個字元即可搜尋型號。</span>
                     </div>
 
-                    <div class="field">
+                    <div class="field full-width">
                         <label for="original-price" id="original-price-label">目前全新參考價（NTD）</label>
                         <input id="original-price" name="originalPrice" type="number" min="1" step="1" required placeholder="例如：10200">
                         <span class="field-hint" id="original-price-hint"></span>
                     </div>
 
-                    <div class="field">
-                        <label for="elapsed-months">購買／保固起算後已過月份</label>
-                        <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required value="0">
-                        <span class="field-hint">請填已經過多久，不需要自行計算剩餘保固。</span>
-                    </div>
+                    <section class="warranty-fields full-width" aria-label="保固與使用時間">
+                        <div class="field">
+                            <label for="total-warranty-months">保固總月數</label>
+                            <input id="total-warranty-months" name="totalWarrantyMonths" type="number" min="0" step="1" required placeholder="例如：36">
+                            <span class="field-hint">請填產品完整保固共有幾個月。</span>
+                        </div>
+                        <div class="field">
+                            <label for="elapsed-months">已使用月數</label>
+                            <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required value="0">
+                            <span class="field-hint">請填從購買或保固起算至今已經過幾個月。</span>
+                        </div>
+                    </section>
 
                     <div class="field" id="condition-field">
                         <label for="condition">商品狀況</label>
@@ -103,11 +110,6 @@
                             <option value="fair">明顯使用痕跡</option>
                             <option value="poor">狀況較差</option>
                         </select>
-                    </div>
-
-                    <div class="field full-width valuation-dynamic-group" id="ram-fields" hidden>
-                        <label for="ram-special-condition">特殊規格或損耗（非功能性故障）</label>
-                        <input id="ram-special-condition" name="ramSpecialCondition" type="text" placeholder="例如：散熱片輕微刮傷；沒有可留空">
                     </div>
 
                     <section class="peripheral-fields full-width" id="peripheral-fields" hidden>
@@ -143,8 +145,6 @@
                         <h3>已辨識資料</h3>
                         <dl>
                             <div><dt>品牌與型號</dt><dd id="detected-model">—</dd></div>
-                            <div><dt>保固資訊</dt><dd id="detected-warranty">—</dd></div>
-                            <div><dt>資料匹配狀態</dt><dd id="detected-match">—</dd></div>
                         </dl>
                     </section>
 
@@ -172,7 +172,7 @@
         </section>
     </main>
 
-    <script src="./valuation.js?v=20260901-3"></script>
+    <script src="./valuation.js?v=20260901-6"></script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>
