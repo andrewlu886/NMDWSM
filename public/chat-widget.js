@@ -46,7 +46,7 @@
                     <span class="ai-chat-avatar" aria-hidden="true">AI</span>
                     <div>
                         <strong>AI 智能客服</strong>
-                        <span style="color: #4ade80;"><i aria-hidden="true">●</i> 上線中</span>
+                        <span style="color: #4ade80;"><i aria-hidden="true">●</i> 為您效勞</span>
                     </div>
                 </div>
                 <button class="ai-chat-close" type="button" aria-label="關閉 AI 對話框">&times;</button>
@@ -188,11 +188,9 @@
             aiMessage.className = 'ai-chat-message assistant';
             
             const aiText = document.createElement('p');
-            // 保留原本文字的換行格式，但允許內部 HTML 渲染
             aiText.style.whiteSpace = 'pre-wrap'; 
 
             if (data.success) {
-                // 安全跳脫一般文字，防止 XSS，但容許後續注入 a 標籤
                 const escapeHTML = (str) => {
                     const div = document.createElement('div');
                     div.textContent = str;
@@ -201,22 +199,22 @@
                 
                 let safeHTML = escapeHTML(data.answer);
                 
-                // 正規表達式解析 [按鈕文字](網址) 為帶有 class 的 a 標籤
                 safeHTML = safeHTML.replace(
                     /\[([^\]]+)\]\(([^)]+)\)/g, 
                     '<a href="$2" class="ai-valuation-btn" target="_blank" rel="noopener noreferrer">$1</a>'
                 );
 
                 aiText.innerHTML = safeHTML;
-                
-                // 將 AI 原始的文字回覆加入歷史紀錄，確保上下文不帶有 HTML
                 chatHistory.push({ role: 'assistant', content: data.answer });
             } else {
-                aiText.textContent = `⚠️ 發生錯誤：${data.message}`;
-                // 發生錯誤時把剛剛的使用者對話歷史移除，避免影響後續對話
+                let errText = data.message;
+                if (errText && (errText.includes('high demand') || errText.includes('Spikes in demand') || errText.includes('502'))) {
+                   errText = '目前 AI 客服線路較忙碌，請稍等幾分鐘後再試一次喔！';
+                }
+    
+                aiText.textContent = `⚠️ 發生錯誤：${errText}`;
                 chatHistory.pop(); 
             }
-
             aiMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span>';
             aiMessage.appendChild(aiText);
             messages.appendChild(aiMessage);
@@ -226,7 +224,7 @@
             if (loadingMessage.parentNode) {
                 messages.removeChild(loadingMessage);
             }
-            chatHistory.pop(); // 發生錯誤時移除最後一筆紀錄
+            chatHistory.pop(); 
 
             const errorMessage = document.createElement('div');
             errorMessage.className = 'ai-chat-message assistant';
@@ -234,7 +232,6 @@
             errorMessage.innerHTML = `<span class="ai-chat-message-avatar" aria-hidden="true">AI</span><p>${errText}</p>`;
             messages.appendChild(errorMessage);
         } finally {
-            // --- 4. 解除鎖定輸入框與聚焦 ---
             input.disabled = false;
             submitBtn.disabled = false;
             input.focus();

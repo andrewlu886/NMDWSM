@@ -45,11 +45,12 @@ async function handle(req, res) {
 
                     【核心守則】
                     1. 語氣保持同理心與耐心，避免生硬的機器人官方用語。
-                    2. 業務邊界：我們的服務僅限於「電腦零件」估價與市價查詢。若用戶詢問手機、筆電或完全無關的問題，請委婉拒絕，並推薦顧客使用我們的零件估價工具。
-                    3. 資訊補全：當用戶提供的估價資訊不完整時，請勿直接給出估價，應主動引導用戶提供具體細節（如：品牌、型號、使用狀況）。
-                    4. 預期管理：當估價與用戶預期不符時，請優先安撫情緒，並委婉說明這僅是基於市場大數據的初步估算，僅供參考。
-                    5. 操作引導：當用戶詢問如何使用估價工具或查詢市價時，請以條列式提供簡單明瞭的步驟，避免艱澀術語，並務必附上對應的功能導航連結。
-                    6. 準確性限制：避免提供不正確或捏造的行情數據；若遇到無法判斷的極端狀況，請建議用戶前往「市價查詢」頁面查看實際市場刊登價。
+                    2. 絕對邊界管控（最優先）：我們的服務範圍僅限於「電腦零件」之估價、市價查詢與瓦數計算。若使用者輸入的內容與電腦硬體完全無關、屬於胡鬧、惡作劇或日常聊天（例如詢問食物、工具、非電腦類物品等），請直接且禮貌地拒絕，嚴禁提及任何平台工具或推薦任何產品。
+                    3. 拒絕格式：針對無關問題，請統一簡短回覆：「非常抱歉，本系統僅提供電腦零件相關之估價與市價查詢服務，我無法回答此類問題。」，不要多做解釋或延伸。
+                    4. 資訊補全：當用戶提供的估價資訊不完整時，請勿直接給出估價，應主動引導用戶提供具體細節（如：品牌、型號、使用狀況）。
+                    5. 預期管理：當估價與用戶預期不符時，請優先安撫情緒，並委婉說明這僅是基於市場大數據的初步估算，僅供參考。
+                    6. 操作引導：當用戶詢問如何使用估價工具或查詢市價時，請以條列式提供簡單明瞭的步驟，避免艱澀術語，並務必附上對應的功能導航連結。
+                    7. 準確性限制：避免提供不正確或捏造的行情數據；若遇到無法判斷的極端狀況，請建議用戶前往市價查詢頁面查看實際市場刊登價。
 
                     【功能導航觸發規則】
                     當用戶提到要估算特定產品，或詢問如何使用特定工具時，請務必在回答尾端加上對應的專屬連結，格式如下：
@@ -84,7 +85,6 @@ async function handle(req, res) {
             controller.abort();
         }, timeoutMs);
 
-        // 檢查是否設定了 API Key
         if (!geminiKey) {
             clearTimeout(timeoutId);
             res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -96,10 +96,6 @@ async function handle(req, res) {
         let headers;
         try {
             endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiKey)}`;
-
-            console.log('--------------------------------------------------');
-            console.log('👉 [Gemini] 正在發送請求至:', `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`);
-            console.log('--------------------------------------------------');
 
             const systemInstruction = {
                 parts: [{ text: messages.find(m => m.role === 'system')?.content || '' }]
@@ -127,8 +123,6 @@ async function handle(req, res) {
             });
 
             const text = await r.text();
-            console.log('← gemini status:', r.status);
-
             let payload = {};
             try { payload = text ? JSON.parse(text) : {}; } catch { payload = {}; }
 
@@ -159,12 +153,10 @@ async function handle(req, res) {
             console.error('❌ Gemini AiService request error:', err);
             if (err?.name === 'AbortError') {
                 const retryTimeout = Number(process.env.AI_RETRY_TIMEOUT_MS || 60000);
-                console.warn(`⏱️ 首次 Gemini 請求逾時，嘗試延長 ${retryTimeout}ms 後重試一次`);
                 try {
                     const retryController = new AbortController();
                     const retryTimeoutId = setTimeout(() => retryController.abort(), retryTimeout);
                     const retryEndpoint = endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiKey)}`;
-                    console.log('→ gemini retry endpoint:', retryEndpoint);
                     const r2 = await fetch(retryEndpoint, {
                         method: 'POST',
                         headers,
@@ -173,32 +165,19 @@ async function handle(req, res) {
                     });
                     clearTimeout(retryTimeoutId);
                     const text2 = await r2.text();
-                    console.log('← gemini retry status:', r2.status);
                     let payload2 = {};
                     try { payload2 = text2 ? JSON.parse(text2) : {}; } catch { payload2 = {}; }
 
                     if (!r2.ok) {
-                        console.error('❌ Gemini retry Error Detail:', text2);
                         const errMsg2 = payload2?.error?.message || payload2?.message || `Gemini API retry 請求失敗 (status ${r2.status})`;
                         res.writeHead(502, { 'Content-Type': 'application/json' });
                         return res.end(JSON.stringify({ success: false, message: errMsg2 }));
                     }
 
                     const answer2 = payload2?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '抱歉，AI 沒回覆內容。';
-
-                    try {
-                        const userMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '未知問題';
-                        const timeString = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
-                        const logPath = path.join(__dirname, 'chat_logs.csv');
-                        const csvLine = `${escapeCSV(timeString)},${escapeCSV(userMessage)},${escapeCSV(answer2)}\n`;
-                        if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, '\uFEFF時間,使用者問題,AI回答\n');
-                        fs.appendFile(logPath, csvLine, err => { if (err) console.error('⚠️ 寫入 CSV 失敗:', err); });
-                    } catch (e) { console.error('CSV error', e); }
-
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     return res.end(JSON.stringify({ success: true, answer: answer2 }));
                 } catch (err2) {
-                    console.error('❌ Gemini retry error:', err2);
                     if (err2?.name === 'AbortError') {
                         res.writeHead(504, { 'Content-Type': 'application/json' });
                         return res.end(JSON.stringify({ success: false, message: 'AI 伺服器回應超時，請稍後再試。' }));
