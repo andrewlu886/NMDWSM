@@ -6,8 +6,6 @@
     <title>實用工具：瓦數計算 & 官網查詢</title>
     <!-- 引入與全站統一的 Google 字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- 引入 SheetJS 用於讀取 Excel 檔案 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* ==========================================
            全站統一變數 (淺色模式 Light Mode)
@@ -585,64 +583,77 @@
         return null;
     }
 
-   // ==========================================
-    // 自動讀取同資料夾的 Excel 檔案 (瓦數資料庫 + 驅動連結)
-    // ==========================================
     document.addEventListener("DOMContentLoaded", function() {
-        const filePath = 'CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx';
         
-        // 1. 讀取瓦數計算資料庫
-        fetch(filePath)
+        // 1. 取得 GPU 資料
+        fetch('/api/gpu-data')
             .then(response => {
-                if (!response.ok) throw new Error("找不到瓦數資料庫檔案");
-                return response.arrayBuffer();
+                if (!response.ok) throw new Error("GPU API 錯誤");
+                return response.json();
             })
             .then(data => {
-                const workbook = XLSX.read(data, {type: 'array'});
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                
-                // 找出真正的標題列
-                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                let headerRowIndex = 0;
-                for(let i = 0; i < Math.min(10, rawData.length); i++) {
-                    const rowText = (rawData[i] || []).join('').replace(/\s/g, '');
-                    if(rowText.includes('顯示卡型號')) {
-                        headerRowIndex = i;
-                        break;
-                    }
-                }
-
-                gpuExcelData = XLSX.utils.sheet_to_json(worksheet, {
-                    range: headerRowIndex,
-                    defval: ""
-                });
-                
+                gpuExcelData = data; 
                 document.getElementById('loading-msg').style.display = 'none';
-                populateExcelSelect();
+                populateExcelSelect(); // 渲染 GPU 下拉選單
             })
             .catch(error => {
-                console.error("載入瓦數 Excel 失敗:", error);
-                document.getElementById('loading-msg').innerHTML = '⚠️ 無法自動載入 Excel 檔案，請確認必須使用本機伺服器 (Local Server) 開啟網頁。';
-                document.getElementById('loading-msg').style.color = 'red';
+                document.getElementById('loading-msg').innerHTML = '⚠️ 無法連接到資料庫 API，請確認後端伺服器已啟動。';
             });
 
-        // 👇 2. 讀取專屬驅動程式下載網址 Excel
-        const driverLinkPath = 'GPU_Driver_Links-ExactFormat.xlsx';
-        fetch(driverLinkPath)
+        // 2. 取得 CPU 資料
+        fetch('/api/cpu-data')
             .then(response => {
-                if (!response.ok) throw new Error("找不到驅動連結檔案");
-                return response.arrayBuffer();
+                if (!response.ok) throw new Error("CPU API 錯誤");
+                return response.json();
             })
             .then(data => {
-                const workbook = XLSX.read(data, {type: 'array'});
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                // 轉換為 JSON 格式儲存於全域變數
-                driverLinksData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-            })
-            .catch(error => {
-                console.error("載入驅動程式 Excel 失敗:", error);
+                cpuExcelData = data;
+                populateCpuSelect(); // 呼叫新增的 CPU 選單生成函數
             });
+
+        // 3. 取得驅動程式連結
+        fetch('/api/driver-links')
+            .then(response => response.json())
+            .then(data => driverLinksData = data)
+            .catch(console.error);
     });
+
+    // ==========================================
+    // 將 CPU 資料寫入下拉選單並綁定事件
+    // ==========================================
+    function populateCpuSelect() {
+        const input = document.getElementById('cpu-power');
+        const datalist = document.getElementById('cpu-list');
+        
+        datalist.innerHTML = '<option value="自訂/其他 - 65W"></option>';
+        input.placeholder = "點擊選擇或輸入尋找 CPU 型號...";
+
+        cpuExcelData.forEach(row => {
+            const modelName = getCleanVal(row, ['CPU型號']);
+            if(modelName && modelName.trim() !== '') {
+                const option = document.createElement('option');
+                option.value = modelName;
+                datalist.appendChild(option);
+            }
+        });
+
+        input.addEventListener('change', function() {
+            const val = this.value;
+            const row = cpuExcelData.find(r => getCleanVal(r, ['CPU型號']) === val);
+            
+            if (row) {
+                // 優先抓取最大銳頻功耗，若無則抓取標稱 TDP
+                let tdp = getCleanVal(row, ['最大銳頻功耗', 'PL2', 'PPT']) || getCleanVal(row, ['標稱TDP', 'TDP']);
+                const tdpMatch = String(tdp).match(/\d+/);
+                currentCpuTdp = tdpMatch ? parseInt(tdpMatch[0]) : 65;
+            } else {
+                // 若使用者自己輸入數字，則解析開頭數字
+                const manualMatch = val.match(/^\d+/);
+                currentCpuTdp = manualMatch ? parseInt(manualMatch[0]) : 0;
+            }
+            autoCalculate();
+        });
+    }
 
     // ==========================================
     // 將資料寫入下拉選單並綁定事件 (GPU)

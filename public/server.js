@@ -152,7 +152,48 @@ const server = http.createServer(async(req, res) => {
         res.end();
         return;
     }
+    // ========================================================
+    // 理瓦數計算與驅動程式 API
+    // ========================================================
+    setCorsHeaders(res);
 
+    if (req.method === 'GET') {
+        const sqlite3 = require('sqlite3').verbose();
+        const database = new sqlite3.Database(path.join(__dirname, 'nmdwsm.db'));
+
+        // 1. GPU 瓦數資料 API
+        if (pathname === '/api/gpu-data') {
+            database.all('SELECT * FROM "GPU_Power_Supply_Data_2010_TO_2026"', [], (err, rows) => {
+                if (err) sendJson(res, 500, { error: err.message });
+                else sendJson(res, 200, rows);
+                database.close();
+            });
+            return;
+        }
+
+        // 2. CPU 瓦數資料 API (配合您新增的 CPU 表格)
+        if (pathname === '/api/cpu-data') {
+            database.all('SELECT * FROM "CPU_Power_Supply_Data_2010_TO_2026"', [], (err, rows) => {
+                if (err) sendJson(res, 500, { error: err.message });
+                else sendJson(res, 200, rows);
+                database.close();
+            });
+            return;
+        }
+
+        // 3. 驅動程式連結 API (注意表名的雙引號)
+        if (pathname === '/api/driver-links') {
+            database.all('SELECT * FROM "GPU_Driver_Links-ExactFormat"', [], (err, rows) => {
+                if (err) sendJson(res, 500, { error: err.message });
+                else sendJson(res, 200, rows);
+                database.close();
+            });
+            return;
+        }
+        // 若找不到上述路徑，記得要關閉資料庫連線避免佔用
+        database.close();
+    }
+    // ========================================================
     // 1. 登入 API (使用 SQLite)
     if (pathname === '/api/login' && req.method === 'POST') {
         setCorsHeaders(res);
