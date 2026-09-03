@@ -104,7 +104,7 @@
 
         submitButton.disabled = true;
         submitButton.textContent = '正在整理推薦資料…';
-        resultDisplay.innerHTML = '<div class="recommend-empty"><span class="recommend-empty-icon" aria-hidden="true">⋯</span><strong>正在尋找適合的硬體</strong><span>這可能需要一點時間。</span></div>';
+        resultDisplay.innerHTML = '<div class="recommend-empty"><strong>正在尋找適合的硬體</strong><span>這可能需要一點時間。</span></div>';
 
         try {
             const response = await fetch('/api/recommend', {
@@ -120,7 +120,7 @@
             resultDisplay.innerHTML = '<div class="recommend-error">目前無法取得推薦資料，請確認網站伺服器正在運作，稍後再試一次。</div>';
         } finally {
             submitButton.disabled = false;
-            submitButton.textContent = '✨ 立即生成推薦清單';
+            submitButton.textContent = '立即生成推薦清單';
         }
     });
 })();

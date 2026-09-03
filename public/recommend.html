@@ -128,7 +128,6 @@
             position: relative;
         }
         #user-display-name { color: var(--text-main) !important; font-weight: 500;}
-        .avatar { background: #e2e8f0; padding: 5px; border-radius: 50%; }
         
         /* --- 動態漸層主導覽列 --- */
         .main-nav {
@@ -375,18 +374,6 @@
             text-align: center;
         }
 
-        .recommend-empty-icon {
-            display: grid;
-            width: 54px;
-            height: 54px;
-            margin: 0 auto 14px;
-            place-items: center;
-            border-radius: 16px;
-            background: #dbeafe;
-            color: var(--primary-color);
-            font-size: 1.55rem;
-        }
-
         .recommend-result-list {
             display: grid;
             gap: 14px;
@@ -593,7 +580,6 @@
                 </div>
                 
                 <div id="user-profile">
-                    <div class="avatar">👤</div>
                     <span id="user-display-name">載入中...</span>
                     <div class="dropdown-menu" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px; box-shadow:var(--shadow-md); z-index:110;">
                         <a href="/account.html" style="display:block; padding:5px 0; color:#333; text-decoration:none;">我的帳戶</a>
@@ -628,9 +614,9 @@
                     <div class="recommend-field">
                         <label for="productType">商品種類</label>
                         <select id="productType" name="productType">
-                            <option value="desktop">🖥️ 套裝主機（Desktop）</option>
-                            <option value="laptop">💻 筆記型電腦（Laptop）</option>
-                            <option value="component">🔧 電腦零件（顯示卡）</option>
+                            <option value="desktop">套裝主機（Desktop）</option>
+                            <option value="laptop">筆記型電腦（Laptop）</option>
+                            <option value="component">電腦零件（顯示卡）</option>
                         </select>
                     </div>
                     <div class="recommend-field">
@@ -640,11 +626,11 @@
                     <div class="recommend-field">
                         <label for="usage">主要用途</label>
                         <select id="usage" name="usage">
-                            <option value="gaming">🎮 3A 遊戲專用</option>
-                            <option value="office">💼 文書辦公／影音娛樂</option>
+                            <option value="gaming">3A 遊戲專用</option>
+                            <option value="office">文書辦公／影音娛樂</option>
                         </select>
                     </div>
-                    <button class="recommend-submit" id="recommend-submit" type="submit">✨ 立即生成推薦清單</button>
+                    <button class="recommend-submit" id="recommend-submit" type="submit">立即生成推薦清單</button>
                 </form>
             </section>
 
@@ -655,7 +641,6 @@
                 </div>
                 <div id="result-display" aria-live="polite">
                     <div class="recommend-empty">
-                        <span class="recommend-empty-icon" aria-hidden="true">✦</span>
                         <strong>你的推薦清單會顯示在這裡</strong>
                         <span>先在左側選擇條件，再開始產生推薦。</span>
                     </div>
@@ -703,7 +688,7 @@
             }
         }
     </script>
-    <script src="./recommend.js?v=20260814-1"></script>
+    <script src="./recommend.js?v=20260904-1"></script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>
