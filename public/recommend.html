@@ -105,30 +105,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
-        .header-actions .auth-btn {
-            background: linear-gradient(135deg, #1d4ed8, #0284c7);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-        }
-        .header-actions .auth-btn:hover {
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-            transform: translateY(-1px);
-        }
-
-        #user-profile {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            position: relative;
-        }
-        #user-display-name { color: var(--text-main) !important; font-weight: 500;}
-        
         /* --- 動態漸層主導覽列 --- */
         .main-nav {
             width: 100%;
@@ -574,26 +550,12 @@
                 <input type="text" id="site-search" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)" aria-label="查詢硬體市價">
             </div>
 
-            <div class="header-actions">
-                <div id="auth-section">
-                    <a href="/login" class="auth-btn">登入 / 註冊</a>
-                </div>
-                
-                <div id="user-profile">
-                    <span id="user-display-name">載入中...</span>
-                    <div class="dropdown-menu" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; padding:10px; border-radius:8px; box-shadow:var(--shadow-md); z-index:110;">
-                        <a href="/account.html" style="display:block; padding:5px 0; color:#333; text-decoration:none;">我的帳戶</a>
-                        <a href="#" onclick="logout()" style="display:block; padding:5px 0; color:red; text-decoration:none;">登出</a>
-                    </div>
-                </div>
-            </div>
         </div>
         
         <nav class="main-nav" aria-label="主要導覽">
             <a href="/">首頁</a>
             <a href="/recommend.html" class="active">智慧推薦</a>
             <a href="/valuation.html">二手硬體估價</a>
-            <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/tools">零件查詢與瓦數計算工具</a>
         </nav>
@@ -650,32 +612,6 @@
     </main>
 
     <script>
-        // 會員狀態與登入切換邏輯
-        window.addEventListener('DOMContentLoaded', () => {
-            const loggedInUser = localStorage.getItem('userEmail');
-            const userName = localStorage.getItem('userName');
-            if (loggedInUser) {
-                document.getElementById('auth-section').style.display = 'none';
-                document.getElementById('user-profile').style.display = 'flex';
-                document.getElementById('user-display-name').innerText = userName ? userName : loggedInUser.split('@')[0];
-            }
-            
-            const profileArea = document.getElementById('user-profile');
-            if (profileArea) {
-                profileArea.addEventListener('click', function() {
-                    const menu = this.querySelector('.dropdown-menu');
-                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-                });
-            }
-        });
-
-        function logout() {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            alert('已成功登出');
-            window.location.reload();
-        }
-
         // 頂部搜尋列邏輯
         function handleSearch(event) {
             if (event.key === 'Enter') triggerSearch();

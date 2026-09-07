@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
-  <rect width="400" height="240" rx="24" fill="#2c3e50"/>
-  <circle cx="86" cy="76" r="34" fill="#3498db"/>
-  <rect x="120" y="58" width="210" height="22" rx="11" fill="#ffffff" opacity="0.95"/>
-  <rect x="120" y="94" width="140" height="14" rx="7" fill="#dbeafe" opacity="0.9"/>
-  <rect x="120" y="122" width="170" height="14" rx="7" fill="#dbeafe" opacity="0.75"/>
-  <text x="120" y="178" fill="#ffffff" font-family="Segoe UI, Microsoft JhengHei, sans-serif" font-size="26" font-weight="700">Forum Image Test</text>
-</svg>

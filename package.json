@@ -1,7 +1,7 @@
 {
   "name": "nmdwsm",
   "version": "1.0.0",
-  "description": "電腦硬體推薦、市價查詢、論壇與跑分教學平台",
+  "description": "電腦硬體推薦、市價查詢、二手估價與跑分教學平台",
   "main": "public/server.js",
   "scripts": {
     "start": "node public/server.js",

@@ -315,21 +315,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const loggedInUser = localStorage.getItem('userEmail');
-    const userName = localStorage.getItem('userName');
-    if (loggedInUser) {
-        document.getElementById('auth-section').style.display = 'none';
-        document.getElementById('user-profile').style.display = 'flex';
-        document.getElementById('user-display-name').textContent = userName || loggedInUser.split('@')[0];
-    }
-    document.getElementById('user-profile').addEventListener('click', function () {
-        const menu = this.querySelector('.dropdown-menu');
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    });
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-        event.preventDefault();
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userName');
-        window.location.reload();
-    });
 });

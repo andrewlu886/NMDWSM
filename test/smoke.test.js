@@ -72,7 +72,7 @@ test.after(async () => {
 });
 
 test('保留的網站頁面可以開啟', async () => {
-  for (const pathname of ['/', '/login', '/account.html', '/forum', '/scrape', '/recommend.html', '/benchmark-instructions.html', '/tools', '/valuation.html', '/valuation']) {
+  for (const pathname of ['/', '/scrape', '/recommend.html', '/benchmark-instructions.html', '/tools', '/valuation.html', '/valuation']) {
     const response = await request(pathname);
     assert.equal(response.status, 200, pathname);
   }
@@ -80,8 +80,8 @@ test('保留的網站頁面可以開啟', async () => {
 
 test('跑分教學只從首頁內容進入，不出現在導覽列', () => {
   const pages = [
-    'index.html', 'account.html', 'benchmark-instructions.html', 'forum.html',
-    'recommend.html', 'login.html', 'valuation.html', 'scrape.html', 'tools.html'
+    'index.html', 'benchmark-instructions.html', 'recommend.html',
+    'valuation.html', 'scrape.html', 'tools.html'
   ];
   for (const filename of pages) {
     const html = fs.readFileSync(path.join(projectRoot, 'public', filename), 'utf8');
@@ -126,53 +126,24 @@ test('估價採用使用者填寫的保固總月數與已使用月數', async ()
   assert.equal(result.formulaInput.totalWarrantyMonths, 48);
 });
 
-test('帳號與論壇流程可以完成', async () => {
-  const email = 'smoke@example.com';
-  let response = await jsonRequest('POST', '/api/register', {
-    name: 'Smoke User', email, password: '12345678', confirmPassword: '12345678'
-  });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('POST', '/api/login', { email, password: '12345678' });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('PUT', '/api/account/name', { userEmail: email, username: 'Smoke Renamed' });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('POST', '/api/posts', {
-    title: 'Smoke Post', content: 'Smoke content', author: email, category: '一般討論', images: []
-  });
-  assert.equal(response.status, 200);
-  const { post_id: postId } = await response.json();
-
-  response = await jsonRequest('POST', `/api/posts/${postId}/replies`, {
-    content: 'Smoke reply', author: email, images: []
-  });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('PUT', `/api/posts/${postId}`, {
-    title: 'Smoke Edited', content: 'Edited content', images: []
-  });
-  assert.equal(response.status, 200);
-
-  response = await request(`/api/account/stats?userEmail=${encodeURIComponent(email)}`);
-  assert.equal(response.status, 200);
-  assert.deepEqual((await response.json()).data, { posts: 1 });
-
-  response = await request(`/api/posts/${postId}`, { method: 'DELETE' });
-  assert.equal(response.status, 200);
-});
-
-test('舊交易頁面導回首頁', async () => {
-  for (const pathname of ['/marketplace', '/seller', '/cart', '/checkout', '/transactions', '/products.html']) {
+test('已移除頁面導回首頁', async () => {
+  for (const pathname of [
+    '/login', '/login.html', '/account', '/account.html', '/forum', '/forum.html',
+    '/marketplace', '/seller', '/cart', '/checkout', '/transactions', '/products.html'
+  ]) {
     const response = await request(pathname);
     assert.equal(response.status, 302, pathname);
     assert.equal(response.headers.get('location'), '/');
   }
 });
 
-test('舊交易 API 與商品圖片無法存取', async () => {
-  for (const pathname of ['/api/products', '/api/favorites', '/api/cart', '/api/transactions', '/uploads/products/57/example.webp']) {
+test('已移除功能的 API 與商品圖片無法存取', async () => {
+  for (const pathname of [
+    '/api/login', '/api/register', '/api/account/name', '/api/account/stats',
+    '/api/posts', '/api/posts/1', '/api/posts/1/replies',
+    '/api/products', '/api/favorites', '/api/cart', '/api/transactions',
+    '/uploads/products/57/example.webp'
+  ]) {
     const response = await request(pathname);
     assert.equal(response.status, 404, pathname);
   }
