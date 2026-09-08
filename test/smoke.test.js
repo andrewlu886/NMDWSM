@@ -231,8 +231,9 @@ test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
   });
   let result = await response.json();
   assert.equal(response.status, 200);
-  assert.equal(result.pricingFormula, 'cpu_motherboard_exponential');
-  assert.equal(result.price, Math.round(10000 * Math.exp(-0.02 * 12)));
+  assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
+  assert.equal(result.price, Math.round(10000 * Math.exp(-0.108) * Math.exp(-0.022 * 12) * Math.exp(-0.004 * 12)));
+  assert.equal(result.calculation.profile, 'i7_12_ultra');
 
   response = await jsonRequest('POST', '/api/valuation', {
     category: 'ram', brand: 'Kingston', model: 'Fury DDR5', originalPrice: 3000,
