@@ -4,24 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryInput = document.getElementById('category');
     const modelInput = document.getElementById('model');
     const modelIdInput = document.getElementById('model-id');
-    const brandInput = document.getElementById('brand');
-    const brandField = document.getElementById('brand-field');
     const suggestions = document.getElementById('model-suggestions');
     const modelHint = document.getElementById('model-hint');
-    const brandHint = document.getElementById('brand-hint');
     const extensionField = document.getElementById('extension-field');
     const extensionSelect = document.getElementById('extension-registered');
     const totalWarrantyInput = document.getElementById('total-warranty-months');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
-    const conditionField = document.getElementById('condition-field');
     const originalPriceInput = document.getElementById('original-price');
     const originalPriceLabel = document.getElementById('original-price-label');
     const originalPriceHint = document.getElementById('original-price-hint');
-    const peripheralFields = document.getElementById('peripheral-fields');
-    const usageCondition = document.getElementById('usage-condition');
-    const appearanceCondition = document.getElementById('appearance-condition');
     let searchTimer;
     let searchController;
     let selectedModel = null;
@@ -30,9 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cpu: 'CPU',
         gpu: '顯示卡',
         motherboard: '主機板',
-        ram: '記憶體',
-        mouse: '滑鼠',
-        keyboard: '鍵盤'
+        ram: '記憶體'
     };
     const matchLabels = {
         exact_model: '精確型號',
@@ -42,12 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
         user_input: '使用者填寫資料'
     };
     const fieldExamples = {
-        cpu: { brand: '例如：Intel、AMD', model: '例如：Intel Core Ultra 7 265K' },
-        gpu: { brand: '例如：ASUS、微星、技嘉', model: '例如：ASUS TUF Gaming RTX 4070 Super' },
-        motherboard: { brand: '例如：ASUS、微星、技嘉、華擎', model: '例如：ASUS TUF Gaming B650-Plus WiFi' },
-        ram: { brand: '例如：Kingston、威剛、芝奇', model: '例如：Kingston Fury Beast DDR5-6000 32GB' },
-        mouse: { brand: '例如：Logitech、Razer、ROG', model: '例如：Logitech G Pro X Superlight 2' },
-        keyboard: { brand: '例如：Keychron、Ducky、Logitech', model: '例如：Keychron K8 Pro' }
+        cpu: { model: '例如：Intel Core Ultra 7 265K' },
+        gpu: { model: '例如：ASUS TUF Gaming RTX 4070 Super' },
+        motherboard: { model: '例如：ASUS TUF Gaming B650-Plus WiFi' },
+        ram: { model: '例如：Kingston Fury Beast DDR5-6000 32GB' }
     };
 
     function formatMoney(value) {
@@ -142,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
                 modelIdInput.value = item.id;
-                if (categoryInput.value === 'cpu') brandInput.value = item.manufacturer;
                 showDetected(item);
                 hideSuggestions();
             });
@@ -163,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams({
             category,
             q: query,
-            brand: brandInput.value.trim(),
             limit: '8'
         });
         try {
@@ -198,12 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scheduleSearch();
     });
     modelInput.addEventListener('focus', scheduleSearch);
-    brandInput.addEventListener('input', () => {
-        if (selectedModel) {
-            clearDetected();
-        }
-        scheduleSearch();
-    });
     originalPriceInput.addEventListener('input', () => {
         delete originalPriceInput.dataset.autoFilled;
     });
@@ -220,21 +201,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             categoryInput.value = tab.dataset.category;
             modelInput.value = '';
-            brandInput.value = '';
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
             totalWarrantyInput.value = '';
-            brandInput.placeholder = fieldExamples[tab.dataset.category].brand;
             modelInput.placeholder = fieldExamples[tab.dataset.category].model;
             clearDetected();
             hideSuggestions();
             formMessage.textContent = '';
-            const isPeripheral = ['mouse', 'keyboard'].includes(tab.dataset.category);
             const isGpu = tab.dataset.category === 'gpu';
-            brandField.hidden = !isPeripheral;
-            brandInput.required = isPeripheral;
-            conditionField.hidden = isPeripheral;
-            peripheralFields.hidden = !isPeripheral;
             originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = isGpu
                 ? '新品參考價（未收錄型號使用）'
@@ -248,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 : tab.dataset.category === 'gpu'
                     ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
                     : '此分類尚未收錄型號，可手動輸入並使用分類預設保固。';
-            brandHint.textContent = '請填產品外盒或本體標示的品牌。';
         });
     });
 
@@ -258,26 +231,17 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
         submitButton.textContent = '處理中...';
         formMessage.textContent = '';
-        const isPeripheral = ['mouse', 'keyboard'].includes(categoryInput.value);
-        const conditionMap = { good: 'good', minor: 'fair', heavy: 'poor' };
         const payload = {
             category: categoryInput.value,
-            brand: isPeripheral ? brandInput.value.trim() : '',
+            brand: '',
             model: modelInput.value.trim(),
             modelId: modelIdInput.value ? Number(modelIdInput.value) : null,
             originalPrice: Number(document.getElementById('original-price').value),
             totalWarrantyMonths: Number(totalWarrantyInput.value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
-            condition: isPeripheral
-                ? conditionMap[usageCondition.value]
-                : document.getElementById('condition').value,
-            details: isPeripheral
-                ? {
-                    usageCondition: usageCondition.value,
-                    appearanceCondition: appearanceCondition.value
-                  }
-                : {}
+            condition: document.getElementById('condition').value,
+            details: {}
         };
 
         try {

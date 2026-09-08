@@ -185,7 +185,7 @@ const server = http.createServer(async(req, res) => {
             }
             const category = String(payload.category).trim().toLowerCase();
             const brand = String(payload.brand || '').trim();
-            const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram', 'mouse', 'keyboard']);
+            const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram']);
             const originalPrice = Number(payload.originalPrice);
             const submittedWarrantyMonths = payload.totalWarrantyMonths === undefined || payload.totalWarrantyMonths === ''
                 ? null
@@ -193,9 +193,6 @@ const server = http.createServer(async(req, res) => {
             const elapsedMonths = Number(payload.elapsedMonths);
             if (!allowedCategories.has(category)) {
                 return sendJson(res, 400, { success: false, message: '不支援這個硬體分類。' });
-            }
-            if (['mouse', 'keyboard'].includes(category) && !brand) {
-                return sendJson(res, 400, { success: false, message: '滑鼠與鍵盤估價需要填寫品牌。' });
             }
             if (!Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
                 return sendJson(res, 400, { success: false, message: '已過月份不可小於 0。' });

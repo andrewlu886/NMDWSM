@@ -104,6 +104,8 @@ test('估價辨識區只顯示辨識到的型號', () => {
   assert.match(valuationPage, /id="total-warranty-months"/);
   assert.match(valuationPage, /id="elapsed-months"/);
   assert.doesNotMatch(valuationPage, /id="total-warranty-months"[^>]*value=/);
+  assert.doesNotMatch(valuationPage, /data-category="(?:mouse|keyboard)"|>滑鼠<|>鍵盤</);
+  assert.doesNotMatch(valuationPage, /id="brand-field"|id="peripheral-fields"/);
 });
 
 test('估價採用使用者填寫的保固總月數與已使用月數', async () => {
@@ -205,20 +207,21 @@ test('同學的 AMD 顯示卡動態定價公式可由 API 使用', async () => {
   assert.equal(result.calculation.floorPrice, 9500);
 });
 
-test('只有滑鼠與鍵盤估價需要品牌', async () => {
-  const response = await jsonRequest('POST', '/api/valuation', {
-    category: 'mouse',
-    brand: '',
-    model: 'G Pro X Superlight 2',
-    originalPrice: 4990,
-    elapsedMonths: 6,
-    extensionRegistered: 'unknown',
-    condition: 'good',
-    details: { usageCondition: 'normal', appearanceCondition: 'minor' }
-  });
-  assert.equal(response.status, 400);
-  const result = await response.json();
-  assert.equal(result.message, '滑鼠與鍵盤估價需要填寫品牌。');
+test('估價 API 不再接受滑鼠與鍵盤分類', async () => {
+  for (const category of ['mouse', 'keyboard']) {
+    const response = await jsonRequest('POST', '/api/valuation', {
+      category,
+      brand: '',
+      model: '未支援的周邊型號',
+      originalPrice: 4990,
+      elapsedMonths: 6,
+      extensionRegistered: 'unknown',
+      condition: 'good'
+    });
+    assert.equal(response.status, 400);
+    const result = await response.json();
+    assert.equal(result.message, '不支援這個硬體分類。');
+  }
 });
 
 test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
@@ -298,22 +301,4 @@ test('板卡品牌與延保登錄會套用不同保固規則', async () => {
   result = await response.json();
   assert.equal(result.warranty.totalMonths, 36);
   assert.equal(result.warranty.registrationApplied, false);
-});
-
-test('滑鼠估價使用品牌分級、功能與外觀損耗公式', async () => {
-  const response = await jsonRequest('POST', '/api/valuation', {
-    category: 'mouse',
-    brand: 'Logitech',
-    model: 'G Pro X Superlight 2',
-    originalPrice: 4000,
-    elapsedMonths: 12,
-    extensionRegistered: 'unknown',
-    condition: 'good',
-    details: { usageCondition: 'good', appearanceCondition: 'minor' }
-  });
-  assert.equal(response.status, 200);
-  const result = await response.json();
-  assert.equal(result.pricingMode, 'test');
-  assert.equal(result.pricingFormula, 'peripheral_brand_tier');
-  assert.equal(result.formulaInput.elapsedMonths, 12);
 });
