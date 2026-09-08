@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const extensionField = document.getElementById('extension-field');
     const extensionSelect = document.getElementById('extension-registered');
     const totalWarrantyInput = document.getElementById('total-warranty-months');
+    const conditionField = document.getElementById('condition-field');
+    const conditionSelect = document.getElementById('condition');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
@@ -51,10 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearAutoFilledPrice() {
-        if (originalPriceInput.dataset.autoFilled === 'amd') {
+        if (originalPriceInput.dataset.autoFilled) {
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
         }
+    }
+
+    function applyCpuPrice(item) {
+        if (!item || !item.cpuPricing) return false;
+        originalPriceInput.value = item.cpuPricing.referencePriceNtd;
+        originalPriceInput.dataset.autoFilled = 'cpu';
+        originalPriceHint.textContent =
+            `已辨識 ${item.canonicalModel}，自動填入新品參考價 ${formatMoney(item.cpuPricing.referencePriceNtd)}（${item.cpuPricing.sourceName}，查價 ${item.cpuPricing.sourceCheckedAt}）。`;
+        return true;
     }
 
     function applyAmdGpuPrice(items, query) {
@@ -131,6 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
                 modelIdInput.value = item.id;
+                if (!applyCpuPrice(item) && categoryInput.value === 'cpu') {
+                    clearAutoFilledPrice();
+                    originalPriceHint.textContent = '此型號目前沒有可靠的新品現貨報價，請手動填寫新品參考價。';
+                }
                 showDetected(item);
                 hideSuggestions();
             });
@@ -163,6 +178,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyAmdGpuPrice(result.data, query);
             } else {
                 renderSuggestions(result.data);
+                const normalizedQuery = normalizeModel(query);
+                const exactMatch = result.data.find(
+                    (item) => normalizeModel(item.canonicalModel) === normalizedQuery
+                        || normalizeModel(`${item.manufacturer} ${item.canonicalModel}`) === normalizedQuery
+                );
+                if (exactMatch) {
+                    modelIdInput.value = exactMatch.id;
+                    if (!applyCpuPrice(exactMatch)) {
+                        clearAutoFilledPrice();
+                        originalPriceHint.textContent = '此型號目前沒有可靠的新品現貨報價，請手動填寫新品參考價。';
+                    }
+                    showDetected(exactMatch);
+                }
             }
         } catch (error) {
             if (error.name !== 'AbortError') {
@@ -181,6 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
         clearDetected();
         if (categoryInput.value === 'gpu') {
             originalPriceHint.textContent = '正在辨識 AMD 顯示卡型號…';
+        } else if (categoryInput.value === 'cpu') {
+            originalPriceHint.textContent = '正在查詢已收錄的 CPU 新品價格…';
         }
         scheduleSearch();
     });
@@ -209,13 +239,17 @@ document.addEventListener('DOMContentLoaded', () => {
             hideSuggestions();
             formMessage.textContent = '';
             const isGpu = tab.dataset.category === 'gpu';
+            conditionField.hidden = !isGpu;
+            if (!isGpu) conditionSelect.value = 'good';
             originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = isGpu
                 ? '新品參考價（未收錄型號使用）'
                 : '目前全新參考價（NTD）';
             originalPriceHint.textContent = isGpu
                 ? '已收錄的 AMD 型號會自動採用同學模型中的發售原價，可留空。'
-                : '';
+                : tab.dataset.category === 'cpu'
+                    ? '選擇有報價的 CPU 型號後會自動填入台灣新品參考價。'
+                    : '';
             const hasAutocomplete = tab.dataset.category === 'cpu';
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號。'
@@ -240,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalWarrantyMonths: Number(totalWarrantyInput.value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
-            condition: document.getElementById('condition').value,
+            condition: conditionSelect.value,
             details: {}
         };
 

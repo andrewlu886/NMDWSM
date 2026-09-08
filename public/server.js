@@ -230,7 +230,7 @@ const server = http.createServer(async(req, res) => {
                     matchLevel: 'user_input',
                     note: '保固期限由使用者輸入，最終仍以購買證明與原廠判定為準。'
                 };
-            if (!resolved.gpuPricing && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
+            if (!resolved.gpuPricing && !resolved.cpuPricing && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
                 return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
             }
             const formulaInput = {
@@ -250,6 +250,9 @@ const server = http.createServer(async(req, res) => {
             if (resolved.gpuPricing) {
                 formulaInput.gpuPricing = resolved.gpuPricing;
                 formulaInput.originalPrice = resolved.gpuPricing.launchPriceNtd;
+            } else if (resolved.cpuPricing) {
+                formulaInput.cpuPricing = resolved.cpuPricing;
+                formulaInput.originalPrice = resolved.cpuPricing.referencePriceNtd;
             }
 
             let pricingResult = null;
@@ -297,7 +300,8 @@ const server = http.createServer(async(req, res) => {
                     canonicalBrand: resolved.canonicalBrand || brand,
                     canonicalModel: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
                     manufacturer: resolved.model ? resolved.model.manufacturer : null,
-                    series: resolved.model ? resolved.model.series : null
+                    series: resolved.model ? resolved.model.series : null,
+                    cpuPricing: resolved.cpuPricing || null
                 },
                     warranty,
                 formulaInput

@@ -72,8 +72,8 @@ test('Intel CPU 依級距套用同學提供的係數', () => {
     ['Core i3-12100F', 'i3_12_14', 0.223, 0.013, 0.001, 0.021],
     ['Core i5-13400F', 'i5_12_13', 0.139, 0.005, 0.003, 0.021],
     ['Core i5-14400F', 'i5_14_ultra', 0.139, 0.024, 0.003, 0.021],
-    ['Core Ultra 7 265K', 'i7_12_ultra', 0.108, 0.022, 0.004, 0.0016],
-    ['Core i9-14900K', 'i9_12_ultra', 0.09, 0.013, 0.001, 0.004]
+    ['Core Ultra 7 265KF', 'i7_12_ultra', 0.108, 0.022, 0.004, 0.0016],
+    ['Core i9-14900KS', 'i9_12_ultra', 0.09, 0.013, 0.001, 0.004]
   ];
 
   for (const [model, id, k, warrantyRate, marketRate, postWarrantyRate] of cases) {

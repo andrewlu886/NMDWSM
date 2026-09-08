@@ -106,6 +106,9 @@ test('估價辨識區只顯示辨識到的型號', () => {
   assert.doesNotMatch(valuationPage, /id="total-warranty-months"[^>]*value=/);
   assert.doesNotMatch(valuationPage, /data-category="(?:mouse|keyboard)"|>滑鼠<|>鍵盤</);
   assert.doesNotMatch(valuationPage, /id="brand-field"|id="peripheral-fields"/);
+  assert.match(valuationPage, /id="condition-field" hidden/);
+  const valuationScript = fs.readFileSync(path.join(projectRoot, 'public', 'valuation.js'), 'utf8');
+  assert.match(valuationScript, /conditionField\.hidden = !isGpu/);
 });
 
 test('估價採用使用者填寫的保固總月數與已使用月數', async () => {
@@ -164,6 +167,32 @@ test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
   assert.equal(response.status, 200);
   let result = await response.json();
   assert.ok(result.data.some((item) => item.canonicalModel === 'Core Ultra 7 265K'));
+
+  for (const model of ['Core i7-12700F', 'Core i5-13600KF', 'Core i9-14900KS', 'Core Ultra 7 265KF']) {
+    response = await request(`/api/valuation/models?category=cpu&q=${encodeURIComponent(model)}&brand=Intel`);
+    assert.equal(response.status, 200);
+    result = await response.json();
+    assert.ok(result.data.some((item) => item.canonicalModel === model), model);
+  }
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i5-12400&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  const i5_12400 = result.data.find((item) => item.canonicalModel === 'Core i5-12400');
+  assert.equal(i5_12400.cpuPricing.referencePriceNtd, 6100);
+  assert.equal(i5_12400.cpuPricing.sourceCheckedAt, '2026-09-06');
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i7-14700F&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  const i7_14700f = result.data.find((item) => item.canonicalModel === 'Core i7-14700F');
+  assert.equal(i7_14700f.cpuPricing.referencePriceNtd, 11490);
+  assert.equal(i7_14700f.cpuPricing.sourceName, 'PChome 24h');
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i5-10400&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  assert.deepEqual(result.data, []);
 
   response = await request('/api/valuation/models?category=gpu&q=RTX%205070&brand=ZOTAC');
   assert.equal(response.status, 200);
@@ -232,7 +261,8 @@ test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
   let result = await response.json();
   assert.equal(response.status, 200);
   assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
-  assert.equal(result.price, Math.round(10000 * Math.exp(-0.108) * Math.exp(-0.022 * 12) * Math.exp(-0.004 * 12)));
+  assert.equal(result.formulaInput.originalPrice, 10300);
+  assert.equal(result.price, Math.round(10300 * Math.exp(-0.108) * Math.exp(-0.022 * 12) * Math.exp(-0.004 * 12)));
   assert.equal(result.calculation.profile, 'i7_12_ultra');
 
   response = await jsonRequest('POST', '/api/valuation', {
@@ -244,6 +274,19 @@ test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
   assert.equal(response.status, 200);
   assert.equal(result.pricingFormula, 'ram_sigma_decay');
   assert.equal(result.calculation.damageFactor, 0.8);
+});
+
+test('已收錄的 Intel CPU 會由後端採用新品參考價', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'cpu', brand: 'Intel', model: 'Core i5-12400',
+    elapsedMonths: 12, totalWarrantyMonths: 36,
+    extensionRegistered: 'unknown', condition: 'good'
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.formulaInput.originalPrice, 6100);
+  assert.equal(result.hardware.cpuPricing.referencePriceNtd, 6100);
+  assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
 });
 
 test('測試估價使用已過月份並回傳保固狀態', async () => {

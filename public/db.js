@@ -1,7 +1,13 @@
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
-const { hardwareModels, brandAliases, warrantyRules, amdGpuPricingModels } = require('../src/data/hardware-catalog');
+const {
+  hardwareModels,
+  brandAliases,
+  warrantyRules,
+  amdGpuPricingModels,
+  intelCpuPricingModels
+} = require('../src/data/hardware-catalog');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nmdwsm.db');
 let db = null;
@@ -74,6 +80,15 @@ function initDatabase() {
           FOREIGN KEY (hardware_model_id) REFERENCES hardware_models(id) ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS hardware_cpu_pricing_models (
+          hardware_model_id INTEGER PRIMARY KEY,
+          reference_price_ntd INTEGER NOT NULL,
+          source_name TEXT NOT NULL,
+          source_url TEXT NOT NULL,
+          source_checked_at TEXT NOT NULL,
+          FOREIGN KEY (hardware_model_id) REFERENCES hardware_models(id) ON DELETE CASCADE
+        );
+
         CREATE INDEX IF NOT EXISTS idx_hardware_models_category_normalized
           ON hardware_models(category, normalized_model);
         CREATE INDEX IF NOT EXISTS idx_hardware_aliases_normalized
@@ -120,6 +135,12 @@ function normalizeHardwareText(value) {
 async function seedHardwareCatalog() {
   await runUpdate('BEGIN TRANSACTION');
   try {
+    await runUpdate(
+      `DELETE FROM hardware_models
+       WHERE category = 'cpu' AND manufacturer = 'Intel'
+         AND series IN ('Core 10th Gen', 'Core 11th Gen')`
+    );
+
     for (const item of hardwareModels) {
       const normalizedModel = normalizeHardwareText(item.canonicalModel);
       await runUpdate(
@@ -190,6 +211,21 @@ async function seedHardwareCatalog() {
           model.id, item.generation, item.vramGb, item.launchPriceNtd, item.floorPriceNtd,
           item.latestGeneration, item.landingCoefficient, item.marketFactor, item.modelVersion
         ]
+      );
+    }
+
+    await runUpdate('DELETE FROM hardware_cpu_pricing_models');
+    for (const item of intelCpuPricingModels) {
+      const model = await runQueryOne(
+        'SELECT id FROM hardware_models WHERE category = ? AND normalized_model = ?',
+        ['cpu', normalizeHardwareText(item.canonicalModel)]
+      );
+      if (!model) throw new Error(`找不到 Intel CPU 型號：${item.canonicalModel}`);
+      await runUpdate(
+        `INSERT INTO hardware_cpu_pricing_models
+         (hardware_model_id, reference_price_ntd, source_name, source_url, source_checked_at)
+         VALUES (?, ?, ?, ?, ?)`,
+        [model.id, item.referencePriceNtd, item.sourceName, item.sourceUrl, item.sourceCheckedAt]
       );
     }
 
@@ -324,6 +360,21 @@ async function findGpuPricingModel(model) {
   };
 }
 
+async function findCpuPricingModel(model) {
+  if (!model || model.category !== 'cpu' || model.manufacturer !== 'Intel') return null;
+  const row = await runQueryOne(
+    'SELECT * FROM hardware_cpu_pricing_models WHERE hardware_model_id = ?',
+    [model.id]
+  );
+  if (!row) return null;
+  return {
+    referencePriceNtd: row.reference_price_ntd,
+    sourceName: row.source_name,
+    sourceUrl: row.source_url,
+    sourceCheckedAt: row.source_checked_at
+  };
+}
+
 async function resolveWarranty({ category, brand, model, elapsedMonths = 0, extensionRegistered = 'unknown' }) {
   const canonicalBrand = await normalizeBrand(brand || (model && model.manufacturer));
   const rules = await runQuery(
@@ -403,6 +454,7 @@ const HardwareCatalog = {
       const item = formatModel(row);
       item.warranty = await resolveWarranty({ category, brand, model: item, elapsedMonths: 0 });
       item.gpuPricing = await findGpuPricingModel(item);
+      item.cpuPricing = await findCpuPricingModel(item);
       return item;
     }));
   },
@@ -410,6 +462,7 @@ const HardwareCatalog = {
   async resolveValuationInput(input) {
     const model = await findHardwareModel(input);
     const gpuPricing = await findGpuPricingModel(model);
+    const cpuPricing = await findCpuPricingModel(model);
     const warranty = await resolveWarranty({
       category: input.category,
       brand: input.brand,
@@ -420,6 +473,7 @@ const HardwareCatalog = {
     return {
       model,
       gpuPricing,
+      cpuPricing,
       warranty,
       canonicalBrand: await normalizeBrand(input.brand || (model && model.manufacturer))
     };
