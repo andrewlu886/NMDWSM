@@ -179,8 +179,15 @@ test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
   assert.equal(response.status, 200);
   result = await response.json();
   const i5_12400 = result.data.find((item) => item.canonicalModel === 'Core i5-12400');
-  assert.equal(i5_12400.cpuPricing.referencePriceNtd, 6100);
-  assert.equal(i5_12400.cpuPricing.sourceCheckedAt, '2026-09-06');
+  assert.equal(i5_12400.cpuPricing.referencePriceNtd, 6600);
+  assert.equal(i5_12400.cpuPricing.sourceName, '使用者提供的價格表');
+  assert.equal(i5_12400.cpuPricing.sourceCheckedAt, '2026-09-09');
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i9-13900KS&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  const i9_13900ks = result.data.find((item) => item.canonicalModel === 'Core i9-13900KS');
+  assert.equal(i9_13900ks.cpuPricing.referencePriceNtd, 25000);
 
   response = await request('/api/valuation/models?category=cpu&q=Core%20i7-14700F&brand=Intel');
   assert.equal(response.status, 200);
@@ -284,8 +291,8 @@ test('已收錄的 Intel CPU 會由後端採用新品參考價', async () => {
   });
   assert.equal(response.status, 200);
   const result = await response.json();
-  assert.equal(result.formulaInput.originalPrice, 6100);
-  assert.equal(result.hardware.cpuPricing.referencePriceNtd, 6100);
+  assert.equal(result.formulaInput.originalPrice, 6600);
+  assert.equal(result.hardware.cpuPricing.referencePriceNtd, 6600);
   assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
 });
 
