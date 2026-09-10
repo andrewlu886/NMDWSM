@@ -68,6 +68,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
+    function applyPrice(item) {
+        if (item.referencePrice) {
+            const price = item.referencePrice;
+            originalPriceInput.value = price.priceNtd;
+            originalPriceInput.dataset.autoFilled = 'reference';
+            originalPriceLabel.textContent = price.basis === 'chipset_base'
+                ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
+            originalPriceHint.textContent = `${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）`;
+            return true;
+        }
+        if (applyCpuPrice(item)) return true;
+        if (item.gpuPricing) {
+            originalPriceInput.value = item.gpuPricing.launchPriceNtd;
+            originalPriceInput.dataset.autoFilled = 'amd';
+            originalPriceHint.textContent = `已帶入 ${item.canonicalModel} 的模型發售原價 ${formatMoney(item.gpuPricing.launchPriceNtd)}。`;
+            return true;
+        }
+        clearAutoFilledPrice();
+        originalPriceHint.textContent = '此型號尚未收錄價格，請手動輸入。';
+        return false;
+    }
+
     function applyAmdGpuPrice(items, query) {
         hideSuggestions();
         const normalizedQuery = normalizeModel(query);
@@ -135,17 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
             button.className = 'model-suggestion';
             button.setAttribute('role', 'option');
             const title = document.createElement('strong');
-            title.textContent = `${item.manufacturer} ${item.canonicalModel}`;
+            title.textContent = item.canonicalModel.startsWith(item.manufacturer)
+                ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
             const detail = document.createElement('span');
-            detail.textContent = `${item.series} · ${formatWarranty(item.warranty)}`;
+            const price = item.referencePrice?.priceNtd ?? item.cpuPricing?.referencePriceNtd ?? item.gpuPricing?.launchPriceNtd;
+            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（基準底價，非完整產品型號）' : ''}`;
             button.append(title, detail);
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
                 modelIdInput.value = item.id;
-                if (!applyCpuPrice(item) && categoryInput.value === 'cpu') {
-                    clearAutoFilledPrice();
-                    originalPriceHint.textContent = '此型號目前沒有可靠的新品現貨報價，請手動填寫新品參考價。';
-                }
+                applyPrice(item);
                 showDetected(item);
                 hideSuggestions();
             });
@@ -157,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchModels() {
         const category = categoryInput.value;
         const query = modelInput.value.trim();
-        if (!['cpu', 'gpu'].includes(category) || query.length < 2) {
+        if (!['cpu', 'gpu', 'motherboard'].includes(category) || query.length < 2) {
             hideSuggestions();
             return;
         }
@@ -174,23 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || '型號查詢失敗');
-            if (category === 'gpu') {
-                applyAmdGpuPrice(result.data, query);
-            } else {
-                renderSuggestions(result.data);
-                const normalizedQuery = normalizeModel(query);
-                const exactMatch = result.data.find(
-                    (item) => normalizeModel(item.canonicalModel) === normalizedQuery
-                        || normalizeModel(`${item.manufacturer} ${item.canonicalModel}`) === normalizedQuery
-                );
-                if (exactMatch) {
-                    modelIdInput.value = exactMatch.id;
-                    if (!applyCpuPrice(exactMatch)) {
-                        clearAutoFilledPrice();
-                        originalPriceHint.textContent = '此型號目前沒有可靠的新品現貨報價，請手動填寫新品參考價。';
-                    }
-                    showDetected(exactMatch);
-                }
+            if (category !== categoryInput.value || query !== modelInput.value.trim()) return;
+            renderSuggestions(result.data);
+            const normalizedQuery = normalizeModel(query);
+            const exactMatch = result.data.find(
+                (item) => normalizeModel(item.canonicalModel) === normalizedQuery
+                    || normalizeModel(`${item.manufacturer} ${item.canonicalModel}`) === normalizedQuery
+            );
+            if (exactMatch) {
+                modelIdInput.value = exactMatch.id;
+                applyPrice(exactMatch);
+                showDetected(exactMatch);
             }
         } catch (error) {
             if (error.name !== 'AbortError') {
@@ -205,10 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     modelInput.addEventListener('input', () => {
+        if (searchController) searchController.abort();
         clearAutoFilledPrice();
         clearDetected();
+        hideSuggestions();
         if (categoryInput.value === 'gpu') {
-            originalPriceHint.textContent = '正在辨識 AMD 顯示卡型號…';
+            originalPriceHint.textContent = '正在查詢顯示卡型號與參考價…';
         } else if (categoryInput.value === 'cpu') {
             originalPriceHint.textContent = '正在查詢已收錄的 CPU 新品價格…';
         }
@@ -224,6 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.category-tab').forEach((tab) => {
         tab.addEventListener('click', () => {
+            if (searchController) searchController.abort();
+            window.clearTimeout(searchTimer);
             document.querySelectorAll('.category-tab').forEach((item) => {
                 const active = item === tab;
                 item.classList.toggle('active', active);
@@ -242,15 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
             conditionField.hidden = !isGpu;
             if (!isGpu) conditionSelect.value = 'good';
             originalPriceInput.required = !isGpu;
-            originalPriceLabel.textContent = isGpu
-                ? '新品參考價（未收錄型號使用）'
-                : '目前全新參考價（NTD）';
-            originalPriceHint.textContent = isGpu
-                ? '已收錄的 AMD 型號會自動採用同學模型中的發售原價，可留空。'
-                : tab.dataset.category === 'cpu'
-                    ? '選擇有報價的 CPU 型號後會自動填入台灣新品參考價。'
-                    : '';
-            const hasAutocomplete = tab.dataset.category === 'cpu';
+            originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
+                ? '參考價／晶片組估價基準價（NTD）' : '新品參考價（NTD）';
+            originalPriceHint.textContent = tab.dataset.category === 'motherboard'
+                ? '晶片組資料為二手估價基準底價，非新品售價。'
+                : '選取已收錄型號可帶入價格；預設使用單買價，不套用搭板優惠。';
+            const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號。'
                 : tab.dataset.category === 'gpu'

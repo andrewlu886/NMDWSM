@@ -158,7 +158,7 @@ const server = http.createServer(async(req, res) => {
             const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
             const query = String(parsedUrl.searchParams.get('q') || '').trim();
             const brand = String(parsedUrl.searchParams.get('brand') || '').trim();
-            if (!['cpu', 'gpu'].includes(category)) {
+            if (!['cpu', 'gpu', 'motherboard'].includes(category)) {
                 return sendJson(res, 200, { success: true, data: [] });
             }
             if (!query) return sendJson(res, 200, { success: true, data: [] });
@@ -230,7 +230,7 @@ const server = http.createServer(async(req, res) => {
                     matchLevel: 'user_input',
                     note: '保固期限由使用者輸入，最終仍以購買證明與原廠判定為準。'
                 };
-            if (!resolved.gpuPricing && !resolved.cpuPricing && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
+            if (!resolved.gpuPricing && !resolved.cpuPricing && !resolved.referencePrice && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
                 return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
             }
             const formulaInput = {
@@ -253,6 +253,8 @@ const server = http.createServer(async(req, res) => {
             } else if (resolved.cpuPricing) {
                 formulaInput.cpuPricing = resolved.cpuPricing;
                 formulaInput.originalPrice = resolved.cpuPricing.referencePriceNtd;
+            } else if (resolved.referencePrice) {
+                formulaInput.originalPrice = resolved.referencePrice.priceNtd;
             }
 
             let pricingResult = null;

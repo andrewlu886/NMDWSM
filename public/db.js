@@ -1,6 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
+const { seedImportedReferencePrices } = require('../src/data/imported-reference-prices');
 const {
   hardwareModels,
   brandAliases,
@@ -286,6 +287,7 @@ async function seedHardwareCatalog() {
         ]
       );
     }
+    await seedImportedReferencePrices(runUpdate);
     await runUpdate('COMMIT');
   } catch (error) {
     await runUpdate('ROLLBACK');
@@ -375,6 +377,19 @@ async function findCpuPricingModel(model) {
   };
 }
 
+async function findReferencePrice(model) {
+  if (!model) return null;
+  if (model.category === 'motherboard') {
+    const rows = await runQuery('SELECT * FROM hardware_motherboard_base_prices');
+    const row = rows.find(r => normalizeHardwareText(`${r.platform} ${r.chipset}`) === normalizeHardwareText(model.canonicalModel));
+    return row ? { priceNtd: row.base_price_ntd, basis: 'chipset_base', source: row.source_file, notes: row.price_basis } : null;
+  }
+  const rows = await runQuery("SELECT * FROM hardware_reference_prices WHERE category = ? AND offer_type = 'standalone' ORDER BY imported_at DESC", [model.category]);
+  const row = rows.find(r => r.brand === model.manufacturer &&
+    [r.model, `${r.brand} ${r.model}`].some(name => normalizeHardwareText(name) === normalizeHardwareText(model.canonicalModel)));
+  return row ? { priceNtd: row.price_ntd, basis: 'reference', source: row.source_file, notes: row.notes } : null;
+}
+
 async function resolveWarranty({ category, brand, model, elapsedMonths = 0, extensionRegistered = 'unknown' }) {
   const canonicalBrand = await normalizeBrand(brand || (model && model.manufacturer));
   const rules = await runQuery(
@@ -428,7 +443,7 @@ async function resolveWarranty({ category, brand, model, elapsedMonths = 0, exte
 const HardwareCatalog = {
   async searchModels({ category, brand, query, limit = 8 }) {
     const normalizedQuery = normalizeHardwareText(query);
-    if (!['cpu', 'gpu'].includes(category) || !normalizedQuery) return [];
+    if (!['cpu', 'gpu', 'motherboard'].includes(category) || !normalizedQuery) return [];
     const safeLimit = Math.min(Math.max(Number(limit) || 8, 1), 20);
     const rows = await runQuery(
       `SELECT DISTINCT hm.* FROM hardware_models hm
@@ -437,7 +452,7 @@ const HardwareCatalog = {
          AND (hm.normalized_model LIKE ? OR hma.normalized_alias LIKE ?
               OR ? LIKE '%' || hm.normalized_model || '%'
               OR ? LIKE '%' || hma.normalized_alias || '%')
-       ORDER BY CASE WHEN hm.normalized_model LIKE ? THEN 0 ELSE 1 END,
+       ORDER BY CASE WHEN hm.normalized_model LIKE ? OR hma.normalized_alias LIKE ? THEN 0 ELSE 1 END,
                 hm.release_year DESC, hm.canonical_model ASC
        LIMIT ?`,
       [
@@ -446,7 +461,8 @@ const HardwareCatalog = {
         `%${normalizedQuery}%`,
         normalizedQuery,
         normalizedQuery,
-        `${normalizedQuery}%`,
+        `%${normalizedQuery}%`,
+        `%${normalizedQuery}%`,
         safeLimit
       ]
     );
@@ -455,6 +471,7 @@ const HardwareCatalog = {
       item.warranty = await resolveWarranty({ category, brand, model: item, elapsedMonths: 0 });
       item.gpuPricing = await findGpuPricingModel(item);
       item.cpuPricing = await findCpuPricingModel(item);
+      item.referencePrice = await findReferencePrice(item);
       return item;
     }));
   },
@@ -463,6 +480,7 @@ const HardwareCatalog = {
     const model = await findHardwareModel(input);
     const gpuPricing = await findGpuPricingModel(model);
     const cpuPricing = await findCpuPricingModel(model);
+    const referencePrice = await findReferencePrice(model);
     const warranty = await resolveWarranty({
       category: input.category,
       brand: input.brand,
@@ -474,6 +492,7 @@ const HardwareCatalog = {
       model,
       gpuPricing,
       cpuPricing,
+      referencePrice,
       warranty,
       canonicalBrand: await normalizeBrand(input.brand || (model && model.manufacturer))
     };
