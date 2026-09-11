@@ -11,7 +11,7 @@
 
 ## 本機啟動
 
-1. 安裝 Node.js 18 以上版本。
+1. 安裝 Node.js 20。
 2. 執行 `npm install`。
 3. 執行 `npm start`。
 4. 開啟 `http://localhost:3000`。
