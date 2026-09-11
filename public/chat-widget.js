@@ -199,9 +199,10 @@
                 
                 let safeHTML = escapeHTML(data.answer);
                 
+                // 【已經修改的區塊】：移除了 target="_blank" 以實現網頁內跳轉
                 safeHTML = safeHTML.replace(
                     /\[([^\]]+)\]\(([^)]+)\)/g, 
-                    '<a href="$2" class="ai-valuation-btn" target="_blank" rel="noopener noreferrer">$1</a>'
+                    '<a href="$2" class="ai-valuation-btn">$1</a>'
                 );
 
                 aiText.innerHTML = safeHTML;
