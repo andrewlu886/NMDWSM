@@ -152,7 +152,7 @@ async function handle(req, res) {
             clearTimeout(timeoutId);
             console.error('❌ Gemini AiService request error:', err);
             if (err?.name === 'AbortError') {
-                const retryTimeout = Number(process.env.AI_RETRY_TIMEOUT_MS || 60000);
+                const retryTimeout = Number(process.env.AI_RETRY_TIMEOUT_MS || 15000);
                 try {
                     const retryController = new AbortController();
                     const retryTimeoutId = setTimeout(() => retryController.abort(), retryTimeout);
