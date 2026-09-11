@@ -71,9 +71,13 @@
 
                     <section class="warranty-fields full-width" aria-label="保固與使用時間">
                         <div class="field">
-                            <label for="total-warranty-months">保固總月數</label>
+                            <label for="total-warranty-months" id="total-warranty-label">保固總月數</label>
                             <input id="total-warranty-months" name="totalWarrantyMonths" type="number" min="0" step="1" required placeholder="例如：36">
-                            <span class="field-hint">請填產品完整保固共有幾個月。</span>
+                            <select id="cpu-warranty-months" aria-label="CPU 保固總月數" hidden disabled>
+                                <option value="36" selected>36 個月（基本保固）</option>
+                                <option value="60">60 個月（延長保固）</option>
+                            </select>
+                            <span class="field-hint" id="total-warranty-hint">請填產品完整保固共有幾個月。</span>
                         </div>
                         <div class="field">
                             <label for="elapsed-months">已使用月數</label>
@@ -132,7 +136,7 @@
         </section>
     </main>
 
-    <script src="./valuation.js?v=20260901-6"></script>
+    <script src="./valuation.js?v=20260912-1"></script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>

@@ -111,12 +111,30 @@ function calculateCpuAndMotherboardValuation(input) {
 }
 
 const intelCpuPricingProfiles = {
-  i3_12_14: { k: 0.223, warrantyRate: 0.013, marketRate: 0.001, postWarrantyRate: 0.021 },
-  i5_12_13: { k: 0.139, warrantyRate: 0.005, marketRate: 0.003, postWarrantyRate: 0.021 },
-  i5_14_ultra: { k: 0.139, warrantyRate: 0.024, marketRate: 0.003, postWarrantyRate: 0.021 },
-  i7_12_ultra: { k: 0.108, warrantyRate: 0.022, marketRate: 0.004, postWarrantyRate: 0.0016 },
-  i9_12_ultra: { k: 0.09, warrantyRate: 0.013, marketRate: 0.001, postWarrantyRate: 0.004 }
+  i3_12_14: { k: 0.223, warrantyRate: 0.013, warrantyDecay: 'linear', marketRate: 0.001, postWarrantyRate: 0.021 },
+  i5_12_13: { k: 0.139, warrantyRate: 0.005, extendedWarrantyRate: 0.003, warrantyDecay: 'linear', marketRate: 0.003, postWarrantyRate: 0.021 },
+  i5_14_ultra: { k: 0.139, warrantyRate: 0.024, extendedWarrantyRate: 0.021, warrantyDecay: 'harmonic', marketRate: 0.003, postWarrantyRate: 0.021 },
+  i7_12_ultra: { k: 0.108, warrantyRate: 0.022, extendedWarrantyRate: 0.0196, warrantyDecay: 'harmonic', marketRate: 0.004, postWarrantyRate: 0.0016 },
+  i9_12_ultra: { k: 0.09, warrantyRate: 0.013, extendedWarrantyRate: 0.0078, warrantyDecay: 'linear', marketRate: 0.001, postWarrantyRate: 0.004 }
 };
+
+function calculateWarrantyDecay(profile, warrantyRate, inWarrantyMonths) {
+  if (profile.warrantyDecay !== 'harmonic') {
+    return warrantyRate * inWarrantyMonths;
+  }
+
+  let decay = 0;
+  const wholeMonths = Math.floor(inWarrantyMonths);
+  for (let month = 1; month <= wholeMonths; month += 1) {
+    decay += warrantyRate / month;
+  }
+
+  const partialMonth = inWarrantyMonths - wholeMonths;
+  if (partialMonth > 0) {
+    decay += (warrantyRate / (wholeMonths + 1)) * partialMonth;
+  }
+  return decay;
+}
 
 function getIntelCpuPricingProfile(modelInput) {
   const model = String(modelInput || '').normalize('NFKC').toUpperCase();
@@ -160,9 +178,13 @@ function calculateIntelCpuValuation(input) {
   const totalWarrantyMonths = Math.max(0, Number(input.totalWarrantyMonths) || 0);
   const inWarrantyMonths = Math.min(elapsedMonths, totalWarrantyMonths);
   const postWarrantyMonths = Math.max(elapsedMonths - totalWarrantyMonths, 0);
+  const warrantyRate = totalWarrantyMonths >= 60 && profile.extendedWarrantyRate
+    ? profile.extendedWarrantyRate
+    : profile.warrantyRate;
+  const warrantyDecay = calculateWarrantyDecay(profile, warrantyRate, inWarrantyMonths);
   const price = originalPrice
     * Math.exp(-profile.k)
-    * Math.exp(-profile.warrantyRate * inWarrantyMonths)
+    * Math.exp(-warrantyDecay)
     * Math.exp(-profile.marketRate * elapsedMonths)
     * Math.exp(-profile.postWarrantyRate * postWarrantyMonths);
 
@@ -176,7 +198,11 @@ function calculateIntelCpuValuation(input) {
     tier: profile.tier,
     generation: profile.generation,
     k: profile.k,
-    warrantyRate: profile.warrantyRate,
+    warrantyRate,
+    baseWarrantyRate: profile.warrantyRate,
+    extendedWarrantyRate: profile.extendedWarrantyRate || null,
+    warrantyDecayMode: profile.warrantyDecay,
+    warrantyDecay,
     marketRate: profile.marketRate,
     postWarrantyRate: profile.postWarrantyRate
   });

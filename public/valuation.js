@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const extensionField = document.getElementById('extension-field');
     const extensionSelect = document.getElementById('extension-registered');
     const totalWarrantyInput = document.getElementById('total-warranty-months');
+    const cpuWarrantySelect = document.getElementById('cpu-warranty-months');
+    const totalWarrantyLabel = document.getElementById('total-warranty-label');
+    const totalWarrantyHint = document.getElementById('total-warranty-hint');
     const conditionField = document.getElementById('condition-field');
     const conditionSelect = document.getElementById('condition');
     const detectedPanel = document.getElementById('detected-hardware');
@@ -50,6 +53,43 @@ document.addEventListener('DOMContentLoaded', () => {
             .normalize('NFKC')
             .toUpperCase()
             .replace(/[^A-Z0-9]/g, '');
+    }
+
+    function supportsFiveYearCpuWarranty(model) {
+        if (categoryInput.value !== 'cpu') return false;
+        const normalized = String(model || '').normalize('NFKC').toUpperCase();
+        const match = normalized.match(/(?:CORE\s*)?I([579])[-\s]*(\d{4,5})/);
+        if (!match) return false;
+        const generation = Math.floor(Number(match[2]) / 1000);
+        return generation === 13 || generation === 14;
+    }
+
+    function updateCpuWarrantyControl(model) {
+        const showOptions = supportsFiveYearCpuWarranty(model);
+        if (showOptions) {
+            if (['36', '60'].includes(totalWarrantyInput.value)) {
+                cpuWarrantySelect.value = totalWarrantyInput.value;
+            }
+            totalWarrantyInput.hidden = true;
+            totalWarrantyInput.disabled = true;
+            totalWarrantyInput.required = false;
+            cpuWarrantySelect.hidden = false;
+            cpuWarrantySelect.disabled = false;
+            cpuWarrantySelect.required = true;
+            totalWarrantyLabel.htmlFor = 'cpu-warranty-months';
+            totalWarrantyHint.textContent = '此 CPU 可選擇 36 個月基本保固或 60 個月延長保固。';
+            return;
+        }
+
+        if (!cpuWarrantySelect.hidden) totalWarrantyInput.value = cpuWarrantySelect.value;
+        cpuWarrantySelect.hidden = true;
+        cpuWarrantySelect.disabled = true;
+        cpuWarrantySelect.required = false;
+        totalWarrantyInput.hidden = false;
+        totalWarrantyInput.disabled = false;
+        totalWarrantyInput.required = true;
+        totalWarrantyLabel.htmlFor = 'total-warranty-months';
+        totalWarrantyHint.textContent = '請填產品完整保固共有幾個月。';
     }
 
     function clearAutoFilledPrice() {
@@ -126,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `${item.manufacturer} ${item.canonicalModel}`;
         extensionField.hidden = !item.warranty.extensionAvailable;
         if (!item.warranty.extensionAvailable) extensionSelect.value = 'unknown';
+        updateCpuWarrantyControl(item.canonicalModel);
     }
 
     function clearDetected() {
@@ -224,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearAutoFilledPrice();
         clearDetected();
         hideSuggestions();
+        updateCpuWarrantyControl(modelInput.value);
         if (categoryInput.value === 'gpu') {
             originalPriceHint.textContent = '正在查詢顯示卡型號與參考價…';
         } else if (categoryInput.value === 'cpu') {
@@ -253,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
             totalWarrantyInput.value = '';
+            cpuWarrantySelect.value = '36';
             modelInput.placeholder = fieldExamples[tab.dataset.category].model;
             clearDetected();
             hideSuggestions();
@@ -272,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 : tab.dataset.category === 'gpu'
                     ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
                     : '此分類尚未收錄型號，可手動輸入並使用分類預設保固。';
+            updateCpuWarrantyControl('');
         });
     });
 
@@ -287,7 +331,9 @@ document.addEventListener('DOMContentLoaded', () => {
             model: modelInput.value.trim(),
             modelId: modelIdInput.value ? Number(modelIdInput.value) : null,
             originalPrice: Number(document.getElementById('original-price').value),
-            totalWarrantyMonths: Number(totalWarrantyInput.value),
+            totalWarrantyMonths: Number(cpuWarrantySelect.hidden
+                ? totalWarrantyInput.value
+                : cpuWarrantySelect.value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
             condition: conditionSelect.value,
