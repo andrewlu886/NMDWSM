@@ -72,7 +72,7 @@ test.after(async () => {
 });
 
 test('保留的網站頁面可以開啟', async () => {
-  for (const pathname of ['/', '/login', '/account.html', '/forum', '/scrape', '/recommend.html', '/benchmark-instructions.html', '/tools', '/valuation.html', '/valuation']) {
+  for (const pathname of ['/', '/scrape', '/recommend.html', '/benchmark-instructions.html', '/tools', '/valuation.html', '/valuation']) {
     const response = await request(pathname);
     assert.equal(response.status, 200, pathname);
   }
@@ -80,8 +80,8 @@ test('保留的網站頁面可以開啟', async () => {
 
 test('跑分教學只從首頁內容進入，不出現在導覽列', () => {
   const pages = [
-    'index.html', 'account.html', 'benchmark-instructions.html', 'forum.html',
-    'recommend.html', 'login.html', 'valuation.html', 'scrape.html', 'tools.html'
+    'index.html', 'benchmark-instructions.html', 'recommend.html',
+    'valuation.html', 'scrape.html', 'tools.html'
   ];
   for (const filename of pages) {
     const html = fs.readFileSync(path.join(projectRoot, 'public', filename), 'utf8');
@@ -104,6 +104,11 @@ test('估價辨識區只顯示辨識到的型號', () => {
   assert.match(valuationPage, /id="total-warranty-months"/);
   assert.match(valuationPage, /id="elapsed-months"/);
   assert.doesNotMatch(valuationPage, /id="total-warranty-months"[^>]*value=/);
+  assert.doesNotMatch(valuationPage, /data-category="(?:mouse|keyboard)"|>滑鼠<|>鍵盤</);
+  assert.doesNotMatch(valuationPage, /id="brand-field"|id="peripheral-fields"/);
+  assert.match(valuationPage, /id="condition-field" hidden/);
+  const valuationScript = fs.readFileSync(path.join(projectRoot, 'public', 'valuation.js'), 'utf8');
+  assert.match(valuationScript, /conditionField\.hidden = !isGpu/);
 });
 
 test('估價採用使用者填寫的保固總月數與已使用月數', async () => {
@@ -126,53 +131,24 @@ test('估價採用使用者填寫的保固總月數與已使用月數', async ()
   assert.equal(result.formulaInput.totalWarrantyMonths, 48);
 });
 
-test('帳號與論壇流程可以完成', async () => {
-  const email = 'smoke@example.com';
-  let response = await jsonRequest('POST', '/api/register', {
-    name: 'Smoke User', email, password: '12345678', confirmPassword: '12345678'
-  });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('POST', '/api/login', { email, password: '12345678' });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('PUT', '/api/account/name', { userEmail: email, username: 'Smoke Renamed' });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('POST', '/api/posts', {
-    title: 'Smoke Post', content: 'Smoke content', author: email, category: '一般討論', images: []
-  });
-  assert.equal(response.status, 200);
-  const { post_id: postId } = await response.json();
-
-  response = await jsonRequest('POST', `/api/posts/${postId}/replies`, {
-    content: 'Smoke reply', author: email, images: []
-  });
-  assert.equal(response.status, 200);
-
-  response = await jsonRequest('PUT', `/api/posts/${postId}`, {
-    title: 'Smoke Edited', content: 'Edited content', images: []
-  });
-  assert.equal(response.status, 200);
-
-  response = await request(`/api/account/stats?userEmail=${encodeURIComponent(email)}`);
-  assert.equal(response.status, 200);
-  assert.deepEqual((await response.json()).data, { posts: 1 });
-
-  response = await request(`/api/posts/${postId}`, { method: 'DELETE' });
-  assert.equal(response.status, 200);
-});
-
-test('舊交易頁面導回首頁', async () => {
-  for (const pathname of ['/marketplace', '/seller', '/cart', '/checkout', '/transactions', '/products.html']) {
+test('已移除頁面導回首頁', async () => {
+  for (const pathname of [
+    '/login', '/login.html', '/account', '/account.html', '/forum', '/forum.html',
+    '/marketplace', '/seller', '/cart', '/checkout', '/transactions', '/products.html'
+  ]) {
     const response = await request(pathname);
     assert.equal(response.status, 302, pathname);
     assert.equal(response.headers.get('location'), '/');
   }
 });
 
-test('舊交易 API 與商品圖片無法存取', async () => {
-  for (const pathname of ['/api/products', '/api/favorites', '/api/cart', '/api/transactions', '/uploads/products/57/example.webp']) {
+test('已移除功能的 API 與商品圖片無法存取', async () => {
+  for (const pathname of [
+    '/api/login', '/api/register', '/api/account/name', '/api/account/stats',
+    '/api/posts', '/api/posts/1', '/api/posts/1/replies',
+    '/api/products', '/api/favorites', '/api/cart', '/api/transactions',
+    '/uploads/products/57/example.webp'
+  ]) {
     const response = await request(pathname);
     assert.equal(response.status, 404, pathname);
   }
@@ -191,6 +167,39 @@ test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
   assert.equal(response.status, 200);
   let result = await response.json();
   assert.ok(result.data.some((item) => item.canonicalModel === 'Core Ultra 7 265K'));
+
+  for (const model of ['Core i7-12700F', 'Core i5-13600KF', 'Core i9-14900KS', 'Core Ultra 7 265KF']) {
+    response = await request(`/api/valuation/models?category=cpu&q=${encodeURIComponent(model)}&brand=Intel`);
+    assert.equal(response.status, 200);
+    result = await response.json();
+    assert.ok(result.data.some((item) => item.canonicalModel === model), model);
+  }
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i5-12400&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  const i5_12400 = result.data.find((item) => item.canonicalModel === 'Core i5-12400');
+  assert.equal(i5_12400.cpuPricing.referencePriceNtd, 6600);
+  assert.equal(i5_12400.cpuPricing.sourceName, '使用者提供的價格表');
+  assert.equal(i5_12400.cpuPricing.sourceCheckedAt, '2026-09-09');
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i9-13900KS&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  const i9_13900ks = result.data.find((item) => item.canonicalModel === 'Core i9-13900KS');
+  assert.equal(i9_13900ks.cpuPricing.referencePriceNtd, 25000);
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i7-14700F&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  const i7_14700f = result.data.find((item) => item.canonicalModel === 'Core i7-14700F');
+  assert.equal(i7_14700f.cpuPricing.referencePriceNtd, 11490);
+  assert.equal(i7_14700f.cpuPricing.sourceName, 'PChome 24h');
+
+  response = await request('/api/valuation/models?category=cpu&q=Core%20i5-10400&brand=Intel');
+  assert.equal(response.status, 200);
+  result = await response.json();
+  assert.deepEqual(result.data, []);
 
   response = await request('/api/valuation/models?category=gpu&q=RTX%205070&brand=ZOTAC');
   assert.equal(response.status, 200);
@@ -234,20 +243,21 @@ test('同學的 AMD 顯示卡動態定價公式可由 API 使用', async () => {
   assert.equal(result.calculation.floorPrice, 9500);
 });
 
-test('只有滑鼠與鍵盤估價需要品牌', async () => {
-  const response = await jsonRequest('POST', '/api/valuation', {
-    category: 'mouse',
-    brand: '',
-    model: 'G Pro X Superlight 2',
-    originalPrice: 4990,
-    elapsedMonths: 6,
-    extensionRegistered: 'unknown',
-    condition: 'good',
-    details: { usageCondition: 'normal', appearanceCondition: 'minor' }
-  });
-  assert.equal(response.status, 400);
-  const result = await response.json();
-  assert.equal(result.message, '滑鼠與鍵盤估價需要填寫品牌。');
+test('估價 API 不再接受滑鼠與鍵盤分類', async () => {
+  for (const category of ['mouse', 'keyboard']) {
+    const response = await jsonRequest('POST', '/api/valuation', {
+      category,
+      brand: '',
+      model: '未支援的周邊型號',
+      originalPrice: 4990,
+      elapsedMonths: 6,
+      extensionRegistered: 'unknown',
+      condition: 'good'
+    });
+    assert.equal(response.status, 400);
+    const result = await response.json();
+    assert.equal(result.message, '不支援這個硬體分類。');
+  }
 });
 
 test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
@@ -257,8 +267,10 @@ test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
   });
   let result = await response.json();
   assert.equal(response.status, 200);
-  assert.equal(result.pricingFormula, 'cpu_motherboard_exponential');
-  assert.equal(result.price, Math.round(10000 * Math.exp(-0.02 * 12)));
+  assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
+  assert.equal(result.formulaInput.originalPrice, 10300);
+  assert.equal(result.price, Math.round(10300 * Math.exp(-0.108) * Math.exp(-0.022 * 12) * Math.exp(-0.004 * 12)));
+  assert.equal(result.calculation.profile, 'i7_12_ultra');
 
   response = await jsonRequest('POST', '/api/valuation', {
     category: 'ram', brand: 'Kingston', model: 'Fury DDR5', originalPrice: 3000,
@@ -269,6 +281,19 @@ test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
   assert.equal(response.status, 200);
   assert.equal(result.pricingFormula, 'ram_sigma_decay');
   assert.equal(result.calculation.damageFactor, 0.8);
+});
+
+test('已收錄的 Intel CPU 會由後端採用新品參考價', async () => {
+  const response = await jsonRequest('POST', '/api/valuation', {
+    category: 'cpu', brand: 'Intel', model: 'Core i5-12400',
+    elapsedMonths: 12, totalWarrantyMonths: 36,
+    extensionRegistered: 'unknown', condition: 'good'
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.formulaInput.originalPrice, 6600);
+  assert.equal(result.hardware.cpuPricing.referencePriceNtd, 6600);
+  assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
 });
 
 test('測試估價使用已過月份並回傳保固狀態', async () => {
@@ -327,22 +352,4 @@ test('板卡品牌與延保登錄會套用不同保固規則', async () => {
   result = await response.json();
   assert.equal(result.warranty.totalMonths, 36);
   assert.equal(result.warranty.registrationApplied, false);
-});
-
-test('滑鼠估價使用品牌分級、功能與外觀損耗公式', async () => {
-  const response = await jsonRequest('POST', '/api/valuation', {
-    category: 'mouse',
-    brand: 'Logitech',
-    model: 'G Pro X Superlight 2',
-    originalPrice: 4000,
-    elapsedMonths: 12,
-    extensionRegistered: 'unknown',
-    condition: 'good',
-    details: { usageCondition: 'good', appearanceCondition: 'minor' }
-  });
-  assert.equal(response.status, 200);
-  const result = await response.json();
-  assert.equal(result.pricingMode, 'test');
-  assert.equal(result.pricingFormula, 'peripheral_brand_tier');
-  assert.equal(result.formulaInput.elapsedMonths, 12);
 });

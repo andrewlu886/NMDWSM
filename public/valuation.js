@@ -4,24 +4,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryInput = document.getElementById('category');
     const modelInput = document.getElementById('model');
     const modelIdInput = document.getElementById('model-id');
-    const brandInput = document.getElementById('brand');
-    const brandField = document.getElementById('brand-field');
     const suggestions = document.getElementById('model-suggestions');
     const modelHint = document.getElementById('model-hint');
-    const brandHint = document.getElementById('brand-hint');
     const extensionField = document.getElementById('extension-field');
     const extensionSelect = document.getElementById('extension-registered');
     const totalWarrantyInput = document.getElementById('total-warranty-months');
+    const conditionField = document.getElementById('condition-field');
+    const conditionSelect = document.getElementById('condition');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
-    const conditionField = document.getElementById('condition-field');
     const originalPriceInput = document.getElementById('original-price');
     const originalPriceLabel = document.getElementById('original-price-label');
     const originalPriceHint = document.getElementById('original-price-hint');
-    const peripheralFields = document.getElementById('peripheral-fields');
-    const usageCondition = document.getElementById('usage-condition');
-    const appearanceCondition = document.getElementById('appearance-condition');
     let searchTimer;
     let searchController;
     let selectedModel = null;
@@ -30,9 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cpu: 'CPU',
         gpu: '顯示卡',
         motherboard: '主機板',
-        ram: '記憶體',
-        mouse: '滑鼠',
-        keyboard: '鍵盤'
+        ram: '記憶體'
     };
     const matchLabels = {
         exact_model: '精確型號',
@@ -42,12 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         user_input: '使用者填寫資料'
     };
     const fieldExamples = {
-        cpu: { brand: '例如：Intel、AMD', model: '例如：Intel Core Ultra 7 265K' },
-        gpu: { brand: '例如：ASUS、微星、技嘉', model: '例如：ASUS TUF Gaming RTX 4070 Super' },
-        motherboard: { brand: '例如：ASUS、微星、技嘉、華擎', model: '例如：ASUS TUF Gaming B650-Plus WiFi' },
-        ram: { brand: '例如：Kingston、威剛、芝奇', model: '例如：Kingston Fury Beast DDR5-6000 32GB' },
-        mouse: { brand: '例如：Logitech、Razer、ROG', model: '例如：Logitech G Pro X Superlight 2' },
-        keyboard: { brand: '例如：Keychron、Ducky、Logitech', model: '例如：Keychron K8 Pro' }
+        cpu: { model: '例如：Intel Core Ultra 7 265K' },
+        gpu: { model: '例如：ASUS TUF Gaming RTX 4070 Super' },
+        motherboard: { model: '例如：ASUS TUF Gaming B650-Plus WiFi' },
+        ram: { model: '例如：Kingston Fury Beast DDR5-6000 32GB' }
     };
 
     function formatMoney(value) {
@@ -62,10 +53,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearAutoFilledPrice() {
-        if (originalPriceInput.dataset.autoFilled === 'amd') {
+        if (originalPriceInput.dataset.autoFilled) {
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
         }
+    }
+
+    function applyCpuPrice(item) {
+        if (!item || !item.cpuPricing) return false;
+        originalPriceInput.value = item.cpuPricing.referencePriceNtd;
+        originalPriceInput.dataset.autoFilled = 'cpu';
+        originalPriceHint.textContent =
+            `已辨識 ${item.canonicalModel}，自動填入新品參考價 ${formatMoney(item.cpuPricing.referencePriceNtd)}（${item.cpuPricing.sourceName}，查價 ${item.cpuPricing.sourceCheckedAt}）。`;
+        return true;
+    }
+
+    function applyPrice(item) {
+        if (item.referencePrice) {
+            const price = item.referencePrice;
+            originalPriceInput.value = price.priceNtd;
+            originalPriceInput.dataset.autoFilled = 'reference';
+            originalPriceLabel.textContent = price.basis === 'chipset_base'
+                ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
+            originalPriceHint.textContent = `${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）`;
+            return true;
+        }
+        if (applyCpuPrice(item)) return true;
+        if (item.gpuPricing) {
+            originalPriceInput.value = item.gpuPricing.launchPriceNtd;
+            originalPriceInput.dataset.autoFilled = 'amd';
+            originalPriceHint.textContent = `已帶入 ${item.canonicalModel} 的模型發售原價 ${formatMoney(item.gpuPricing.launchPriceNtd)}。`;
+            return true;
+        }
+        clearAutoFilledPrice();
+        originalPriceHint.textContent = '此型號尚未收錄價格，請手動輸入。';
+        return false;
     }
 
     function applyAmdGpuPrice(items, query) {
@@ -135,14 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
             button.className = 'model-suggestion';
             button.setAttribute('role', 'option');
             const title = document.createElement('strong');
-            title.textContent = `${item.manufacturer} ${item.canonicalModel}`;
+            title.textContent = item.canonicalModel.startsWith(item.manufacturer)
+                ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
             const detail = document.createElement('span');
-            detail.textContent = `${item.series} · ${formatWarranty(item.warranty)}`;
+            const price = item.referencePrice?.priceNtd ?? item.cpuPricing?.referencePriceNtd ?? item.gpuPricing?.launchPriceNtd;
+            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（基準底價，非完整產品型號）' : ''}`;
             button.append(title, detail);
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
                 modelIdInput.value = item.id;
-                if (categoryInput.value === 'cpu') brandInput.value = item.manufacturer;
+                applyPrice(item);
                 showDetected(item);
                 hideSuggestions();
             });
@@ -154,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchModels() {
         const category = categoryInput.value;
         const query = modelInput.value.trim();
-        if (!['cpu', 'gpu'].includes(category) || query.length < 2) {
+        if (!['cpu', 'gpu', 'motherboard'].includes(category) || query.length < 2) {
             hideSuggestions();
             return;
         }
@@ -163,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams({
             category,
             q: query,
-            brand: brandInput.value.trim(),
             limit: '8'
         });
         try {
@@ -172,10 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || '型號查詢失敗');
-            if (category === 'gpu') {
-                applyAmdGpuPrice(result.data, query);
-            } else {
-                renderSuggestions(result.data);
+            if (category !== categoryInput.value || query !== modelInput.value.trim()) return;
+            renderSuggestions(result.data);
+            const normalizedQuery = normalizeModel(query);
+            const exactMatch = result.data.find(
+                (item) => normalizeModel(item.canonicalModel) === normalizedQuery
+                    || normalizeModel(`${item.manufacturer} ${item.canonicalModel}`) === normalizedQuery
+            );
+            if (exactMatch) {
+                modelIdInput.value = exactMatch.id;
+                applyPrice(exactMatch);
+                showDetected(exactMatch);
             }
         } catch (error) {
             if (error.name !== 'AbortError') {
@@ -190,20 +220,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     modelInput.addEventListener('input', () => {
+        if (searchController) searchController.abort();
         clearAutoFilledPrice();
         clearDetected();
+        hideSuggestions();
         if (categoryInput.value === 'gpu') {
-            originalPriceHint.textContent = '正在辨識 AMD 顯示卡型號…';
+            originalPriceHint.textContent = '正在查詢顯示卡型號與參考價…';
+        } else if (categoryInput.value === 'cpu') {
+            originalPriceHint.textContent = '正在查詢已收錄的 CPU 新品價格…';
         }
         scheduleSearch();
     });
     modelInput.addEventListener('focus', scheduleSearch);
-    brandInput.addEventListener('input', () => {
-        if (selectedModel) {
-            clearDetected();
-        }
-        scheduleSearch();
-    });
     originalPriceInput.addEventListener('input', () => {
         delete originalPriceInput.dataset.autoFilled;
     });
@@ -213,6 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.category-tab').forEach((tab) => {
         tab.addEventListener('click', () => {
+            if (searchController) searchController.abort();
+            window.clearTimeout(searchTimer);
             document.querySelectorAll('.category-tab').forEach((item) => {
                 const active = item === tab;
                 item.classList.toggle('active', active);
@@ -220,35 +250,28 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             categoryInput.value = tab.dataset.category;
             modelInput.value = '';
-            brandInput.value = '';
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
             totalWarrantyInput.value = '';
-            brandInput.placeholder = fieldExamples[tab.dataset.category].brand;
             modelInput.placeholder = fieldExamples[tab.dataset.category].model;
             clearDetected();
             hideSuggestions();
             formMessage.textContent = '';
-            const isPeripheral = ['mouse', 'keyboard'].includes(tab.dataset.category);
             const isGpu = tab.dataset.category === 'gpu';
-            brandField.hidden = !isPeripheral;
-            brandInput.required = isPeripheral;
-            conditionField.hidden = isPeripheral;
-            peripheralFields.hidden = !isPeripheral;
+            conditionField.hidden = !isGpu;
+            if (!isGpu) conditionSelect.value = 'good';
             originalPriceInput.required = !isGpu;
-            originalPriceLabel.textContent = isGpu
-                ? '新品參考價（未收錄型號使用）'
-                : '目前全新參考價（NTD）';
-            originalPriceHint.textContent = isGpu
-                ? '已收錄的 AMD 型號會自動採用同學模型中的發售原價，可留空。'
-                : '';
-            const hasAutocomplete = tab.dataset.category === 'cpu';
+            originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
+                ? '參考價／晶片組估價基準價（NTD）' : '新品參考價（NTD）';
+            originalPriceHint.textContent = tab.dataset.category === 'motherboard'
+                ? '晶片組資料為二手估價基準底價，非新品售價。'
+                : '選取已收錄型號可帶入價格；預設使用單買價，不套用搭板優惠。';
+            const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號。'
                 : tab.dataset.category === 'gpu'
                     ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
                     : '此分類尚未收錄型號，可手動輸入並使用分類預設保固。';
-            brandHint.textContent = '請填產品外盒或本體標示的品牌。';
         });
     });
 
@@ -258,26 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.disabled = true;
         submitButton.textContent = '處理中...';
         formMessage.textContent = '';
-        const isPeripheral = ['mouse', 'keyboard'].includes(categoryInput.value);
-        const conditionMap = { good: 'good', minor: 'fair', heavy: 'poor' };
         const payload = {
             category: categoryInput.value,
-            brand: isPeripheral ? brandInput.value.trim() : '',
+            brand: '',
             model: modelInput.value.trim(),
             modelId: modelIdInput.value ? Number(modelIdInput.value) : null,
             originalPrice: Number(document.getElementById('original-price').value),
             totalWarrantyMonths: Number(totalWarrantyInput.value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
-            condition: isPeripheral
-                ? conditionMap[usageCondition.value]
-                : document.getElementById('condition').value,
-            details: isPeripheral
-                ? {
-                    usageCondition: usageCondition.value,
-                    appearanceCondition: appearanceCondition.value
-                  }
-                : {}
+            condition: conditionSelect.value,
+            details: {}
         };
 
         try {
@@ -315,21 +329,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const loggedInUser = localStorage.getItem('userEmail');
-    const userName = localStorage.getItem('userName');
-    if (loggedInUser) {
-        document.getElementById('auth-section').style.display = 'none';
-        document.getElementById('user-profile').style.display = 'flex';
-        document.getElementById('user-display-name').textContent = userName || loggedInUser.split('@')[0];
-    }
-    document.getElementById('user-profile').addEventListener('click', function () {
-        const menu = this.querySelector('.dropdown-menu');
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    });
-    document.getElementById('logout-link').addEventListener('click', (event) => {
-        event.preventDefault();
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userName');
-        window.location.reload();
-    });
 });

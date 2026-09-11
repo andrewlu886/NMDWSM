@@ -27,12 +27,17 @@ const PUBLIC_DIR = path.resolve(__dirname);
 const BLOCKED_STATIC_EXTENSIONS = new Set(['.db', '.sqlite', '.sqlite3']);
 const BLOCKED_STATIC_FILES = new Set(['users.json', 'products.json', 'posts.json']);
 const LEGACY_PAGE_ROUTES = new Set([
+    '/login', '/login.html', '/account', '/account.html',
+    '/forum', '/forum.html',
     '/marketplace', '/marketplace.html', '/seller', '/seller.html',
     '/products', '/products.html', '/product', '/product.html',
     '/cart', '/cart.html', '/checkout', '/checkout.html',
     '/transactions', '/transactions.html'
 ]);
-const LEGACY_API_PREFIXES = ['/api/products', '/api/favorites', '/api/cart', '/api/transactions'];
+const LEGACY_API_PREFIXES = [
+    '/api/login', '/api/register', '/api/account', '/api/posts',
+    '/api/products', '/api/favorites', '/api/cart', '/api/transactions'
+];
 
 function isLegacyApiPath(pathname) {
     return LEGACY_API_PREFIXES.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/'));
@@ -44,14 +49,6 @@ db.initDatabase().then(() => {
     console.error('❌ 資料庫連接失敗:', err.message);
     process.exit(1);
 });
-
-function normalizeAttachmentList(items) {
-    if (Array.isArray(items)) {
-        return items.filter(Boolean);
-    }
-
-    return items ? [items] : [];
-}
 
 function sendJson(res, statusCode, data) {
     res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -77,58 +74,6 @@ function parseJsonBody(req) {
         });
         req.on('error', reject);
     });
-}
-
-function encodeJsonList(items) {
-    return JSON.stringify(normalizeAttachmentList(items));
-}
-
-function decodeJsonList(value) {
-    if (!value) return [];
-    try {
-        return normalizeAttachmentList(JSON.parse(value));
-    } catch (error) {
-        return normalizeAttachmentList(value);
-    }
-}
-
-async function findRequestUser(identifier) {
-    if (!identifier) return null;
-    if (/^\d+$/.test(String(identifier))) {
-        return db.User.findById(Number(identifier));
-    }
-    return db.User.findByEmail(identifier);
-}
-
-function formatDbReply(reply) {
-    return {
-        id: reply.id,
-        content: reply.content,
-        author: reply.username || reply.author_email || '匿名使用者',
-        authorEmail: reply.author_email,
-        date: reply.created_at,
-        images: decodeJsonList(reply.images)
-    };
-}
-
-async function formatDbPost(post) {
-    const replies = await db.Comment.getByPost(post.id);
-    return {
-        id: post.id,
-        title: post.title,
-        content: post.content,
-        category: post.category,
-        author: post.author_name || post.author_email || '匿名使用者',
-        authorEmail: post.author_email,
-        date: post.created_at,
-        images: decodeJsonList(post.images),
-        replies: replies.map(formatDbReply)
-    };
-}
-
-async function requireUserFromBodyOrQuery(parsedUrl, body = {}) {
-    const user = await findRequestUser(body.userEmail || body.userId || parsedUrl.searchParams.get('userEmail') || parsedUrl.searchParams.get('userId'));
-    return user;
 }
 
 // --- 輔助函式 ---
@@ -193,79 +138,8 @@ const server = http.createServer(async(req, res) => {
         // 若找不到上述路徑，記得要關閉資料庫連線避免佔用
         database.close();
     }
-    // ========================================================
-    // 1. 登入 API (使用 SQLite)
-    if (pathname === '/api/login' && req.method === 'POST') {
-        setCorsHeaders(res);
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', async () => {
-            try {
-                const { email, password } = JSON.parse(body);
-                const user = await db.User.findByEmail(email);
-                
-                if (user && user.password === password) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ 
-                        success: true, 
-                    message: "登入成功", 
-                        user: { id: user.id, email: user.email, username: user.username } 
-                    }));
-                } else {
-                    res.writeHead(401, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "帳號或密碼錯誤" }));
-                }
-            } catch (error) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "請檢查傳送的資料格式" }));
-            }
-        });
-
-    // 2. 註冊 API (使用 SQLite)
-    } else if (pathname === '/api/register' && req.method === 'POST') {
-        setCorsHeaders(res);
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', async () => {
-            try {
-                const parsedBody = JSON.parse(body);
-                console.log('📝 收到註冊請求資料:', parsedBody);
-                
-                // 兼容前端可能傳遞 name 或 username 的情況
-                const { name, username, email, password, confirmPassword } = parsedBody;
-                const finalName = name || username;
-                
-                if (password !== confirmPassword || password.length < 8) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: "密碼不一致" }));
-                }
-
-                const existingUser = await db.User.findByEmail(email);
-                if (existingUser) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: "此信箱已被註冊" }));
-                }
-
-                await db.User.create({
-                    email,
-                    password,
-                    username: finalName || '未命名使用者',
-                    real_name: finalName || '',
-                    phone: '',
-                    city: ''
-                });
-                
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, message: "註冊成功" }));
-            } catch (error) {
-                console.error('❌ 註冊 API 發生錯誤:', error);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: "伺服器錯誤" }));
-            }
-        });
-
-// 3. 需求推薦 API (升級版：即時爬蟲與智慧定價)
-    } else if (pathname === '/api/recommend' && req.method === 'POST') {
+    // 需求推薦 API
+    if (pathname === '/api/recommend' && req.method === 'POST') {
         setCorsHeaders(res);
         try {
             const options = await parseJsonBody(req);
@@ -278,129 +152,13 @@ const server = http.createServer(async(req, res) => {
             }
         }
 
-    // 4. 取得論壇文章 API (使用 SQLite)
-    }else if (pathname === '/api/posts' && req.method === 'GET') {
-        setCorsHeaders(res);
-        try {
-            const posts = await db.Post.getAll();
-            const formattedPosts = await Promise.all(posts.map(formatDbPost));
-            sendJson(res, 200, formattedPosts);
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: "無法讀取文章列表" });
-        }
-
-    // 5. 新增論壇文章 API (使用 SQLite)
-    } else if (pathname === '/api/posts' && req.method === 'POST') {
-        setCorsHeaders(res);
-        try {
-            const { title, content, author, images, author_id, category } = await parseJsonBody(req);
-            if (!title || !content) {
-                return sendJson(res, 400, { success: false, message: "標題和內容不能為空" });
-            }
-
-            const authorUser = author_id ? await db.User.findById(author_id) : await findRequestUser(author);
-            const result = await db.Post.create({
-                author_id: authorUser?.id || 1,
-                title,
-                content,
-                category: category || '一般討論',
-                images: encodeJsonList(images)
-            });
-
-            sendJson(res, 200, { success: true, message: "發文成功", post_id: result.id });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: "發文發生錯誤" });
-        }
-        } else if (/^\/api\/posts\/\d+\/replies$/.test(pathname) && req.method === 'POST') {
-            setCorsHeaders(res);
-            const postId = parseInt(pathname.split('/')[3]);
-            try {
-                const { content, author, images } = await parseJsonBody(req);
-                if (!content) {
-                    return sendJson(res, 400, { success: false, message: "回覆內容不能為空" });
-                }
-
-                const post = await db.Post.findById(postId);
-                if (!post) {
-                    return sendJson(res, 404, { success: false, message: "找不到文章" });
-                }
-
-                const authorUser = await findRequestUser(author);
-                const result = await db.Comment.create({
-                    post_id: postId,
-                    author_id: authorUser?.id || 1,
-                    content,
-                    images: encodeJsonList(images)
-                });
-
-                const reply = await db.runQueryOne('SELECT c.*, u.username, u.email as author_email FROM comments c LEFT JOIN users u ON c.author_id = u.id WHERE c.id = ?', [result.id]);
-                sendJson(res, 200, { success: true, message: '回覆成功', reply: formatDbReply(reply) });
-            } catch (error) {
-                sendJson(res, 500, { success: false, message: '回覆發生錯誤' });
-            }
-        
-        // --- 論壇文章修改/刪除 API ---
-} else if (pathname.startsWith('/api/posts/') && (req.method === 'PUT' || req.method === 'DELETE')) {
-    setCorsHeaders(res);
-    const postId = parseInt(pathname.split('/')[3]); // 取得 URL 中的 id
-
-    if (req.method === 'DELETE') {
-        const result = await db.Post.delete(postId);
-        if (!result.changes) {
-            return sendJson(res, 404, { success: false, message: '找不到文章' });
-        }
-        sendJson(res, 200, { success: true, message: '文章已刪除' });
-    } else if (req.method === 'PUT') {
-        try {
-            const { title, content, images } = await parseJsonBody(req);
-            const result = await db.Post.update(postId, {
-                title,
-                content,
-                images: images !== undefined ? encodeJsonList(images) : null
-            });
-            if (!result.changes) {
-                return sendJson(res, 404, { success: false, message: '找不到文章' });
-            }
-            sendJson(res, 200, { success: true, message: '文章已更新' });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '文章更新失敗' });
-        }
-    }
-    } else if (pathname === '/api/account/name' && req.method === 'PUT') {
-        setCorsHeaders(res);
-        try {
-            const body = await parseJsonBody(req);
-            const user = await requireUserFromBodyOrQuery(parsedUrl, body);
-            const username = String(body.username || '').trim();
-            if (!user) return sendJson(res, 400, { success: false, message: '請先登入' });
-            if (!username) return sendJson(res, 400, { success: false, message: '請輸入使用者名稱' });
-            if (username.length > 30) return sendJson(res, 400, { success: false, message: '使用者名稱請勿超過 30 個字' });
-            await db.User.updateUsername(user.id, username);
-            sendJson(res, 200, { success: true, message: '使用者名稱已更新', username });
-        } catch (error) {
-            sendJson(res, 500, { success: false, message: '更新使用者名稱失敗' });
-        }
-
-    // 取得使用者統計資料（貼文數等）
-    } else if (pathname === '/api/account/stats' && req.method === 'GET') {
-        setCorsHeaders(res);
-        try {
-            const user = await requireUserFromBodyOrQuery(parsedUrl);
-            if (!user) return sendJson(res, 404, { success: false, message: '找不到使用者' });
-            const stats = await db.Stats.getByUser(user.id);
-            sendJson(res, 200, { success: true, data: stats });
-        } catch (error) {
-            console.error('❌ 取得使用者統計失敗:', error);
-            sendJson(res, 500, { success: false, message: '取得統計失敗' });
-        }
-
     } else if (pathname === '/api/valuation/models' && req.method === 'GET') {
         setCorsHeaders(res);
         try {
             const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
             const query = String(parsedUrl.searchParams.get('q') || '').trim();
             const brand = String(parsedUrl.searchParams.get('brand') || '').trim();
-            if (!['cpu', 'gpu'].includes(category)) {
+            if (!['cpu', 'gpu', 'motherboard'].includes(category)) {
                 return sendJson(res, 200, { success: true, data: [] });
             }
             if (!query) return sendJson(res, 200, { success: true, data: [] });
@@ -427,7 +185,7 @@ const server = http.createServer(async(req, res) => {
             }
             const category = String(payload.category).trim().toLowerCase();
             const brand = String(payload.brand || '').trim();
-            const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram', 'mouse', 'keyboard']);
+            const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram']);
             const originalPrice = Number(payload.originalPrice);
             const submittedWarrantyMonths = payload.totalWarrantyMonths === undefined || payload.totalWarrantyMonths === ''
                 ? null
@@ -435,9 +193,6 @@ const server = http.createServer(async(req, res) => {
             const elapsedMonths = Number(payload.elapsedMonths);
             if (!allowedCategories.has(category)) {
                 return sendJson(res, 400, { success: false, message: '不支援這個硬體分類。' });
-            }
-            if (['mouse', 'keyboard'].includes(category) && !brand) {
-                return sendJson(res, 400, { success: false, message: '滑鼠與鍵盤估價需要填寫品牌。' });
             }
             if (!Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
                 return sendJson(res, 400, { success: false, message: '已過月份不可小於 0。' });
@@ -475,7 +230,7 @@ const server = http.createServer(async(req, res) => {
                     matchLevel: 'user_input',
                     note: '保固期限由使用者輸入，最終仍以購買證明與原廠判定為準。'
                 };
-            if (!resolved.gpuPricing && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
+            if (!resolved.gpuPricing && !resolved.cpuPricing && !resolved.referencePrice && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
                 return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
             }
             const formulaInput = {
@@ -495,6 +250,11 @@ const server = http.createServer(async(req, res) => {
             if (resolved.gpuPricing) {
                 formulaInput.gpuPricing = resolved.gpuPricing;
                 formulaInput.originalPrice = resolved.gpuPricing.launchPriceNtd;
+            } else if (resolved.cpuPricing) {
+                formulaInput.cpuPricing = resolved.cpuPricing;
+                formulaInput.originalPrice = resolved.cpuPricing.referencePriceNtd;
+            } else if (resolved.referencePrice) {
+                formulaInput.originalPrice = resolved.referencePrice.priceNtd;
             }
 
             let pricingResult = null;
@@ -542,7 +302,8 @@ const server = http.createServer(async(req, res) => {
                     canonicalBrand: resolved.canonicalBrand || brand,
                     canonicalModel: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
                     manufacturer: resolved.model ? resolved.model.manufacturer : null,
-                    series: resolved.model ? resolved.model.series : null
+                    series: resolved.model ? resolved.model.series : null,
+                    cpuPricing: resolved.cpuPricing || null
                 },
                     warranty,
                 formulaInput
@@ -605,9 +366,7 @@ const server = http.createServer(async(req, res) => {
     // --- 靜態檔案路由 (網頁前端路由) ---
     } else {
         let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
-        if (pathname === '/login') filePath = path.join(__dirname, 'login.html');
-        else if (pathname === '/forum') filePath = path.join(__dirname, 'forum.html');
-        else if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
+        if (pathname === '/scrape') filePath = path.join(__dirname, 'scrape.html');
         else if (pathname === '/recommend') filePath = path.join(__dirname, 'recommend.html');
         else if (pathname === '/tools') filePath = path.join(__dirname, 'tools.html');
         else if (pathname === '/valuation') filePath = path.join(__dirname, 'valuation.html');
@@ -655,8 +414,6 @@ server.listen(PORT, () => {
     ==========================================
     🌟 伺服器已啟動！
     ▶️ 測試首頁: http://localhost:${PORT}
-    ▶️ 登入頁面: http://localhost:${PORT}/login
-    ▶️ 論壇頁面: http://localhost:${PORT}/forum
     ▶️ 測試 API: http://localhost:${PORT}/api
     ▶️ 工具頁面: http://localhost:${PORT}/tools
     ==========================================

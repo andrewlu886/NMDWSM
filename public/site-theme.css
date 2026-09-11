@@ -178,51 +178,6 @@ body > header .auth-btn:hover,
     background: var(--site-primary-hover) !important;
 }
 
-body > header #user-profile {
-    align-items: center !important;
-    gap: 9px !important;
-    color: var(--site-navy) !important;
-}
-
-body > header #user-display-name {
-    color: var(--site-navy) !important;
-    font-weight: 600;
-}
-
-body > header .avatar {
-    display: grid;
-    width: 34px;
-    height: 34px;
-    box-sizing: border-box;
-    padding: 0 !important;
-    place-items: center;
-    border-radius: 50% !important;
-    background: #dbeafe !important;
-    color: var(--site-primary) !important;
-}
-
-body > header .dropdown-menu {
-    z-index: 1100 !important;
-    min-width: 135px;
-    padding: 8px !important;
-    border: 1px solid var(--site-border) !important;
-    border-radius: 10px !important;
-    background: #fff !important;
-    box-shadow: var(--site-shadow-md) !important;
-}
-
-body > header .dropdown-menu a {
-    display: block;
-    padding: 8px 10px !important;
-    border-radius: 7px;
-    color: var(--site-navy) !important;
-    text-decoration: none;
-}
-
-body > header .dropdown-menu a:hover {
-    background: #eff6ff;
-}
-
 body > header .main-nav,
 .recommend-nav {
     display: flex !important;

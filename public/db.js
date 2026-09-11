@@ -1,7 +1,14 @@
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
-const { hardwareModels, brandAliases, warrantyRules, amdGpuPricingModels } = require('../src/data/hardware-catalog');
+const { seedImportedReferencePrices } = require('../src/data/imported-reference-prices');
+const {
+  hardwareModels,
+  brandAliases,
+  warrantyRules,
+  amdGpuPricingModels,
+  intelCpuPricingModels
+} = require('../src/data/hardware-catalog');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nmdwsm.db');
 let db = null;
@@ -16,42 +23,6 @@ function initDatabase() {
 
       db.run('PRAGMA foreign_keys = ON');
       db.exec(`
-        CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          email TEXT UNIQUE NOT NULL,
-          password TEXT NOT NULL,
-          username TEXT NOT NULL,
-          real_name TEXT,
-          phone TEXT,
-          city TEXT,
-          role TEXT DEFAULT 'member',
-          reputation_score INTEGER DEFAULT 0,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-
-        CREATE TABLE IF NOT EXISTS posts (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          author_id INTEGER,
-          title TEXT NOT NULL,
-          content TEXT NOT NULL,
-          category TEXT,
-          images TEXT,
-          views INTEGER DEFAULT 0,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (author_id) REFERENCES users(id)
-        );
-
-        CREATE TABLE IF NOT EXISTS comments (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          post_id INTEGER,
-          author_id INTEGER,
-          content TEXT NOT NULL,
-          images TEXT,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (post_id) REFERENCES posts(id),
-          FOREIGN KEY (author_id) REFERENCES users(id)
-        );
-
         CREATE TABLE IF NOT EXISTS hardware_models (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           category TEXT NOT NULL,
@@ -110,6 +81,15 @@ function initDatabase() {
           FOREIGN KEY (hardware_model_id) REFERENCES hardware_models(id) ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS hardware_cpu_pricing_models (
+          hardware_model_id INTEGER PRIMARY KEY,
+          reference_price_ntd INTEGER NOT NULL,
+          source_name TEXT NOT NULL,
+          source_url TEXT NOT NULL,
+          source_checked_at TEXT NOT NULL,
+          FOREIGN KEY (hardware_model_id) REFERENCES hardware_models(id) ON DELETE CASCADE
+        );
+
         CREATE INDEX IF NOT EXISTS idx_hardware_models_category_normalized
           ON hardware_models(category, normalized_model);
         CREATE INDEX IF NOT EXISTS idx_hardware_aliases_normalized
@@ -119,15 +99,7 @@ function initDatabase() {
       `, (initErr) => {
         if (initErr) return reject(initErr);
 
-        const migrations = [
-          'ALTER TABLE posts ADD COLUMN images TEXT',
-          'ALTER TABLE comments ADD COLUMN images TEXT'
-        ];
-        let chain = Promise.resolve();
-        migrations.forEach((sql) => {
-          chain = chain.then(() => new Promise((done) => db.run(sql, () => done())));
-        });
-        chain.then(seedHardwareCatalog).then(() => resolve(db)).catch(reject);
+        seedHardwareCatalog().then(() => resolve(db)).catch(reject);
       });
     });
   });
@@ -164,6 +136,12 @@ function normalizeHardwareText(value) {
 async function seedHardwareCatalog() {
   await runUpdate('BEGIN TRANSACTION');
   try {
+    await runUpdate(
+      `DELETE FROM hardware_models
+       WHERE category = 'cpu' AND manufacturer = 'Intel'
+         AND series IN ('Core 10th Gen', 'Core 11th Gen')`
+    );
+
     for (const item of hardwareModels) {
       const normalizedModel = normalizeHardwareText(item.canonicalModel);
       await runUpdate(
@@ -237,6 +215,21 @@ async function seedHardwareCatalog() {
       );
     }
 
+    await runUpdate('DELETE FROM hardware_cpu_pricing_models');
+    for (const item of intelCpuPricingModels) {
+      const model = await runQueryOne(
+        'SELECT id FROM hardware_models WHERE category = ? AND normalized_model = ?',
+        ['cpu', normalizeHardwareText(item.canonicalModel)]
+      );
+      if (!model) throw new Error(`找不到 Intel CPU 型號：${item.canonicalModel}`);
+      await runUpdate(
+        `INSERT INTO hardware_cpu_pricing_models
+         (hardware_model_id, reference_price_ntd, source_name, source_url, source_checked_at)
+         VALUES (?, ?, ?, ?, ?)`,
+        [model.id, item.referencePriceNtd, item.sourceName, item.sourceUrl, item.sourceCheckedAt]
+      );
+    }
+
     for (const [canonicalBrand, aliases] of Object.entries(brandAliases)) {
       for (const alias of aliases) {
         await runUpdate(
@@ -294,89 +287,13 @@ async function seedHardwareCatalog() {
         ]
       );
     }
+    await seedImportedReferencePrices(runUpdate);
     await runUpdate('COMMIT');
   } catch (error) {
     await runUpdate('ROLLBACK');
     throw error;
   }
 }
-
-const User = {
-  findByEmail(email) {
-    return runQueryOne('SELECT * FROM users WHERE email = ?', [email]);
-  },
-
-  findById(id) {
-    return runQueryOne('SELECT * FROM users WHERE id = ?', [id]);
-  },
-
-  create(data) {
-    return runUpdate(
-      `INSERT INTO users (email, password, username, real_name, phone, city)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [data.email, data.password, data.username, data.real_name, data.phone, data.city]
-    );
-  },
-
-  updateUsername(userId, username) {
-    return runUpdate('UPDATE users SET username = ? WHERE id = ?', [username, userId]);
-  }
-};
-
-const Post = {
-  getAll() {
-    return runQuery(`SELECT p.*, u.username AS author_name, u.email AS author_email
-                     FROM posts p LEFT JOIN users u ON p.author_id = u.id
-                     ORDER BY p.created_at DESC LIMIT 50`);
-  },
-
-  findById(id) {
-    return runQueryOne(`SELECT p.*, u.username AS author_name, u.email AS author_email
-                        FROM posts p LEFT JOIN users u ON p.author_id = u.id
-                        WHERE p.id = ?`, [id]);
-  },
-
-  create(data) {
-    return runUpdate(
-      'INSERT INTO posts (author_id, title, content, category, images) VALUES (?, ?, ?, ?, ?)',
-      [data.author_id, data.title, data.content, data.category, data.images || null]
-    );
-  },
-
-  update(id, data) {
-    return runUpdate(
-      'UPDATE posts SET title = ?, content = ?, images = ? WHERE id = ?',
-      [data.title, data.content, data.images || null, id]
-    );
-  },
-
-  async delete(id) {
-    await runUpdate('DELETE FROM comments WHERE post_id = ?', [id]);
-    return runUpdate('DELETE FROM posts WHERE id = ?', [id]);
-  }
-};
-
-const Comment = {
-  getByPost(postId) {
-    return runQuery(`SELECT c.*, u.username, u.email AS author_email
-                     FROM comments c LEFT JOIN users u ON c.author_id = u.id
-                     WHERE c.post_id = ? ORDER BY c.created_at ASC`, [postId]);
-  },
-
-  create(data) {
-    return runUpdate(
-      'INSERT INTO comments (post_id, author_id, content, images) VALUES (?, ?, ?, ?)',
-      [data.post_id, data.author_id, data.content, data.images || null]
-    );
-  }
-};
-
-const Stats = {
-  async getByUser(userId) {
-    const posts = await runQueryOne('SELECT COUNT(*) AS count FROM posts WHERE author_id = ?', [userId]);
-    return { posts: posts.count };
-  }
-};
 
 async function normalizeBrand(value) {
   const normalized = normalizeHardwareText(value);
@@ -445,6 +362,34 @@ async function findGpuPricingModel(model) {
   };
 }
 
+async function findCpuPricingModel(model) {
+  if (!model || model.category !== 'cpu' || model.manufacturer !== 'Intel') return null;
+  const row = await runQueryOne(
+    'SELECT * FROM hardware_cpu_pricing_models WHERE hardware_model_id = ?',
+    [model.id]
+  );
+  if (!row) return null;
+  return {
+    referencePriceNtd: row.reference_price_ntd,
+    sourceName: row.source_name,
+    sourceUrl: row.source_url,
+    sourceCheckedAt: row.source_checked_at
+  };
+}
+
+async function findReferencePrice(model) {
+  if (!model) return null;
+  if (model.category === 'motherboard') {
+    const rows = await runQuery('SELECT * FROM hardware_motherboard_base_prices');
+    const row = rows.find(r => normalizeHardwareText(`${r.platform} ${r.chipset}`) === normalizeHardwareText(model.canonicalModel));
+    return row ? { priceNtd: row.base_price_ntd, basis: 'chipset_base', source: row.source_file, notes: row.price_basis } : null;
+  }
+  const rows = await runQuery("SELECT * FROM hardware_reference_prices WHERE category = ? AND offer_type = 'standalone' ORDER BY imported_at DESC", [model.category]);
+  const row = rows.find(r => r.brand === model.manufacturer &&
+    [r.model, `${r.brand} ${r.model}`].some(name => normalizeHardwareText(name) === normalizeHardwareText(model.canonicalModel)));
+  return row ? { priceNtd: row.price_ntd, basis: 'reference', source: row.source_file, notes: row.notes } : null;
+}
+
 async function resolveWarranty({ category, brand, model, elapsedMonths = 0, extensionRegistered = 'unknown' }) {
   const canonicalBrand = await normalizeBrand(brand || (model && model.manufacturer));
   const rules = await runQuery(
@@ -498,7 +443,7 @@ async function resolveWarranty({ category, brand, model, elapsedMonths = 0, exte
 const HardwareCatalog = {
   async searchModels({ category, brand, query, limit = 8 }) {
     const normalizedQuery = normalizeHardwareText(query);
-    if (!['cpu', 'gpu'].includes(category) || !normalizedQuery) return [];
+    if (!['cpu', 'gpu', 'motherboard'].includes(category) || !normalizedQuery) return [];
     const safeLimit = Math.min(Math.max(Number(limit) || 8, 1), 20);
     const rows = await runQuery(
       `SELECT DISTINCT hm.* FROM hardware_models hm
@@ -507,7 +452,7 @@ const HardwareCatalog = {
          AND (hm.normalized_model LIKE ? OR hma.normalized_alias LIKE ?
               OR ? LIKE '%' || hm.normalized_model || '%'
               OR ? LIKE '%' || hma.normalized_alias || '%')
-       ORDER BY CASE WHEN hm.normalized_model LIKE ? THEN 0 ELSE 1 END,
+       ORDER BY CASE WHEN hm.normalized_model LIKE ? OR hma.normalized_alias LIKE ? THEN 0 ELSE 1 END,
                 hm.release_year DESC, hm.canonical_model ASC
        LIMIT ?`,
       [
@@ -516,7 +461,8 @@ const HardwareCatalog = {
         `%${normalizedQuery}%`,
         normalizedQuery,
         normalizedQuery,
-        `${normalizedQuery}%`,
+        `%${normalizedQuery}%`,
+        `%${normalizedQuery}%`,
         safeLimit
       ]
     );
@@ -524,6 +470,8 @@ const HardwareCatalog = {
       const item = formatModel(row);
       item.warranty = await resolveWarranty({ category, brand, model: item, elapsedMonths: 0 });
       item.gpuPricing = await findGpuPricingModel(item);
+      item.cpuPricing = await findCpuPricingModel(item);
+      item.referencePrice = await findReferencePrice(item);
       return item;
     }));
   },
@@ -531,6 +479,8 @@ const HardwareCatalog = {
   async resolveValuationInput(input) {
     const model = await findHardwareModel(input);
     const gpuPricing = await findGpuPricingModel(model);
+    const cpuPricing = await findCpuPricingModel(model);
+    const referencePrice = await findReferencePrice(model);
     const warranty = await resolveWarranty({
       category: input.category,
       brand: input.brand,
@@ -541,6 +491,8 @@ const HardwareCatalog = {
     return {
       model,
       gpuPricing,
+      cpuPricing,
+      referencePrice,
       warranty,
       canonicalBrand: await normalizeBrand(input.brand || (model && model.manufacturer))
     };
@@ -552,10 +504,6 @@ module.exports = {
   runQuery,
   runQueryOne,
   runUpdate,
-  User,
-  Post,
-  Comment,
-  Stats,
   HardwareCatalog,
   normalizeHardwareText
 };

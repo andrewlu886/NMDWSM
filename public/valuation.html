@@ -16,23 +16,11 @@
             <form class="search-wrapper" action="/scrape" method="get">
                 <input type="search" name="keyword" class="nav-search" placeholder="查詢硬體市價..." aria-label="查詢硬體市價">
             </form>
-            <div class="header-actions">
-                <div id="auth-section"><a href="/login" class="auth-btn">登入 / 註冊</a></div>
-                <div id="user-profile" style="display:none;">
-                    <div class="avatar">👤</div>
-                    <span id="user-display-name">載入中...</span>
-                    <div class="dropdown-menu">
-                        <a href="/account.html">會員資料</a>
-                        <a href="#" id="logout-link">登出</a>
-                    </div>
-                </div>
-            </div>
         </div>
         <nav class="main-nav" aria-label="主要導覽">
             <a href="/">首頁</a>
             <a href="/recommend.html">智慧推薦</a>
             <a href="/valuation.html" class="active">二手硬體估價</a>
-            <a href="/forum">討論區</a>
             <a href="/scrape">市價查詢</a>
             <a href="/tools">零件查詢與瓦數計算工具</a>
         </nav>
@@ -51,7 +39,7 @@
             <div class="valuation-heading-row">
                 <div>
                     <h2>選擇硬體種類</h2>
-                    <p>CPU 提供型號建議，顯示卡與其他分類請手動輸入完整型號。</p>
+                    <p>CPU、顯示卡提供型號與價格建議；主機板可選擇晶片組估價基準，記憶體請手動輸入。</p>
                 </div>
                 <span class="data-status-badge">測試估價</span>
             </div>
@@ -61,20 +49,12 @@
                 <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="gpu">顯示卡</button>
                 <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="motherboard">主機板</button>
                 <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="ram">記憶體</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="mouse">滑鼠</button>
-                <button type="button" class="category-tab" role="tab" aria-selected="false" data-category="keyboard">鍵盤</button>
             </div>
 
             <div class="valuation-layout">
                 <form id="valuation-form" class="valuation-form" novalidate>
                     <input type="hidden" id="category" name="category" value="cpu">
                     <input type="hidden" id="model-id" name="modelId">
-
-                    <div class="field full-width valuation-dynamic-group" id="brand-field" hidden>
-                        <label for="brand">品牌</label>
-                        <input id="brand" name="brand" type="text" placeholder="例如：Logitech、Razer、ROG">
-                        <span class="field-hint" id="brand-hint">請填產品外盒或本體標示的品牌。</span>
-                    </div>
 
                     <div class="field full-width model-search-field">
                         <label for="model">完整型號</label>
@@ -102,7 +82,7 @@
                         </div>
                     </section>
 
-                    <div class="field" id="condition-field">
+                    <div class="field" id="condition-field" hidden>
                         <label for="condition">商品狀況</label>
                         <select id="condition" name="condition" required>
                             <option value="like_new">近全新</option>
@@ -111,25 +91,6 @@
                             <option value="poor">狀況較差</option>
                         </select>
                     </div>
-
-                    <section class="peripheral-fields full-width" id="peripheral-fields" hidden>
-                        <div class="field">
-                            <label for="usage-condition">功能損耗程度</label>
-                            <select id="usage-condition" name="usageCondition">
-                                <option value="good">正常</option>
-                                <option value="minor">輕微損耗</option>
-                                <option value="heavy">嚴重損耗</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label for="appearance-condition">外觀損耗程度</label>
-                            <select id="appearance-condition" name="appearanceCondition">
-                                <option value="good">正常痕跡</option>
-                                <option value="minor">輕微打油／掉漆</option>
-                                <option value="heavy">嚴重破損／發黏</option>
-                            </select>
-                        </div>
-                    </section>
 
                     <div class="field full-width extension-field" id="extension-field" hidden>
                         <label for="extension-registered">是否完成延長保固登錄</label>

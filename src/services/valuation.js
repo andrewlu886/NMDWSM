@@ -110,6 +110,78 @@ function calculateCpuAndMotherboardValuation(input) {
   );
 }
 
+const intelCpuPricingProfiles = {
+  i3_12_14: { k: 0.223, warrantyRate: 0.013, marketRate: 0.001, postWarrantyRate: 0.021 },
+  i5_12_13: { k: 0.139, warrantyRate: 0.005, marketRate: 0.003, postWarrantyRate: 0.021 },
+  i5_14_ultra: { k: 0.139, warrantyRate: 0.024, marketRate: 0.003, postWarrantyRate: 0.021 },
+  i7_12_ultra: { k: 0.108, warrantyRate: 0.022, marketRate: 0.004, postWarrantyRate: 0.0016 },
+  i9_12_ultra: { k: 0.09, warrantyRate: 0.013, marketRate: 0.001, postWarrantyRate: 0.004 }
+};
+
+function getIntelCpuPricingProfile(modelInput) {
+  const model = String(modelInput || '').normalize('NFKC').toUpperCase();
+  const ultraMatch = model.match(/CORE\s*ULTRA\s*([3579])/);
+  if (ultraMatch) {
+    const tier = Number(ultraMatch[1]);
+    if (tier === 5) return { id: 'i5_14_ultra', tier, generation: 'ultra', ...intelCpuPricingProfiles.i5_14_ultra };
+    if (tier === 7) return { id: 'i7_12_ultra', tier, generation: 'ultra', ...intelCpuPricingProfiles.i7_12_ultra };
+    if (tier === 9) return { id: 'i9_12_ultra', tier, generation: 'ultra', ...intelCpuPricingProfiles.i9_12_ultra };
+    return null;
+  }
+
+  const coreMatch = model.match(/(?:CORE\s*)?I([3579])[-\s]*(\d{4,5})/);
+  if (!coreMatch) return null;
+  const tier = Number(coreMatch[1]);
+  const generation = Math.floor(Number(coreMatch[2]) / 1000);
+  if (tier === 3 && generation >= 12 && generation <= 14) {
+    return { id: 'i3_12_14', tier, generation, ...intelCpuPricingProfiles.i3_12_14 };
+  }
+  if (tier === 5 && generation >= 12 && generation <= 13) {
+    return { id: 'i5_12_13', tier, generation, ...intelCpuPricingProfiles.i5_12_13 };
+  }
+  if (tier === 5 && generation >= 14) {
+    return { id: 'i5_14_ultra', tier, generation, ...intelCpuPricingProfiles.i5_14_ultra };
+  }
+  if (tier === 7 && generation >= 12) {
+    return { id: 'i7_12_ultra', tier, generation, ...intelCpuPricingProfiles.i7_12_ultra };
+  }
+  if (tier === 9 && generation >= 12) {
+    return { id: 'i9_12_ultra', tier, generation, ...intelCpuPricingProfiles.i9_12_ultra };
+  }
+  return null;
+}
+
+function calculateIntelCpuValuation(input) {
+  const originalPrice = requireOriginalPrice(input);
+  const profile = getIntelCpuPricingProfile(input.model);
+  if (!profile) return null;
+
+  const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
+  const totalWarrantyMonths = Math.max(0, Number(input.totalWarrantyMonths) || 0);
+  const inWarrantyMonths = Math.min(elapsedMonths, totalWarrantyMonths);
+  const postWarrantyMonths = Math.max(elapsedMonths - totalWarrantyMonths, 0);
+  const price = originalPrice
+    * Math.exp(-profile.k)
+    * Math.exp(-profile.warrantyRate * inWarrantyMonths)
+    * Math.exp(-profile.marketRate * elapsedMonths)
+    * Math.exp(-profile.postWarrantyRate * postWarrantyMonths);
+
+  return createResult(price, 'intel_cpu_segment_decay', {
+    originalPrice,
+    elapsedMonths,
+    totalWarrantyMonths,
+    inWarrantyMonths,
+    postWarrantyMonths,
+    profile: profile.id,
+    tier: profile.tier,
+    generation: profile.generation,
+    k: profile.k,
+    warrantyRate: profile.warrantyRate,
+    marketRate: profile.marketRate,
+    postWarrantyRate: profile.postWarrantyRate
+  });
+}
+
 function calculateAmdGpuValuation(input) {
   const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
   const pricing = input.gpuPricing || {};
@@ -199,7 +271,10 @@ function calculateTestValuation(input) {
 }
 
 function calculateValuation(input) {
-  if (['cpu', 'motherboard'].includes(input.category)) {
+  if (input.category === 'cpu') {
+    return calculateIntelCpuValuation(input) || calculateCpuAndMotherboardValuation(input);
+  }
+  if (input.category === 'motherboard') {
     return calculateCpuAndMotherboardValuation(input);
   }
   if (input.category === 'gpu' && input.gpuPricing) {
@@ -216,6 +291,8 @@ module.exports = {
   calculateValuation,
   calculateTestValuation,
   calculateCpuAndMotherboardValuation,
+  calculateIntelCpuValuation,
+  getIntelCpuPricingProfile,
   calculateAmdGpuValuation,
   calculateRamValuation,
   calculatePeripheralValuation,
