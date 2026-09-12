@@ -19,18 +19,19 @@ function fallbackAnswerForUserMessage(userMessage) {
     const text = String(userMessage || '').trim();
     const normalized = text.toLowerCase();
 
-    // --- 新增：打招呼的關鍵字判斷 ---
+    // 打招呼的關鍵字判斷
     if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安/.test(normalized)) {
         return '您好！我是網站的專屬導遊，有什麼電腦零件估價或行情查詢的需求，都可以問我喔！';
     }
 
-    // --- 新增：感謝與道別的關鍵字判斷 ---
+    // 感謝與道別的關鍵字判斷
     if (/謝謝|感謝|感恩|拜拜|再見|掰掰/.test(normalized)) {
         return '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！';
     }
 
-    if (/估價|價錢|價格|價格估算|幾錢|多少/.test(normalized)) {
-        return '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)';
+    // --- 修改：加入裝機、推薦、組裝等關鍵字 ---
+    if (/估價|價錢|價格|價格估算|幾錢|多少|裝機|組裝|推薦|菜單|配電腦/.test(normalized)) {
+        return '需要估算電腦零件的價格或尋找裝機推薦嗎？請點擊這裡：[點此前往零件估價工具](/valuation)';
     }
 
     if (/行情|市價|市場價格|價格查詢|買賣|價格/.test(normalized)) {
@@ -45,15 +46,15 @@ function fallbackAnswerForUserMessage(userMessage) {
         return '非常抱歉，目前我們僅針對電腦零件提供估價喔！[點此前往零件估價工具](/valuation)';
     }
 
-    // --- 修改：更人性化的兜底回覆 ---
-    return '不好意思，這部分超出了我的專業範圍😅。我目前主要擅長電腦零件的估價與行情查詢，您要不要試試看問我這類的問題呢？';
+    // 更人性化的兜底回覆
+    return '不好意思，這部分超出了我的專業範圍😅。我目前主要擅長電腦零件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？';
 }
 
 // 定義並訓練對話模型
 async function trainNlpModel() {
     if (!manager || isModelTrained) return;
 
-    // --- 新增：打招呼意圖 ---
+    // 打招呼意圖
     manager.addDocument('zh', '你好', 'intent.greeting');
     manager.addDocument('zh', '您好', 'intent.greeting');
     manager.addDocument('zh', '嗨', 'intent.greeting');
@@ -64,7 +65,7 @@ async function trainNlpModel() {
     manager.addDocument('zh', '晚安', 'intent.greeting');
     manager.addAnswer('zh', 'intent.greeting', '您好！我是網站的專屬導遊，有什麼電腦零件估價或行情查詢的需求，都可以問我喔！');
 
-    // --- 新增：感謝與道別意圖 ---
+    // 感謝與道別意圖
     manager.addDocument('zh', '謝謝', 'intent.thanks');
     manager.addDocument('zh', '感謝', 'intent.thanks');
     manager.addDocument('zh', '感恩', 'intent.thanks');
@@ -73,7 +74,7 @@ async function trainNlpModel() {
     manager.addDocument('zh', '掰掰', 'intent.thanks');
     manager.addAnswer('zh', 'intent.thanks', '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！');
 
-    // 1. 零件估價意圖
+    // 零件估價與裝機推薦意圖
     manager.addDocument('zh', '我想估價', 'intent.valuation');
     manager.addDocument('zh', '顯示卡', 'intent.valuation');
     manager.addDocument('zh', 'CPU', 'intent.valuation');
@@ -81,7 +82,16 @@ async function trainNlpModel() {
     manager.addDocument('zh', '主機板', 'intent.valuation');
     manager.addDocument('zh', '滑鼠鍵盤', 'intent.valuation');
     manager.addDocument('zh', '電腦零件', 'intent.valuation');
-    manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
+
+    // 新增裝機與推薦相關詞彙
+    manager.addDocument('zh', '電腦裝機', 'intent.valuation');
+    manager.addDocument('zh', '我想找電腦裝機', 'intent.valuation');
+    manager.addDocument('zh', '組裝電腦', 'intent.valuation');
+    manager.addDocument('zh', '智慧推薦', 'intent.valuation');
+    manager.addDocument('zh', '推薦電腦', 'intent.valuation');
+    manager.addDocument('zh', '電腦菜單', 'intent.valuation');
+    manager.addDocument('zh', '幫我配電腦', 'intent.valuation');
+    manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格或尋找裝機推薦嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
 
     // 2. 市價查詢意圖
     manager.addDocument('zh', '市場價格', 'intent.scrape');
