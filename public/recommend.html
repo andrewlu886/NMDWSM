@@ -264,6 +264,10 @@
             margin-bottom: 20px;
         }
 
+        .recommend-field[hidden] {
+            display: none;
+        }
+
         .recommend-field label {
             display: block;
             margin-bottom: 8px;
@@ -578,18 +582,26 @@
                         <select id="productType" name="productType">
                             <option value="desktop">套裝主機（Desktop）</option>
                             <option value="laptop">筆記型電腦（Laptop）</option>
-                            <option value="component">電腦零件（顯示卡）</option>
+                            <option value="component">電腦零件</option>
                         </select>
                     </div>
                     <div class="recommend-field">
                         <label for="budget">預算範圍（NTD）</label>
                         <input id="budget" name="budget" type="number" min="1000" placeholder="請輸入預算上限"> 
                     </div>
-                    <div class="recommend-field">
+                    <div class="recommend-field" id="usage-field">
                         <label for="usage">主要用途</label>
                         <select id="usage" name="usage">
                             <option value="gaming">3A 遊戲專用</option>
                             <option value="office">文書辦公／影音娛樂</option>
+                        </select>
+                    </div>
+                    <div class="recommend-field" id="component-type-field" hidden>
+                        <label for="componentType">零件類別</label>
+                        <select id="componentType" name="componentType" disabled>
+                            <option value="">請選擇零件類別</option>
+                            <option value="cpu">處理器（CPU）</option>
+                            <option value="gpu">顯示卡（GPU）</option>
                         </select>
                     </div>
                     <button class="recommend-submit" id="recommend-submit" type="submit">立即生成推薦清單</button>
@@ -624,7 +636,7 @@
             }
         }
     </script>
-    <script src="./recommend.js?v=20260904-1"></script>
+    <script src="./recommend.js?v=20260913-1"></script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>

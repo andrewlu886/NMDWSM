@@ -6,10 +6,12 @@ const {
   scrapePlatforms
 } = require('../src/scrapers');
 const {
+  normalizeSearchKeyword,
   expandExcludeWords,
   filterSearchResults,
   searchProducts
 } = require('../src/services/search');
+const { matchesSearchKeyword } = require('../src/utils/search-keyword');
 const {
   getSearchKeyword,
   rankRecommendations,
@@ -61,6 +63,38 @@ test('搜尋服務傳遞平台選項並執行包含、排除與價格排序', as
   assert.deepEqual(results.map((item) => item.price), ['4,000', '6,000']);
 });
 
+test('市價查詢會統一全形字元並移除所有空白', () => {
+  assert.equal(normalizeSearchKeyword('RTX4060'), 'RTX4060');
+  assert.equal(normalizeSearchKeyword(' RTX  4060\t\n'), 'RTX4060');
+  assert.equal(normalizeSearchKeyword('ＲＴＸ　４０６０'), 'RTX4060');
+  assert.equal(normalizeSearchKeyword('Intel Core i5-12400F'), 'IntelCorei5-12400F');
+});
+
+test('有空格與無空格的搜尋會送出相同關鍵字並產生相同結果', async () => {
+  const receivedKeywords = [];
+  const dependencies = {
+    scrapePlatforms: async (keyword) => {
+      receivedKeywords.push(keyword);
+      return [
+        product('RTX 4060 顯示卡', '9,000'),
+        product('RTX4060 顯卡風扇', '1,500')
+      ];
+    }
+  };
+  const baseOptions = { platforms: 'all', include: '', exclude: '', categories: '' };
+  const compactResults = await searchProducts({ ...baseOptions, keyword: 'RTX4060' }, dependencies);
+  const spacedResults = await searchProducts({ ...baseOptions, keyword: 'RTX 4060' }, dependencies);
+
+  assert.deepEqual(receivedKeywords, ['RTX4060', 'RTX4060']);
+  assert.deepEqual(spacedResults, compactResults);
+});
+
+test('商品名稱與關鍵字的本地比對會忽略空白', () => {
+  assert.equal(matchesSearchKeyword('ASUS GeForce RTX 4060 Ti 8GB', 'RTX4060Ti'), true);
+  assert.equal(matchesSearchKeyword('Intel Core i5-12400F 處理器', 'Intel Core i5-12400F'), true);
+  assert.equal(matchesSearchKeyword('RTX 4070 顯示卡', 'RTX4060'), false);
+});
+
 test('同義詞擴充與顯卡搜尋防呆會排除周邊及低價商品', () => {
   const expanded = expandExcludeWords(['w11', '筆電']);
   assert.ok(expanded.includes('windows 11'));
@@ -74,11 +108,12 @@ test('同義詞擴充與顯卡搜尋防呆會排除周邊及低價商品', () =>
   assert.deepEqual(results.map((item) => item.name), ['RTX 4060 顯示卡']);
 });
 
-test('推薦關鍵字依商品類型與用途選擇', () => {
+test('主機與筆電依用途選擇關鍵字，零件依類別選擇', () => {
   assert.equal(getSearchKeyword('desktop', 'gaming'), '主機');
   assert.equal(getSearchKeyword('desktop', 'office'), '套裝機');
   assert.equal(getSearchKeyword('laptop', 'gaming'), '筆電');
-  assert.equal(getSearchKeyword('component', 'office'), '處理器');
+  assert.equal(getSearchKeyword('component', 'gaming', 'cpu'), '處理器');
+  assert.equal(getSearchKeyword('component', 'office', 'gpu'), '顯示卡');
 });
 
 test('推薦排名維持分數優先、同分價格優先及 Top 3 schema', () => {
@@ -99,17 +134,49 @@ test('推薦排名維持分數優先、同分價格優先及 Top 3 schema', () =
   assert.equal(result.suggestedPrice, 30000);
 });
 
-test('辦公推薦允許只有 CPU，零件推薦使用單項最高分', () => {
+test('辦公推薦允許只有 CPU，零件推薦只保留所選類別', () => {
   const office = rankRecommendations({ budget: 30000, usage: 'office', productType: 'desktop' }, [
     product('i7-13700 16GB Windows 11 套裝機', '25,000')
   ]);
   assert.equal(office.recommendations.length, 1);
   assert.equal(office.recommendations[0].gpu, 'UNKNOWN');
 
-  const component = rankRecommendations({ budget: 30000, usage: 'gaming', productType: 'component' }, [
+  const products = [
+    product('Intel Core i7-13700K 處理器', '12,000'),
     product('RTX 4070 SUPER 顯示卡', '28,000')
-  ]);
-  assert.equal(component.recommendations[0].gpu, 'RTX4070SUPER');
+  ];
+  const cpuComponents = rankRecommendations({
+    budget: 30000,
+    productType: 'component',
+    componentType: 'cpu'
+  }, products);
+  const gpuComponents = rankRecommendations({
+    budget: 30000,
+    productType: 'component',
+    componentType: 'gpu'
+  }, products);
+
+  assert.equal(cpuComponents.recommendations.length, 1);
+  assert.equal(cpuComponents.recommendations[0].cpu, 'I7-13700K');
+  assert.equal(cpuComponents.recommendations[0].gpu, 'UNKNOWN');
+  assert.equal(gpuComponents.recommendations.length, 1);
+  assert.equal(gpuComponents.recommendations[0].cpu, 'UNKNOWN');
+  assert.equal(gpuComponents.recommendations[0].gpu, 'RTX4070SUPER');
+});
+
+test('零件推薦將所選類別的關鍵字傳給爬蟲', async () => {
+  let receivedKeyword;
+  await getRecommendations({
+    budget: 30000,
+    productType: 'component',
+    componentType: 'cpu'
+  }, {
+    scrapePlatforms: async (keyword) => {
+      receivedKeyword = keyword;
+      return [];
+    }
+  });
+  assert.equal(receivedKeyword, '處理器');
 });
 
 test('getRecommendations 使用固定六平台並回傳空結果 schema', async () => {

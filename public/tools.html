@@ -539,9 +539,8 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        
         // 1. 取得 GPU 資料
-        fetch('/api/gpu-data')
+        const gpuDataRequest = fetch('/api/gpu-data')
             .then(response => {
                 if (!response.ok) throw new Error("GPU API 錯誤");
                 return response.json();
@@ -556,7 +555,7 @@
             });
 
         // 2. 取得 CPU 資料
-        fetch('/api/cpu-data')
+        const cpuDataRequest = fetch('/api/cpu-data')
             .then(response => {
                 if (!response.ok) throw new Error("CPU API 錯誤");
                 return response.json();
@@ -564,7 +563,12 @@
             .then(data => {
                 cpuExcelData = data;
                 populateCpuSelect(); // 呼叫新增的 CPU 選單生成函數
-            });
+            })
+            .catch(error => console.error('CPU 資料載入失敗：', error));
+
+        // 推薦頁會透過網址帶入 CPU/GPU；等兩份型號資料就緒後再自動配對。
+        Promise.allSettled([gpuDataRequest, cpuDataRequest])
+            .then(autoSelectModelFromURL);
 
         // 3. 取得驅動程式連結
         fetch('/api/driver-links')
@@ -700,16 +704,16 @@
     function normalizeHardwareName(value) {
         return String(value || '')
             .toLowerCase()
-            .replace(/\b(nvidia|geforce|amd|radeon|graphics|gpu)\b/g, '')
+            .replace(/\b(nvidia|geforce|amd|radeon|intel|core|processor|graphics|cpu|gpu)\b/g, '')
             .replace(/[^a-z0-9]+/g, '');
     }
 
-    function findGpuRow(queryGpu) {
-        const query = normalizeHardwareName(queryGpu);
+    function findHardwareRow(data, modelKeywords, requestedModel) {
+        const query = normalizeHardwareName(requestedModel);
         if (!query) return null;
 
-        const candidates = gpuExcelData
-            .map(row => ({ row, model: String(getCleanVal(row, ['顯示卡型號']) || '') }))
+        const candidates = data
+            .map(row => ({ row, model: String(getCleanVal(row, modelKeywords) || '') }))
             .filter(item => item.model.trim())
             .map(item => ({ ...item, normalized: normalizeHardwareName(item.model) }))
             .filter(item => item.normalized);
@@ -722,6 +726,14 @@
             .sort((a, b) => Math.abs(a.normalized.length - query.length) - Math.abs(b.normalized.length - query.length));
 
         return partialMatches.length ? partialMatches[0].row : null;
+    }
+
+    function findGpuRow(queryGpu) {
+        return findHardwareRow(gpuExcelData, ['顯示卡型號'], queryGpu);
+    }
+
+    function findCpuRow(queryCpu) {
+        return findHardwareRow(cpuExcelData, ['CPU型號'], queryCpu);
     }
 
     function getCpuTierValue(queryCpu) {
@@ -764,10 +776,13 @@
             }
         }
 
-        // 2. 處理 CPU 自動分級
+        // 2. 優先選中資料庫內的 CPU 實際型號，找不到時才使用等級估算。
         if (queryCpu) {
             const cpuInput = document.getElementById('cpu-power');
-            cpuInput.value = getCpuTierValue(queryCpu);
+            const matchedCpuRow = findCpuRow(queryCpu);
+            cpuInput.value = matchedCpuRow
+                ? getCleanVal(matchedCpuRow, ['CPU型號'])
+                : getCpuTierValue(queryCpu);
             cpuInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
 

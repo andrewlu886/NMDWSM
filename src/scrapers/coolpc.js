@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { matchesSearchKeyword } = require('../utils/search-keyword');
 
 async function scrape(keyword) {
   try {
@@ -20,7 +21,7 @@ async function scrape(keyword) {
 
     $('option').each((_index, element) => {
       const text = $(element).text();
-      if (text.toLowerCase().includes(keyword.toLowerCase())) {
+      if (matchesSearchKeyword(text, keyword)) {
         const priceMatch = text.match(/\$(\d+)/);
         results.push({
           platform: '原價屋',

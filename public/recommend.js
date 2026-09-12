@@ -3,6 +3,11 @@
     const submitButton = document.getElementById('recommend-submit');
     const resultDisplay = document.getElementById('result-display');
     const searchInput = document.getElementById('site-search');
+    const productTypeSelect = document.getElementById('productType');
+    const usageField = document.getElementById('usage-field');
+    const usageSelect = document.getElementById('usage');
+    const componentTypeField = document.getElementById('component-type-field');
+    const componentTypeSelect = document.getElementById('componentType');
 
     function goToPriceSearch() {
         const keyword = searchInput.value.trim();
@@ -21,8 +26,31 @@
         return element;
     }
 
-    function renderResults(result, budget, usage, productType) {
+    function getCalculatorUrl(item) {
+        const knownModel = (value) => value && value !== 'UNKNOWN' ? value : '';
+        const params = new URLSearchParams({
+            gpu: knownModel(item.gpu),
+            cpu: knownModel(item.cpu)
+        });
+        return `/tools.html?${params.toString()}`;
+    }
+
+    function syncRequirementFields() {
+        const isComponent = productTypeSelect.value === 'component';
+        usageField.hidden = isComponent;
+        usageSelect.disabled = isComponent;
+        componentTypeField.hidden = !isComponent;
+        componentTypeSelect.disabled = !isComponent;
+        componentTypeSelect.required = isComponent;
+    }
+
+    productTypeSelect.addEventListener('change', syncRequirementFields);
+    syncRequirementFields();
+
+    function renderResults(result, budget, usage, productType, componentType) {
         resultDisplay.replaceChildren();
+        const calculatorLink = document.querySelector('.recommend-calculator-link');
+        calculatorLink.href = '/tools';
 
         if (usage === 'gaming' && productType !== 'component' && budget < 30000) {
             addTextElement(
@@ -38,6 +66,9 @@
             empty.setAttribute('role', 'status');
             return;
         }
+
+        // 上方的捷徑預設帶入第一筆推薦，每張卡片則帶入各自的型號。
+        calculatorLink.href = getCalculatorUrl(result.recommendations[0]);
 
         const list = document.createElement('div');
         list.className = 'recommend-result-list';
@@ -63,12 +94,19 @@
 
             const tags = document.createElement('div');
             tags.className = 'recommend-tags';
-            const specs = [
-                `CPU：${item.cpu || '未提供'}`,
-                `GPU：${item.gpu || '未提供'}`,
-                `RAM：${item.ram && item.ram !== 'UNKNOWN' ? item.ram : '未提供'}`,
-                `系統：${item.os && item.os !== 'UNKNOWN' ? item.os : '未提供'}`
-            ];
+            let specs;
+            if (productType === 'component') {
+                specs = componentType === 'cpu'
+                    ? [`CPU：${item.cpu}`]
+                    : [`GPU：${item.gpu}`];
+            } else {
+                specs = [
+                    `CPU：${item.cpu && item.cpu !== 'UNKNOWN' ? item.cpu : '未提供'}`,
+                    `GPU：${item.gpu && item.gpu !== 'UNKNOWN' ? item.gpu : '未提供'}`,
+                    `RAM：${item.ram && item.ram !== 'UNKNOWN' ? item.ram : '未提供'}`,
+                    `系統：${item.os && item.os !== 'UNKNOWN' ? item.os : '未提供'}`
+                ];
+            }
             specs.forEach((spec) => addTextElement(tags, 'span', 'recommend-tag', spec));
             card.appendChild(tags);
 
@@ -77,7 +115,7 @@
 
             const toolsLink = document.createElement('a');
             toolsLink.className = 'recommend-tools-link';
-            toolsLink.href = `/tools.html?gpu=${encodeURIComponent(item.gpu || '')}&cpu=${encodeURIComponent(item.cpu || '')}`;
+            toolsLink.href = getCalculatorUrl(item);
             toolsLink.target = '_blank';
             toolsLink.rel = 'noopener noreferrer';
             toolsLink.textContent = '計算整機建議瓦數';
@@ -94,11 +132,17 @@
         event.preventDefault();
 
         const budget = Number(document.getElementById('budget').value);
-        const usage = document.getElementById('usage').value;
-        const productType = document.getElementById('productType').value;
+        const productType = productTypeSelect.value;
+        const usage = usageSelect.disabled ? '' : usageSelect.value;
+        const componentType = productType === 'component' ? componentTypeSelect.value : '';
 
         if (!Number.isFinite(budget) || budget <= 0) {
             document.getElementById('budget').focus();
+            return;
+        }
+
+        if (productType === 'component' && !componentType) {
+            componentTypeSelect.focus();
             return;
         }
 
@@ -110,11 +154,13 @@
             const response = await fetch('/api/recommend', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ budget, usage, productType })
+                body: JSON.stringify(productType === 'component'
+                    ? { budget, productType, componentType }
+                    : { budget, usage, productType })
             });
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            renderResults(await response.json(), budget, usage, productType);
+            renderResults(await response.json(), budget, usage, productType, componentType);
         } catch (error) {
             console.error('推薦服務錯誤：', error);
             resultDisplay.innerHTML = '<div class="recommend-error">目前無法取得推薦資料，請確認網站伺服器正在運作，稍後再試一次。</div>';

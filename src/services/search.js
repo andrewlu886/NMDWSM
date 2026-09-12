@@ -1,4 +1,5 @@
 const { scrapePlatforms } = require('../scrapers');
+const { normalizeSearchKeyword } = require('../utils/search-keyword');
 
 const SYNONYM_GROUPS = Object.freeze([
   ['w11', 'win11', 'windows11', 'windows 11'],
@@ -75,12 +76,17 @@ function filterSearchResults(products, options) {
 
 async function searchProducts(options, dependencies = {}) {
   const scrape = dependencies.scrapePlatforms || scrapePlatforms;
-  const products = await scrape(options.keyword, options.platforms || 'all');
-  return filterSearchResults(products, options);
+  const normalizedOptions = {
+    ...options,
+    keyword: normalizeSearchKeyword(options.keyword)
+  };
+  const products = await scrape(normalizedOptions.keyword, normalizedOptions.platforms || 'all');
+  return filterSearchResults(products, normalizedOptions);
 }
 
 module.exports = {
   SYNONYM_GROUPS,
+  normalizeSearchKeyword,
   expandExcludeWords,
   parsePrice,
   filterSearchResults,
