@@ -16,6 +16,7 @@
             text-align: center;
             transition: background-color 0.2s ease, transform 0.1s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
         
         .ai-valuation-btn:hover {
@@ -32,6 +33,21 @@
             display: block;
             width: fit-content;
         }
+
+        /* 建議問題的特殊樣式 */
+        .suggestion-btn {
+            background-color: #f3f4f6;
+            color: #374151 !important;
+            border: 1px solid #d1d5db;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .suggestion-btn:hover {
+            background-color: #e5e7eb;
+            color: #1f2937 !important;
+        }
     `;
     document.head.appendChild(style);
 
@@ -40,12 +56,12 @@
     
     // 1. 修改 HTML：渲染 UI 結構
     widget.innerHTML = `
-        <section class="ai-chat-panel" id="ai-chat-panel" aria-label="AI 客服助手" aria-hidden="true">
+        <section class="ai-chat-panel" id="ai-chat-panel" aria-label="網站導遊" aria-hidden="true">
             <header class="ai-chat-header">
                 <div class="ai-chat-heading">
-                    <span class="ai-chat-avatar" aria-hidden="true">AI</span>
+                    <span class="ai-chat-avatar" aria-hidden="true">專業</span>
                     <div>
-                        <strong>AI 智能客服</strong>
+                        <strong> 網站導遊</strong>
                         <span style="color: #4ade80;"><i aria-hidden="true">●</i> 為您效勞</span>
                     </div>
                 </div>
@@ -54,8 +70,16 @@
 
             <div class="ai-chat-messages" aria-live="polite">
                 <div class="ai-chat-message assistant">
-                    <span class="ai-chat-message-avatar" aria-hidden="true">AI</span>
-                    <p>您好！我是網站的 AI 客服助手，請問有什麼我可以幫忙的嗎？</p>
+                    <span class="ai-chat-message-avatar" aria-hidden="true">專業</span>
+                    <div class="message-content">
+                        <p>您好！我是網站的內建客服助手，請問有什麼我可以幫忙的嗎？</p>
+                        <p style="font-size: 13px; color: #666; margin-top: 8px;">您可以試著點擊下方按鈕，或是在聊天欄直接輸入問題：</p>
+                        <div class="suggestions-container" style="margin-top: 8px;">
+                            <button class="ai-valuation-btn suggestion-btn" data-query="我想估價顯示卡" type="button">我想估價顯示卡</button>
+                            <button class="ai-valuation-btn suggestion-btn" data-query="查詢最近的硬體行情" type="button">查詢最近的硬體行情</button>
+                            <button class="ai-valuation-btn suggestion-btn" data-query="我要計算電源供應器瓦數" type="button">我要計算電源供應器瓦數</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -83,6 +107,15 @@
 
     // 記錄對話歷史的陣列
     let chatHistory = [];
+
+    // --- 綁定建議問題按鈕的點擊事件 ---
+    document.querySelectorAll('.suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const query = e.target.getAttribute('data-query');
+            input.value = query;
+            form.requestSubmit(); // 點擊後直接送出
+        });
+    });
 
     function setOpen(isOpen) {
         widget.classList.toggle('is-open', isOpen);
@@ -153,7 +186,7 @@
         // 顯示「思考中...」提示
         const loadingMessage = document.createElement('div');
         loadingMessage.className = 'ai-chat-message assistant';
-        loadingMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span><p class="loading-text">思考中...</p>';
+        loadingMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">專業</span><p class="loading-text">思考中...</p>';
         messages.appendChild(loadingMessage);
         messages.scrollTop = messages.scrollHeight;
 
@@ -199,10 +232,9 @@
                 
                 let safeHTML = escapeHTML(data.answer);
                 
-                // 【已經修改的區塊】：移除了 target="_blank" 以實現網頁內跳轉
                 safeHTML = safeHTML.replace(
-                    /\[([^\]]+)\]\(([^)]+)\)/g, 
-                    '<a href="$2" class="ai-valuation-btn">$1</a>'
+                  /\[([^\]]+)\]\(([^)]+)\)/g, 
+                   '<a href="$2" class="ai-valuation-btn">$1</a>'
                 );
 
                 aiText.innerHTML = safeHTML;
@@ -216,7 +248,7 @@
                 aiText.textContent = `⚠️ 發生錯誤：${errText}`;
                 chatHistory.pop(); 
             }
-            aiMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span>';
+            aiMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">專業</span>';
             aiMessage.appendChild(aiText);
             messages.appendChild(aiMessage);
 
@@ -230,7 +262,7 @@
             const errorMessage = document.createElement('div');
             errorMessage.className = 'ai-chat-message assistant';
             const errText = (error && error.message) ? `⚠️ 無法連線到伺服器：${error.message}` : '⚠️ 無法連線到伺服器，請確認網路或稍後再試。';
-            errorMessage.innerHTML = `<span class="ai-chat-message-avatar" aria-hidden="true">AI</span><p>${errText}</p>`;
+            errorMessage.innerHTML = `<span class="ai-chat-message-avatar" aria-hidden="true">專業</span><p>${errText}</p>`;
             messages.appendChild(errorMessage);
         } finally {
             input.disabled = false;

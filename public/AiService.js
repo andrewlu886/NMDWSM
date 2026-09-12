@@ -1,18 +1,125 @@
-// --- AiService.js AI客服實作
+// --- AiService.js (NLP.js 輕量版) ---
 const fs = require('fs');
 const path = require('path');
+
+let NlpManager;
+let manager;
+
+try {
+    const nlp = require('node-nlp');
+    NlpManager = nlp.NlpManager;
+    manager = new NlpManager({ languages: ['zh'], forceNER: true });
+} catch (error) {
+    console.warn('⚠️ node-nlp 未安裝或無法載入，AIService 轉為關鍵字型備援回應。');
+}
+
+let isModelTrained = false;
+
+function fallbackAnswerForUserMessage(userMessage) {
+    const text = String(userMessage || '').trim();
+    const normalized = text.toLowerCase();
+
+    // --- 新增：打招呼的關鍵字判斷 ---
+    if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安/.test(normalized)) {
+        return '您好！我是網站的專屬導遊，有什麼電腦零件估價或行情查詢的需求，都可以問我喔！';
+    }
+
+    // --- 新增：感謝與道別的關鍵字判斷 ---
+    if (/謝謝|感謝|感恩|拜拜|再見|掰掰/.test(normalized)) {
+        return '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！';
+    }
+
+    if (/估價|價錢|價格|價格估算|幾錢|多少/.test(normalized)) {
+        return '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)';
+    }
+
+    if (/行情|市價|市場價格|價格查詢|買賣|價格/.test(normalized)) {
+        return '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)';
+    }
+
+    if (/瓦數|電源|供應器|電供/.test(normalized)) {
+        return '若需計算電源供應器瓦數：[點此前往瓦數計算工具](/tools)';
+    }
+
+    if (/手機|平板|筆電|筆記型電腦/.test(normalized)) {
+        return '非常抱歉，目前我們僅針對電腦零件提供估價喔！[點此前往零件估價工具](/valuation)';
+    }
+
+    // --- 修改：更人性化的兜底回覆 ---
+    return '不好意思，這部分超出了我的專業範圍😅。我目前主要擅長電腦零件的估價與行情查詢，您要不要試試看問我這類的問題呢？';
+}
+
+// 定義並訓練對話模型
+async function trainNlpModel() {
+    if (!manager || isModelTrained) return;
+
+    // --- 新增：打招呼意圖 ---
+    manager.addDocument('zh', '你好', 'intent.greeting');
+    manager.addDocument('zh', '您好', 'intent.greeting');
+    manager.addDocument('zh', '嗨', 'intent.greeting');
+    manager.addDocument('zh', '哈囉', 'intent.greeting');
+    manager.addDocument('zh', '有人在嗎', 'intent.greeting');
+    manager.addDocument('zh', '早安', 'intent.greeting');
+    manager.addDocument('zh', '午安', 'intent.greeting');
+    manager.addDocument('zh', '晚安', 'intent.greeting');
+    manager.addAnswer('zh', 'intent.greeting', '您好！我是網站的專屬導遊，有什麼電腦零件估價或行情查詢的需求，都可以問我喔！');
+
+    // --- 新增：感謝與道別意圖 ---
+    manager.addDocument('zh', '謝謝', 'intent.thanks');
+    manager.addDocument('zh', '感謝', 'intent.thanks');
+    manager.addDocument('zh', '感恩', 'intent.thanks');
+    manager.addDocument('zh', '拜拜', 'intent.thanks');
+    manager.addDocument('zh', '再見', 'intent.thanks');
+    manager.addDocument('zh', '掰掰', 'intent.thanks');
+    manager.addAnswer('zh', 'intent.thanks', '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！');
+
+    // 1. 零件估價意圖
+    manager.addDocument('zh', '我想估價', 'intent.valuation');
+    manager.addDocument('zh', '顯示卡', 'intent.valuation');
+    manager.addDocument('zh', 'CPU', 'intent.valuation');
+    manager.addDocument('zh', 'GPU', 'intent.valuation');
+    manager.addDocument('zh', '主機板', 'intent.valuation');
+    manager.addDocument('zh', '滑鼠鍵盤', 'intent.valuation');
+    manager.addDocument('zh', '電腦零件', 'intent.valuation');
+    manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
+
+    // 2. 市價查詢意圖
+    manager.addDocument('zh', '市場價格', 'intent.scrape');
+    manager.addDocument('zh', '市價', 'intent.scrape');
+    manager.addDocument('zh', '行情', 'intent.scrape');
+    manager.addAnswer('zh', 'intent.scrape', '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)');
+
+    // 3. 瓦數計算意圖
+    manager.addDocument('zh', '瓦數計算', 'intent.tools');
+    manager.addDocument('zh', '電源供應器', 'intent.tools');
+    manager.addDocument('zh', '電供', 'intent.tools');
+    manager.addAnswer('zh', 'intent.tools', '若需計算電源供應器瓦數：[點此前往瓦數計算工具](/tools)');
+
+    // 4. 不支援的產品 (邊界管控)
+    manager.addDocument('zh', '手機', 'intent.unsupported');
+    manager.addDocument('zh', '平板', 'intent.unsupported');
+    manager.addDocument('zh', '筆電', 'intent.unsupported');
+    manager.addDocument('zh', '筆記型電腦', 'intent.unsupported');
+    manager.addAnswer('zh', 'intent.unsupported', '非常抱歉，目前我們僅針對電腦零件提供估價喔！[點此前往零件估價工具](/valuation)');
+
+    try {
+        await manager.train();
+        manager.save();
+        isModelTrained = true;
+        console.log('✅ 輕量級 NLP 模型訓練完成');
+    } catch (error) {
+        console.warn('⚠️ NLP 模型訓練失敗，將使用詞彙備援回應。');
+        isModelTrained = true;
+    }
+}
 
 function parseJsonBody(req) {
     return new Promise((resolve, reject) => {
         let body = '';
         req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
-            try {
-                resolve(body ? JSON.parse(body) : {});
-            } catch (err) {
-                console.error('❌ 無法解析 incoming JSON，raw body:', body);
-                reject(err);
-            }
+            try { resolve(body ? JSON.parse(body) : {}); } 
+            catch (err) { resolve({}); }
         });
         req.on('error', reject);
     });
@@ -27,172 +134,47 @@ async function handle(req, res) {
     try {
         const body = await parseJsonBody(req);
         const rawMessages = Array.isArray(body.messages) ? body.messages : [];
+        
+        // 取得使用者最後一句話作為 NLP 的判斷依據
+        const userMessage = [...rawMessages].reverse().find(m => m.role === 'user')?.content || '';
 
-        const rawGeminiKey = process.env.GEMINI_API_KEY || '';
-        const geminiKey = rawGeminiKey.replace(/^"|"$/g, '').trim(); 
-
-        let envModel = process.env.GEMINI_MODEL || process.env.GEMINI_MODEL_NAME || 'gemini-3.6-flash';
-        if (envModel.includes('2.5') || envModel.includes('mini')) {
-            envModel = 'gemini-3.6-flash';
-        }
-        const geminiModel = envModel;
-
-        const messages = [
-            { 
-                role: 'system', 
-                content: `你是一位專業、親切的電腦產品二手估價平台 AI 客服助手。
-                    你的任務是協助使用者使用估價工具等相關問題。
-
-                    【核心守則】
-                    1. 語氣保持同理心與耐心，避免生硬的機器人官方用語。
-                    2. 絕對邊界管控（最優先）：我們的服務範圍僅限於「電腦零件」之估價、市價查詢與瓦數計算。若使用者輸入的內容與電腦硬體完全無關、屬於胡鬧、惡作劇或日常聊天（例如詢問食物、工具、非電腦類物品等），請直接且禮貌地拒絕，嚴禁提及任何平台工具或推薦任何產品。
-                    3. 拒絕格式：針對無關問題，請統一簡短回覆：「非常抱歉，本系統僅提供電腦零件相關之估價與市價查詢服務，我無法回答此類問題。」，不要多做解釋或延伸。
-                    4. 資訊補全：當用戶提供的估價資訊不完整時，請勿直接給出估價，應主動引導用戶提供具體細節（如：品牌、型號、使用狀況）。
-                    5. 預期管理：當估價與用戶預期不符時，請優先安撫情緒，並委婉說明這僅是基於市場大數據的初步估算，僅供參考。
-                    6. 操作引導：當用戶詢問如何使用估價工具或查詢市價時，請以條列式提供簡單明瞭的步驟，避免艱澀術語，並務必附上對應的功能導航連結。
-                    7. 準確性限制：避免提供不正確或捏造的行情數據；若遇到無法判斷的極端狀況，請建議用戶前往市價查詢頁面查看實際市場刊登價。
-
-                    【功能導航觸發規則】
-                    當用戶提到要估算特定產品，或詢問如何使用特定工具時，請務必在回答尾端加上對應的專屬連結，格式如下：
-                    - 若提及「顯示卡」、「CPU」、「GPU」、「主機板」、「滑鼠」、「鍵盤」或「電腦零件」：[點此前往零件估價工具](/valuation)
-                    - 若提及「市場價格」、「市價」或「行情」：[點此前往市價查詢](/scrape)
-                    - 若提及「手機」或「平板」或「筆電」或「筆記型電腦」：委婉告知目前僅針對電腦零件估價，並務必附上連結：[點此前往零件估價工具](/valuation)
-                    - 若提及瓦數計算或電源供應器等相關問題：[點此前往瓦數計算工具](/tools)
-
-                    【輸出限制】
-                    - 除了上述的導航連結格式外，不要使用其他特殊符號渲染回答。
-                    - 回答請盡量控制在 100 字以內，保持簡明扼要。
-                    - 操作步驟請直接使用條列式呈現。`
-            }
-        ];
-
-        rawMessages.forEach(m => {
-            if (m.role === 'user' || m.role === 'assistant') {
-                const text = String(m.content || '').trim();
-                if (text) messages.push({ role: m.role, content: text });
-            }
-        });
-
-        if (messages.length <= 1) {
+        if (!userMessage) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({ success: false, message: '請提供有效的訊息內容' }));
         }
 
-        const timeoutMs = Number(process.env.AI_TIMEOUT_MS || process.env.GEMINI_TIMEOUT_MS || 30000);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-            console.warn(`⏱️ AI request timed out after ${timeoutMs}ms, aborting`);
-            controller.abort();
-        }, timeoutMs);
+        // 確保模型已經訓練完畢
+        await trainNlpModel();
 
-        if (!geminiKey) {
-            clearTimeout(timeoutId);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ success: false, message: '伺服器未設定 GEMINI_API_KEY' }));
-        }
+        let answer = fallbackAnswerForUserMessage(userMessage);
 
-        let endpoint;
-        let bodyPayload;
-        let headers;
-        try {
-            endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiKey)}`;
-
-            const systemInstruction = {
-                parts: [{ text: messages.find(m => m.role === 'system')?.content || '' }]
-            };
-
-            const contents = messages
-                .filter(m => m.role !== 'system')
-                .map(m => ({
-                    role: m.role === 'assistant' ? 'model' : 'user',
-                    parts: [{ text: String(m.content || '') }]
-                }));
-
-            bodyPayload = {
-                system_instruction: systemInstruction,
-                contents: contents
-            };
-
-            headers = { 'Content-Type': 'application/json' };
-
-            let r = await fetch(endpoint, {
-                method: 'POST',
-                headers,
-                signal: controller.signal,
-                body: JSON.stringify(bodyPayload)
-            });
-
-            const text = await r.text();
-            let payload = {};
-            try { payload = text ? JSON.parse(text) : {}; } catch { payload = {}; }
-
-            if (!r.ok) {
-                console.error('❌ Gemini Error Detail:', text);
-                const errMsg = payload?.error?.message || payload?.message || `Gemini API 請求失敗 (status ${r.status})`;
-                clearTimeout(timeoutId);
-                res.writeHead(502, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: errMsg }));
-            }
-
-            const answer = payload?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '抱歉，AI 沒回覆內容。';
-            clearTimeout(timeoutId);
-
+        if (manager) {
             try {
-                const userMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '未知問題';
-                const timeString = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
-                const logPath = path.join(__dirname, 'chat_logs.csv');
-                const csvLine = `${escapeCSV(timeString)},${escapeCSV(userMessage)},${escapeCSV(answer)}\n`;
-                if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, '\uFEFF時間,使用者問題,AI回答\n');
-                fs.appendFile(logPath, csvLine, err => { if (err) console.error('⚠️ 寫入 CSV 失敗:', err); });
-            } catch (e) { console.error('CSV error', e); }
-
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ success: true, answer }));
-        } catch (err) {
-            clearTimeout(timeoutId);
-            console.error('❌ Gemini AiService request error:', err);
-            if (err?.name === 'AbortError') {
-                const retryTimeout = Number(process.env.AI_RETRY_TIMEOUT_MS || 15000);
-                try {
-                    const retryController = new AbortController();
-                    const retryTimeoutId = setTimeout(() => retryController.abort(), retryTimeout);
-                    const retryEndpoint = endpoint || `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiKey)}`;
-                    const r2 = await fetch(retryEndpoint, {
-                        method: 'POST',
-                        headers,
-                        signal: retryController.signal,
-                        body: JSON.stringify(bodyPayload)
-                    });
-                    clearTimeout(retryTimeoutId);
-                    const text2 = await r2.text();
-                    let payload2 = {};
-                    try { payload2 = text2 ? JSON.parse(text2) : {}; } catch { payload2 = {}; }
-
-                    if (!r2.ok) {
-                        const errMsg2 = payload2?.error?.message || payload2?.message || `Gemini API retry 請求失敗 (status ${r2.status})`;
-                        res.writeHead(502, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ success: false, message: errMsg2 }));
-                    }
-
-                    const answer2 = payload2?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '抱歉，AI 沒回覆內容。';
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: true, answer: answer2 }));
-                } catch (err2) {
-                    if (err2?.name === 'AbortError') {
-                        res.writeHead(504, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ success: false, message: 'AI 伺服器回應超時，請稍後再試。' }));
-                    }
-                    res.writeHead(502, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: err2?.message || 'Gemini API retry 錯誤' }));
-                }
+                const response = await manager.process('zh', userMessage);
+                answer = response.answer || answer;
+            } catch (error) {
+                console.warn('⚠️ NLP 執行失敗，改用關鍵字備援回答。');
+                answer = fallbackAnswerForUserMessage(userMessage);
             }
-            res.writeHead(502, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ success: false, message: err?.message || 'Gemini API 請求錯誤' }));
         }
+
+        // 寫入 CSV 紀錄
+        try {
+            const timeString = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+            const logPath = path.join(__dirname, 'chat_logs.csv');
+            const csvLine = `${escapeCSV(timeString)},${escapeCSV(userMessage)},${escapeCSV(answer)}\n`;
+            if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, '\uFEFF時間,使用者問題,AI回答\n');
+            fs.appendFile(logPath, csvLine, () => {});
+        } catch (e) {}
+
+        // 回傳給前端
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: true, answer }));
+
     } catch (error) {
-        console.error('❌ AiService global error:', error);
+        console.error('❌ NLP 服務發生錯誤:', error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ success: false, message: 'AI 聊天服務發生錯誤' }));
+        return res.end(JSON.stringify({ success: false, message: '系統錯誤' }));
     }
 }
 

@@ -71,6 +71,12 @@ test.after(async () => {
   }
 });
 
+test('AI 聊天服務依賴宣告與備援載入應可被正確驗證', async () => {
+  const pkg = require(path.join(projectRoot, 'package.json'));
+  assert.ok(pkg.dependencies && pkg.dependencies['node-nlp'], 'node-nlp 應該被宣告為正式依賴');
+  assert.doesNotThrow(() => require(path.join(projectRoot, 'public/AiService.js')), 'AiService 應該在缺少 node-nlp 時以備援方式載入');
+});
+
 test('保留的網站頁面可以開啟', async () => {
   for (const pathname of ['/', '/scrape', '/recommend.html', '/benchmark-instructions.html', '/tools', '/valuation.html', '/valuation']) {
     const response = await request(pathname);

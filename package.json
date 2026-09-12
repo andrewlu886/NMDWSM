@@ -15,6 +15,7 @@
     "axios": "^1.16.1",
     "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
+    "node-nlp": "^5.0.0-alpha.5",
     "puppeteer": "^23.0.0",
     "puppeteer-extra": "^3.3.4",
     "puppeteer-extra-plugin-stealth": "^2.11.1",
