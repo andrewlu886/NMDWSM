@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { matchesSearchKeyword } = require('../utils/search-keyword');
 
 async function scrape(keyword) {
   try {
@@ -15,7 +16,7 @@ async function scrape(keyword) {
     const results = [];
     const items = response.data.data || [];
     items.forEach((item) => {
-      if (item && item.prod_name && item.prod_name.toLowerCase().includes(keyword.toLowerCase())) {
+      if (item && item.prod_name && matchesSearchKeyword(item.prod_name, keyword)) {
         results.push({
           platform: '欣亞',
           name: item.prod_name,

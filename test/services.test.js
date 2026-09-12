@@ -6,10 +6,12 @@ const {
   scrapePlatforms
 } = require('../src/scrapers');
 const {
+  normalizeSearchKeyword,
   expandExcludeWords,
   filterSearchResults,
   searchProducts
 } = require('../src/services/search');
+const { matchesSearchKeyword } = require('../src/utils/search-keyword');
 const {
   getSearchKeyword,
   rankRecommendations,
@@ -59,6 +61,38 @@ test('搜尋服務傳遞平台選項並執行包含、排除與價格排序', as
   });
   assert.equal(receivedPlatforms, 'sinya,coolpc');
   assert.deepEqual(results.map((item) => item.price), ['4,000', '6,000']);
+});
+
+test('市價查詢會統一全形字元並移除所有空白', () => {
+  assert.equal(normalizeSearchKeyword('RTX4060'), 'RTX4060');
+  assert.equal(normalizeSearchKeyword(' RTX  4060\t\n'), 'RTX4060');
+  assert.equal(normalizeSearchKeyword('ＲＴＸ　４０６０'), 'RTX4060');
+  assert.equal(normalizeSearchKeyword('Intel Core i5-12400F'), 'IntelCorei5-12400F');
+});
+
+test('有空格與無空格的搜尋會送出相同關鍵字並產生相同結果', async () => {
+  const receivedKeywords = [];
+  const dependencies = {
+    scrapePlatforms: async (keyword) => {
+      receivedKeywords.push(keyword);
+      return [
+        product('RTX 4060 顯示卡', '9,000'),
+        product('RTX4060 顯卡風扇', '1,500')
+      ];
+    }
+  };
+  const baseOptions = { platforms: 'all', include: '', exclude: '', categories: '' };
+  const compactResults = await searchProducts({ ...baseOptions, keyword: 'RTX4060' }, dependencies);
+  const spacedResults = await searchProducts({ ...baseOptions, keyword: 'RTX 4060' }, dependencies);
+
+  assert.deepEqual(receivedKeywords, ['RTX4060', 'RTX4060']);
+  assert.deepEqual(spacedResults, compactResults);
+});
+
+test('商品名稱與關鍵字的本地比對會忽略空白', () => {
+  assert.equal(matchesSearchKeyword('ASUS GeForce RTX 4060 Ti 8GB', 'RTX4060Ti'), true);
+  assert.equal(matchesSearchKeyword('Intel Core i5-12400F 處理器', 'Intel Core i5-12400F'), true);
+  assert.equal(matchesSearchKeyword('RTX 4070 顯示卡', 'RTX4060'), false);
 });
 
 test('同義詞擴充與顯卡搜尋防呆會排除周邊及低價商品', () => {
