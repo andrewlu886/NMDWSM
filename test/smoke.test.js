@@ -44,7 +44,7 @@ test.before(async () => {
   });
   server.stderr.on('data', chunk => { serverError += chunk.toString(); });
 
-  for (let attempt = 0; attempt < 40; attempt += 1) {
+  for (let attempt = 0; attempt < 80; attempt += 1) {
     if (server.exitCode !== null) throw new Error(`Server exited early: ${serverError}`);
     try {
       const response = await request('/');
@@ -78,6 +78,22 @@ test('保留的網站頁面可以開啟', async () => {
   }
 });
 
+test('零件推薦 API 要求明確的 CPU 或 GPU 類別', async () => {
+  let response = await jsonRequest('POST', '/api/recommend', {
+    budget: 30000,
+    productType: 'component'
+  });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).message, /componentType/);
+
+  response = await jsonRequest('POST', '/api/recommend', {
+    budget: 30000,
+    productType: 'component',
+    componentType: 'ram'
+  });
+  assert.equal(response.status, 400);
+});
+
 test('跑分教學只從首頁內容進入，不出現在導覽列', () => {
   const pages = [
     'index.html', 'benchmark-instructions.html', 'recommend.html',
@@ -102,6 +118,7 @@ test('估價辨識區只顯示辨識到的型號', () => {
   assert.doesNotMatch(detectedSection[1], /保固資訊|資料匹配狀態/);
   assert.doesNotMatch(valuationPage, /ram-special-condition|特殊規格或損耗/);
   assert.match(valuationPage, /id="total-warranty-months"/);
+  assert.match(valuationPage, /id="cpu-warranty-months"[\s\S]*value="36"[\s\S]*value="60"/);
   assert.match(valuationPage, /id="elapsed-months"/);
   assert.doesNotMatch(valuationPage, /id="total-warranty-months"[^>]*value=/);
   assert.doesNotMatch(valuationPage, /data-category="(?:mouse|keyboard)"|>滑鼠<|>鍵盤</);
@@ -109,6 +126,8 @@ test('估價辨識區只顯示辨識到的型號', () => {
   assert.match(valuationPage, /id="condition-field" hidden/);
   const valuationScript = fs.readFileSync(path.join(projectRoot, 'public', 'valuation.js'), 'utf8');
   assert.match(valuationScript, /conditionField\.hidden = !isGpu/);
+  assert.match(valuationScript, /generation === 13 \|\| generation === 14/);
+  assert.match(valuationScript, /I\(\[579\]\)/);
 });
 
 test('估價採用使用者填寫的保固總月數與已使用月數', async () => {
@@ -269,7 +288,9 @@ test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
   assert.equal(response.status, 200);
   assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
   assert.equal(result.formulaInput.originalPrice, 10300);
-  assert.equal(result.price, Math.round(10300 * Math.exp(-0.108) * Math.exp(-0.022 * 12) * Math.exp(-0.004 * 12)));
+  const warrantyDecay = Array.from({ length: 12 }, (_, index) => 0.022 / (index + 1))
+    .reduce((sum, value) => sum + value, 0);
+  assert.equal(result.price, Math.round(10300 * Math.exp(-0.108) * Math.exp(-warrantyDecay) * Math.exp(-0.004 * 12)));
   assert.equal(result.calculation.profile, 'i7_12_ultra');
 
   response = await jsonRequest('POST', '/api/valuation', {

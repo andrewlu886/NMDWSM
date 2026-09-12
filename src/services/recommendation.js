@@ -10,9 +10,9 @@ const {
   getOsBonusScore
 } = require('./hardware');
 
-function getSearchKeyword(productType, usage) {
+function getSearchKeyword(productType, usage, componentType) {
   if (productType === 'laptop') return usage === 'gaming' ? '筆電' : '筆記型電腦';
-  if (productType === 'component') return usage === 'gaming' ? '顯示卡' : '處理器';
+  if (productType === 'component') return componentType === 'gpu' ? '顯示卡' : '處理器';
   return usage === 'gaming' ? '主機' : '套裝機';
 }
 
@@ -24,19 +24,21 @@ function rankRecommendations(options, products) {
     if (!item || !item.price) return;
     const cleanPrice = parseInt(String(item.price).replace(/[^\d]/g, ''), 10);
     if (Number.isNaN(cleanPrice) || cleanPrice === 0 || cleanPrice > options.budget || cleanPrice < minimumPrice) return;
-    if (options.usage === 'gaming' && item.name.includes('文書')) return;
+    if (options.productType !== 'component' && options.usage === 'gaming' && item.name.includes('文書')) return;
 
     const cpu = extractCPU(item.name);
     const gpu = extractGPU(item.name);
     const ram = extractRAM(item.name);
     const os = extractOS(item.name);
+    if (options.productType === 'component' && options.componentType === 'cpu' && cpu === 'UNKNOWN') return;
+    if (options.productType === 'component' && options.componentType === 'gpu' && gpu === 'UNKNOWN') return;
     if (options.productType !== 'component' && cpu === 'UNKNOWN' && gpu === 'UNKNOWN') return;
     if (options.usage === 'gaming' && options.productType !== 'component' && gpu === 'UNKNOWN') return;
 
     const cpuScore = getDynamicCPUScore(cpu);
     const gpuScore = getDynamicGPUScore(gpu);
     const baseScore = options.productType === 'component'
-      ? Math.max(cpuScore, gpuScore)
+      ? options.componentType === 'cpu' ? cpuScore : gpuScore
       : options.usage === 'gaming'
         ? (gpuScore * 0.75) + (cpuScore * 0.25)
         : (cpuScore * 0.75) + (gpuScore * 0.25);
@@ -81,7 +83,7 @@ function rankRecommendations(options, products) {
 
 async function getRecommendations(options, dependencies = {}) {
   const scrape = dependencies.scrapePlatforms || scrapePlatforms;
-  const keyword = getSearchKeyword(options.productType, options.usage);
+  const keyword = getSearchKeyword(options.productType, options.usage, options.componentType);
   const products = await scrape(keyword, RECOMMENDATION_PLATFORM_IDS);
   return rankRecommendations(options, products);
 }

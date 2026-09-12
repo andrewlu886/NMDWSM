@@ -143,6 +143,12 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const options = await parseJsonBody(req);
+            if (options.productType === 'component' && !['cpu', 'gpu'].includes(options.componentType)) {
+                return sendJson(res, 400, {
+                    success: false,
+                    message: '選擇電腦零件時，componentType 必須為 cpu 或 gpu'
+                });
+            }
             const result = await getRecommendations(options);
             sendJson(res, 200, result);
         } catch (error) {
