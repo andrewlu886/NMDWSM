@@ -351,9 +351,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.getElementById('result-empty').hidden = true;
             document.getElementById('result-content').hidden = false;
-            const warning = document.getElementById('test-warning');
-            warning.hidden = result.pricingMode === 'official';
-            warning.textContent = result.warning || '';
             document.getElementById('result-category').textContent = categoryNames[payload.category];
             document.getElementById('result-price').textContent = formatMoney(result.price);
             document.getElementById('result-range').textContent =
