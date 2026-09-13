@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node public/server.js",
     "test": "node --test test/smoke.test.js",
-    "test:unit": "node --test test/hardware.test.js test/services.test.js test/valuation.test.js",
+    "test:unit": "node --test test/hardware.test.js test/services.test.js test/valuation.test.js test/browser-page.test.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
