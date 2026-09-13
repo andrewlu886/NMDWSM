@@ -1,27 +1,31 @@
 const cheerio = require('cheerio');
 const puppeteer = require('./browser');
 const { loadProductPage } = require('./browser-page');
+const { fetchSearchHtml } = require('./search-html');
 
 async function scrape(keyword) {
-  console.log(`[Yahoo購物] 啟動隱形瀏覽器搜尋: ${keyword}`);
+  console.log(`[Yahoo購物] 搜尋: ${keyword}`);
   let browser;
   try {
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    });
-    const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
     const searchUrl = `https://tw.buy.yahoo.com/search/product?p=${encodeURIComponent(keyword)}`;
-    await loadProductPage(page, searchUrl, 'a[href*="/gdsale/"], a[href*="/activity/"]', 'Yahoo購物');
+    let content = await fetchSearchHtml(searchUrl, 'a[href*="/gdsale/"]', 'yahoo');
+    if (!content) {
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      });
+      const page = await browser.newPage();
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-    for (let index = 0; index < 3; index += 1) {
-      await page.evaluate(() => globalThis.scrollBy(0, 800));
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await loadProductPage(page, searchUrl, 'a[href*="/gdsale/"], a[href*="/activity/"]', 'Yahoo購物');
+
+      for (let index = 0; index < 3; index += 1) {
+        await page.evaluate(() => globalThis.scrollBy(0, 800));
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+
+      content = await page.content();
     }
-
-    const content = await page.content();
     const $ = cheerio.load(content);
     const results = [];
     $('a[href*="/gdsale/"], a[href*="/activity/"]').each((_index, element) => {

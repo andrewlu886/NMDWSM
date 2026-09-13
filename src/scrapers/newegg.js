@@ -1,22 +1,26 @@
 const cheerio = require('cheerio');
 const puppeteer = require('./browser');
 const { loadProductPage } = require('./browser-page');
+const { fetchSearchHtml } = require('./search-html');
 
 async function scrape(keyword) {
-  console.log(`[Newegg] 啟動隱形瀏覽器搜尋美國硬體: ${keyword}`);
+  console.log(`[Newegg] 搜尋美國硬體: ${keyword}`);
   let browser;
   try {
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--lang=en-US']
-    });
-    const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
     const searchUrl = `https://www.newegg.com/p/pl?d=${encodeURIComponent(keyword)}`;
-    await loadProductPage(page, searchUrl, '.item-cell .item-title', 'Newegg');
+    let content = await fetchSearchHtml(searchUrl, '.item-cell .item-title', 'newegg');
+    if (!content) {
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--lang=en-US']
+      });
+      const page = await browser.newPage();
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-    const content = await page.content();
+      await loadProductPage(page, searchUrl, '.item-cell .item-title', 'Newegg');
+
+      content = await page.content();
+    }
     const $ = cheerio.load(content);
     const results = [];
     $('.item-cell').each((_index, element) => {
