@@ -3,6 +3,6 @@ services:
     name: nmdwsm
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npx puppeteer browsers install chrome && npm rebuild sqlite3 --build-from-source
     startCommand: npm start
     autoDeploy: true

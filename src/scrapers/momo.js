@@ -17,11 +17,14 @@ async function scrape(keyword) {
     };
     const response = await axios.post(apiUrl, payload, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
         'Content-Type': 'application/json',
-        'Referer': 'https://www.momoshop.com.tw/'
+        'Origin': 'https://www.momoshop.com.tw',
+        'Referer': `https://www.momoshop.com.tw/search/searchShop.jsp?keyword=${encodeURIComponent(keyword)}`
       },
-      timeout: 5000
+      timeout: 10000
     });
 
     const results = [];
@@ -46,7 +49,15 @@ async function scrape(keyword) {
     console.log(`[Momo] 搜尋完成，找到 ${results.length} 筆`);
     return results.slice(0, 99);
   } catch (error) {
-    console.error(`Momo 爬蟲失敗: ${error.message}`);
+    const status = error.response?.status;
+    const responseData = error.response?.data;
+    const responsePreview = responseData
+      ? JSON.stringify(responseData).slice(0, 500)
+      : '';
+    console.error(
+      `[Momo] 爬蟲失敗${status ? ` (HTTP ${status})` : ''}: ${error.message}`
+      + (responsePreview ? ` | 回應: ${responsePreview}` : '')
+    );
     return [];
   }
 }
