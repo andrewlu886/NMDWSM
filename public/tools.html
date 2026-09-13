@@ -482,7 +482,7 @@
                     <option value="MSI 微星">MSI 微星</option>
                     <option value="GIGABYTE 技嘉">GIGABYTE 技嘉</option>
                     <option value="ASRock_BIOS">ASRock 華擎主機板</option>
-                    <option value="ASRock_顯卡驅動">ASRock 華擎顯卡</option>
+                    <option value="ASRock_其他驅動">ASRock 華擎其他驅動</option>
                     <option value="Intel">Intel</option>
                     <option value="AMD">AMD</option>
                     <option value="NVIDIA">NVIDIA</option>
@@ -809,7 +809,7 @@
         
         let recommendW = Math.ceil((totalW * 1.3) / 50) * 50;
         
-        if(recommendW < 400) recommendW = 400;
+        if(recommendW < 300) recommendW = 300;
 
         if(currentGpuPsu > recommendW) {
             recommendW = currentGpuPsu;
@@ -832,7 +832,6 @@
     function searchOfficial() {
         const brand = document.getElementById('brand-select').value;
         const model = document.getElementById('model-input').value.trim();
-        // 👇 1. 優先比對 Excel 裡的專屬驅動程式連結
         if (model && driverLinksData.length > 0) {
             // 轉小寫並去除空白，提高防呆配對成功率
             const searchStr = model.toLowerCase().replace(/\s+/g, '');
@@ -871,7 +870,7 @@
             targetUrl = `https://www.gigabyte.com/tw/Search?kw=${encodedModel}`;
         } else if (brand.includes("ASRock_BIOS")) {
             targetUrl = `https://www.asrock.com/support/index.tw.asp?cat=BIOS`;
-        } else if (brand.includes("ASRock_顯卡驅動")) {
+        } else if (brand.includes("ASRock_其他驅動")) {
             targetUrl = `https://www.asrock.com/support/index.tw.asp?cat=Drivers`;
         } else if (brand.includes("Intel")) {
             targetUrl = `https://www.intel.com.tw/content/www/tw/zh/search.html#q=${encodedModel}&cf-tabfilter=Downloads`;
