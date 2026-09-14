@@ -19,8 +19,8 @@ function fallbackAnswerForUserMessage(userMessage) {
     const text = String(userMessage || '').trim();
     const normalized = text.toLowerCase();
 
-    // 打招呼的關鍵字判斷
-    if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安/.test(normalized)) {
+    // 打招呼與身分詢問的關鍵字判斷
+    if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安|你是誰|你是啥|你是什麼|自我介紹|機器人|客服/.test(normalized)) {
         return '您好！我是網站的專屬導遊，有什麼電腦零件估價或行情查詢的需求，都可以問我喔！';
     }
 
@@ -29,7 +29,7 @@ function fallbackAnswerForUserMessage(userMessage) {
         return '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！';
     }
 
-    // --- 修改：加入裝機、推薦、組裝等關鍵字 ---
+    // 裝機、推薦、組裝等關鍵字
     if (/估價|價錢|價格|價格估算|幾錢|多少|裝機|組裝|推薦|菜單|配電腦/.test(normalized)) {
         return '需要估算電腦零件的價格或尋找裝機推薦嗎？請點擊這裡：[點此前往零件估價工具](/valuation)';
     }
@@ -47,14 +47,14 @@ function fallbackAnswerForUserMessage(userMessage) {
     }
 
     // 更人性化的兜底回覆
-    return '不好意思，這部分超出了我的專業範圍😅。我目前主要擅長電腦零件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？';
+    return '不好意思，這部分超出了我的專業範圍😅。我能幫助你跳轉到電腦零件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？';
 }
 
 // 定義並訓練對話模型
 async function trainNlpModel() {
     if (!manager || isModelTrained) return;
 
-    // 打招呼意圖
+    // 打招呼與身分詢問意圖
     manager.addDocument('zh', '你好', 'intent.greeting');
     manager.addDocument('zh', '您好', 'intent.greeting');
     manager.addDocument('zh', '嗨', 'intent.greeting');
@@ -63,6 +63,13 @@ async function trainNlpModel() {
     manager.addDocument('zh', '早安', 'intent.greeting');
     manager.addDocument('zh', '午安', 'intent.greeting');
     manager.addDocument('zh', '晚安', 'intent.greeting');
+    manager.addDocument('zh', '你是誰', 'intent.greeting');
+    manager.addDocument('zh', '你是啥', 'intent.greeting');
+    manager.addDocument('zh', '你是什麼', 'intent.greeting');
+    manager.addDocument('zh', '自我介紹一下', 'intent.greeting');
+    manager.addDocument('zh', '你是機器人嗎', 'intent.greeting');
+    manager.addDocument('zh', '你是客服嗎', 'intent.greeting');
+    manager.addDocument('zh', '所以你是啥', 'intent.greeting');
     manager.addAnswer('zh', 'intent.greeting', '您好！我是網站的專屬導遊，有什麼電腦零件估價或行情查詢的需求，都可以問我喔！');
 
     // 感謝與道別意圖
@@ -93,24 +100,30 @@ async function trainNlpModel() {
     manager.addDocument('zh', '幫我配電腦', 'intent.valuation');
     manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格或尋找裝機推薦嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
 
-    // 2. 市價查詢意圖
+    // 市價查詢意圖
     manager.addDocument('zh', '市場價格', 'intent.scrape');
     manager.addDocument('zh', '市價', 'intent.scrape');
     manager.addDocument('zh', '行情', 'intent.scrape');
     manager.addAnswer('zh', 'intent.scrape', '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)');
 
-    // 3. 瓦數計算意圖
+    // 瓦數計算意圖
     manager.addDocument('zh', '瓦數計算', 'intent.tools');
     manager.addDocument('zh', '電源供應器', 'intent.tools');
     manager.addDocument('zh', '電供', 'intent.tools');
     manager.addAnswer('zh', 'intent.tools', '若需計算電源供應器瓦數：[點此前往瓦數計算工具](/tools)');
 
-    // 4. 不支援的產品 (邊界管控)
+    // 不支援的產品 (邊界管控)
     manager.addDocument('zh', '手機', 'intent.unsupported');
     manager.addDocument('zh', '平板', 'intent.unsupported');
     manager.addDocument('zh', '筆電', 'intent.unsupported');
     manager.addDocument('zh', '筆記型電腦', 'intent.unsupported');
-    manager.addAnswer('zh', 'intent.unsupported', '非常抱歉，目前我們僅針對電腦零件提供估價喔！[點此前往零件估價工具](/valuation)');
+    manager.addAnswer('zh', 'intent.unsupported', '非常抱歉，目前我們僅針對電腦零組件提供估價喔！[點此前往零件估價工具](/valuation)');
+
+    // 無關意圖，邊界管控
+    manager.addDocument('zh', '誰是', 'intent.none');
+    manager.addDocument('zh', '這是什麼', 'intent.none');
+    manager.addDocument('zh', '天氣', 'intent.none');
+    manager.addAnswer('zh', 'intent.none', '不好意思，這部分超出了我的專業範圍😅。我能幫助你跳轉到電腦零組件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？');
 
     try {
         await manager.train();
@@ -161,14 +174,20 @@ async function handle(req, res) {
         if (manager) {
             try {
                 const response = await manager.process('zh', userMessage);
-                answer = response.answer || answer;
+                
+                // 若意圖為 None 或信心分數 (score) 低於 0.6，強制使用兜底回覆避免亂猜
+                if (response.intent === 'None' || response.score < 0.6) {
+                    answer = fallbackAnswerForUserMessage(userMessage);
+                } else {
+                    answer = response.answer || fallbackAnswerForUserMessage(userMessage);
+                }
             } catch (error) {
                 console.warn('⚠️ NLP 執行失敗，改用關鍵字備援回答。');
                 answer = fallbackAnswerForUserMessage(userMessage);
             }
         }
 
-        // 寫入 CSV 紀錄
+        // 寫入 CSV 的對話紀錄
         try {
             const timeString = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
             const logPath = path.join(__dirname, 'chat_logs.csv');

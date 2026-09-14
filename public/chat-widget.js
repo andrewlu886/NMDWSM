@@ -1,5 +1,5 @@
 (function () {
-    // --- 0. 動態注入 CSS 樣式 ---
+    // 動態注入 CSS 樣式
     const style = document.createElement('style');
     style.innerHTML = `
         /* 按鈕樣式：用於將 Markdown 連結轉換為視覺化導航按鈕 */
@@ -54,7 +54,7 @@
     const widget = document.createElement('div');
     widget.className = 'ai-chat-widget';
     
-    // 1. 修改 HTML：渲染 UI 結構
+    // 修改 HTML：渲染 UI 結構
     widget.innerHTML = `
         <section class="ai-chat-panel" id="ai-chat-panel" aria-label="網站導遊" aria-hidden="true">
             <header class="ai-chat-header">
@@ -108,7 +108,7 @@
     // 記錄對話歷史的陣列
     let chatHistory = [];
 
-    // --- 綁定建議問題按鈕的點擊事件 ---
+    // 綁定建議問題按鈕的點擊事件
     document.querySelectorAll('.suggestion-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const query = e.target.getAttribute('data-query');
@@ -163,7 +163,7 @@
 
         if (!text) return;
 
-        // --- 1. 顯示使用者的訊息 ---
+        // 顯示使用者的訊息
         const userMessage = document.createElement('div');
         userMessage.className = 'ai-chat-message user';
         const userText = document.createElement('p');
