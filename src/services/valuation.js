@@ -40,6 +40,7 @@ function getPeripheralBrandTier(brandInput) {
 }
 
 function calculatePeripheralValuation(input) {
+  const formulaConfig = getFormulaConfig(input);
   const originalPrice = Number(input.originalPrice);
   const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
   const usage = ['good', 'minor', 'heavy'].includes(input.details?.usageCondition)
@@ -53,7 +54,7 @@ function calculatePeripheralValuation(input) {
   }
 
   const tierKey = getPeripheralBrandTier(input.brand);
-  const tier = peripheralBrandTiers[tierKey];
+  const tier = formulaConfig.peripheralBrandTiers[tierKey];
   const startRatio = tier.startAppearance[appearance] + tier.startUsage[usage];
   const floorRatio = tier.floorAppearance[appearance] + tier.floorUsage[usage];
   const startPrice = originalPrice * startRatio;
@@ -102,7 +103,7 @@ function requireOriginalPrice(input) {
 function calculateCpuAndMotherboardValuation(input) {
   const originalPrice = requireOriginalPrice(input);
   const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
-  const monthlyDecayRate = 0.02;
+  const monthlyDecayRate = Number(getFormulaConfig(input).motherboard.monthlyDecayRate);
   return createResult(
     originalPrice * Math.exp(-monthlyDecayRate * elapsedMonths),
     'cpu_motherboard_exponential',
@@ -117,6 +118,19 @@ const intelCpuPricingProfiles = {
   i7_12_ultra: { k: 0.108, warrantyRate: 0.022, extendedWarrantyRate: 0.0196, warrantyDecay: 'harmonic', marketRate: 0.004, postWarrantyRate: 0.0016 },
   i9_12_ultra: { k: 0.09, warrantyRate: 0.013, extendedWarrantyRate: 0.0078, warrantyDecay: 'linear', marketRate: 0.001, postWarrantyRate: 0.004 }
 };
+
+function getFormulaConfig(input = {}) {
+  const stored = input.formulaConfig || {};
+  return {
+    conditionFactors: stored.conditionFactors || conditionFactors,
+    peripheralBrandTiers: stored.peripheralBrandTiers || peripheralBrandTiers,
+    motherboard: stored.motherboard || { monthlyDecayRate: 0.02 },
+    intelProfiles: stored.intelProfiles || intelCpuPricingProfiles,
+    amdGpu: stored.amdGpu || { baseMonthlyDecayRate: 0.020, generationFactor: 0.002, vramFactor: -0.0006 },
+    ram: stored.ram || { marketCorrection: [], monthlyDecayRate: -0.11, specialDamageFactor: 0.8 },
+    generic: stored.generic || { maxMonths: 120, monthlyAgeRate: 0.008, minimumAgeFactor: 0.2 }
+  };
+}
 
 function calculateWarrantyDecay(profile, warrantyRate, inWarrantyMonths) {
   if (profile.warrantyDecay !== 'harmonic') {
@@ -136,14 +150,14 @@ function calculateWarrantyDecay(profile, warrantyRate, inWarrantyMonths) {
   return decay;
 }
 
-function getIntelCpuPricingProfile(modelInput) {
+function getIntelCpuPricingProfile(modelInput, formulaProfiles = intelCpuPricingProfiles) {
   const model = String(modelInput || '').normalize('NFKC').toUpperCase();
   const ultraMatch = model.match(/CORE\s*ULTRA\s*([3579])/);
   if (ultraMatch) {
     const tier = Number(ultraMatch[1]);
-    if (tier === 5) return { id: 'i5_14_ultra', tier, generation: 'ultra', ...intelCpuPricingProfiles.i5_14_ultra };
-    if (tier === 7) return { id: 'i7_12_ultra', tier, generation: 'ultra', ...intelCpuPricingProfiles.i7_12_ultra };
-    if (tier === 9) return { id: 'i9_12_ultra', tier, generation: 'ultra', ...intelCpuPricingProfiles.i9_12_ultra };
+    if (tier === 5) return { id: 'i5_14_ultra', tier, generation: 'ultra', ...formulaProfiles.i5_14_ultra };
+    if (tier === 7) return { id: 'i7_12_ultra', tier, generation: 'ultra', ...formulaProfiles.i7_12_ultra };
+    if (tier === 9) return { id: 'i9_12_ultra', tier, generation: 'ultra', ...formulaProfiles.i9_12_ultra };
     return null;
   }
 
@@ -152,26 +166,26 @@ function getIntelCpuPricingProfile(modelInput) {
   const tier = Number(coreMatch[1]);
   const generation = Math.floor(Number(coreMatch[2]) / 1000);
   if (tier === 3 && generation >= 12 && generation <= 14) {
-    return { id: 'i3_12_14', tier, generation, ...intelCpuPricingProfiles.i3_12_14 };
+    return { id: 'i3_12_14', tier, generation, ...formulaProfiles.i3_12_14 };
   }
   if (tier === 5 && generation >= 12 && generation <= 13) {
-    return { id: 'i5_12_13', tier, generation, ...intelCpuPricingProfiles.i5_12_13 };
+    return { id: 'i5_12_13', tier, generation, ...formulaProfiles.i5_12_13 };
   }
   if (tier === 5 && generation >= 14) {
-    return { id: 'i5_14_ultra', tier, generation, ...intelCpuPricingProfiles.i5_14_ultra };
+    return { id: 'i5_14_ultra', tier, generation, ...formulaProfiles.i5_14_ultra };
   }
   if (tier === 7 && generation >= 12) {
-    return { id: 'i7_12_ultra', tier, generation, ...intelCpuPricingProfiles.i7_12_ultra };
+    return { id: 'i7_12_ultra', tier, generation, ...formulaProfiles.i7_12_ultra };
   }
   if (tier === 9 && generation >= 12) {
-    return { id: 'i9_12_ultra', tier, generation, ...intelCpuPricingProfiles.i9_12_ultra };
+    return { id: 'i9_12_ultra', tier, generation, ...formulaProfiles.i9_12_ultra };
   }
   return null;
 }
 
 function calculateIntelCpuValuation(input) {
   const originalPrice = requireOriginalPrice(input);
-  const profile = getIntelCpuPricingProfile(input.model);
+  const profile = getIntelCpuPricingProfile(input.model, getFormulaConfig(input).intelProfiles);
   if (!profile) return null;
 
   const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
@@ -223,9 +237,10 @@ function calculateAmdGpuValuation(input) {
     throw new TypeError('AMD 顯示卡定價參數不完整。');
   }
 
-  const monthlyDecayRate = 0.020
-    + 0.002 * (latestGeneration - generation)
-    - 0.0006 * (vramGb - 8);
+  const gpuFormula = getFormulaConfig(input).amdGpu;
+  const monthlyDecayRate = Number(gpuFormula.baseMonthlyDecayRate)
+    + Number(gpuFormula.generationFactor) * (latestGeneration - generation)
+    + Number(gpuFormula.vramFactor) * (vramGb - 8);
   const decayPrice = originalPrice
     * Math.exp(landingCoefficient)
     * Math.exp(-monthlyDecayRate * elapsedMonths);
@@ -245,19 +260,21 @@ function calculateAmdGpuValuation(input) {
 
 function calculateRamValuation(input) {
   const originalPrice = requireOriginalPrice(input);
+  const ramFormula = getFormulaConfig(input).ram;
   const elapsedMonths = Math.max(0, Math.floor(Number(input.elapsedMonths) || 0));
   let marketCorrection = 0;
-  if (elapsedMonths >= 1 && elapsedMonths <= 5) marketCorrection = 0.241;
-  else if (elapsedMonths >= 6 && elapsedMonths <= 8) marketCorrection = 0.465;
-  else if (elapsedMonths === 9) marketCorrection = 0.772;
-  else if (elapsedMonths >= 10) marketCorrection = 1.57;
+  const correctionRule = (ramFormula.marketCorrection || []).find((rule) => (
+    elapsedMonths >= Number(rule.minMonths) &&
+    (rule.maxMonths === null || elapsedMonths <= Number(rule.maxMonths))
+  ));
+  if (correctionRule) marketCorrection = Number(correctionRule.value);
 
   let decaySum = 0;
   for (let month = 1; month <= elapsedMonths; month += 1) {
-    decaySum += -0.11 / month;
+    decaySum += Number(ramFormula.monthlyDecayRate) / month;
   }
   const hasSpecialDamage = Boolean(String(input.details?.specialCondition || '').trim());
-  const damageFactor = hasSpecialDamage ? 0.8 : 1;
+  const damageFactor = hasSpecialDamage ? Number(ramFormula.specialDamageFactor) : 1;
   const price = originalPrice * Math.exp(marketCorrection) * Math.exp(decaySum) * damageFactor;
   return createResult(price, 'ram_sigma_decay', {
     originalPrice,
@@ -272,6 +289,7 @@ function calculateTestValuation(input) {
   if (['mouse', 'keyboard'].includes(input.category)) {
     return calculatePeripheralValuation(input);
   }
+  const formulaConfig = getFormulaConfig(input);
   const originalPrice = Number(input.originalPrice);
   const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
   if (!Number.isFinite(originalPrice) || originalPrice <= 0) {
@@ -279,8 +297,8 @@ function calculateTestValuation(input) {
   }
 
   // 僅供串接測試：正式公式完成後只需替換這個函式。
-  const ageFactor = Math.max(0.2, 1 - Math.min(elapsedMonths, 120) * 0.008);
-  const conditionFactor = conditionFactors[input.condition] || conditionFactors.good;
+  const ageFactor = Math.max(Number(formulaConfig.generic.minimumAgeFactor), 1 - Math.min(elapsedMonths, Number(formulaConfig.generic.maxMonths)) * Number(formulaConfig.generic.monthlyAgeRate));
+  const conditionFactor = formulaConfig.conditionFactors[input.condition] || formulaConfig.conditionFactors.good;
   const price = Math.max(0, Math.round(originalPrice * ageFactor * conditionFactor));
 
   return {

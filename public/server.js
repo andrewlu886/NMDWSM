@@ -237,6 +237,7 @@ const server = http.createServer(async(req, res) => {
                     matchLevel: 'user_input',
                     note: '保固期限由使用者輸入，最終仍以購買證明與原廠判定為準。'
                 };
+            const formulaConfig = await db.getValuationFormulaConfig();
             if (!resolved.gpuPricing && !resolved.cpuPricing && !resolved.referencePrice && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
                 return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
             }
@@ -252,7 +253,8 @@ const server = http.createServer(async(req, res) => {
                 isWarrantyExpired: warranty.isExpired,
                 extensionRegistered,
                 condition: String(payload.condition),
-                details: payload.details && typeof payload.details === 'object' ? payload.details : {}
+                details: payload.details && typeof payload.details === 'object' ? payload.details : {},
+                formulaConfig
             };
             if (resolved.gpuPricing) {
                 formulaInput.gpuPricing = {

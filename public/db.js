@@ -9,6 +9,7 @@ const {
   amdGpuPricingModels,
   intelCpuPricingModels
 } = require('../src/data/hardware-catalog');
+const { valuationFormulaRules } = require('../src/data/valuation-formulas');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nmdwsm.db');
 let db = null;
@@ -88,6 +89,14 @@ function initDatabase() {
           source_url TEXT NOT NULL,
           source_checked_at TEXT NOT NULL,
           FOREIGN KEY (hardware_model_id) REFERENCES hardware_models(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS valuation_formula_rules (
+          formula_key TEXT PRIMARY KEY,
+          category TEXT NOT NULL,
+          config_json TEXT NOT NULL,
+          source_name TEXT NOT NULL DEFAULT 'project-default',
+          updated_at TEXT NOT NULL
         );
 
         CREATE INDEX IF NOT EXISTS idx_hardware_models_category_normalized
@@ -287,6 +296,17 @@ async function seedHardwareCatalog() {
         ]
       );
     }
+
+    for (const [formulaKey, config] of Object.entries(valuationFormulaRules)) {
+      await runUpdate(
+        `INSERT INTO valuation_formula_rules
+         (formula_key, category, config_json, source_name, updated_at)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(formula_key) DO NOTHING`,
+        [formulaKey, formulaKey === 'conditionFactors' || formulaKey === 'peripheralBrandTiers' ? 'peripheral' : formulaKey === 'intelProfiles' ? 'cpu' : formulaKey === 'amdGpu' ? 'gpu' : formulaKey === 'motherboard' ? 'motherboard' : formulaKey === 'ram' ? 'ram' : 'generic', JSON.stringify(config), 'project-default', '2026-09-14']
+      );
+    }
+
     await seedImportedReferencePrices(runUpdate);
     await runUpdate('COMMIT');
   } catch (error) {
@@ -341,6 +361,18 @@ async function findHardwareModel({ category, modelId, model }) {
     .filter((candidate) => normalized.includes(candidate.normalized_model))
     .sort((a, b) => b.normalized_model.length - a.normalized_model.length)[0];
   return formatModel(row);
+}
+
+async function getValuationFormulaConfig() {
+  const rows = await runQuery('SELECT formula_key, config_json FROM valuation_formula_rules');
+  return rows.reduce((config, row) => {
+    try {
+      config[row.formula_key] = JSON.parse(row.config_json);
+    } catch (error) {
+      throw new Error(`估價規則資料格式錯誤：${row.formula_key}`);
+    }
+    return config;
+  }, {});
 }
 
 async function findGpuPricingModel(model) {
@@ -505,5 +537,6 @@ module.exports = {
   runQueryOne,
   runUpdate,
   HardwareCatalog,
+  getValuationFormulaConfig,
   normalizeHardwareText
 };
