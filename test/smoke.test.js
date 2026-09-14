@@ -204,7 +204,7 @@ test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
   assert.equal(response.status, 200);
   result = await response.json();
   const i5_12400 = result.data.find((item) => item.canonicalModel === 'Core i5-12400');
-  assert.equal(i5_12400.cpuPricing.referencePriceNtd, 6600);
+  assert.equal(i5_12400.cpuPricing.referencePriceNtd, 6250);
   assert.equal(i5_12400.cpuPricing.sourceName, '使用者提供的價格表');
   assert.equal(i5_12400.cpuPricing.sourceCheckedAt, '2026-09-09');
 
@@ -212,7 +212,27 @@ test('型號查詢涵蓋指定 CPU 與顯示卡世代', async () => {
   assert.equal(response.status, 200);
   result = await response.json();
   const i9_13900ks = result.data.find((item) => item.canonicalModel === 'Core i9-13900KS');
-  assert.equal(i9_13900ks.cpuPricing.referencePriceNtd, 25000);
+  assert.equal(i9_13900ks.cpuPricing.referencePriceNtd, 24900);
+
+  for (const [model, expectedPrice] of [
+    ['Core i3-12100', 4350],
+    ['Core i5-12400F', 5450],
+    ['Core i5-12600KF', 9150],
+    ['Core i7-12700F', 9990],
+    ['Core i9-12900K', 18300],
+    ['Core i3-13100', 4850],
+    ['Core i5-13400F', 6990],
+    ['Core i7-13700KF', 13500],
+    ['Core i7-13700K', 14000],
+    ['Core i9-13900K', 20400]
+  ]) {
+    response = await request(`/api/valuation/models?category=cpu&q=${encodeURIComponent(model)}&brand=Intel`);
+    assert.equal(response.status, 200);
+    result = await response.json();
+    const item = result.data.find((candidate) => candidate.canonicalModel === model);
+    assert.ok(item, model);
+    assert.equal(item.cpuPricing.referencePriceNtd, expectedPrice, model);
+  }
 
   response = await request('/api/valuation/models?category=cpu&q=Core%20i7-14700F&brand=Intel');
   assert.equal(response.status, 200);
@@ -293,10 +313,10 @@ test('同學的 CPU 與 RAM 公式可由 API 使用', async () => {
   let result = await response.json();
   assert.equal(response.status, 200);
   assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
-  assert.equal(result.formulaInput.originalPrice, 10300);
+  assert.equal(result.formulaInput.originalPrice, 10000);
   const warrantyDecay = Array.from({ length: 12 }, (_, index) => 0.022 / (index + 1))
     .reduce((sum, value) => sum + value, 0);
-  assert.equal(result.price, Math.round(10300 * Math.exp(-0.108) * Math.exp(-warrantyDecay) * Math.exp(-0.004 * 12)));
+  assert.equal(result.price, Math.round(10000 * Math.exp(-0.108) * Math.exp(-warrantyDecay) * Math.exp(-0.004 * 12)));
   assert.equal(result.calculation.profile, 'i7_12_ultra');
 
   response = await jsonRequest('POST', '/api/valuation', {
@@ -318,9 +338,33 @@ test('已收錄的 Intel CPU 會由後端採用新品參考價', async () => {
   });
   assert.equal(response.status, 200);
   const result = await response.json();
-  assert.equal(result.formulaInput.originalPrice, 6600);
-  assert.equal(result.hardware.cpuPricing.referencePriceNtd, 6600);
+  assert.equal(result.formulaInput.originalPrice, 6250);
+  assert.equal(result.hardware.cpuPricing.referencePriceNtd, 6250);
   assert.equal(result.pricingFormula, 'intel_cpu_segment_decay');
+});
+
+test('使用者修改自動填入的價格後會以修改值估價', async () => {
+  let response = await jsonRequest('POST', '/api/valuation', {
+    category: 'cpu', brand: 'Intel', model: 'Core i5-12400', originalPrice: 8000,
+    elapsedMonths: 12, totalWarrantyMonths: 36,
+    extensionRegistered: 'unknown', condition: 'good'
+  });
+  let result = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(result.formulaInput.originalPrice, 8000);
+  assert.equal(result.calculation.originalPrice, 8000);
+
+  response = await jsonRequest('POST', '/api/valuation', {
+    category: 'gpu', brand: '', model: 'AMD Radeon RX 9070 XT', originalPrice: 30000,
+    elapsedMonths: 12, totalWarrantyMonths: 36,
+    extensionRegistered: 'unknown', condition: 'good'
+  });
+  result = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(result.formulaInput.originalPrice, 30000);
+  assert.equal(result.formulaInput.gpuPricing.launchPriceNtd, 30000);
+  assert.equal(result.calculation.originalPrice, 30000);
+  assert.notEqual(result.price, 17605);
 });
 
 test('測試估價使用已過月份並回傳保固狀態', async () => {
