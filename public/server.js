@@ -193,6 +193,7 @@ const server = http.createServer(async(req, res) => {
             const brand = String(payload.brand || '').trim();
             const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram']);
             const originalPrice = Number(payload.originalPrice);
+            const hasSubmittedPrice = Number.isFinite(originalPrice) && originalPrice > 0;
             const submittedWarrantyMonths = payload.totalWarrantyMonths === undefined || payload.totalWarrantyMonths === ''
                 ? null
                 : Number(payload.totalWarrantyMonths);
@@ -254,13 +255,22 @@ const server = http.createServer(async(req, res) => {
                 details: payload.details && typeof payload.details === 'object' ? payload.details : {}
             };
             if (resolved.gpuPricing) {
-                formulaInput.gpuPricing = resolved.gpuPricing;
-                formulaInput.originalPrice = resolved.gpuPricing.launchPriceNtd;
+                formulaInput.gpuPricing = {
+                    ...resolved.gpuPricing,
+                    ...(hasSubmittedPrice ? { launchPriceNtd: originalPrice } : {})
+                };
+                formulaInput.originalPrice = hasSubmittedPrice
+                    ? originalPrice
+                    : resolved.gpuPricing.launchPriceNtd;
             } else if (resolved.cpuPricing) {
                 formulaInput.cpuPricing = resolved.cpuPricing;
-                formulaInput.originalPrice = resolved.cpuPricing.referencePriceNtd;
+                formulaInput.originalPrice = hasSubmittedPrice
+                    ? originalPrice
+                    : resolved.cpuPricing.referencePriceNtd;
             } else if (resolved.referencePrice) {
-                formulaInput.originalPrice = resolved.referencePrice.priceNtd;
+                formulaInput.originalPrice = hasSubmittedPrice
+                    ? originalPrice
+                    : resolved.referencePrice.priceNtd;
             }
 
             let pricingResult = null;

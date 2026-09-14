@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         originalPriceInput.value = item.cpuPricing.referencePriceNtd;
         originalPriceInput.dataset.autoFilled = 'cpu';
         originalPriceHint.textContent =
-            `已辨識 ${item.canonicalModel}，自動填入新品參考價 ${formatMoney(item.cpuPricing.referencePriceNtd)}（${item.cpuPricing.sourceName}，查價 ${item.cpuPricing.sourceCheckedAt}）。`;
+            `已辨識 ${item.canonicalModel}，自動填入新品參考價 ${formatMoney(item.cpuPricing.referencePriceNtd)}（${item.cpuPricing.sourceName}，查價 ${item.cpuPricing.sourceCheckedAt}）。可直接修改，估價會以欄位內價格計算。`;
         return true;
     }
 
@@ -115,14 +115,14 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceInput.dataset.autoFilled = 'reference';
             originalPriceLabel.textContent = price.basis === 'chipset_base'
                 ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
-            originalPriceHint.textContent = `${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）`;
+            originalPriceHint.textContent = `${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）。可直接修改，估價會以欄位內價格計算。`;
             return true;
         }
         if (applyCpuPrice(item)) return true;
         if (item.gpuPricing) {
             originalPriceInput.value = item.gpuPricing.launchPriceNtd;
             originalPriceInput.dataset.autoFilled = 'amd';
-            originalPriceHint.textContent = `已帶入 ${item.canonicalModel} 的模型發售原價 ${formatMoney(item.gpuPricing.launchPriceNtd)}。`;
+            originalPriceHint.textContent = `已帶入 ${item.canonicalModel} 的模型發售原價 ${formatMoney(item.gpuPricing.launchPriceNtd)}。可直接修改，估價會以欄位內價格計算。`;
             return true;
         }
         clearAutoFilledPrice();
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         originalPriceInput.value = matched.gpuPricing.launchPriceNtd;
         originalPriceInput.dataset.autoFilled = 'amd';
         originalPriceHint.textContent =
-            `已辨識 ${matched.canonicalModel}，自動填入新品參考價 ${formatMoney(matched.gpuPricing.launchPriceNtd)}。`;
+            `已辨識 ${matched.canonicalModel}，自動填入新品參考價 ${formatMoney(matched.gpuPricing.launchPriceNtd)}。可直接修改，估價會以欄位內價格計算。`;
         showDetected(matched);
     }
 
