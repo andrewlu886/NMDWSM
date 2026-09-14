@@ -6,9 +6,23 @@ const {
   scrapePlatforms
 } = require('../src/scrapers');
 const {
+  scrape: scrapeCoolpc,
+  buildCoolpcSearchUrl,
+  cleanCoolpcProductSearchText,
+  extractCoreProductIdentifier,
+  normalizeCoolpcProductUrl,
+  extractCoolpcProductUrl,
+  extractCoolpcSearchProducts,
+  findCoolpcDirectProductUrl
+} = require('../src/scrapers/coolpc');
+const cheerio = require('cheerio');
+const axios = require('axios');
+const {
   normalizeSearchKeyword,
   expandExcludeWords,
   filterSearchResults,
+  extractGpuFamily,
+  matchesGpuFamily,
   searchProducts
 } = require('../src/services/search');
 const { matchesSearchKeyword } = require('../src/utils/search-keyword');
@@ -21,6 +35,156 @@ const {
 function product(name, price, platform = '測試平台') {
   return { name, price, platform, url: 'https://example.com/item' };
 }
+
+test('原價屋搜尋網址會依關鍵字正確編碼', () => {
+  assert.equal(buildCoolpcSearchUrl('3060'), 'https://coolpc.com.tw/tw/?s=3060');
+  assert.equal(buildCoolpcSearchUrl('RTX 3060 顯示卡'), 'https://coolpc.com.tw/tw/?s=RTX%203060%20%E9%A1%AF%E7%A4%BA%E5%8D%A1');
+});
+
+test('原價屋商品網址只接受原價屋網域的有效連結', () => {
+  assert.equal(
+    normalizeCoolpcProductUrl('/tw/portfolio-items/rtx-3060'),
+    'https://coolpc.com.tw/tw/portfolio-items/rtx-3060'
+  );
+  assert.equal(
+    normalizeCoolpcProductUrl('https://www.coolpc.com.tw/tw/portfolio-items/rtx-3060'),
+    'https://www.coolpc.com.tw/tw/portfolio-items/rtx-3060'
+  );
+  assert.equal(normalizeCoolpcProductUrl('https://coolpc.com.tw/tw/product/rtx-3060'), null);
+  assert.equal(normalizeCoolpcProductUrl('https://example.com/item'), null);
+  assert.equal(normalizeCoolpcProductUrl('javascript:alert(1)'), null);
+  assert.equal(normalizeCoolpcProductUrl('https://coolpc.com.tw/evaluate.php'), null);
+});
+
+test('原價屋會依優先順序提取商品核心型號', () => {
+  assert.equal(extractCoreProductIdentifier('華碩 TUF Ryzen AI 9 465/RTX5060/32G FA401GM'), 'FA401GM');
+  assert.equal(extractCoreProductIdentifier('Acer Nitro ANV15-52-52CL RTX5060'), 'ANV15-52-52CL');
+  assert.equal(extractCoreProductIdentifier('華碩 DUAL-RTX5060-O8G-A 顯示卡'), 'DUAL-RTX5060-O8G-A');
+  assert.equal(extractCoreProductIdentifier('Intel Core i5-14450HX'), 'I514450HX');
+  assert.equal(extractCoreProductIdentifier('GeForce RTX 5060 Ti'), 'RTX5060TI');
+});
+
+test('原價屋搜尋頁只解析並去重正式商品連結', () => {
+  const products = extractCoolpcSearchProducts(`
+    <article id="post-1"><h2><a href="/tw/portfolio-items/asus-fa401gm/">ASUS FA401GM RTX5060 筆電</a></h2></article>
+    <a href="/tw/portfolio-items/asus-fa401gm/">重複連結</a>
+    <a href="https://example.com/item">外部連結</a>
+  `);
+  assert.equal(products.length, 1);
+  assert.equal(products[0].url, 'https://coolpc.com.tw/tw/portfolio-items/asus-fa401gm/');
+  assert.match(products[0].text, /FA401GM/);
+});
+
+test('原價屋只在核心型號唯一一致時使用商品直連', () => {
+  const searchProducts = [
+    { url: 'https://coolpc.com.tw/tw/portfolio-items/rtx5060/', text: 'ASUS RTX5060 8G 顯示卡' },
+    { url: 'https://coolpc.com.tw/tw/portfolio-items/rtx5060ti/', text: 'ASUS RTX5060 Ti 8G 顯示卡' }
+  ];
+  assert.equal(
+    findCoolpcDirectProductUrl('ASUS RTX5060 8G 顯示卡', searchProducts),
+    'https://coolpc.com.tw/tw/portfolio-items/rtx5060/'
+  );
+  assert.equal(
+    findCoolpcDirectProductUrl('ASUS RTX5060 Ti 8G 顯示卡', searchProducts),
+    'https://coolpc.com.tw/tw/portfolio-items/rtx5060ti/'
+  );
+  assert.equal(
+    findCoolpcDirectProductUrl('ASUS FA401GM RTX5060', [
+      { url: 'https://coolpc.com.tw/tw/portfolio-items/a/', text: 'ASUS FA401GM RTX5060' },
+      { url: 'https://coolpc.com.tw/tw/portfolio-items/b/', text: 'ASUS FA401GM RTX5060 展示頁' }
+    ]),
+    null
+  );
+});
+
+test('原價屋商品搜尋文字會移除價格與促銷資訊', () => {
+  assert.equal(
+    cleanCoolpcProductSearchText('酷！PC 【黑豹】 華碩 TUF Ryzen AI 9 465/RTX5060/32G/1T/14吋 銀 FA401GM 省$3000, $65900 ◆ ★'),
+    '華碩 TUF Ryzen AI 9 465/RTX5060/32G/1T/14吋 銀 FA401GM'
+  );
+  assert.equal(cleanCoolpcProductSearchText('$15990 ◆ ★'), '');
+});
+
+test('原價屋選項有商品網址時會優先使用直達頁', () => {
+  const $ = cheerio.load('<select><option data-url="/tw/portfolio-items/rtx-3060">RTX 3060 $15990</option></select>');
+  assert.equal(
+    extractCoolpcProductUrl($, $('option')[0]),
+    'https://coolpc.com.tw/tw/portfolio-items/rtx-3060'
+  );
+});
+
+test('原價屋爬蟲會將商品網址帶入結果', async () => {
+  const originalGet = axios.get;
+  axios.get = async (url) => ({
+    data: url.includes('evaluate.php')
+      ? Buffer.from('<option data-href="/tw/portfolio-items/rtx-3060">RTX 3060 $15990</option>')
+      : ''
+  });
+  try {
+    const [result] = await scrapeCoolpc('RTX 3060');
+    assert.equal(result.url, 'https://coolpc.com.tw/tw/portfolio-items/rtx-3060');
+    assert.equal(result.price, '15990');
+  } finally {
+    axios.get = originalGet;
+  }
+});
+
+test('原價屋爬蟲沒有商品直連時會用清理後商品名稱搜尋', async () => {
+  const originalGet = axios.get;
+  axios.get = async (url) => ({
+    data: url.includes('evaluate.php')
+      ? Buffer.from('<option>ASUS TUF RTX 3060 12G $15990 ◆ ★</option>')
+      : ''
+  });
+  try {
+    const [result] = await scrapeCoolpc('RTX 3060');
+    assert.equal(result.url, 'https://coolpc.com.tw/tw/?s=RTX3060');
+  } finally {
+    axios.get = originalGet;
+  }
+});
+
+test('原價屋爬蟲會用搜尋頁唯一型號配對商品直連', async () => {
+  const originalGet = axios.get;
+  axios.get = async (url) => ({
+    data: url.includes('evaluate.php')
+      ? Buffer.from('<option>ASUS TUF FX607JV RTX 5060 $45990</option>')
+      : '<article><h2><a href="/tw/portfolio-items/asus-fx607jv/">ASUS TUF FX607JV RTX5060 Laptop</a></h2></article>'
+  });
+  try {
+    const [result] = await scrapeCoolpc('RTX 5060');
+    assert.equal(result.url, 'https://coolpc.com.tw/tw/portfolio-items/asus-fx607jv/');
+  } finally {
+    axios.get = originalGet;
+  }
+});
+
+test('原價屋爬蟲會保留完整商品名稱，不截斷或附加省略號', async () => {
+  const originalGet = axios.get;
+  const longName = `ASUS TUF RTX 3060 ${'LongSpec '.repeat(20)}`.trim();
+  axios.get = async () => ({
+    data: Buffer.from(`<option>${longName} $15990</option>`)
+  });
+  try {
+    const [result] = await scrapeCoolpc('RTX 3060');
+    assert.equal(result.name, longName);
+    assert.equal(result.name.endsWith('...'), false);
+    assert.ok(result.name.length > 125);
+  } finally {
+    axios.get = originalGet;
+  }
+});
+
+test('原價屋爬蟲失敗時仍導向對應的動態搜尋頁', async () => {
+  const originalGet = axios.get;
+  axios.get = async () => { throw new Error('測試錯誤'); };
+  try {
+    const [result] = await scrapeCoolpc('RTX 3060');
+    assert.equal(result.url, 'https://coolpc.com.tw/tw/?s=RTX%203060');
+  } finally {
+    axios.get = originalGet;
+  }
+});
 
 test('平台 registry 忽略未知平台並維持固定順序', () => {
   const registry = { coolpc: async () => [], sinya: async () => [] };
@@ -162,6 +326,32 @@ test('辦公推薦允許只有 CPU，零件推薦只保留所選類別', () => {
   assert.equal(gpuComponents.recommendations.length, 1);
   assert.equal(gpuComponents.recommendations[0].cpu, 'UNKNOWN');
   assert.equal(gpuComponents.recommendations[0].gpu, 'RTX4070SUPER');
+});
+
+test('顯示卡搜尋以基礎型號匹配同系列並排除誤匹配', () => {
+  assert.equal(extractGpuFamily('4060'), '4060');
+  assert.equal(extractGpuFamily('RTX 4060'), '4060');
+  assert.equal(extractGpuFamily('RTX4060'), '4060');
+  assert.equal(extractGpuFamily('Intel Core i5-12400F'), null);
+
+  assert.equal(matchesGpuFamily('ASUS GeForce RTX 4060 8GB Graphics Card', '4060'), true);
+  assert.equal(matchesGpuFamily('ASUS GeForce RTX 4060 Ti 8GB Graphics Card', '4060'), true);
+  assert.equal(matchesGpuFamily('ASUS GeForce RTX 4060 Super Graphics Card', '4060'), true);
+  assert.equal(matchesGpuFamily('GIGABYTE GeForce RTX 5060 Graphics Card', '4060'), false);
+  assert.equal(matchesGpuFamily('便椅 HT4060-BL', '4060'), false);
+
+  const results = filterSearchResults([
+    product('RTX 4060 顯示卡', '9,000'),
+    product('RTX 4060 Ti 顯示卡', '12,000'),
+    product('RTX 4060 Super 顯示卡', '13,000'),
+    product('RTX 5060 顯示卡', '10,000'),
+    product('便椅 HT4060-BL', '7,000')
+  ], { keyword: '4060', include: '', exclude: '', categories: '' });
+  assert.deepEqual(results.map((item) => item.name), [
+    'RTX 4060 顯示卡',
+    'RTX 4060 Ti 顯示卡',
+    'RTX 4060 Super 顯示卡'
+  ]);
 });
 
 test('零件推薦將所選類別的關鍵字傳給爬蟲', async () => {

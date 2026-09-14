@@ -41,10 +41,27 @@ function parsePrice(price) {
   return digits ? parseInt(digits, 10) : Infinity;
 }
 
+function extractGpuFamily(keyword) {
+  const normalized = normalizeSearchKeyword(keyword).toUpperCase();
+  const match = normalized.match(/(?<!\d)(?:RTX|RX)?([3-9]\d{3})(?:TI|SUPER)?(?!\d)/);
+  return match ? match[1] : null;
+}
+
+function isGpuProductName(name) {
+  return /RTX|GEFORCE|RADEON|GRAPHIC|VIDEO|GPU|顯示卡|顯卡/i.test(name);
+}
+
+function matchesGpuFamily(name, family) {
+  const normalizedName = String(name || '').normalize('NFKC').toUpperCase();
+  const familyPattern = new RegExp(`(?<!\\d)${family}(?:\\s*(?:TI|SUPER))?(?!\\d)`);
+  return familyPattern.test(normalizedName) && isGpuProductName(normalizedName);
+}
+
 function filterSearchResults(products, options) {
   const includeWords = splitWords(options.include);
   let excludeWords = expandExcludeWords(splitWords(options.exclude));
   const categoryWords = splitWords(options.categories, ',');
+  const gpuFamily = extractGpuFamily(options.keyword);
   let minimumPrice = 0;
 
   if (/\d[06]\d0/.test(options.keyword)) {
@@ -67,7 +84,8 @@ function filterSearchResults(products, options) {
       || !excludeWords.some((word) => name.includes(word.toLowerCase()));
     const categoryMatch = categoryWords.length === 0
       || categoryWords.some((word) => name.includes(word.toLowerCase()));
-    if (!includeMatch || !excludeMatch || !categoryMatch) return false;
+    const gpuFamilyMatch = gpuFamily ? matchesGpuFamily(item?.name || '', gpuFamily) : true;
+    if (!includeMatch || !excludeMatch || !categoryMatch || !gpuFamilyMatch) return false;
     return minimumPrice === 0 || parsePrice(item.price) >= minimumPrice;
   });
 
@@ -90,5 +108,7 @@ module.exports = {
   expandExcludeWords,
   parsePrice,
   filterSearchResults,
+  extractGpuFamily,
+  matchesGpuFamily,
   searchProducts
 };
