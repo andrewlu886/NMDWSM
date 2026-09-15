@@ -322,6 +322,25 @@ async function seedHardwareCatalog() {
       );
     }
 
+    // 只升級仍使用舊 5090 係數的資料庫，保留其他 NVIDIA 型號及自訂規則。
+    const nvidiaRow = await runQueryOne(
+      'SELECT config_json FROM valuation_formula_rules WHERE formula_key = ?', ['nvidiaGpu']
+    );
+    if (nvidiaRow) {
+      const nvidiaConfig = JSON.parse(nvidiaRow.config_json);
+      const old5090 = nvidiaConfig['5090'];
+      if (old5090?.k === 0.035 && old5090.warrantyRates?.['36'] === 0.030 &&
+          old5090.warrantyRates?.['48'] === 0.024 && old5090.warrantyRates?.['60'] === 0.018) {
+        nvidiaConfig['5090'] = valuationFormulaRules.nvidiaGpu['5090'];
+        await runUpdate(
+          `UPDATE valuation_formula_rules
+           SET config_json = ?, source_name = ?, updated_at = ? WHERE formula_key = ?`,
+          [JSON.stringify(nvidiaConfig), '使用者提供的 NVIDIA 公式圖；5090 係數更新圖',
+            '2026-09-15', 'nvidiaGpu']
+        );
+      }
+    }
+
     await seedImportedReferencePrices(runUpdate);
     await runUpdate('COMMIT');
   } catch (error) {
