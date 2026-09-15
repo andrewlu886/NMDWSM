@@ -27,6 +27,9 @@ const {
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
+const SCRAPE_RATE_LIMIT = 3;
+const SCRAPE_RATE_WINDOW_MS = 60 * 1000;
+const scrapeRequestsByIp = new Map();
 const BLOCKED_STATIC_EXTENSIONS = new Set(['.db', '.sqlite', '.sqlite3']);
 const BLOCKED_STATIC_FILES = new Set(['users.json', 'products.json', 'posts.json']);
 const LEGACY_PAGE_ROUTES = new Set([
@@ -77,6 +80,41 @@ function parseJsonBody(req) {
         });
         req.on('error', reject);
     });
+}
+
+function getClientIp(req) {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    if (forwardedFor) return String(forwardedFor).split(',')[0].trim();
+    return req.socket.remoteAddress || 'unknown';
+}
+
+function checkScrapeRateLimit(req) {
+    const now = Date.now();
+    const ip = getClientIp(req);
+    const recentRequests = (scrapeRequestsByIp.get(ip) || [])
+        .filter(timestamp => now - timestamp < SCRAPE_RATE_WINDOW_MS);
+
+    if (recentRequests.length >= SCRAPE_RATE_LIMIT) {
+        scrapeRequestsByIp.set(ip, recentRequests);
+        const retryAfterSeconds = Math.ceil(
+            (SCRAPE_RATE_WINDOW_MS - (now - recentRequests[0])) / 1000
+        );
+        return { allowed: false, retryAfterSeconds };
+    }
+
+    recentRequests.push(now);
+    scrapeRequestsByIp.set(ip, recentRequests);
+
+    // 清理已過期的 IP 記錄，避免長期累積。
+    if (scrapeRequestsByIp.size > 1000) {
+        for (const [storedIp, timestamps] of scrapeRequestsByIp) {
+            if (!timestamps.some(timestamp => now - timestamp < SCRAPE_RATE_WINDOW_MS)) {
+                scrapeRequestsByIp.delete(storedIp);
+            }
+        }
+    }
+
+    return { allowed: true };
 }
 
 // --- 輔助函式 ---
@@ -378,6 +416,15 @@ const server = http.createServer(async(req, res) => {
         const keyword = parsedUrl.searchParams.get('keyword');
         if (!keyword) {
             return sendJson(res, 400, { success: false, message: '請輸入搜尋關鍵字' });
+        }
+
+        const rateLimit = checkScrapeRateLimit(req);
+        if (!rateLimit.allowed) {
+            res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
+            return sendJson(res, 429, {
+                success: false,
+                message: '查詢過於頻繁，請稍後再試。'
+            });
         }
 
         try {
