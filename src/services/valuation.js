@@ -1,4 +1,5 @@
 const TEST_WARNING = '目前使用測試公式，結果僅供功能測試，不代表實際市場價格。';
+const { valuationFormulaRules } = require('../data/valuation-formulas');
 
 const conditionFactors = {
   like_new: 0.92,
@@ -127,6 +128,7 @@ function getFormulaConfig(input = {}) {
     motherboard: stored.motherboard || { monthlyDecayRate: 0.02 },
     intelProfiles: stored.intelProfiles || intelCpuPricingProfiles,
     amdGpu: stored.amdGpu || { baseMonthlyDecayRate: 0.020, generationFactor: 0.002, vramFactor: -0.0006 },
+    nvidiaGpu: stored.nvidiaGpu || valuationFormulaRules.nvidiaGpu,
     ram: stored.ram || { marketCorrection: [], monthlyDecayRate: -0.11, specialDamageFactor: 0.8 },
     generic: stored.generic || { maxMonths: 120, monthlyAgeRate: 0.008, minimumAgeFactor: 0.2 }
   };
@@ -258,6 +260,46 @@ function calculateAmdGpuValuation(input) {
   });
 }
 
+function getNvidiaGpuPricingProfile(model, totalWarrantyMonths, profiles) {
+  const normalized = String(model || '').normalize('NFKC').toUpperCase();
+  const match = normalized.match(/RTX[\s_-]*(5050|5060[\s_-]*TI|5060|5070[\s_-]*TI|5070|5080|5090)(?![A-Z0-9]|[\s_-]*(?:TI|SUPER))/);
+  if (!match || ![36, 48, 60].includes(Number(totalWarrantyMonths))) return null;
+  const modelKey = match[1].replace(/[\s_-]/g, '').replace('TI', 'Ti');
+  const profile = profiles[modelKey];
+  const warrantyRate = Number(profile?.warrantyRates?.[totalWarrantyMonths]);
+  if (!profile || !Number.isFinite(Number(profile.k)) || !Number.isFinite(warrantyRate)) return null;
+  return {
+    modelKey,
+    k: Number(profile.k),
+    warrantyRate,
+    estimatedWarrantyRate: (profile.estimatedWarrantyMonths || []).includes(Number(totalWarrantyMonths))
+  };
+}
+
+function calculateNvidiaGpuValuation(input) {
+  const profile = getNvidiaGpuPricingProfile(
+    input.model, input.totalWarrantyMonths, getFormulaConfig(input).nvidiaGpu
+  );
+  if (!profile) return null;
+  const originalPrice = requireOriginalPrice(input);
+  const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
+  const totalWarrantyMonths = Number(input.totalWarrantyMonths);
+  const inWarrantyMonths = Math.min(elapsedMonths, totalWarrantyMonths);
+  const price = originalPrice
+    * Math.exp(-profile.k)
+    * Math.exp(-profile.warrantyRate * inWarrantyMonths);
+  return createResult(price, 'nvidia_rtx50_warranty_decay', {
+    originalPrice,
+    elapsedMonths,
+    totalWarrantyMonths,
+    inWarrantyMonths,
+    modelKey: profile.modelKey,
+    k: profile.k,
+    warrantyRate: profile.warrantyRate,
+    estimatedWarrantyRate: profile.estimatedWarrantyRate
+  });
+}
+
 function calculateRamValuation(input) {
   const originalPrice = requireOriginalPrice(input);
   const ramFormula = getFormulaConfig(input).ram;
@@ -324,6 +366,10 @@ function calculateValuation(input) {
   if (input.category === 'gpu' && input.gpuPricing) {
     return calculateAmdGpuValuation(input);
   }
+  if (input.category === 'gpu') {
+    const nvidiaResult = calculateNvidiaGpuValuation(input);
+    if (nvidiaResult) return nvidiaResult;
+  }
   if (input.category === 'ram') {
     return calculateRamValuation(input);
   }
@@ -338,6 +384,8 @@ module.exports = {
   calculateIntelCpuValuation,
   getIntelCpuPricingProfile,
   calculateAmdGpuValuation,
+  calculateNvidiaGpuValuation,
+  getNvidiaGpuPricingProfile,
   calculateRamValuation,
   calculatePeripheralValuation,
   getPeripheralBrandTier

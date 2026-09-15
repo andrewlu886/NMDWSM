@@ -110,6 +110,7 @@ const gpuModels = [
   [2022, 'NVIDIA', 'GeForce RTX 40', 'RTX 4080'],
   [2024, 'NVIDIA', 'GeForce RTX 40 Super', 'RTX 4080 Super'],
   [2022, 'NVIDIA', 'GeForce RTX 40', 'RTX 4090'],
+  [2025, 'NVIDIA', 'GeForce RTX 50', 'RTX 5050'],
   [2025, 'NVIDIA', 'GeForce RTX 50', 'RTX 5060'],
   [2025, 'NVIDIA', 'GeForce RTX 50', 'RTX 5060 Ti'],
   [2025, 'NVIDIA', 'GeForce RTX 50', 'RTX 5070'],

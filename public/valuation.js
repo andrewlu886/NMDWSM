@@ -89,7 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
         totalWarrantyInput.disabled = false;
         totalWarrantyInput.required = true;
         totalWarrantyLabel.htmlFor = 'total-warranty-months';
-        totalWarrantyHint.textContent = '請填產品完整保固共有幾個月。';
+        totalWarrantyHint.textContent = categoryInput.value === 'gpu'
+            ? 'RTX 50 指定型號且保固為 36、48 或 60 個月時套用 NVIDIA 公式，不計商品狀況；其他情況沿用通用公式。'
+            : '請填產品完整保固共有幾個月。';
     }
 
     function clearAutoFilledPrice() {
@@ -370,8 +372,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('result-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
             document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
+            const nvidiaNote = result.pricingFormula === 'nvidia_rtx50_warranty_decay'
+                ? `已套用 NVIDIA RTX 50 公式（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減，商品狀況不計入。`
+                : '';
             document.getElementById('result-note').textContent =
-                [result.fallbackReason, result.warranty.note].filter(Boolean).join(' ');
+                [result.fallbackReason, nvidiaNote, result.warranty.note].filter(Boolean).join(' ');
             detectedPanel.hidden = false;
             document.getElementById('detected-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;

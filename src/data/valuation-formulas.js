@@ -39,6 +39,16 @@ const valuationFormulaRules = {
     i9_12_ultra: { k: 0.09, warrantyRate: 0.013, extendedWarrantyRate: 0.0078, warrantyDecay: 'linear', marketRate: 0.001, postWarrantyRate: 0.004 }
   },
   amdGpu: { baseMonthlyDecayRate: 0.020, generationFactor: 0.002, vramFactor: -0.0006 },
+  // 使用者提供的 RTX 50 估價公式圖；5090 的四年係數由三、五年線性插值。
+  nvidiaGpu: {
+    '5050': { k: 0.196, warrantyRates: { 36: 0.031, 48: 0.023, 60: 0.018 } },
+    '5060': { k: 0.096, warrantyRates: { 36: 0.031, 48: 0.023, 60: 0.018 } },
+    '5060Ti': { k: 0.124, warrantyRates: { 36: 0.024, 48: 0.018, 60: 0.014 } },
+    '5070': { k: 0.160, warrantyRates: { 36: 0.009, 48: 0.007, 60: 0.006 } },
+    '5070Ti': { k: 0.118, warrantyRates: { 36: 0.009, 48: 0.007, 60: 0.006 } },
+    '5080': { k: 0.110, warrantyRates: { 36: 0.023, 48: 0.018, 60: 0.014 } },
+    '5090': { k: 0.035, warrantyRates: { 36: 0.030, 48: 0.024, 60: 0.018 }, estimatedWarrantyMonths: [48] }
+  },
   ram: {
     marketCorrection: [
       { minMonths: 1, maxMonths: 5, value: 0.241 },

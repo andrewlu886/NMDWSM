@@ -298,12 +298,20 @@ async function seedHardwareCatalog() {
     }
 
     for (const [formulaKey, config] of Object.entries(valuationFormulaRules)) {
+      const category = {
+        conditionFactors: 'peripheral', peripheralBrandTiers: 'peripheral',
+        intelProfiles: 'cpu', amdGpu: 'gpu', nvidiaGpu: 'gpu',
+        motherboard: 'motherboard', ram: 'ram'
+      }[formulaKey] || 'generic';
+      const isNvidiaFormula = formulaKey === 'nvidiaGpu';
       await runUpdate(
         `INSERT INTO valuation_formula_rules
          (formula_key, category, config_json, source_name, updated_at)
          VALUES (?, ?, ?, ?, ?)
          ON CONFLICT(formula_key) DO NOTHING`,
-        [formulaKey, formulaKey === 'conditionFactors' || formulaKey === 'peripheralBrandTiers' ? 'peripheral' : formulaKey === 'intelProfiles' ? 'cpu' : formulaKey === 'amdGpu' ? 'gpu' : formulaKey === 'motherboard' ? 'motherboard' : formulaKey === 'ram' ? 'ram' : 'generic', JSON.stringify(config), 'project-default', '2026-09-14']
+        [formulaKey, category, JSON.stringify(config),
+          isNvidiaFormula ? '使用者提供的 NVIDIA 公式圖' : 'project-default',
+          isNvidiaFormula ? '2026-09-15' : '2026-09-14']
       );
     }
 
