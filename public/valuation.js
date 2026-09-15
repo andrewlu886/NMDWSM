@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cpuWarrantySelect = document.getElementById('cpu-warranty-months');
     const totalWarrantyLabel = document.getElementById('total-warranty-label');
     const totalWarrantyHint = document.getElementById('total-warranty-hint');
-    const conditionField = document.getElementById('condition-field');
-    const conditionSelect = document.getElementById('condition');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
@@ -90,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         totalWarrantyInput.required = true;
         totalWarrantyLabel.htmlFor = 'total-warranty-months';
         totalWarrantyHint.textContent = categoryInput.value === 'gpu'
-            ? 'NVIDIA RTX 50 指定型號可輸入保固月數；非 36、48、60 個月的係數由已知數據推算。已使用月數為 0 時保固衰減尚未開始。'
+            ? 'NVIDIA RTX 30、40、50 可輸入保固月數；30、40 系列借用同級 50 系列係數。已使用月數為 0 時保固衰減尚未開始。'
             : '請填產品完整保固共有幾個月。';
     }
 
@@ -312,8 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
             hideSuggestions();
             formMessage.textContent = '';
             const isGpu = tab.dataset.category === 'gpu';
-            conditionField.hidden = !isGpu;
-            if (!isGpu) conditionSelect.value = 'good';
             originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
                 ? '參考價／晶片組估價基準價（NTD）' : '新品參考價（NTD）';
@@ -350,11 +346,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 : cpuWarrantySelect.value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
-            condition: conditionSelect.value,
             details: {}
         };
 
         try {
+            document.getElementById('result-content').hidden = true;
+            document.getElementById('result-empty').hidden = false;
             const response = await fetch('/api/valuation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -372,8 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('result-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
             document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
-            const nvidiaNote = result.pricingFormula === 'nvidia_rtx50_warranty_decay'
-                ? `已套用 NVIDIA RTX 50 公式（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減，商品狀況不計入。`
+            const nvidiaNote = result.calculation?.profileSourceModel
+                ? `${result.estimatedModelProfile
+                    ? `已借用 ${result.profileSourceModel} 係數估價；跨系列係數為推估值，不代表此型號的實測資料。`
+                    : '已套用 NVIDIA RTX 50 公式。'}（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減。`
                 : '';
             document.getElementById('result-note').textContent =
                 [result.fallbackReason, nvidiaNote, result.warranty.note].filter(Boolean).join(' ');

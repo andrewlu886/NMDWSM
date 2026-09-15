@@ -260,12 +260,25 @@ function calculateAmdGpuValuation(input) {
   });
 }
 
+function isNvidiaGpuModel(model, manufacturer) {
+  if (manufacturer === 'NVIDIA') return true;
+  if (manufacturer === 'AMD') return false;
+  return /(?:^|[^A-Z0-9])(?:NVIDIA|GEFORCE|RTX|GTX)(?:$|[^A-Z0-9]|\d)/
+    .test(String(model || '').normalize('NFKC').toUpperCase());
+}
+
 function getNvidiaGpuPricingProfile(model, totalWarrantyMonths, profiles) {
   const normalized = String(model || '').normalize('NFKC').toUpperCase();
-  const match = normalized.match(/RTX[\s_-]*(5050|5060[\s_-]*TI|5060|5070[\s_-]*TI|5070|5080|5090)(?![A-Z0-9]|[\s_-]*(?:TI|SUPER))/);
+  const match = normalized.match(/(?:^|[^A-Z0-9])RTX[\s_-]*((?:30|40|50)(?:50|60|70|80|90))((?:[\s_-]*(?:TI|SUPER))*)(?![A-Z0-9])/);
   const months = Number(totalWarrantyMonths);
   if (!match || !Number.isFinite(months) || months < 0) return null;
-  const modelKey = match[1].replace(/[\s_-]/g, '').replace('TI', 'Ti');
+  const series = match[1].slice(0, 2);
+  const tier = match[1].slice(2);
+  const variants = match[2].replace(/[\s_-]/g, '');
+  const hasTi = variants.includes('TI');
+  if (series === '50' && (variants.includes('SUPER') || (hasTi && !['60', '70'].includes(tier)))) return null;
+  const modelKey = `50${tier}${hasTi && ['60', '70'].includes(tier) ? 'Ti' : ''}`;
+  const profileSourceModel = `RTX 50${tier}${modelKey.endsWith('Ti') ? ' Ti' : ''}`;
   const profile = profiles[modelKey];
   const rates = Object.entries(profile?.warrantyRates || {})
     .map(([duration, rate]) => [Number(duration), Number(rate)])
@@ -287,6 +300,8 @@ function getNvidiaGpuPricingProfile(model, totalWarrantyMonths, profiles) {
   if (!profile || !Number.isFinite(Number(profile.k)) || !Number.isFinite(warrantyRate)) return null;
   return {
     modelKey,
+    profileSourceModel,
+    estimatedModelProfile: series !== '50',
     k: Number(profile.k),
     warrantyRate,
     estimatedWarrantyRate: exactRate === undefined || (profile.estimatedWarrantyMonths || []).includes(months)
@@ -305,16 +320,24 @@ function calculateNvidiaGpuValuation(input) {
   const price = originalPrice
     * Math.exp(-profile.k)
     * Math.exp(-profile.warrantyRate * inWarrantyMonths);
-  return createResult(price, 'nvidia_rtx50_warranty_decay', {
+  const result = createResult(price,
+    profile.estimatedModelProfile ? 'nvidia_rtx_proxy_warranty_decay' : 'nvidia_rtx50_warranty_decay', {
     originalPrice,
     elapsedMonths,
     totalWarrantyMonths,
     inWarrantyMonths,
     modelKey: profile.modelKey,
+    profileSourceModel: profile.profileSourceModel,
+    estimatedModelProfile: profile.estimatedModelProfile,
     k: profile.k,
     warrantyRate: profile.warrantyRate,
     estimatedWarrantyRate: profile.estimatedWarrantyRate
   });
+  return {
+    ...result,
+    profileSourceModel: profile.profileSourceModel,
+    estimatedModelProfile: profile.estimatedModelProfile
+  };
 }
 
 function calculateRamValuation(input) {
@@ -357,7 +380,7 @@ function calculateTestValuation(input) {
 
   // 僅供串接測試：正式公式完成後只需替換這個函式。
   const ageFactor = Math.max(Number(formulaConfig.generic.minimumAgeFactor), 1 - Math.min(elapsedMonths, Number(formulaConfig.generic.maxMonths)) * Number(formulaConfig.generic.monthlyAgeRate));
-  const conditionFactor = formulaConfig.conditionFactors[input.condition] || formulaConfig.conditionFactors.good;
+  const conditionFactor = formulaConfig.conditionFactors.good;
   const price = Math.max(0, Math.round(originalPrice * ageFactor * conditionFactor));
 
   return {
@@ -386,6 +409,9 @@ function calculateValuation(input) {
   if (input.category === 'gpu') {
     const nvidiaResult = calculateNvidiaGpuValuation(input);
     if (nvidiaResult) return nvidiaResult;
+    if (isNvidiaGpuModel(input.model, input.manufacturer)) {
+      throw new TypeError('目前沒有對應的 NVIDIA 估價公式。');
+    }
   }
   if (input.category === 'ram') {
     return calculateRamValuation(input);
@@ -403,6 +429,7 @@ module.exports = {
   calculateAmdGpuValuation,
   calculateNvidiaGpuValuation,
   getNvidiaGpuPricingProfile,
+  isNvidiaGpuModel,
   calculateRamValuation,
   calculatePeripheralValuation,
   getPeripheralBrandTier

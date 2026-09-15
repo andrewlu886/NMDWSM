@@ -20,7 +20,10 @@ for (const envFile of envCandidates) {
 const db = require('./db.js');
 const { searchProducts } = require('../src/services/search');
 const { getRecommendations } = require('../src/services/recommendation');
-const { TEST_WARNING, calculateValuation } = require('../src/services/valuation');
+const {
+    TEST_WARNING, calculateValuation, calculateNvidiaGpuValuation,
+    getNvidiaGpuPricingProfile, isNvidiaGpuModel
+} = require('../src/services/valuation');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
@@ -184,7 +187,7 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const payload = await parseJsonBody(req);
-            const requiredFields = ['category', 'model', 'elapsedMonths', 'condition'];
+            const requiredFields = ['category', 'model', 'elapsedMonths'];
             const missingField = requiredFields.find(field => payload[field] === undefined || payload[field] === null || payload[field] === '');
             if (missingField) {
                 return sendJson(res, 400, { success: false, message: '估價資料不完整，請檢查所有必填欄位。' });
@@ -238,13 +241,23 @@ const server = http.createServer(async(req, res) => {
                     note: '保固期限由使用者輸入，最終仍以購買證明與原廠判定為準。'
                 };
             const formulaConfig = await db.getValuationFormulaConfig();
+            const nvidiaCandidate = category === 'gpu' && !resolved.gpuPricing &&
+                isNvidiaGpuModel(payload.model, resolved.model && resolved.model.manufacturer);
+            if (nvidiaCandidate && !getNvidiaGpuPricingProfile(
+                payload.model, warranty.totalMonths, formulaConfig.nvidiaGpu
+            )) {
+                return sendJson(res, 400, {
+                    success: false, message: '目前沒有對應的 NVIDIA 估價公式。'
+                });
+            }
             if (!resolved.gpuPricing && !resolved.cpuPricing && !resolved.referencePrice && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
                 return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
             }
             const formulaInput = {
                 category,
                 brand: resolved.canonicalBrand || brand,
-                model: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
+                model: resolved.model && resolved.model.manufacturer !== 'NVIDIA'
+                    ? resolved.model.canonicalModel : String(payload.model).trim(),
                 modelId: resolved.model ? resolved.model.id : null,
                 originalPrice,
                 elapsedMonths,
@@ -252,7 +265,7 @@ const server = http.createServer(async(req, res) => {
                 remainingWarrantyMonths: warranty.remainingMonths,
                 isWarrantyExpired: warranty.isExpired,
                 extensionRegistered,
-                condition: String(payload.condition),
+                condition: 'good',
                 details: payload.details && typeof payload.details === 'object' ? payload.details : {},
                 formulaConfig
             };
@@ -277,8 +290,11 @@ const server = http.createServer(async(req, res) => {
 
             let pricingResult = null;
             let fallbackReason = null;
+            if (nvidiaCandidate) {
+                pricingResult = calculateNvidiaGpuValuation(formulaInput);
+            }
             const valuationApiUrl = String(process.env.VALUATION_API_URL || '').trim();
-            if (valuationApiUrl) {
+            if (valuationApiUrl && !pricingResult) {
                 const headers = { 'Content-Type': 'application/json' };
                 const valuationApiKey = String(process.env.VALUATION_API_KEY || '').trim();
                 if (valuationApiKey) headers.Authorization = `Bearer ${valuationApiKey}`;
