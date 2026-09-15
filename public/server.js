@@ -207,7 +207,7 @@ const server = http.createServer(async(req, res) => {
             if (!Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
                 return sendJson(res, 400, { success: false, message: '已過月份不可小於 0。' });
             }
-            if (submittedWarrantyMonths !== null &&
+            if (category !== 'ram' && submittedWarrantyMonths !== null &&
                 (!Number.isFinite(submittedWarrantyMonths) || submittedWarrantyMonths < 0)) {
                 return sendJson(res, 400, { success: false, message: '保固總月數不可小於 0。' });
             }
@@ -222,7 +222,7 @@ const server = http.createServer(async(req, res) => {
                 elapsedMonths,
                 extensionRegistered
             });
-            const warranty = submittedWarrantyMonths === null
+            const warranty = category === 'ram' || submittedWarrantyMonths === null
                 ? resolved.warranty
                 : {
                     ...resolved.warranty,
@@ -293,7 +293,9 @@ const server = http.createServer(async(req, res) => {
             if (nvidiaCandidate) {
                 pricingResult = calculateNvidiaGpuValuation(formulaInput);
             }
-            const valuationApiUrl = String(process.env.VALUATION_API_URL || '').trim();
+            const valuationApiUrl = category === 'ram'
+                ? ''
+                : String(process.env.VALUATION_API_URL || '').trim();
             if (valuationApiUrl && !pricingResult) {
                 const headers = { 'Content-Type': 'application/json' };
                 const valuationApiKey = String(process.env.VALUATION_API_KEY || '').trim();

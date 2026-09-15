@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cpuWarrantySelect = document.getElementById('cpu-warranty-months');
     const totalWarrantyLabel = document.getElementById('total-warranty-label');
     const totalWarrantyHint = document.getElementById('total-warranty-hint');
+    const warrantyMonthsField = document.getElementById('warranty-months-field');
+    const elapsedMonthsHint = document.getElementById('elapsed-months-hint');
+    const warrantyResultRow = document.getElementById('result-warranty-row');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
@@ -63,6 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateCpuWarrantyControl(model) {
+        const isRam = categoryInput.value === 'ram';
+        warrantyMonthsField.hidden = isRam;
+        totalWarrantyInput.disabled = isRam;
+        totalWarrantyInput.required = !isRam;
+        cpuWarrantySelect.disabled = true;
+        cpuWarrantySelect.required = false;
+        if (isRam) {
+            totalWarrantyInput.value = '';
+            totalWarrantyLabel.htmlFor = 'elapsed-months';
+            totalWarrantyHint.textContent = '記憶體估價不使用保固月數，僅依購買時間與公式計算。';
+            elapsedMonthsHint.textContent = '請填記憶體已使用幾個月，系統會按月份套用衰減公式。';
+            return;
+        }
+        elapsedMonthsHint.textContent = '請填從購買或保固起算至今已經過幾個月。';
         const showOptions = supportsFiveYearCpuWarranty(model);
         if (showOptions) {
             if (['36', '60'].includes(totalWarrantyInput.value)) {
@@ -299,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.setAttribute('aria-selected', String(active));
             });
             categoryInput.value = tab.dataset.category;
+            warrantyResultRow.hidden = tab.dataset.category === 'ram';
             modelInput.value = '';
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
@@ -312,12 +330,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const isGpu = tab.dataset.category === 'gpu';
             originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
-                ? '參考價／晶片組估價基準價（NTD）' : '新品參考價（NTD）';
+                ? '參考價／晶片組估價基準價（NTD）'
+                : tab.dataset.category === 'ram' ? '原價（NTD）' : '新品參考價（NTD）';
             originalPriceHint.textContent = {
                 cpu: '選取已收錄 CPU 可帶入新品參考價；修改後以欄位內價格估價。',
                 gpu: '已收錄顯示卡可帶入參考價，AMD 模型帶入發售價；修改後以欄位內價格估價。',
                 motherboard: '晶片組資料為二手估價基準底價，非新品售價；修改後以欄位內價格估價。',
-                ram: '記憶體尚未收錄型號價格，請手動填入；估價以欄位內價格計算。'
+                ram: '請填入圖中括號內整個 P₀ × e^K 的原價；估價只按已使用月數衰減。'
             }[tab.dataset.category];
             const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
@@ -348,6 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
             extensionRegistered: extensionSelect.value,
             details: {}
         };
+        if (payload.category === 'ram') delete payload.totalWarrantyMonths;
 
         try {
             document.getElementById('result-content').hidden = true;
@@ -369,13 +389,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('result-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
             document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
+            warrantyResultRow.hidden = payload.category === 'ram';
             const nvidiaNote = result.calculation?.profileSourceModel
                 ? `${result.estimatedModelProfile
                     ? `已借用 ${result.profileSourceModel} 係數估價；跨系列係數為推估值，不代表此型號的實測資料。`
                     : '已套用 NVIDIA RTX 50 公式。'}（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減。`
                 : '';
             document.getElementById('result-note').textContent =
-                [result.fallbackReason, nvidiaNote, result.warranty.note].filter(Boolean).join(' ');
+                [result.fallbackReason, nvidiaNote,
+                    payload.category === 'ram' ? '' : result.warranty.note]
+                    .filter(Boolean).join(' ');
             detectedPanel.hidden = false;
             document.getElementById('detected-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;

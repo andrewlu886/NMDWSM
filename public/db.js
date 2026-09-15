@@ -304,14 +304,21 @@ async function seedHardwareCatalog() {
         motherboard: 'motherboard', ram: 'ram'
       }[formulaKey] || 'generic';
       const isNvidiaFormula = formulaKey === 'nvidiaGpu';
+      const isRamFormula = formulaKey === 'ram';
       await runUpdate(
         `INSERT INTO valuation_formula_rules
          (formula_key, category, config_json, source_name, updated_at)
          VALUES (?, ?, ?, ?, ?)
-         ON CONFLICT(formula_key) DO NOTHING`,
+         ON CONFLICT(formula_key) DO UPDATE SET
+           category = excluded.category,
+           config_json = excluded.config_json,
+           source_name = excluded.source_name,
+           updated_at = excluded.updated_at
+         WHERE excluded.formula_key = 'ram'`,
         [formulaKey, category, JSON.stringify(config),
-          isNvidiaFormula ? '使用者提供的 NVIDIA 公式圖' : 'project-default',
-          isNvidiaFormula ? '2026-09-15' : '2026-09-14']
+          isNvidiaFormula ? '使用者提供的 NVIDIA 公式圖'
+            : isRamFormula ? '使用者提供的記憶體公式圖（原價已含 e^K）' : 'project-default',
+          isNvidiaFormula || isRamFormula ? '2026-09-15' : '2026-09-14']
       );
     }
 

@@ -129,7 +129,7 @@ function getFormulaConfig(input = {}) {
     intelProfiles: stored.intelProfiles || intelCpuPricingProfiles,
     amdGpu: stored.amdGpu || { baseMonthlyDecayRate: 0.020, generationFactor: 0.002, vramFactor: -0.0006 },
     nvidiaGpu: stored.nvidiaGpu || valuationFormulaRules.nvidiaGpu,
-    ram: stored.ram || { marketCorrection: [], monthlyDecayRate: -0.11, specialDamageFactor: 0.8 },
+    ram: stored.ram || valuationFormulaRules.ram,
     generic: stored.generic || { maxMonths: 120, monthlyAgeRate: 0.008, minimumAgeFactor: 0.2 }
   };
 }
@@ -344,26 +344,16 @@ function calculateRamValuation(input) {
   const originalPrice = requireOriginalPrice(input);
   const ramFormula = getFormulaConfig(input).ram;
   const elapsedMonths = Math.max(0, Math.floor(Number(input.elapsedMonths) || 0));
-  let marketCorrection = 0;
-  const correctionRule = (ramFormula.marketCorrection || []).find((rule) => (
-    elapsedMonths >= Number(rule.minMonths) &&
-    (rule.maxMonths === null || elapsedMonths <= Number(rule.maxMonths))
-  ));
-  if (correctionRule) marketCorrection = Number(correctionRule.value);
-
+  // 圖中的 n=9 是使用九個月的示例；上限 g 應取實際已使用月數。
   let decaySum = 0;
   for (let month = 1; month <= elapsedMonths; month += 1) {
     decaySum += Number(ramFormula.monthlyDecayRate) / month;
   }
-  const hasSpecialDamage = Boolean(String(input.details?.specialCondition || '').trim());
-  const damageFactor = hasSpecialDamage ? Number(ramFormula.specialDamageFactor) : 1;
-  const price = originalPrice * Math.exp(marketCorrection) * Math.exp(decaySum) * damageFactor;
+  const price = originalPrice * Math.exp(decaySum);
   return createResult(price, 'ram_sigma_decay', {
     originalPrice,
     elapsedMonths,
-    marketCorrection,
-    decaySum,
-    damageFactor
+    decaySum
   });
 }
 

@@ -104,7 +104,7 @@
                     </div>
 
                     <section class="warranty-fields full-width" aria-label="保固與使用時間">
-                        <div class="field">
+                        <div class="field" id="warranty-months-field">
                             <label for="total-warranty-months" id="total-warranty-label">保固總月數</label>
                             <input id="total-warranty-months" name="totalWarrantyMonths" type="number" min="0" step="1" required placeholder="例如：36">
                             <select id="cpu-warranty-months" aria-label="CPU 保固總月數" hidden disabled>
@@ -113,10 +113,10 @@
                             </select>
                             <span class="field-hint" id="total-warranty-hint">請填產品完整保固共有幾個月。</span>
                         </div>
-                        <div class="field">
+                        <div class="field" id="elapsed-months-field">
                             <label for="elapsed-months">已使用月數</label>
                             <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required value="0">
-                            <span class="field-hint">請填從購買或保固起算至今已經過幾個月。</span>
+                            <span class="field-hint" id="elapsed-months-hint">請填從購買或保固起算至今已經過幾個月。</span>
                         </div>
                     </section>
 
@@ -151,7 +151,7 @@
                         <p class="result-price" id="result-price">NT$ 0</p>
                         <div class="result-range"><span>測試區間</span><strong id="result-range">—</strong></div>
                         <div class="result-meta"><span>辨識型號</span><strong id="result-model">—</strong></div>
-                        <div class="result-meta"><span>保固狀態</span><strong id="result-warranty">—</strong></div>
+                        <div class="result-meta" id="result-warranty-row"><span>保固狀態</span><strong id="result-warranty">—</strong></div>
                         <p class="result-note" id="result-note">保固為規則推定，最終以序號、發票與原廠判定為準。</p>
                     </div>
                 </aside>

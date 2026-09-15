@@ -50,14 +50,9 @@ const valuationFormulaRules = {
     '5090': { k: 0.035, warrantyRates: { 36: 0.030, 48: 0.024, 60: 0.018 }, estimatedWarrantyMonths: [48] }
   },
   ram: {
-    marketCorrection: [
-      { minMonths: 1, maxMonths: 5, value: 0.241 },
-      { minMonths: 6, maxMonths: 8, value: 0.465 },
-      { minMonths: 9, maxMonths: 9, value: 0.772 },
-      { minMonths: 10, maxMonths: null, value: 1.57 }
-    ],
-    monthlyDecayRate: -0.11,
-    specialDamageFactor: 0.8
+    // 輸入的原價就是圖中整個 (P0 × e^K)，不再另乘市場修正係數。
+    formula: 'originalPrice × exp(Σ[t=1..elapsedMonths](-0.11/t))',
+    monthlyDecayRate: -0.11
   },
   generic: { maxMonths: 120, monthlyAgeRate: 0.008, minimumAgeFactor: 0.2 }
 };
