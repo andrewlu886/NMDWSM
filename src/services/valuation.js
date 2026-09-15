@@ -263,16 +263,33 @@ function calculateAmdGpuValuation(input) {
 function getNvidiaGpuPricingProfile(model, totalWarrantyMonths, profiles) {
   const normalized = String(model || '').normalize('NFKC').toUpperCase();
   const match = normalized.match(/RTX[\s_-]*(5050|5060[\s_-]*TI|5060|5070[\s_-]*TI|5070|5080|5090)(?![A-Z0-9]|[\s_-]*(?:TI|SUPER))/);
-  if (!match || ![36, 48, 60].includes(Number(totalWarrantyMonths))) return null;
+  const months = Number(totalWarrantyMonths);
+  if (!match || !Number.isFinite(months) || months < 0) return null;
   const modelKey = match[1].replace(/[\s_-]/g, '').replace('TI', 'Ti');
   const profile = profiles[modelKey];
-  const warrantyRate = Number(profile?.warrantyRates?.[totalWarrantyMonths]);
+  const rates = Object.entries(profile?.warrantyRates || {})
+    .map(([duration, rate]) => [Number(duration), Number(rate)])
+    .sort((a, b) => a[0] - b[0]);
+  if (rates.length < 2 || rates.some(([duration, rate]) => !Number.isFinite(duration) || !Number.isFinite(rate) || rate <= 0)) return null;
+  const exactRate = profile.warrantyRates[months];
+  let warrantyRate = Number(exactRate);
+  if (exactRate === undefined) {
+    const upperIndex = rates.findIndex(([duration]) => duration >= months);
+    const lowerIndex = upperIndex === -1 ? rates.length - 2 : Math.max(0, upperIndex - 1);
+    const [lowerMonths, lowerRate] = rates[lowerIndex];
+    const [upperMonths, upperRate] = rates[lowerIndex + 1];
+    const ratio = (months - lowerMonths) / (upperMonths - lowerMonths);
+    // 已知年期之間線性插值；超出範圍以指數延伸，避免係數變為負數。
+    warrantyRate = months < rates[0][0] || months > rates[rates.length - 1][0]
+      ? lowerRate * Math.pow(upperRate / lowerRate, ratio)
+      : lowerRate + (upperRate - lowerRate) * ratio;
+  }
   if (!profile || !Number.isFinite(Number(profile.k)) || !Number.isFinite(warrantyRate)) return null;
   return {
     modelKey,
     k: Number(profile.k),
     warrantyRate,
-    estimatedWarrantyRate: (profile.estimatedWarrantyMonths || []).includes(Number(totalWarrantyMonths))
+    estimatedWarrantyRate: exactRate === undefined || (profile.estimatedWarrantyMonths || []).includes(months)
   };
 }
 

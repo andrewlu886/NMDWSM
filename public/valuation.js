@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         totalWarrantyInput.required = true;
         totalWarrantyLabel.htmlFor = 'total-warranty-months';
         totalWarrantyHint.textContent = categoryInput.value === 'gpu'
-            ? 'RTX 50 指定型號且保固為 36、48 或 60 個月時套用 NVIDIA 公式，不計商品狀況；其他情況沿用通用公式。'
+            ? 'NVIDIA RTX 50 指定型號可輸入保固月數；非 36、48、60 個月的係數由已知數據推算。已使用月數為 0 時保固衰減尚未開始。'
             : '請填產品完整保固共有幾個月。';
     }
 
