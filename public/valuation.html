@@ -8,6 +8,40 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="./valuation.css">
     <link rel="stylesheet" href="./site-theme.css">
+    <style>
+        /* =========================================
+           主導覽列 (Main Nav) 動畫底線特效 (兩倍粗)
+           ========================================= */
+        
+        /* 1. 確保選單連結為相對定位，以利放置底線 */
+        .main-nav a {
+            position: relative; 
+            text-decoration: none; /* 確保移除預設底線 */
+        }
+
+        /* 2. 繪製兩倍粗 (6px) 的動態底線 */
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; /* ★ 往上抬：從原本的 -6px 調整為 -2px (若還太低可改為 0) */
+            left: 0;
+            width: 100%;
+            height: 6px; /* 兩倍粗的底線 */
+            background-color: #fffefe; /* 您可以改成您的主色調 */
+            border-radius: 6px; /* 讓底線端點保持圓潤 */
+            z-index: 1; /* ★ 關鍵修復：確保底線浮在最上層，不會被背景遮住 */
+            
+            /* 動畫初始設定：縮放為 0 (隱藏) */
+            transform: scaleX(0); 
+            transition: transform 0.3s ease;
+        }
+
+        /* 3. 當滑鼠懸停 (Hover) 或身處該頁面 (active) 時，底線展開 */
+        .main-nav a:hover::after,
+        .main-nav a.active::after {
+            transform: scaleX(1);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -20,6 +54,7 @@
         <nav class="main-nav" aria-label="主要導覽">
             <a href="/">首頁</a>
             <a href="/recommend.html">智慧推薦</a>
+            <!-- 目前所在頁面會套用 active 樣式，底線會保持展開 -->
             <a href="/valuation.html" class="active">二手硬體估價</a>
             <a href="/scrape">市價查詢</a>
             <a href="/tools">零件查詢與瓦數計算工具</a>
@@ -65,7 +100,7 @@
                     <div class="field full-width">
                         <label for="original-price" id="original-price-label">目前全新參考價（NTD）</label>
                         <input id="original-price" name="originalPrice" type="number" min="1" step="1" required placeholder="例如：10200">
-                        <span class="field-hint" id="original-price-hint">選取已收錄 CPU 可帶入新品參考價；修改後以欄位內價格估價。</span>
+                        <span class="field-hint" id="original-price-hint"></span>
                     </div>
 
                     <section class="warranty-fields full-width" aria-label="保固與使用時間">
