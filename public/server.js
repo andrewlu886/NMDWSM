@@ -27,7 +27,7 @@ const {
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
-const SCRAPE_RATE_LIMIT = 3;
+const SCRAPE_RATE_LIMIT = 5;
 const SCRAPE_RATE_WINDOW_MS = 60 * 1000;
 const scrapeRequestsByIp = new Map();
 const BLOCKED_STATIC_EXTENSIONS = new Set(['.db', '.sqlite', '.sqlite3']);
