@@ -550,9 +550,6 @@
         <div class="header-main">
             <a href="/" class="logo"> 一次估夠</a>
             
-            <div class="search-wrapper">
-                <input type="text" id="site-search" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)" aria-label="查詢硬體市價">
-            </div>
 
         </div>
         
@@ -623,19 +620,6 @@
         </div>
     </main>
 
-    <script>
-        // 頂部搜尋列邏輯
-        function handleSearch(event) {
-            if (event.key === 'Enter') triggerSearch();
-        }
-
-        function triggerSearch() {
-            const input = document.getElementById('site-search');
-            if (input && input.value.trim()) {
-                window.location.href = `/scrape?keyword=${encodeURIComponent(input.value.trim())}`;
-            }
-        }
-    </script>
     <script src="./recommend.js?v=20260913-1"></script>
     <script src="./chat-widget.js"></script>
 </body>

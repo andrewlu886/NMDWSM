@@ -44,7 +44,7 @@ body > header.recommend-header {
 body > header .header-main,
 .recommend-header-main {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 400px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center !important;
     width: auto !important;
     max-width: 1100px !important;

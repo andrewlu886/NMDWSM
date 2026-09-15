@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchTimer;
     let searchController;
     let selectedModel = null;
+    let resultRequestId = 0;
 
     const categoryNames = {
         cpu: 'CPU',
@@ -47,6 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function formatMoney(value) {
         return `NT$ ${Number(value || 0).toLocaleString('zh-TW')}`;
+    }
+
+    function resetResult(category) {
+        resultRequestId += 1;
+        document.getElementById('result-empty').hidden = true;
+        document.getElementById('result-content').hidden = false;
+        document.getElementById('result-category').textContent = categoryNames[category];
+        document.getElementById('result-price').textContent = formatMoney(0);
+        document.getElementById('result-range').textContent = '—';
+        document.getElementById('result-model').textContent = '—';
+        document.getElementById('result-warranty').textContent = '—';
+        document.getElementById('result-note').textContent = '';
+        warrantyResultRow.hidden = category === 'ram';
+        submitButton.disabled = false;
+        submitButton.textContent = '開始估價';
     }
 
     function normalizeModel(value) {
@@ -316,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.setAttribute('aria-selected', String(active));
             });
             categoryInput.value = tab.dataset.category;
-            warrantyResultRow.hidden = tab.dataset.category === 'ram';
+            resetResult(tab.dataset.category);
             modelInput.value = '';
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
@@ -351,6 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!form.reportValidity()) return;
+        const requestId = ++resultRequestId;
         submitButton.disabled = true;
         submitButton.textContent = '處理中...';
         formMessage.textContent = '';
@@ -378,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
+            if (requestId !== resultRequestId || payload.category !== categoryInput.value) return;
             if (!response.ok || !result.success) throw new Error(result.message || '估價失敗');
 
             document.getElementById('result-empty').hidden = true;
@@ -404,10 +422,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
             extensionField.hidden = !result.warranty.extensionAvailable;
         } catch (error) {
-            formMessage.textContent = error.message || '估價失敗，請稍後再試。';
+            if (requestId === resultRequestId) {
+                formMessage.textContent = error.message || '估價失敗，請稍後再試。';
+            }
         } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = '開始估價';
+            if (requestId === resultRequestId) {
+                submitButton.disabled = false;
+                submitButton.textContent = '開始估價';
+            }
         }
     });
 

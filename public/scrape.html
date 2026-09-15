@@ -424,9 +424,6 @@
         <div class="header-main">
             <a href="/" class="logo">一次估夠</a>
             
-            <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)">
-            </div>
 
         </div>
         
@@ -477,20 +474,6 @@
                 fetchPrices();
             }
         };
-
-        function triggerSearch() {
-            const input = document.querySelector('.nav-search');
-            if (input && input.value.trim()) {
-                document.getElementById('keyword-input').value = input.value.trim();
-                fetchPrices();
-            }
-        }
-
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                triggerSearch();
-            }
-        }
 
         function handleKeyPressSearch(event) {
             if (event.key === 'Enter') fetchPrices();
