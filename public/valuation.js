@@ -115,14 +115,15 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceInput.dataset.autoFilled = 'reference';
             originalPriceLabel.textContent = price.basis === 'chipset_base'
                 ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
-            originalPriceHint.textContent = `${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）。可直接修改，估價會以欄位內價格計算。`;
+            originalPriceHint.textContent = `已帶入 ${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）。修改後會以欄位內價格估價。`;
             return true;
         }
         if (applyCpuPrice(item)) return true;
         if (item.gpuPricing) {
             originalPriceInput.value = item.gpuPricing.launchPriceNtd;
             originalPriceInput.dataset.autoFilled = 'amd';
-            originalPriceHint.textContent = `已帶入 ${item.canonicalModel} 的模型發售原價 ${formatMoney(item.gpuPricing.launchPriceNtd)}。可直接修改，估價會以欄位內價格計算。`;
+            originalPriceLabel.textContent = '模型發售價（NTD）';
+            originalPriceHint.textContent = `已帶入 ${item.canonicalModel} 的模型發售價 ${formatMoney(item.gpuPricing.launchPriceNtd)}。修改後會以欄位內價格估價。`;
             return true;
         }
         clearAutoFilledPrice();
@@ -146,8 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modelIdInput.value = matched.id;
         originalPriceInput.value = matched.gpuPricing.launchPriceNtd;
         originalPriceInput.dataset.autoFilled = 'amd';
+        originalPriceLabel.textContent = '模型發售價（NTD）';
         originalPriceHint.textContent =
-            `已辨識 ${matched.canonicalModel}，自動填入新品參考價 ${formatMoney(matched.gpuPricing.launchPriceNtd)}。可直接修改，估價會以欄位內價格計算。`;
+            `已辨識 ${matched.canonicalModel}，自動填入模型發售價 ${formatMoney(matched.gpuPricing.launchPriceNtd)}。修改後會以欄位內價格估價。`;
         showDetected(matched);
     }
 
@@ -207,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
                 modelIdInput.value = item.id;
+                delete originalPriceInput.dataset.userEdited;
                 applyPrice(item);
                 showDetected(item);
                 hideSuggestions();
@@ -245,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             if (exactMatch) {
                 modelIdInput.value = exactMatch.id;
-                applyPrice(exactMatch);
+                if (!originalPriceInput.dataset.userEdited) applyPrice(exactMatch);
                 showDetected(exactMatch);
             }
         } catch (error) {
@@ -263,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modelInput.addEventListener('input', () => {
         if (searchController) searchController.abort();
         clearAutoFilledPrice();
+        delete originalPriceInput.dataset.userEdited;
         clearDetected();
         hideSuggestions();
         updateCpuWarrantyControl(modelInput.value);
@@ -276,6 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
     modelInput.addEventListener('focus', scheduleSearch);
     originalPriceInput.addEventListener('input', () => {
         delete originalPriceInput.dataset.autoFilled;
+        originalPriceInput.dataset.userEdited = 'true';
+        originalPriceHint.textContent = Number(originalPriceInput.value) > 0
+            ? `已改為 ${formatMoney(originalPriceInput.value)}；估價會以目前欄位價格計算。`
+            : '請填入大於 0 的價格；已收錄型號也可重新選取來帶入參考價。';
     });
     document.addEventListener('click', (event) => {
         if (!event.target.closest('.model-search-field')) hideSuggestions();
@@ -294,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modelInput.value = '';
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
+            delete originalPriceInput.dataset.userEdited;
             totalWarrantyInput.value = '';
             cpuWarrantySelect.value = '36';
             modelInput.placeholder = fieldExamples[tab.dataset.category].model;
@@ -306,9 +315,12 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
                 ? '參考價／晶片組估價基準價（NTD）' : '新品參考價（NTD）';
-            originalPriceHint.textContent = tab.dataset.category === 'motherboard'
-                ? '晶片組資料為二手估價基準底價，非新品售價。'
-                : '選取已收錄型號可帶入價格；預設使用單買價，不套用搭板優惠。';
+            originalPriceHint.textContent = {
+                cpu: '選取已收錄 CPU 可帶入新品參考價；修改後以欄位內價格估價。',
+                gpu: '已收錄顯示卡可帶入參考價，AMD 模型帶入發售價；修改後以欄位內價格估價。',
+                motherboard: '晶片組資料為二手估價基準底價，非新品售價；修改後以欄位內價格估價。',
+                ram: '記憶體尚未收錄型號價格，請手動填入；估價以欄位內價格計算。'
+            }[tab.dataset.category];
             const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號。'
