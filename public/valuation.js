@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
+    const resultEmpty = document.getElementById('result-empty');
+    const resultContent = document.getElementById('result-content');
+    const resultEmptyTitle = resultEmpty.querySelector('h3');
+    const resultEmptyText = resultEmpty.querySelector('p');
     const originalPriceInput = document.getElementById('original-price');
     const originalPriceLabel = document.getElementById('original-price-label');
     const originalPriceHint = document.getElementById('original-price-hint');
@@ -52,8 +56,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetResult(category) {
         resultRequestId += 1;
-        document.getElementById('result-empty').hidden = true;
-        document.getElementById('result-content').hidden = false;
+        resultEmpty.hidden = true;
+        resultContent.hidden = false;
+        clearResultDetails(category);
+        submitButton.disabled = false;
+        submitButton.textContent = '開始估價';
+    }
+
+    function clearResultDetails(category) {
         document.getElementById('result-category').textContent = categoryNames[category];
         document.getElementById('result-price').textContent = formatMoney(0);
         document.getElementById('result-range').textContent = '—';
@@ -61,8 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('result-warranty').textContent = '—';
         document.getElementById('result-note').textContent = '';
         warrantyResultRow.hidden = category === 'ram';
-        submitButton.disabled = false;
-        submitButton.textContent = '開始估價';
     }
 
     function normalizeModel(value) {
@@ -387,8 +395,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (payload.category === 'ram') delete payload.totalWarrantyMonths;
 
         try {
-            document.getElementById('result-content').hidden = true;
-            document.getElementById('result-empty').hidden = false;
+            clearResultDetails(payload.category);
+            resultEmptyTitle.textContent = '等待估價資料';
+            resultEmptyText.textContent = '完成左側欄位後，測試計算結果會顯示在這裡。';
+            resultContent.hidden = true;
+            resultEmpty.hidden = false;
             const response = await fetch('/api/valuation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -398,8 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (requestId !== resultRequestId || payload.category !== categoryInput.value) return;
             if (!response.ok || !result.success) throw new Error(result.message || '估價失敗');
 
-            document.getElementById('result-empty').hidden = true;
-            document.getElementById('result-content').hidden = false;
+            resultEmpty.hidden = true;
+            resultContent.hidden = false;
             document.getElementById('result-category').textContent = categoryNames[payload.category];
             document.getElementById('result-price').textContent = formatMoney(result.price);
             document.getElementById('result-range').textContent =
@@ -424,6 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             if (requestId === resultRequestId) {
                 formMessage.textContent = error.message || '估價失敗，請稍後再試。';
+                if (error.message === '目前尚未支援此型號') {
+                    resultEmptyTitle.textContent = error.message;
+                    resultEmptyText.textContent = '此型號目前沒有適用的估價公式，因此不提供估價金額。';
+                }
             }
         } finally {
             if (requestId === resultRequestId) {

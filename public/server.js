@@ -21,8 +21,8 @@ const db = require('./db.js');
 const { searchProducts } = require('../src/services/search');
 const { getRecommendations } = require('../src/services/recommendation');
 const {
-    TEST_WARNING, calculateValuation, calculateNvidiaGpuValuation,
-    getNvidiaGpuPricingProfile, isNvidiaGpuModel
+    TEST_WARNING, UNSUPPORTED_MODEL_MESSAGE, calculateValuation, calculateNvidiaGpuValuation,
+    getNvidiaGpuPricingProfile, isNvidiaGpuModel, isLegacyIntelCoreCpuModel
 } = require('../src/services/valuation');
 
 const PORT = process.env.PORT || 3000;
@@ -249,6 +249,9 @@ const server = http.createServer(async(req, res) => {
                 (!Number.isFinite(submittedWarrantyMonths) || submittedWarrantyMonths < 0)) {
                 return sendJson(res, 400, { success: false, message: '保固總月數不可小於 0。' });
             }
+            if (category === 'cpu' && isLegacyIntelCoreCpuModel(payload.model)) {
+                return sendJson(res, 400, { success: false, message: UNSUPPORTED_MODEL_MESSAGE });
+            }
             const extensionRegistered = ['yes', 'no', 'unknown'].includes(payload.extensionRegistered)
                 ? payload.extensionRegistered
                 : 'unknown';
@@ -281,11 +284,12 @@ const server = http.createServer(async(req, res) => {
             const formulaConfig = await db.getValuationFormulaConfig();
             const nvidiaCandidate = category === 'gpu' && !resolved.gpuPricing &&
                 isNvidiaGpuModel(payload.model, resolved.model && resolved.model.manufacturer);
-            if (nvidiaCandidate && !getNvidiaGpuPricingProfile(
+            const hasNvidiaFormula = nvidiaCandidate && Boolean(getNvidiaGpuPricingProfile(
                 payload.model, warranty.totalMonths, formulaConfig.nvidiaGpu
-            )) {
+            ));
+            if (category === 'gpu' && !resolved.gpuPricing && !hasNvidiaFormula) {
                 return sendJson(res, 400, {
-                    success: false, message: '目前沒有對應的 NVIDIA 估價公式。'
+                    success: false, message: UNSUPPORTED_MODEL_MESSAGE
                 });
             }
             if (!resolved.gpuPricing && !resolved.cpuPricing && !resolved.referencePrice && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {

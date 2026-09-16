@@ -1,4 +1,5 @@
 const TEST_WARNING = '目前使用測試公式，結果僅供功能測試，不代表實際市場價格。';
+const UNSUPPORTED_MODEL_MESSAGE = '目前尚未支援此型號';
 const { valuationFormulaRules } = require('../data/valuation-formulas');
 
 const conditionFactors = {
@@ -102,6 +103,9 @@ function requireOriginalPrice(input) {
 }
 
 function calculateCpuAndMotherboardValuation(input) {
+  if (input.category === 'cpu' && isLegacyIntelCoreCpuModel(input.model)) {
+    throw new TypeError(UNSUPPORTED_MODEL_MESSAGE);
+  }
   const originalPrice = requireOriginalPrice(input);
   const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
   const monthlyDecayRate = Number(getFormulaConfig(input).motherboard.monthlyDecayRate);
@@ -150,6 +154,18 @@ function calculateWarrantyDecay(profile, warrantyRate, inWarrantyMonths) {
     decay += (warrantyRate / (wholeMonths + 1)) * partialMonth;
   }
   return decay;
+}
+
+function isLegacyIntelCoreCpuModel(modelInput) {
+  const model = String(modelInput || '').normalize('NFKC').toUpperCase();
+  const match = model.match(/(?:^|[^A-Z0-9])(?:INTEL[\s-]+)?(?:CORE[\s-]+)?I[3579][\s-]*(\d{3,5})(?!\d)/);
+  if (!match) return false;
+  const digits = match[1];
+  const firstTwo = Number(digits.slice(0, 2));
+  const generation = digits.length === 3 ? 1
+    : digits.length === 5 || (firstTwo >= 10 && firstTwo <= 19)
+      ? firstTwo : Number(digits[0]);
+  return generation >= 1 && generation <= 11;
 }
 
 function getIntelCpuPricingProfile(modelInput, formulaProfiles = intelCpuPricingProfiles) {
@@ -388,6 +404,7 @@ function calculateTestValuation(input) {
 
 function calculateValuation(input) {
   if (input.category === 'cpu') {
+    if (isLegacyIntelCoreCpuModel(input.model)) throw new TypeError(UNSUPPORTED_MODEL_MESSAGE);
     return calculateIntelCpuValuation(input) || calculateCpuAndMotherboardValuation(input);
   }
   if (input.category === 'motherboard') {
@@ -399,9 +416,7 @@ function calculateValuation(input) {
   if (input.category === 'gpu') {
     const nvidiaResult = calculateNvidiaGpuValuation(input);
     if (nvidiaResult) return nvidiaResult;
-    if (isNvidiaGpuModel(input.model, input.manufacturer)) {
-      throw new TypeError('目前沒有對應的 NVIDIA 估價公式。');
-    }
+    throw new TypeError(UNSUPPORTED_MODEL_MESSAGE);
   }
   if (input.category === 'ram') {
     return calculateRamValuation(input);
@@ -411,10 +426,12 @@ function calculateValuation(input) {
 
 module.exports = {
   TEST_WARNING,
+  UNSUPPORTED_MODEL_MESSAGE,
   calculateValuation,
   calculateTestValuation,
   calculateCpuAndMotherboardValuation,
   calculateIntelCpuValuation,
+  isLegacyIntelCoreCpuModel,
   getIntelCpuPricingProfile,
   calculateAmdGpuValuation,
   calculateNvidiaGpuValuation,
