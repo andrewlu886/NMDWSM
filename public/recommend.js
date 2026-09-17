@@ -2,21 +2,11 @@
     const form = document.getElementById('recommend-form');
     const submitButton = document.getElementById('recommend-submit');
     const resultDisplay = document.getElementById('result-display');
-    const searchInput = document.getElementById('site-search');
     const productTypeSelect = document.getElementById('productType');
     const usageField = document.getElementById('usage-field');
     const usageSelect = document.getElementById('usage');
     const componentTypeField = document.getElementById('component-type-field');
     const componentTypeSelect = document.getElementById('componentType');
-
-    function goToPriceSearch() {
-        const keyword = searchInput.value.trim();
-        if (keyword) window.location.href = `/scrape?keyword=${encodeURIComponent(keyword)}`;
-    }
-
-    searchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') goToPriceSearch();
-    });
 
     function addTextElement(parent, tag, className, text) {
         const element = document.createElement(tag);
