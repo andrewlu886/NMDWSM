@@ -809,7 +809,8 @@
         } else if (brand.includes("ASRock_其他驅動")) {
             targetUrl = `https://www.asrock.com/support/index.tw.asp?cat=Drivers`;
         } else if (brand.includes("Intel")) {
-            targetUrl = `https://www.intel.com.tw/content/www/tw/zh/search.html#q=${encodedModel}&cf-tabfilter=Downloads`;
+            const intelQuery = encodeURIComponent(model.replace(/-/g, ' '));
+            targetUrl = `https://www.intel.com.tw/content/www/tw/zh/search.html#q=${intelQuery}&cf-tabfilter=Downloads`;
         }
 
         if (targetUrl) {

@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryNames = {
         cpu: 'CPU',
         gpu: '顯示卡',
-        motherboard: '主機板',
         ram: '記憶體'
     };
     const matchLabels = {
@@ -46,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fieldExamples = {
         cpu: { model: '例如：Intel Core Ultra 7 265K' },
         gpu: { model: '例如：ASUS TUF Gaming RTX 4070 Super' },
-        motherboard: { model: '例如：ASUS TUF Gaming B650-Plus WiFi' },
         ram: { model: '例如：Kingston Fury Beast DDR5-6000 32GB' }
     };
 
@@ -100,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalWarrantyInput.value = '';
             totalWarrantyLabel.htmlFor = 'elapsed-months';
             totalWarrantyHint.textContent = '記憶體估價不使用保固月數，僅依購買時間與公式計算。';
-            elapsedMonthsHint.textContent = '請填記憶體已使用幾個月，系統會按月份套用衰減公式。';
+            elapsedMonthsHint.textContent = '請填記憶體已使用幾個月。';
             return;
         }
         elapsedMonthsHint.textContent = '請填從購買或保固起算至今已經過幾個月。';
@@ -128,9 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         totalWarrantyInput.disabled = false;
         totalWarrantyInput.required = true;
         totalWarrantyLabel.htmlFor = 'total-warranty-months';
-        totalWarrantyHint.textContent = categoryInput.value === 'gpu'
-            ? 'NVIDIA RTX 30、40、50 可輸入保固月數；30、40 系列借用同級 50 系列係數。已使用月數為 0 時保固衰減尚未開始。'
-            : '請填產品完整保固共有幾個月。';
+        totalWarrantyHint.textContent = '請填產品完整保固共有幾個月。';
     }
 
     function clearAutoFilledPrice() {
@@ -154,8 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const price = item.referencePrice;
             originalPriceInput.value = price.priceNtd;
             originalPriceInput.dataset.autoFilled = 'reference';
-            originalPriceLabel.textContent = price.basis === 'chipset_base'
-                ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
+            originalPriceLabel.textContent = '新品參考價（NTD）';
             originalPriceHint.textContent = `已帶入 ${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）。修改後會以欄位內價格估價。`;
             return true;
         }
@@ -245,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
             const detail = document.createElement('span');
             const price = item.referencePrice?.priceNtd ?? item.cpuPricing?.referencePriceNtd ?? item.gpuPricing?.launchPriceNtd;
-            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（基準底價，非完整產品型號）' : ''}`;
+            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}`;
             button.append(title, detail);
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
@@ -263,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchModels() {
         const category = categoryInput.value;
         const query = modelInput.value.trim();
-        if (!['cpu', 'gpu', 'motherboard'].includes(category) || query.length < 2) {
+        if (!['cpu', 'gpu'].includes(category) || query.length < 2) {
             hideSuggestions();
             return;
         }
@@ -353,21 +348,18 @@ document.addEventListener('DOMContentLoaded', () => {
             formMessage.textContent = '';
             const isGpu = tab.dataset.category === 'gpu';
             originalPriceInput.required = !isGpu;
-            originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
-                ? '參考價／晶片組估價基準價（NTD）'
-                : tab.dataset.category === 'ram' ? '原價（NTD）' : '新品參考價（NTD）';
+            originalPriceLabel.textContent = tab.dataset.category === 'ram' ? '原價（NTD）' : '新品參考價（NTD）';
             originalPriceHint.textContent = {
                 cpu: '選取已收錄 CPU 可帶入新品參考價；修改後以欄位內價格估價。',
-                gpu: '已收錄顯示卡可帶入參考價，AMD 模型帶入發售價；修改後以欄位內價格估價。',
-                motherboard: '晶片組資料為二手估價基準底價，非新品售價；修改後以欄位內價格估價。',
-                ram: '請填入圖中括號內整個 P₀ × e^K 的原價；估價只按已使用月數衰減。'
+                gpu: '',
+                ram: ''
             }[tab.dataset.category];
-            const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
+            const hasAutocomplete = ['cpu', 'gpu'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號。'
                 : tab.dataset.category === 'gpu'
                     ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
-                    : '此分類尚未收錄型號，可手動輸入並使用分類預設保固。';
+                    : '';
             updateCpuWarrantyControl('');
         });
     });

@@ -205,7 +205,7 @@ const server = http.createServer(async(req, res) => {
             const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
             const query = String(parsedUrl.searchParams.get('q') || '').trim();
             const brand = String(parsedUrl.searchParams.get('brand') || '').trim();
-            if (!['cpu', 'gpu', 'motherboard'].includes(category)) {
+            if (!['cpu', 'gpu'].includes(category)) {
                 return sendJson(res, 200, { success: true, data: [] });
             }
             if (!query) return sendJson(res, 200, { success: true, data: [] });
@@ -232,7 +232,7 @@ const server = http.createServer(async(req, res) => {
             }
             const category = String(payload.category).trim().toLowerCase();
             const brand = String(payload.brand || '').trim();
-            const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram']);
+            const allowedCategories = new Set(['cpu', 'gpu', 'ram']);
             const originalPrice = Number(payload.originalPrice);
             const hasSubmittedPrice = Number.isFinite(originalPrice) && originalPrice > 0;
             const submittedWarrantyMonths = payload.totalWarrantyMonths === undefined || payload.totalWarrantyMonths === ''
