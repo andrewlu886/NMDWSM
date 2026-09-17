@@ -85,11 +85,27 @@ async function seedImportedReferencePrices(runUpdate) {
     source_row INTEGER NOT NULL, imported_at TEXT NOT NULL,
     PRIMARY KEY(platform, chipset, source_file)
   )`);
-  const put = async (category, brand, model, price, type, notes, source) => runUpdate(
-    `INSERT INTO hardware_reference_prices VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(category, brand, model, offer_type, source_file) DO UPDATE SET
-       price_ntd=excluded.price_ntd, notes=excluded.notes`,
-    [category, brand, model, price, type, notes, source, '2026-09-10']);
+  const put = async (category, brand, model, price, type, notes, source) => {
+    if (category === 'cpu') {
+      // 來源可由使用者修改；以型號與報價種類判斷是否已有價格，避免重建舊來源。
+      return runUpdate(
+        `INSERT INTO hardware_reference_prices
+         (category, brand, model, price_ntd, offer_type, notes, source_file, imported_at)
+         SELECT ?, ?, ?, ?, ?, ?, ?, ?
+         WHERE NOT EXISTS (
+           SELECT 1 FROM hardware_reference_prices
+           WHERE category = ? AND brand = ? AND model = ? AND offer_type = ?
+         )`,
+        [category, brand, model, price, type, notes, source, '2026-09-10',
+          category, brand, model, type]
+      );
+    }
+    return runUpdate(
+      `INSERT INTO hardware_reference_prices VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(category, brand, model, offer_type, source_file) DO UPDATE SET
+         price_ntd=excluded.price_ntd, notes=excluded.notes`,
+      [category, brand, model, price, type, notes, source, '2026-09-10']);
+  };
   for (const [index, [brand, model, price]] of gpuRows.entries()) {
     await put('gpu', brand, model, price, 'standalone',
       '截圖參考價，未查核現貨；型號依原文保留',

@@ -224,7 +224,7 @@ async function seedHardwareCatalog() {
       );
     }
 
-    await runUpdate('DELETE FROM hardware_cpu_pricing_models');
+    // CPU 價格由資料庫維護，初始清單只補入尚未存在的價格。
     for (const item of intelCpuPricingModels) {
       const model = await runQueryOne(
         'SELECT id FROM hardware_models WHERE category = ? AND normalized_model = ?',
@@ -234,7 +234,8 @@ async function seedHardwareCatalog() {
       await runUpdate(
         `INSERT INTO hardware_cpu_pricing_models
          (hardware_model_id, reference_price_ntd, source_name, source_url, source_checked_at)
-         VALUES (?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(hardware_model_id) DO NOTHING`,
         [model.id, item.referencePriceNtd, item.sourceName, item.sourceUrl, item.sourceCheckedAt]
       );
     }
