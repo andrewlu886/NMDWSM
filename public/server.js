@@ -18,6 +18,7 @@ for (const envFile of envCandidates) {
 
 // SQLite 資料庫
 const db = require('./db.js');
+const { isBodyTooLarge, parseJsonBody } = require('./json-body');
 const { searchProducts } = require('../src/services/search');
 const { getRecommendations } = require('../src/services/recommendation');
 const {
@@ -65,21 +66,6 @@ function isBlockedStaticFile(filePath) {
     const fileName = path.basename(filePath).toLowerCase();
     const ext = path.extname(fileName);
     return BLOCKED_STATIC_EXTENSIONS.has(ext) || BLOCKED_STATIC_FILES.has(fileName);
-}
-
-function parseJsonBody(req) {
-    return new Promise((resolve, reject) => {
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
-            try {
-                resolve(body ? JSON.parse(body) : {});
-            } catch (error) {
-                reject(error);
-            }
-        });
-        req.on('error', reject);
-    });
 }
 
 function getClientIp(req) {
@@ -195,7 +181,10 @@ const server = http.createServer(async(req, res) => {
         } catch (error) {
             console.error('❌ API 推薦處理發生錯誤:', error);
             if (!res.headersSent) {
-                sendJson(res, 500, { success: false, message: '伺服器內部錯誤' });
+                sendJson(res, isBodyTooLarge(error) ? 413 : 500, {
+                    success: false,
+                    message: isBodyTooLarge(error) ? error.message : '伺服器內部錯誤'
+                });
             }
         }
 
@@ -388,7 +377,10 @@ const server = http.createServer(async(req, res) => {
             });
         } catch (error) {
             console.error('❌ 估價處理失敗:', error);
-            sendJson(res, 500, { success: false, message: '估價資料處理失敗，請稍後再試。' });
+            sendJson(res, isBodyTooLarge(error) ? 413 : 500, {
+                success: false,
+                message: isBodyTooLarge(error) ? error.message : '估價資料處理失敗，請稍後再試。'
+            });
         }
 
     } else if ((pathname === '/api/chat' || pathname === '/api/chat/') && req.method === 'POST') {

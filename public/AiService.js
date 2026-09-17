@@ -1,6 +1,7 @@
 // --- AiService.js (NLP.js 輕量版) ---
 const fs = require('fs');
 const path = require('path');
+const { isBodyTooLarge, parseJsonBody } = require('./json-body');
 
 let NlpManager;
 let manager;
@@ -136,18 +137,6 @@ async function trainNlpModel() {
     }
 }
 
-function parseJsonBody(req) {
-    return new Promise((resolve, reject) => {
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
-            try { resolve(body ? JSON.parse(body) : {}); } 
-            catch (err) { resolve({}); }
-        });
-        req.on('error', reject);
-    });
-}
-
 function escapeCSV(text) {
     if (!text) return '""';
     return `"${String(text).replace(/"/g, '""')}"`;
@@ -155,7 +144,13 @@ function escapeCSV(text) {
 
 async function handle(req, res) {
     try {
-        const body = await parseJsonBody(req);
+        let body;
+        try {
+            body = await parseJsonBody(req);
+        } catch (error) {
+            if (!(error instanceof SyntaxError)) throw error;
+            body = {};
+        }
         const rawMessages = Array.isArray(body.messages) ? body.messages : [];
         
         // 取得使用者最後一句話作為 NLP 的判斷依據
@@ -202,8 +197,11 @@ async function handle(req, res) {
 
     } catch (error) {
         console.error('❌ NLP 服務發生錯誤:', error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ success: false, message: '系統錯誤' }));
+        res.writeHead(isBodyTooLarge(error) ? 413 : 500, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({
+            success: false,
+            message: isBodyTooLarge(error) ? error.message : '系統錯誤'
+        }));
     }
 }
 
