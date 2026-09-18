@@ -340,14 +340,16 @@ async function seedHardwareCatalog() {
         old5080.warrantyRates?.['48'] === 0.018 && old5080.warrantyRates?.['60'] === 0.014;
       const isMisread5080 = old5080?.k === 0.110 && old5080.warrantyRates?.['36'] === 0.010 &&
         old5080.warrantyRates?.['48'] === 0.008 && old5080.warrantyRates?.['60'] === 0.006;
-      if (isOriginal5090 || isMistaken5090 || isPrevious5080 || isMisread5080) {
+      const isPreviousK5080 = old5080?.k === 0.107 && old5080.warrantyRates?.['36'] === 0.008 &&
+        old5080.warrantyRates?.['48'] === 0.006 && old5080.warrantyRates?.['60'] === 0.005;
+      if (isOriginal5090 || isMistaken5090 || isPrevious5080 || isMisread5080 || isPreviousK5080) {
         if (isOriginal5090 || isMistaken5090) nvidiaConfig['5090'] = valuationFormulaRules.nvidiaGpu['5090'];
-        if (isPrevious5080 || isMisread5080) nvidiaConfig['5080'] = valuationFormulaRules.nvidiaGpu['5080'];
+        if (isPrevious5080 || isMisread5080 || isPreviousK5080) nvidiaConfig['5080'] = valuationFormulaRules.nvidiaGpu['5080'];
         await runUpdate(
           `UPDATE valuation_formula_rules
            SET config_json = ?, source_name = ?, updated_at = ? WHERE formula_key = ?`,
-          [JSON.stringify(nvidiaConfig), '使用者提供的 NVIDIA 公式圖；5080 係數修正圖',
-            '2026-09-18', 'nvidiaGpu']
+          [JSON.stringify(nvidiaConfig), '使用者提供的 NVIDIA 公式圖；5080 係數更新為 0.024',
+            '2026-09-19', 'nvidiaGpu']
         );
       }
     }
