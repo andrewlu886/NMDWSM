@@ -194,7 +194,7 @@ const server = http.createServer(async(req, res) => {
             const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
             const query = String(parsedUrl.searchParams.get('q') || '').trim();
             const brand = String(parsedUrl.searchParams.get('brand') || '').trim();
-            if (!['cpu', 'gpu'].includes(category)) {
+            if (!['cpu', 'gpu', 'motherboard'].includes(category)) {
                 return sendJson(res, 200, { success: true, data: [] });
             }
             if (!query) return sendJson(res, 200, { success: true, data: [] });
@@ -221,7 +221,10 @@ const server = http.createServer(async(req, res) => {
             }
             const category = String(payload.category).trim().toLowerCase();
             const brand = String(payload.brand || '').trim();
-            const allowedCategories = new Set(['cpu', 'gpu', 'ram']);
+            const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram']);
+            if (String(payload.model).trim().length > 100) {
+                return sendJson(res, 400, { success: false, message: '完整型號不可超過 100 字。' });
+            }
             const originalPrice = Number(payload.originalPrice);
             const hasSubmittedPrice = Number.isFinite(originalPrice) && originalPrice > 0;
             const submittedWarrantyMonths = payload.totalWarrantyMonths === undefined || payload.totalWarrantyMonths === ''

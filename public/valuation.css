@@ -331,12 +331,15 @@
 }
 
 .detected-hardware dd {
+    min-width: 0;
     margin: 0;
     color: var(--site-navy);
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 .valuation-result {
+    min-width: 0;
     min-height: 340px;
     box-sizing: border-box;
     padding: 26px;
@@ -390,8 +393,10 @@
 
 .result-range strong,
 .result-meta strong {
+    min-width: 0;
     color: var(--site-navy);
     text-align: right;
+    overflow-wrap: anywhere;
 }
 
 .result-note {
