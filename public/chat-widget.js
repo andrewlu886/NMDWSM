@@ -28,7 +28,7 @@
             transform: translateY(1px);
         }
 
-        /* 確保連結換行，視覺上更像獨立按鈕 */
+        /* 確保連結換行 */
         .ai-chat-message.assistant p a.ai-valuation-btn {
             display: block;
             width: fit-content;
@@ -75,10 +75,10 @@
                         <p>您好！我是網站的內建客服助手，請問有什麼我可以幫忙的嗎？</p>
                         <p style="font-size: 13px; color: #666; margin-top: 8px;">您可以試著點擊下方按鈕，或是在聊天欄直接輸入問題：</p>
                         <div class="suggestions-container" style="margin-top: 8px;">
-                            <button class="ai-valuation-btn suggestion-btn" data-query="我想估價顯示卡" type="button">我想估價顯示卡</button>
+                            <button class="ai-valuation-btn suggestion-btn" data-query="可以幫我智慧推薦一台電腦嗎？" type="button">可以幫我智慧推薦一台電腦嗎？</button>
+                            <button class="ai-valuation-btn suggestion-btn" data-query="我想估算我的顯示卡價值" type="button">我想估算我的顯示卡價值</button>
                             <button class="ai-valuation-btn suggestion-btn" data-query="查詢最近的硬體行情" type="button">查詢最近的硬體行情</button>
                             <button class="ai-valuation-btn suggestion-btn" data-query="我要計算電源供應器瓦數" type="button">我要計算電源供應器瓦數</button>
-                        </div>
                     </div>
                 </div>
             </div>
