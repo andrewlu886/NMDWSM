@@ -323,23 +323,27 @@ async function seedHardwareCatalog() {
       );
     }
 
-    // 只升級已知舊版 5090 係數，保留其他 NVIDIA 型號及自訂規則。
+    // 修正誤套到 5090 的圖片係數，並更新舊版 5080；保留其他自訂規則。
     const nvidiaRow = await runQueryOne(
       'SELECT config_json FROM valuation_formula_rules WHERE formula_key = ?', ['nvidiaGpu']
     );
     if (nvidiaRow) {
       const nvidiaConfig = JSON.parse(nvidiaRow.config_json);
       const old5090 = nvidiaConfig['5090'];
+      const old5080 = nvidiaConfig['5080'];
       const isOriginal5090 = old5090?.k === 0.035 && old5090.warrantyRates?.['36'] === 0.030 &&
         old5090.warrantyRates?.['48'] === 0.024 && old5090.warrantyRates?.['60'] === 0.018;
-      const isPrevious5090 = old5090?.k === 0.017 && old5090.warrantyRates?.['36'] === 0.028 &&
-        old5090.warrantyRates?.['48'] === 0.021 && old5090.warrantyRates?.['60'] === 0.017;
-      if (isOriginal5090 || isPrevious5090) {
-        nvidiaConfig['5090'] = valuationFormulaRules.nvidiaGpu['5090'];
+      const isMistaken5090 = old5090?.k === 0.017 && old5090.warrantyRates?.['36'] === 0.017 &&
+        old5090.warrantyRates?.['48'] === undefined && old5090.warrantyRates?.['60'] === 0.010;
+      const isPrevious5080 = old5080?.k === 0.110 && old5080.warrantyRates?.['36'] === 0.023 &&
+        old5080.warrantyRates?.['48'] === 0.018 && old5080.warrantyRates?.['60'] === 0.014;
+      if (isOriginal5090 || isMistaken5090 || isPrevious5080) {
+        if (isOriginal5090 || isMistaken5090) nvidiaConfig['5090'] = valuationFormulaRules.nvidiaGpu['5090'];
+        if (isPrevious5080) nvidiaConfig['5080'] = valuationFormulaRules.nvidiaGpu['5080'];
         await runUpdate(
           `UPDATE valuation_formula_rules
            SET config_json = ?, source_name = ?, updated_at = ? WHERE formula_key = ?`,
-          [JSON.stringify(nvidiaConfig), '使用者提供的 NVIDIA 公式圖；5090 係數更新圖',
+          [JSON.stringify(nvidiaConfig), '使用者提供的 NVIDIA 公式圖；5080 係數更新圖',
             '2026-09-18', 'nvidiaGpu']
         );
       }
