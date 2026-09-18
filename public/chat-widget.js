@@ -79,9 +79,11 @@
                             <button class="ai-valuation-btn suggestion-btn" data-query="我想估算我的顯示卡價值" type="button">我想估算我的顯示卡價值</button>
                             <button class="ai-valuation-btn suggestion-btn" data-query="查詢最近的硬體行情" type="button">查詢最近的硬體行情</button>
                             <button class="ai-valuation-btn suggestion-btn" data-query="我要計算電源供應器瓦數" type="button">我要計算電源供應器瓦數</button>
+                        </div>
                     </div>
                 </div>
             </div>
+            
 
             <form class="ai-chat-form">
                 <label class="sr-only" for="ai-chat-input">輸入訊息</label>
