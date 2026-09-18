@@ -103,9 +103,6 @@ function requireOriginalPrice(input) {
 }
 
 function calculateCpuAndMotherboardValuation(input) {
-  if (input.category === 'motherboard') {
-    throw new TypeError('不支援這個硬體分類。');
-  }
   if (input.category === 'cpu' && isLegacyIntelCoreCpuModel(input.model)) {
     throw new TypeError(UNSUPPORTED_MODEL_MESSAGE);
   }
@@ -411,7 +408,7 @@ function calculateValuation(input) {
     return calculateIntelCpuValuation(input) || calculateCpuAndMotherboardValuation(input);
   }
   if (input.category === 'motherboard') {
-    throw new TypeError('不支援這個硬體分類。');
+    return calculateCpuAndMotherboardValuation(input);
   }
   if (input.category === 'gpu' && input.gpuPricing) {
     return calculateAmdGpuValuation(input);

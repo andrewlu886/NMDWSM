@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryNames = {
         cpu: 'CPU',
         gpu: '顯示卡',
+        motherboard: '主機板',
         ram: '記憶體'
     };
     const matchLabels = {
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fieldExamples = {
         cpu: { model: '例如：Intel Core Ultra 7 265K' },
         gpu: { model: '例如：ASUS TUF Gaming RTX 4070 Super' },
+        motherboard: { model: '例如：AMD AM5 B650' },
         ram: { model: '例如：Kingston Fury Beast DDR5-6000 32GB' }
     };
 
@@ -155,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const price = item.referencePrice;
             originalPriceInput.value = price.priceNtd;
             originalPriceInput.dataset.autoFilled = 'reference';
-            originalPriceLabel.textContent = '新品參考價（NTD）';
+            originalPriceLabel.textContent = price.basis === 'chipset_base'
+                ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
             originalPriceHint.textContent = `已帶入 ${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）。修改後會以欄位內價格估價。`;
             return true;
         }
@@ -380,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
             const detail = document.createElement('span');
             const price = item.referencePrice?.priceNtd ?? item.cpuPricing?.referencePriceNtd ?? item.gpuPricing?.launchPriceNtd;
-            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}`;
+            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（基準底價，非完整產品型號）' : ''}`;
             button.append(title, detail);
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
@@ -398,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchModels() {
         const category = categoryInput.value;
         const query = modelInput.value.trim();
-        if (!['cpu', 'gpu'].includes(category) || query.length < 2) {
+        if (!['cpu', 'gpu', 'motherboard'].includes(category) || query.length < 2) {
             hideSuggestions();
             return;
         }
@@ -450,6 +453,8 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceHint.textContent = '正在查詢顯示卡型號與參考價…';
         } else if (categoryInput.value === 'cpu') {
             originalPriceHint.textContent = '正在查詢已收錄的 CPU 新品價格…';
+        } else if (categoryInput.value === 'motherboard') {
+            originalPriceHint.textContent = '正在查詢主機板晶片組估價基準…';
         }
         scheduleSearch();
     });
@@ -488,18 +493,21 @@ document.addEventListener('DOMContentLoaded', () => {
             formMessage.textContent = '';
             const isGpu = tab.dataset.category === 'gpu';
             originalPriceInput.required = !isGpu;
-            originalPriceLabel.textContent = tab.dataset.category === 'ram' ? '原價（NTD）' : '新品參考價（NTD）';
+            originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
+                ? '參考價／晶片組估價基準價（NTD）'
+                : tab.dataset.category === 'ram' ? '原價（NTD）' : '新品參考價（NTD）';
             originalPriceHint.textContent = {
                 cpu: '選取已收錄 CPU 可帶入新品參考價；修改後以欄位內價格估價。',
                 gpu: '',
+                motherboard: '晶片組資料為二手估價基準底價，非新品售價；修改後以欄位內價格估價。',
                 ram: ''
             }[tab.dataset.category];
-            const hasAutocomplete = ['cpu', 'gpu'].includes(tab.dataset.category);
+            const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
-                ? '輸入至少 2 個字元即可搜尋型號。'
+                ? '輸入至少 2 個字元即可搜尋型號，最多 100 字。'
                 : tab.dataset.category === 'gpu'
                     ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
-                    : '';
+                    : '完整型號最多 100 字。';
             updateCpuWarrantyControl('');
         });
     });
@@ -529,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             clearResultDetails(payload.category);
             resultEmptyTitle.textContent = '等待估價資料';
-            resultEmptyText.textContent = '完成左側欄位後，測試計算結果會顯示在這裡。';
+            resultEmptyText.textContent = '完成左側欄位後，估價結果會顯示在這裡。';
             resultContent.hidden = true;
             resultEmpty.hidden = false;
             const response = await fetch('/api/valuation', {

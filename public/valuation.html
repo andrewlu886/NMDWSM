@@ -6,7 +6,7 @@
     <title>二手硬體估價 | 一次估夠</title>
     <meta name="description" content="查詢硬體型號、保固狀態並測試二手硬體估價流程。">
     <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="./valuation.css">
+    <link rel="stylesheet" href="./valuation.css?v=20260918-1">
     <link rel="stylesheet" href="./site-theme.css">
     <link rel="stylesheet" href="./history.css">
     <style>
@@ -72,7 +72,7 @@
             <div class="valuation-heading-row">
                 <div>
                     <h2>選擇硬體種類</h2>
-                    <p>CPU、顯示卡提供型號與價格建議；記憶體請手動輸入。</p>
+                    <p>CPU、顯示卡提供型號與價格建議；主機板可選擇晶片組估價基準，記憶體請手動輸入。</p>
                 </div>
             </div>
 
@@ -90,9 +90,9 @@
 
                     <div class="field full-width model-search-field">
                         <label for="model">完整型號</label>
-                        <input id="model" name="model" type="text" required autocomplete="off" aria-autocomplete="list" aria-controls="model-suggestions" placeholder="例如：Intel Core Ultra 7 265K">
+                        <input id="model" name="model" type="text" required maxlength="100" autocomplete="off" aria-autocomplete="list" aria-controls="model-suggestions" placeholder="例如：Intel Core Ultra 7 265K">
                         <div id="model-suggestions" class="model-suggestions" role="listbox" hidden></div>
-                        <span class="field-hint" id="model-hint">輸入至少 2 個字元即可搜尋型號。</span>
+                        <span class="field-hint" id="model-hint">輸入至少 2 個字元即可搜尋型號，最多 100 字。</span>
                     </div>
 
                     <div class="field full-width">
@@ -142,11 +142,11 @@
                 <aside class="valuation-result" aria-live="polite">
                     <div class="result-empty" id="result-empty">
                         <h3>等待估價資料</h3>
-                        <p>完成左側欄位後，測試計算結果會顯示在這裡。</p>
+                        <p>完成左側欄位後，估價結果會顯示在這裡。</p>
                     </div>
                     <div class="result-content" id="result-content" hidden>
                         <p class="history-snapshot" id="valuation-snapshot" hidden></p>
-                        <p class="result-label">測試計算結果（<span id="result-category">CPU</span>）</p>
+                        <p class="result-label">估價結果（<span id="result-category">CPU</span>）</p>
                         <p class="result-price" id="result-price">NT$ 0</p>
                         <div class="result-range"><span>測試區間</span><strong id="result-range">—</strong></div>
                         <div class="result-meta"><span>辨識型號</span><strong id="result-model">—</strong></div>
@@ -168,7 +168,7 @@
     </main>
 
     <script src="./history-store.js"></script>
-    <script src="./valuation.js?v=20260917-3"></script>
+    <script src="./valuation.js?v=20260918-2"></script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>
