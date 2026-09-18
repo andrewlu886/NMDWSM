@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="./valuation.css">
     <link rel="stylesheet" href="./site-theme.css">
+    <link rel="stylesheet" href="./history.css">
     <style>
         /* =========================================
            主導覽列 (Main Nav) 動畫底線特效 (兩倍粗)
@@ -144,6 +145,7 @@
                         <p>完成左側欄位後，測試計算結果會顯示在這裡。</p>
                     </div>
                     <div class="result-content" id="result-content" hidden>
+                        <p class="history-snapshot" id="valuation-snapshot" hidden></p>
                         <p class="result-label">測試計算結果（<span id="result-category">CPU</span>）</p>
                         <p class="result-price" id="result-price">NT$ 0</p>
                         <div class="result-range"><span>測試區間</span><strong id="result-range">—</strong></div>
@@ -154,8 +156,18 @@
                 </aside>
             </div>
         </section>
+        <section class="history-panel" aria-labelledby="valuation-history-title">
+            <div class="history-heading">
+                <h2 id="valuation-history-title">估價歷史紀錄</h2>
+                <button type="button" id="valuation-history-clear" hidden>清除全部</button>
+            </div>
+            <p class="history-explanation">只保存在此網站的目前瀏覽器，最多 20 筆。舊估價僅供參考。</p>
+            <p class="history-status" id="valuation-history-status" role="status" aria-live="polite"></p>
+            <div class="history-list" id="valuation-history-list"></div>
+        </section>
     </main>
 
+    <script src="./history-store.js"></script>
     <script src="./valuation.js?v=20260917-3"></script>
     <script src="./chat-widget.js"></script>
 </body>

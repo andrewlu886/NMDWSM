@@ -417,6 +417,7 @@
         }
     </style>
     <link rel="stylesheet" href="./site-theme.css">
+    <link rel="stylesheet" href="./history.css">
 </head>
 <body>
 
@@ -463,10 +464,154 @@
         </div>
 
         <div id="loading">正在查詢各通路商品與價格，請稍候…</div>
+        <p class="history-snapshot" id="market-snapshot" hidden></p>
         <div class="results-list" id="results-container"></div>
+        <section class="history-panel" aria-labelledby="market-history-title">
+            <div class="history-heading">
+                <h2 id="market-history-title">市價查詢歷史紀錄</h2>
+                <button type="button" id="market-history-clear" hidden>清除全部</button>
+            </div>
+            <p class="history-explanation">只保存在此網站的目前瀏覽器，最多 20 筆。紀錄的是查詢當時的刊登價格，並非成交價格。</p>
+            <p class="history-status" id="market-history-status" role="status" aria-live="polite"></p>
+            <div class="history-list" id="market-history-list"></div>
+        </section>
     </main>
 
+    <script src="./history-store.js"></script>
     <script>
+        const marketHistoryList = document.getElementById('market-history-list');
+        const marketHistoryStatus = document.getElementById('market-history-status');
+        const marketHistoryClear = document.getElementById('market-history-clear');
+        const marketSnapshot = document.getElementById('market-snapshot');
+        let marketRequestId = 0;
+
+        function marketDate(value) {
+            return new Date(value).toLocaleString('zh-TW');
+        }
+
+        function restoreMarketCriteria(criteria) {
+            document.getElementById('keyword-input').value = criteria.keyword;
+            document.getElementById('exclude-input').value = criteria.exclude || '';
+            document.querySelectorAll('#platform-checkboxes input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = criteria.platforms.includes(checkbox.value);
+            });
+        }
+
+        function renderMarketResults(items) {
+            const container = document.getElementById('results-container');
+            container.replaceChildren();
+            if (!items.length) {
+                const empty = document.createElement('p');
+                empty.className = 'history-no-results';
+                empty.textContent = '目前沒有找到相關結果，請更換關鍵字或減少排除條件再試一次。';
+                container.appendChild(empty);
+                return;
+            }
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+
+                const info = document.createElement('div');
+                info.className = 'result-info';
+                const platform = document.createElement('span');
+                platform.className = 'platform';
+                platform.textContent = item.platform || '';
+                const name = document.createElement('h4');
+                name.textContent = item.name || '';
+                const displayPrice = (item.price && item.price !== '待實作 DOM 解析') ? `${item.price} 元` : '點擊查看價格';
+                const price = document.createElement('div');
+                price.className = 'price';
+                price.textContent = displayPrice;
+                info.append(platform, name, price);
+                card.appendChild(info);
+
+                try {
+                    const url = new URL(item.url);
+                    if (url.protocol === 'http:' || url.protocol === 'https:') {
+                        const link = document.createElement('a');
+                        link.href = url.href;
+                        link.className = 'btn-link';
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        link.textContent = '前往商場確認';
+                        card.appendChild(link);
+                    }
+                } catch (_) {
+                    // 商品沒有有效連結時仍顯示價格資訊。
+                }
+                container.appendChild(card);
+            });
+        }
+
+        async function refreshMarketHistory() {
+            try {
+                const records = await window.NMDHistory.list('marketSearches');
+                marketHistoryList.replaceChildren();
+                marketHistoryClear.hidden = records.length === 0;
+                if (!records.length) {
+                    marketHistoryStatus.textContent = '目前沒有市價查詢紀錄。';
+                    return;
+                }
+                marketHistoryStatus.textContent = '';
+                records.forEach(record => {
+                    const entry = document.createElement('article');
+                    entry.className = 'history-entry';
+                    const summary = document.createElement('div');
+                    const title = document.createElement('strong');
+                    title.textContent = record.criteria.keyword;
+                    const meta = document.createElement('span');
+                    meta.className = 'history-meta';
+                    meta.textContent = `${marketDate(record.createdAt)} · ${record.results.length} 筆商品 · ${record.criteria.platforms.join('、')}${record.criteria.exclude ? ` · 排除：${record.criteria.exclude}` : ''}`;
+                    summary.append(title, meta);
+                    const actions = document.createElement('div');
+                    actions.className = 'history-actions';
+                    for (const [label, action] of [
+                        ['查看結果', () => {
+                            marketRequestId += 1;
+                            restoreMarketCriteria(record.criteria);
+                            document.getElementById('loading').style.display = 'none';
+                            marketSnapshot.textContent = `查詢當時的市價（${marketDate(record.createdAt)}），不會自動重新查詢。商品價格與連結可能已變動。`;
+                            marketSnapshot.hidden = false;
+                            renderMarketResults(record.results);
+                        }],
+                        ['重新查詢', () => {
+                            restoreMarketCriteria(record.criteria);
+                            fetchPrices();
+                        }],
+                        ['刪除', async () => {
+                            try {
+                                await window.NMDHistory.remove('marketSearches', record.id);
+                                await refreshMarketHistory();
+                            } catch (_) {
+                                marketHistoryStatus.textContent = '刪除紀錄失敗，請稍後再試。';
+                            }
+                        }]
+                    ]) {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.textContent = label;
+                        button.addEventListener('click', action);
+                        actions.appendChild(button);
+                    }
+                    entry.append(summary, actions);
+                    marketHistoryList.appendChild(entry);
+                });
+            } catch (_) {
+                marketHistoryStatus.textContent = '此瀏覽器目前無法使用歷史紀錄，市價查詢仍可正常使用。';
+            }
+        }
+
+        marketHistoryClear.addEventListener('click', async () => {
+            if (!window.confirm('確定要清除所有市價查詢歷史紀錄嗎？')) return;
+            try {
+                await window.NMDHistory.clear('marketSearches');
+                await refreshMarketHistory();
+            } catch (_) {
+                marketHistoryStatus.textContent = '清除紀錄失敗，請稍後再試。';
+            }
+        });
+        refreshMarketHistory();
+
         window.onload = function() {
             const keyword = new URLSearchParams(window.location.search).get('keyword');
             if (keyword) {
@@ -486,7 +631,8 @@
             const loading = document.getElementById('loading');
             
             const checkboxes = document.querySelectorAll('#platform-checkboxes input[type="checkbox"]:checked');
-            const selectedPlatforms = Array.from(checkboxes).map(cb => cb.value).join(',');
+            const platforms = Array.from(checkboxes).map(cb => cb.value);
+            const selectedPlatforms = platforms.join(',');
 
             if (selectedPlatforms.length === 0) {
                 alert('請至少選擇一個通路！');
@@ -498,7 +644,9 @@
                 return;
             }
 
-            container.innerHTML = '';
+            const requestId = ++marketRequestId;
+            container.replaceChildren();
+            marketSnapshot.hidden = true;
             loading.style.display = 'block';
 
             try {
@@ -506,53 +654,29 @@
                 if (!response.ok) throw new Error('網路回應不正常');
                 
                 const result = await response.json();
-                console.log("收到後端回傳資料:", result);
+                if (requestId !== marketRequestId) return;
+                if (!result.success || !Array.isArray(result.data)) throw new Error('查詢失敗');
 
                 loading.style.display = 'none';
-
-                if (result.success && result.data && result.data.length > 0) {
-                    result.data.forEach(item => {
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-
-                        const info = document.createElement('div');
-                        info.className = 'result-info';
-                        const platform = document.createElement('span');
-                        platform.className = 'platform';
-                        platform.textContent = item.platform || '';
-                        const name = document.createElement('h4');
-                        name.textContent = item.name || '';
-                        const displayPrice = (item.price && item.price !== "待實作 DOM 解析") ? `${item.price} 元` : "點擊查看價格";
-                        const price = document.createElement('div');
-                        price.className = 'price';
-                        price.textContent = displayPrice;
-                        info.append(platform, name, price);
-                        card.appendChild(info);
-
-                        try {
-                            const url = new URL(item.url);
-                            if (url.protocol === 'http:' || url.protocol === 'https:') {
-                                const link = document.createElement('a');
-                                link.href = url.href;
-                                link.className = 'btn-link';
-                                link.target = '_blank';
-                                link.rel = 'noopener noreferrer';
-                                link.textContent = '前往商場確認';
-                                card.appendChild(link);
-                            }
-                        } catch (_) {
-                            // 商品沒有有效連結時仍顯示價格資訊。
-                        }
-                        container.appendChild(card);
+                renderMarketResults(result.data);
+                try {
+                    await window.NMDHistory.add('marketSearches', {
+                        criteria: { keyword, exclude, platforms },
+                        results: result.data
                     });
-                } else {
-                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%; padding: 2rem; font-size: 1.1rem; background: var(--card-bg); border-radius: 12px;">目前沒有找到相關結果，請更換關鍵字或減少排除條件再試一次。</p>';
+                    await refreshMarketHistory();
+                } catch (_) {
+                    marketHistoryStatus.textContent = '此次查詢未能儲存；查詢結果仍可正常查看。';
                 }
 
             } catch (error) {
+                if (requestId !== marketRequestId) return;
                 loading.style.display = 'none';
                 console.error('Fetch 發生錯誤:', error);
-                container.innerHTML = '<p style="color: var(--accent-color); text-align: center; width: 100%; padding: 2rem; font-size: 1.1rem; background: var(--card-bg); border-radius: 12px; font-weight: bold;">連線失敗：請確認後端伺服器 (server.js) 是否已啟動。</p>';
+                const message = document.createElement('p');
+                message.className = 'history-search-error';
+                message.textContent = '連線失敗：請確認後端伺服器 (server.js) 是否已啟動。';
+                container.replaceChildren(message);
             }
         }
     </script>

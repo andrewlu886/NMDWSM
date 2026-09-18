@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const originalPriceInput = document.getElementById('original-price');
     const originalPriceLabel = document.getElementById('original-price-label');
     const originalPriceHint = document.getElementById('original-price-hint');
+    const historyList = document.getElementById('valuation-history-list');
+    const historyStatus = document.getElementById('valuation-history-status');
+    const historyClear = document.getElementById('valuation-history-clear');
+    const snapshotLabel = document.getElementById('valuation-snapshot');
     let searchTimer;
     let searchController;
     let selectedModel = null;
@@ -62,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearResultDetails(category) {
+        snapshotLabel.hidden = true;
         document.getElementById('result-category').textContent = categoryNames[category];
         document.getElementById('result-price').textContent = formatMoney(0);
         document.getElementById('result-range').textContent = '—';
@@ -196,6 +201,141 @@ document.addEventListener('DOMContentLoaded', () => {
         const extensionText = warranty.registrationApplied ? '（已計入登錄延保）' : '';
         return `共 ${warranty.totalMonths} 個月，剩餘 ${warranty.remainingMonths} 個月${extensionText}`;
     }
+
+    function formatDate(value) {
+        return new Date(value).toLocaleString('zh-TW');
+    }
+
+    function renderValuationResult(result, payload, snapshotDate) {
+        resultEmpty.hidden = true;
+        resultContent.hidden = false;
+        snapshotLabel.hidden = !snapshotDate;
+        if (snapshotDate) snapshotLabel.textContent = `查詢當時的估價（${formatDate(snapshotDate)}），不會自動重新估價。`;
+        document.getElementById('result-category').textContent = categoryNames[payload.category] || payload.category;
+        document.getElementById('result-price').textContent = formatMoney(result.price);
+        document.getElementById('result-range').textContent =
+            `${formatMoney(result.range.min)} – ${formatMoney(result.range.max)}`;
+        document.getElementById('result-model').textContent =
+            `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
+        document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
+        warrantyResultRow.hidden = payload.category === 'ram';
+        const nvidiaNote = result.calculation?.profileSourceModel
+            ? `${result.estimatedModelProfile
+                ? `已借用 ${result.profileSourceModel} 係數估價；跨系列係數為推估值，不代表此型號的實測資料。`
+                : '已套用 NVIDIA RTX 50 公式。'}（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減。`
+            : '';
+        document.getElementById('result-note').textContent =
+            [result.fallbackReason, nvidiaNote,
+                payload.category === 'ram' ? '' : result.warranty.note]
+                .filter(Boolean).join(' ');
+    }
+
+    function savedResult(result) {
+        return {
+            price: result.price,
+            range: result.range,
+            hardware: {
+                canonicalBrand: result.hardware.canonicalBrand,
+                canonicalModel: result.hardware.canonicalModel
+            },
+            warranty: result.warranty,
+            fallbackReason: result.fallbackReason,
+            calculation: result.calculation,
+            estimatedModelProfile: result.estimatedModelProfile,
+            profileSourceModel: result.profileSourceModel
+        };
+    }
+
+    function restoreInput(input) {
+        if (categoryInput.value !== input.category) {
+            document.querySelector(`.category-tab[data-category="${input.category}"]`)?.click();
+        }
+        if (searchController) searchController.abort();
+        window.clearTimeout(searchTimer);
+        hideSuggestions();
+        clearDetected();
+        modelInput.value = input.model;
+        modelIdInput.value = input.modelId ?? '';
+        originalPriceInput.value = input.originalPrice;
+        originalPriceInput.dataset.userEdited = 'true';
+        delete originalPriceInput.dataset.autoFilled;
+        updateCpuWarrantyControl(input.model);
+        if (input.category !== 'ram') {
+            totalWarrantyInput.value = input.totalWarrantyMonths;
+            if (!cpuWarrantySelect.hidden) cpuWarrantySelect.value = String(input.totalWarrantyMonths);
+        }
+        document.getElementById('elapsed-months').value = input.elapsedMonths;
+        extensionSelect.value = input.extensionRegistered || 'unknown';
+        formMessage.textContent = '';
+    }
+
+    async function refreshHistory() {
+        try {
+            const records = await window.NMDHistory.list('valuations');
+            historyList.replaceChildren();
+            historyClear.hidden = records.length === 0;
+            if (!records.length) {
+                historyStatus.textContent = '目前沒有估價紀錄。';
+                return;
+            }
+            historyStatus.textContent = '';
+            records.forEach(record => {
+                const entry = document.createElement('article');
+                entry.className = 'history-entry';
+                const summary = document.createElement('div');
+                const title = document.createElement('strong');
+                title.textContent = `${categoryNames[record.input.category] || record.input.category} · ${record.input.model}`;
+                const meta = document.createElement('span');
+                meta.className = 'history-meta';
+                meta.textContent = `${formatDate(record.createdAt)} · ${formatMoney(record.result.price)}`;
+                summary.append(title, meta);
+                const actions = document.createElement('div');
+                actions.className = 'history-actions';
+                for (const [label, action] of [
+                    ['查看結果', () => {
+                        resultRequestId += 1;
+                        submitButton.disabled = false;
+                        submitButton.textContent = '開始估價';
+                        formMessage.textContent = '';
+                        renderValuationResult(record.result, record.input, record.createdAt);
+                    }],
+                    ['重新估價', () => {
+                        restoreInput(record.input);
+                        form.requestSubmit();
+                    }],
+                    ['刪除', async () => {
+                        try {
+                            await window.NMDHistory.remove('valuations', record.id);
+                            await refreshHistory();
+                        } catch (_) {
+                            historyStatus.textContent = '刪除紀錄失敗，請稍後再試。';
+                        }
+                    }]
+                ]) {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.textContent = label;
+                    button.addEventListener('click', action);
+                    actions.appendChild(button);
+                }
+                entry.append(summary, actions);
+                historyList.appendChild(entry);
+            });
+        } catch (_) {
+            historyStatus.textContent = '此瀏覽器目前無法使用歷史紀錄，估價功能仍可正常使用。';
+        }
+    }
+
+    historyClear.addEventListener('click', async () => {
+        if (!window.confirm('確定要清除所有估價歷史紀錄嗎？')) return;
+        try {
+            await window.NMDHistory.clear('valuations');
+            await refreshHistory();
+        } catch (_) {
+            historyStatus.textContent = '清除紀錄失敗，請稍後再試。';
+        }
+    });
+    refreshHistory();
 
     function showDetected(item) {
         selectedModel = item;
@@ -401,29 +541,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (requestId !== resultRequestId || payload.category !== categoryInput.value) return;
             if (!response.ok || !result.success) throw new Error(result.message || '估價失敗');
 
-            resultEmpty.hidden = true;
-            resultContent.hidden = false;
-            document.getElementById('result-category').textContent = categoryNames[payload.category];
-            document.getElementById('result-price').textContent = formatMoney(result.price);
-            document.getElementById('result-range').textContent =
-                `${formatMoney(result.range.min)} – ${formatMoney(result.range.max)}`;
-            document.getElementById('result-model').textContent =
-                `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
-            document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
-            warrantyResultRow.hidden = payload.category === 'ram';
-            const nvidiaNote = result.calculation?.profileSourceModel
-                ? `${result.estimatedModelProfile
-                    ? `已借用 ${result.profileSourceModel} 係數估價；跨系列係數為推估值，不代表此型號的實測資料。`
-                    : '已套用 NVIDIA RTX 50 公式。'}（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減。`
-                : '';
-            document.getElementById('result-note').textContent =
-                [result.fallbackReason, nvidiaNote,
-                    payload.category === 'ram' ? '' : result.warranty.note]
-                    .filter(Boolean).join(' ');
+            renderValuationResult(result, payload);
             detectedPanel.hidden = false;
             document.getElementById('detected-model').textContent =
                 `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
             extensionField.hidden = !result.warranty.extensionAvailable;
+            try {
+                await window.NMDHistory.add('valuations', { input: payload, result: savedResult(result) });
+                await refreshHistory();
+            } catch (_) {
+                historyStatus.textContent = '此次估價未能儲存；估價結果仍可正常查看。';
+            }
         } catch (error) {
             if (requestId === resultRequestId) {
                 formMessage.textContent = error.message || '估價失敗，請稍後再試。';
