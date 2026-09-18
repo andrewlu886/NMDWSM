@@ -234,6 +234,13 @@ const ramRows = {
     ['G.SKILL', 'Trident Z5 RGB White 64GB (2x32GB) DDR5-6000 CL30 F5-6000J3040G32GX2-TZ5RW', 29000],
     ['G.SKILL', 'Trident Z5 RGB Black 32GB (2x16GB) DDR5-6000 CL30 F5-6000J3038F16GX2-TZ5NR', 19400],
     ['G.SKILL', 'Trident Z5 RGB Black 64GB (2x32GB) DDR5-6000 CL30 F5-6000J3040G32GX2-TZ5NR', 37900]
+  ],
+  '235716': [
+    ['Kingston', 'FURY Beast RGB Black 32GB (2x16GB) DDR5-6400 CL32', 14800]
+  ],
+  '235735': [
+    ['Kingston', 'FURY Beast Black 64GB (2x32GB) DDR5-6400 CL32 (獸獵者)', 28800],
+    ['Kingston', 'FURY Renegade RGB Black 32GB (2x16GB) DDR5-7200 KF572C38RSAK2-32', 16800]
   ]
 };
 
@@ -246,6 +253,11 @@ const brandNames = {
 
 const normalize = (value) => String(value || '').normalize('NFKC').toUpperCase()
   .replace(/[^\p{L}\p{N}]/gu, '');
+
+const sourceFiles = {
+  '235716': '2026-09-18_235716.png',
+  '235735': '2026-09-18_235735.png'
+};
 
 async function seedScreenshotReferencePrices(runUpdate, runQueryOne) {
   await runUpdate(`CREATE TABLE IF NOT EXISTS hardware_motherboard_product_chipsets (
@@ -261,7 +273,7 @@ async function seedScreenshotReferencePrices(runUpdate, runQueryOne) {
     ['gpu', gpuRows], ['motherboard', motherboardRows], ['ram', ramRows]
   ]) {
     for (const [time, rows] of Object.entries(groups)) {
-      const source = `螢幕擷取畫面 2026-09-18 ${time}.png`;
+      const source = sourceFiles[time] || `螢幕擷取畫面 2026-09-18 ${time}.png`;
       for (const [brand, model, price, extra, vramGb] of rows) {
         if (!brand || !model || !Number.isInteger(price) || price <= 0 ||
             `${brand} ${model}`.length > 100) {
