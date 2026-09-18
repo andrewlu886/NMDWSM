@@ -86,6 +86,13 @@ async function trainNlpModel() {
     manager.addDocument('zh', '掰掰', 'intent.thanks');
     manager.addAnswer('zh', 'intent.thanks', '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！');
 
+    // 市價查詢意圖
+    manager.addDocument('zh', '買', 'intent.scrape');
+    manager.addDocument('zh', '市場價格', 'intent.scrape');
+    manager.addDocument('zh', '市價', 'intent.scrape');
+    manager.addDocument('zh', '行情', 'intent.scrape');
+    manager.addAnswer('zh', 'intent.scrape', '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)');
+
     // 零件估價與裝機推薦意圖
     manager.addDocument('zh', '我想估價', 'intent.valuation');
     manager.addDocument('zh', '顯示卡', 'intent.valuation');
@@ -107,12 +114,6 @@ async function trainNlpModel() {
     manager.addDocument('zh', '電腦菜單', 'intent.valuation');
     manager.addDocument('zh', '幫我配電腦', 'intent.valuation');
     manager.addAnswer('zh', 'intent.valuation', '需要尋找裝機推薦嗎？請點擊這裡：[點此前往智慧推薦](/recommend)');
-
-    // 市價查詢意圖
-    manager.addDocument('zh', '市場價格', 'intent.scrape');
-    manager.addDocument('zh', '市價', 'intent.scrape');
-    manager.addDocument('zh', '行情', 'intent.scrape');
-    manager.addAnswer('zh', 'intent.scrape', '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)');
 
     // 瓦數計算意圖
     manager.addDocument('zh', '瓦數計算', 'intent.tools');
