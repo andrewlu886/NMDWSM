@@ -170,10 +170,10 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const options = await parseJsonBody(req);
-            if (options.productType === 'component' && !['cpu', 'gpu'].includes(options.componentType)) {
+            if (!['desktop', 'laptop'].includes(options.productType)) {
                 return sendJson(res, 400, {
                     success: false,
-                    message: '選擇電腦零件時，componentType 必須為 cpu 或 gpu'
+                    message: '商品種類僅支援套裝主機或筆記型電腦'
                 });
             }
             const result = await getRecommendations(options);

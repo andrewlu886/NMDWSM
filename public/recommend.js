@@ -3,10 +3,7 @@
     const submitButton = document.getElementById('recommend-submit');
     const resultDisplay = document.getElementById('result-display');
     const productTypeSelect = document.getElementById('productType');
-    const usageField = document.getElementById('usage-field');
     const usageSelect = document.getElementById('usage');
-    const componentTypeField = document.getElementById('component-type-field');
-    const componentTypeSelect = document.getElementById('componentType');
 
     function addTextElement(parent, tag, className, text) {
         const element = document.createElement(tag);
@@ -25,24 +22,12 @@
         return `/tools.html?${params.toString()}`;
     }
 
-    function syncRequirementFields() {
-        const isComponent = productTypeSelect.value === 'component';
-        usageField.hidden = isComponent;
-        usageSelect.disabled = isComponent;
-        componentTypeField.hidden = !isComponent;
-        componentTypeSelect.disabled = !isComponent;
-        componentTypeSelect.required = isComponent;
-    }
-
-    productTypeSelect.addEventListener('change', syncRequirementFields);
-    syncRequirementFields();
-
-    function renderResults(result, budget, usage, productType, componentType) {
+    function renderResults(result, budget, usage) {
         resultDisplay.replaceChildren();
         const calculatorLink = document.querySelector('.recommend-calculator-link');
         calculatorLink.href = '/tools';
 
-        if (usage === 'gaming' && productType !== 'component' && budget < 30000) {
+        if (usage === 'gaming' && budget < 30000) {
             addTextElement(
                 resultDisplay,
                 'div',
@@ -84,19 +69,12 @@
 
             const tags = document.createElement('div');
             tags.className = 'recommend-tags';
-            let specs;
-            if (productType === 'component') {
-                specs = componentType === 'cpu'
-                    ? [`CPU：${item.cpu}`]
-                    : [`GPU：${item.gpu}`];
-            } else {
-                specs = [
-                    `CPU：${item.cpu && item.cpu !== 'UNKNOWN' ? item.cpu : '未提供'}`,
-                    `GPU：${item.gpu && item.gpu !== 'UNKNOWN' ? item.gpu : '未提供'}`,
-                    `RAM：${item.ram && item.ram !== 'UNKNOWN' ? item.ram : '未提供'}`,
-                    `系統：${item.os && item.os !== 'UNKNOWN' ? item.os : '未提供'}`
-                ];
-            }
+            const specs = [
+                `CPU：${item.cpu && item.cpu !== 'UNKNOWN' ? item.cpu : '未提供'}`,
+                `GPU：${item.gpu && item.gpu !== 'UNKNOWN' ? item.gpu : '未提供'}`,
+                `RAM：${item.ram && item.ram !== 'UNKNOWN' ? item.ram : '未提供'}`,
+                `系統：${item.os && item.os !== 'UNKNOWN' ? item.os : '未提供'}`
+            ];
             specs.forEach((spec) => addTextElement(tags, 'span', 'recommend-tag', spec));
             card.appendChild(tags);
 
@@ -123,16 +101,10 @@
 
         const budget = Number(document.getElementById('budget').value);
         const productType = productTypeSelect.value;
-        const usage = usageSelect.disabled ? '' : usageSelect.value;
-        const componentType = productType === 'component' ? componentTypeSelect.value : '';
+        const usage = usageSelect.value;
 
         if (!Number.isFinite(budget) || budget <= 0) {
             document.getElementById('budget').focus();
-            return;
-        }
-
-        if (productType === 'component' && !componentType) {
-            componentTypeSelect.focus();
             return;
         }
 
@@ -144,13 +116,11 @@
             const response = await fetch('/api/recommend', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productType === 'component'
-                    ? { budget, productType, componentType }
-                    : { budget, usage, productType })
+                body: JSON.stringify({ budget, usage, productType })
             });
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            renderResults(await response.json(), budget, usage, productType, componentType);
+            renderResults(await response.json(), budget, usage);
         } catch (error) {
             console.error('推薦服務錯誤：', error);
             resultDisplay.innerHTML = '<div class="recommend-error">目前無法取得推薦資料，請確認網站伺服器正在運作，稍後再試一次。</div>';
