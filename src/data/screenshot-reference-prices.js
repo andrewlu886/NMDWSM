@@ -236,11 +236,11 @@ const ramRows = {
     ['G.SKILL', 'Trident Z5 RGB Black 64GB (2x32GB) DDR5-6000 CL30 F5-6000J3040G32GX2-TZ5NR', 37900]
   ],
   '235716': [
-    ['Kingston', 'FURY Beast RGB Black 32GB (2x16GB) DDR5-6400 CL32', 14800]
+    ['Kingston', 'FURY Beast RGB Black 32GB DDR5-6400 CL32', 14800]
   ],
   '235735': [
-    ['Kingston', 'FURY Beast Black 64GB (2x32GB) DDR5-6400 CL32 (獸獵者)', 28800],
-    ['Kingston', 'FURY Renegade RGB Black 32GB (2x16GB) DDR5-7200 KF572C38RSAK2-32', 16800]
+    ['Kingston', 'FURY Beast Black 64GB DDR5-6400 CL32 (獸獵者)', 28800],
+    ['Kingston', 'FURY Renegade RGB Black 32GB DDR5-7200 KF572C38RSAK2-32', 16800]
   ]
 };
 
