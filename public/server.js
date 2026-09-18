@@ -222,8 +222,17 @@ const server = http.createServer(async(req, res) => {
             const category = String(payload.category).trim().toLowerCase();
             const brand = String(payload.brand || '').trim();
             const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram']);
-            if (String(payload.model).trim().length > 100) {
-                return sendJson(res, 400, { success: false, message: '完整型號不可超過 100 字。' });
+            const inputLabels = {
+                model: '完整型號', originalPrice: '新品參考價',
+                totalWarrantyMonths: '保固總月數', elapsedMonths: '已使用月數'
+            };
+            const oversizedField = Object.keys(inputLabels).find(
+                field => String(payload[field] ?? '').length > 100
+            );
+            if (oversizedField) {
+                return sendJson(res, 400, {
+                    success: false, message: `${inputLabels[oversizedField]}不可超過 100 字。`
+                });
             }
             const originalPrice = Number(payload.originalPrice);
             const hasSubmittedPrice = Number.isFinite(originalPrice) && originalPrice > 0;

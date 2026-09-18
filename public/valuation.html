@@ -97,23 +97,25 @@
 
                     <div class="field full-width">
                         <label for="original-price" id="original-price-label">目前全新參考價（NTD）</label>
-                        <input id="original-price" name="originalPrice" type="number" min="1" step="1" required placeholder="例如：10200">
+                        <input id="original-price" name="originalPrice" type="number" min="1" step="1" required data-maxlength="100" placeholder="例如：10200">
                         <span class="field-hint" id="original-price-hint"></span>
                     </div>
 
                     <section class="warranty-fields full-width" aria-label="保固與使用時間">
                         <div class="field" id="warranty-months-field">
                             <label for="total-warranty-months" id="total-warranty-label">保固總月數</label>
-                            <input id="total-warranty-months" name="totalWarrantyMonths" type="number" min="0" step="1" required placeholder="例如：36">
-                            <select id="cpu-warranty-months" aria-label="CPU 保固總月數" hidden disabled>
-                                <option value="36" selected>36 個月（基本保固）</option>
-                                <option value="60">60 個月（延長保固）</option>
+                            <select id="cpu-warranty-months" aria-label="常用保固總月數">
+                                <option value="" selected>選擇常用月數或自行輸入</option>
+                                <option value="36">36 個月</option>
+                                <option value="60">60 個月</option>
+                                <option value="custom">自行輸入</option>
                             </select>
-                            <span class="field-hint" id="total-warranty-hint">請填產品完整保固共有幾個月。</span>
+                            <input id="total-warranty-months" name="totalWarrantyMonths" type="number" min="0" step="1" required data-maxlength="100" aria-label="自行輸入保固總月數" placeholder="或自行輸入月數">
+                            <span class="field-hint" id="total-warranty-hint">可選 36／60 個月，或自行輸入；最多 100 字。</span>
                         </div>
                         <div class="field" id="elapsed-months-field">
                             <label for="elapsed-months">已使用月數</label>
-                            <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required value="0">
+                            <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required data-maxlength="100" value="0">
                             <span class="field-hint" id="elapsed-months-hint">請填從購買或保固起算至今已經過幾個月。</span>
                         </div>
                     </section>
@@ -168,7 +170,7 @@
     </main>
 
     <script src="./history-store.js"></script>
-    <script src="./valuation.js?v=20260918-2"></script>
+    <script src="./valuation.js?v=20260918-3"></script>
     <script src="./chat-widget.js"></script>
 </body>
 </html>
