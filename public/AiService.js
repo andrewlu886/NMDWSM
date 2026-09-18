@@ -97,7 +97,7 @@ async function trainNlpModel() {
     manager.addDocument('zh', '行情', 'intent.scrape');
     manager.addAnswer('zh', 'intent.scrape', '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)');
 
-    // 零件估價與裝機推薦意圖
+    // 零件估價意圖
     manager.addDocument('zh', '我想估價', 'intent.valuation');
     manager.addDocument('zh', '顯示卡', 'intent.valuation');
     manager.addDocument('zh', 'CPU', 'intent.valuation');
@@ -107,17 +107,17 @@ async function trainNlpModel() {
     manager.addDocument('zh', '電腦零件', 'intent.valuation');
     manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
 
-    // 新增裝機與推薦相關詞彙
-    manager.addDocument('zh', '一體機', 'intent.valuation');
-    manager.addDocument('zh', '套裝機', 'intent.valuation');
-    manager.addDocument('zh', '電腦裝機', 'intent.valuation');
-    manager.addDocument('zh', '我想找電腦裝機', 'intent.valuation');
-    manager.addDocument('zh', '組裝電腦', 'intent.valuation');
-    manager.addDocument('zh', '智慧推薦', 'intent.valuation');
-    manager.addDocument('zh', '推薦電腦', 'intent.valuation');
-    manager.addDocument('zh', '電腦菜單', 'intent.valuation');
-    manager.addDocument('zh', '幫我配電腦', 'intent.valuation');
-    manager.addAnswer('zh', 'intent.valuation', '需要尋找裝機推薦嗎？請點擊這裡：[點此前往智慧推薦](/recommend)');
+    // 裝機與智慧推薦使用獨立意圖，避免隨機回覆估價連結。
+    manager.addDocument('zh', '一體機', 'intent.recommend');
+    manager.addDocument('zh', '套裝機', 'intent.recommend');
+    manager.addDocument('zh', '電腦裝機', 'intent.recommend');
+    manager.addDocument('zh', '我想找電腦裝機', 'intent.recommend');
+    manager.addDocument('zh', '組裝電腦', 'intent.recommend');
+    manager.addDocument('zh', '智慧推薦', 'intent.recommend');
+    manager.addDocument('zh', '推薦電腦', 'intent.recommend');
+    manager.addDocument('zh', '電腦菜單', 'intent.recommend');
+    manager.addDocument('zh', '幫我配電腦', 'intent.recommend');
+    manager.addAnswer('zh', 'intent.recommend', '需要尋找裝機推薦嗎？請點擊這裡：[點此前往智慧推薦](/recommend)');
 
     // 瓦數計算意圖
     manager.addDocument('zh', '瓦數計算', 'intent.tools');
@@ -182,7 +182,8 @@ async function handle(req, res) {
 
         let answer = fallbackAnswerForUserMessage(userMessage);
 
-        if (manager) {
+        // 明確詢問「智慧推薦」時，保留已判定的推薦連結，不讓分類模型改成估價回覆。
+        if (manager && !/智慧推薦/.test(userMessage)) {
             try {
                 const response = await manager.process('zh', userMessage);
                 
