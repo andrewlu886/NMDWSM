@@ -159,8 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceInput.value = price.priceNtd;
             originalPriceInput.dataset.autoFilled = 'reference';
             originalPriceLabel.textContent = price.basis === 'chipset_base'
-                ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
-            originalPriceHint.textContent = `已帶入 ${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）。修改後會以欄位內價格估價。`;
+                ? '估價參考價（NTD，非新品售價）'
+                : price.basis === 'retail_fallback' ? '截圖商品單買價（NTD，基準價例外）'
+                    : '新品參考價（NTD）';
+            originalPriceHint.textContent = price.basis === 'chipset_base' && price.productPriceNtd
+                ? `截圖商品單買價 ${formatMoney(price.productPriceNtd)}（${price.productPriceSource}）；估價使用 ${formatMoney(price.priceNtd)}。修改後以欄位價格估價。`
+                : `已帶入 ${formatMoney(price.priceNtd)} · 依主機板系列估算（來源：${price.source}）。修改後會以欄位內價格估價。`;
             return true;
         }
         if (applyCpuPrice(item)) return true;
@@ -345,7 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedModel = item;
         detectedPanel.hidden = false;
         document.getElementById('detected-model').textContent =
-            `${item.manufacturer} ${item.canonicalModel}`;
+            item.canonicalModel.startsWith(item.manufacturer)
+                ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
         extensionField.hidden = !item.warranty.extensionAvailable;
         if (!item.warranty.extensionAvailable) extensionSelect.value = 'unknown';
         updateCpuWarrantyControl(item.canonicalModel);
@@ -384,7 +389,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
             const detail = document.createElement('span');
             const price = item.referencePrice?.priceNtd ?? item.cpuPricing?.referencePriceNtd ?? item.gpuPricing?.launchPriceNtd;
-            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（基準底價，非完整產品型號）' : ''}`;
+            detail.textContent = item.referencePrice?.basis === 'chipset_base' && item.referencePrice.productPriceNtd
+                ? `商品單買價 ${formatMoney(item.referencePrice.productPriceNtd)} · 估價基準價 ${formatMoney(price)}`
+                : `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（估價參考價）' : item.referencePrice?.basis === 'retail_fallback' ? '（使用商品價）' : ''}`;
             button.append(title, detail);
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
@@ -402,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchModels() {
         const category = categoryInput.value;
         const query = modelInput.value.trim();
-        if (!['cpu', 'gpu', 'motherboard'].includes(category) || query.length < 2) {
+        if (!['cpu', 'gpu', 'motherboard', 'ram'].includes(category) || query.length < 2) {
             hideSuggestions();
             return;
         }
@@ -455,7 +462,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (categoryInput.value === 'cpu') {
             originalPriceHint.textContent = '正在查詢已收錄的 CPU 新品價格…';
         } else if (categoryInput.value === 'motherboard') {
-            originalPriceHint.textContent = '正在查詢主機板晶片組估價基準…';
+            originalPriceHint.textContent = '正在查詢主機板商品與估價參考價…';
+        } else if (categoryInput.value === 'ram') {
+            originalPriceHint.textContent = '正在查詢記憶體型號與截圖參考價…';
         }
         scheduleSearch();
     });
@@ -495,15 +504,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const isGpu = tab.dataset.category === 'gpu';
             originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
-                ? '參考價／晶片組估價基準價（NTD）'
+                ? '商品價／估價參考價（NTD）'
                 : tab.dataset.category === 'ram' ? '原價（NTD）' : '新品參考價（NTD）';
             originalPriceHint.textContent = {
                 cpu: '選取已收錄 CPU 可帶入新品參考價；修改後以欄位內價格估價。',
                 gpu: '',
-                motherboard: '晶片組資料為二手估價基準底價，非新品售價；修改後以欄位內價格估價。',
-                ram: ''
+                motherboard: '商品單買價與估價參考價分開顯示；沒有參考價時才使用截圖商品價。',
+                ram: '選取已收錄記憶體可帶入截圖單條／整組參考價。'
             }[tab.dataset.category];
-            const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
+            const hasAutocomplete = ['cpu', 'gpu', 'motherboard', 'ram'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
                 ? '輸入至少 2 個字元即可搜尋型號，最多 100 字。'
                 : tab.dataset.category === 'gpu'
@@ -551,7 +560,9 @@ document.addEventListener('DOMContentLoaded', () => {
             renderValuationResult(result, payload);
             detectedPanel.hidden = false;
             document.getElementById('detected-model').textContent =
-                `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
+                result.hardware.canonicalModel.startsWith(result.hardware.canonicalBrand)
+                    ? result.hardware.canonicalModel
+                    : `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
             extensionField.hidden = !result.warranty.extensionAvailable;
             try {
                 await window.NMDHistory.add('valuations', { input: payload, result: savedResult(result) });

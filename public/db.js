@@ -2,6 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
 const { seedImportedReferencePrices } = require('../src/data/imported-reference-prices');
+const { seedScreenshotReferencePrices } = require('../src/data/screenshot-reference-prices');
 const {
   hardwareModels,
   brandAliases,
@@ -337,19 +338,22 @@ async function seedHardwareCatalog() {
         old5090.warrantyRates?.['48'] === undefined && old5090.warrantyRates?.['60'] === 0.010;
       const isPrevious5080 = old5080?.k === 0.110 && old5080.warrantyRates?.['36'] === 0.023 &&
         old5080.warrantyRates?.['48'] === 0.018 && old5080.warrantyRates?.['60'] === 0.014;
-      if (isOriginal5090 || isMistaken5090 || isPrevious5080) {
+      const isMisread5080 = old5080?.k === 0.110 && old5080.warrantyRates?.['36'] === 0.010 &&
+        old5080.warrantyRates?.['48'] === 0.008 && old5080.warrantyRates?.['60'] === 0.006;
+      if (isOriginal5090 || isMistaken5090 || isPrevious5080 || isMisread5080) {
         if (isOriginal5090 || isMistaken5090) nvidiaConfig['5090'] = valuationFormulaRules.nvidiaGpu['5090'];
-        if (isPrevious5080) nvidiaConfig['5080'] = valuationFormulaRules.nvidiaGpu['5080'];
+        if (isPrevious5080 || isMisread5080) nvidiaConfig['5080'] = valuationFormulaRules.nvidiaGpu['5080'];
         await runUpdate(
           `UPDATE valuation_formula_rules
            SET config_json = ?, source_name = ?, updated_at = ? WHERE formula_key = ?`,
-          [JSON.stringify(nvidiaConfig), '使用者提供的 NVIDIA 公式圖；5080 係數更新圖',
+          [JSON.stringify(nvidiaConfig), '使用者提供的 NVIDIA 公式圖；5080 係數修正圖',
             '2026-09-18', 'nvidiaGpu']
         );
       }
     }
 
     await seedImportedReferencePrices(runUpdate);
+    await seedScreenshotReferencePrices(runUpdate, runQueryOne);
     await runUpdate('COMMIT');
   } catch (error) {
     await runUpdate('ROLLBACK');
@@ -418,15 +422,25 @@ async function getValuationFormulaConfig() {
 }
 
 async function findGpuPricingModel(model) {
-  if (!model || model.category !== 'gpu' || model.manufacturer !== 'AMD') return null;
-  const row = await runQueryOne(
-    'SELECT * FROM hardware_gpu_pricing_models WHERE hardware_model_id = ?',
-    [model.id]
+  if (!model || model.category !== 'gpu') return null;
+  const variant = await runQueryOne(
+    'SELECT * FROM hardware_gpu_variant_specs WHERE hardware_model_id = ?', [model.id]
   );
+  if (!variant && model.manufacturer !== 'AMD') return null;
+  const row = variant
+    ? await runQueryOne(
+      `SELECT pricing.* FROM hardware_gpu_pricing_models pricing
+       JOIN hardware_models base ON base.id = pricing.hardware_model_id
+       WHERE base.category = 'gpu' AND base.manufacturer = 'AMD' AND base.normalized_model = ?`,
+      [normalizeHardwareText(variant.base_model)]
+    )
+    : await runQueryOne(
+      'SELECT * FROM hardware_gpu_pricing_models WHERE hardware_model_id = ?', [model.id]
+    );
   if (!row) return null;
   return {
     generation: row.generation,
-    vramGb: row.vram_gb,
+    vramGb: variant ? variant.vram_gb : row.vram_gb,
     launchPriceNtd: row.launch_price_ntd,
     floorPriceNtd: row.floor_price_ntd,
     latestGeneration: row.latest_generation,
@@ -454,6 +468,36 @@ async function findCpuPricingModel(model) {
 async function findReferencePrice(model) {
   if (!model) return null;
   if (model.category === 'motherboard') {
+    const product = await runQueryOne(
+      'SELECT * FROM hardware_motherboard_product_chipsets WHERE hardware_model_id = ?',
+      [model.id]
+    );
+    if (product) {
+      const retail = await runQueryOne(
+        `SELECT * FROM hardware_reference_prices
+         WHERE category = 'motherboard' AND brand = ? AND model = ?
+           AND offer_type = 'standalone' ORDER BY imported_at DESC LIMIT 1`,
+        [model.manufacturer, model.canonicalModel.slice(model.manufacturer.length + 1)]
+      );
+      const baseline = await runQueryOne(
+        `SELECT * FROM hardware_motherboard_base_prices
+         WHERE platform = ? AND (chipset = ? OR (' / ' || chipset || ' / ') LIKE ?)
+         ORDER BY imported_at DESC LIMIT 1`,
+        [product.platform, product.chipset, `% / ${product.chipset} / %`]
+      );
+      if (baseline) return {
+        priceNtd: baseline.base_price_ntd, basis: 'chipset_base',
+        source: baseline.source_file, notes: baseline.price_basis,
+        productPriceNtd: retail?.price_ntd ?? null,
+        productPriceSource: retail?.source_file ?? null
+      };
+      if (retail) return {
+        priceNtd: retail.price_ntd, basis: 'retail_fallback',
+        source: retail.source_file,
+        notes: '尚無估價參考價，例外使用截圖商品單買價估價'
+      };
+      return null;
+    }
     const rows = await runQuery('SELECT * FROM hardware_motherboard_base_prices');
     const row = rows.find(r => normalizeHardwareText(`${r.platform} ${r.chipset}`) === normalizeHardwareText(model.canonicalModel));
     return row ? { priceNtd: row.base_price_ntd, basis: 'chipset_base', source: row.source_file, notes: row.price_basis } : null;
@@ -517,7 +561,7 @@ async function resolveWarranty({ category, brand, model, elapsedMonths = 0, exte
 const HardwareCatalog = {
   async searchModels({ category, brand, query, limit = 8 }) {
     const normalizedQuery = normalizeHardwareText(query);
-    if (!['cpu', 'gpu', 'motherboard'].includes(category) || !normalizedQuery) return [];
+    if (!['cpu', 'gpu', 'motherboard', 'ram'].includes(category) || !normalizedQuery) return [];
     const safeLimit = Math.min(Math.max(Number(limit) || 8, 1), 20);
     const rows = await runQuery(
       `SELECT DISTINCT hm.* FROM hardware_models hm

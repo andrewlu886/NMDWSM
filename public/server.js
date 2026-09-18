@@ -194,7 +194,7 @@ const server = http.createServer(async(req, res) => {
             const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
             const query = String(parsedUrl.searchParams.get('q') || '').trim();
             const brand = String(parsedUrl.searchParams.get('brand') || '').trim();
-            if (!['cpu', 'gpu', 'motherboard'].includes(category)) {
+            if (!['cpu', 'gpu', 'motherboard', 'ram'].includes(category)) {
                 return sendJson(res, 200, { success: true, data: [] });
             }
             if (!query) return sendJson(res, 200, { success: true, data: [] });
@@ -313,13 +313,14 @@ const server = http.createServer(async(req, res) => {
                 formulaConfig
             };
             if (resolved.gpuPricing) {
+                const gpuReferencePrice = hasSubmittedPrice
+                    ? originalPrice
+                    : resolved.referencePrice?.priceNtd ?? resolved.gpuPricing.launchPriceNtd;
                 formulaInput.gpuPricing = {
                     ...resolved.gpuPricing,
-                    ...(hasSubmittedPrice ? { launchPriceNtd: originalPrice } : {})
+                    launchPriceNtd: gpuReferencePrice
                 };
-                formulaInput.originalPrice = hasSubmittedPrice
-                    ? originalPrice
-                    : resolved.gpuPricing.launchPriceNtd;
+                formulaInput.originalPrice = gpuReferencePrice;
             } else if (resolved.cpuPricing) {
                 formulaInput.cpuPricing = resolved.cpuPricing;
                 formulaInput.originalPrice = hasSubmittedPrice
