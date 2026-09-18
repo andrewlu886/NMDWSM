@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
         user_input: '使用者填寫資料'
     };
     const fieldExamples = {
-        cpu: { model: '例如：Intel Core Ultra 7 265K' },
-        gpu: { model: '例如：ASUS TUF Gaming RTX 4070 Super' },
+        cpu: { model: '例如：Intel Core i5 14400' },
+        gpu: { model: '例如：GIGABYTE AORUS RTX5070 MASTER 12G' },
         motherboard: { model: '例如：AMD AM5 B650' },
         ram: { model: '例如：Kingston Fury Beast DDR5-6000 32GB' }
     };

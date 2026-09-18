@@ -241,6 +241,9 @@ const ramRows = {
   '235735': [
     ['Kingston', 'FURY Beast Black 64GB DDR5-6400 CL32 (獸獵者)', 28800],
     ['Kingston', 'FURY Renegade RGB Black 32GB DDR5-7200 KF572C38RSAK2-32', 16800]
+  ],
+  'user-20260919': [
+    ['Kingston', 'FURY Beast DDR5-6000 32GB', 17500]
   ]
 };
 
@@ -256,7 +259,8 @@ const normalize = (value) => String(value || '').normalize('NFKC').toUpperCase()
 
 const sourceFiles = {
   '235716': '2026-09-18_235716.png',
-  '235735': '2026-09-18_235735.png'
+  '235735': '2026-09-18_235735.png',
+  'user-20260919': '使用者提供 2026-09-19'
 };
 
 async function seedScreenshotReferencePrices(runUpdate, runQueryOne) {
