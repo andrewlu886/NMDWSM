@@ -39,7 +39,7 @@ function fallbackAnswerForUserMessage(userMessage) {
         return '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)';
     }
 
-    if (/行情|市價|市場價格|價格查詢|買賣|價格/.test(normalized)) {
+    if (/行情|市價|市場價格|價格查詢|買賣|價格|想買|要買|購買/.test(normalized)) {
         return '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)';
     }
 
@@ -88,6 +88,10 @@ async function trainNlpModel() {
 
     // 市價查詢意圖
     manager.addDocument('zh', '買', 'intent.scrape');
+    manager.addDocument('zh', '我想買', 'intent.scrape');
+    manager.addDocument('zh', '我要買', 'intent.scrape');
+    manager.addDocument('zh', '我要買顯卡', 'intent.scrape');
+    manager.addDocument('zh', '我想購買', 'intent.scrape');
     manager.addDocument('zh', '市場價格', 'intent.scrape');
     manager.addDocument('zh', '市價', 'intent.scrape');
     manager.addDocument('zh', '行情', 'intent.scrape');
@@ -132,6 +136,10 @@ async function trainNlpModel() {
     manager.addDocument('zh', '誰是', 'intent.none');
     manager.addDocument('zh', '這是什麼', 'intent.none');
     manager.addDocument('zh', '天氣', 'intent.none');
+    manager.addDocument('zh', 'BBB', 'intent.none');
+    manager.addDocument('zh', '123', 'intent.none');
+    manager.addDocument('zh', '測試', 'intent.none');
+    manager.addDocument('zh', '隨便', 'intent.none');
     manager.addAnswer('zh', 'intent.none', '不好意思，這部分超出了我的專業範圍😅。我能幫助你跳轉到電腦零組件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？');
 
     try {
@@ -179,7 +187,7 @@ async function handle(req, res) {
                 const response = await manager.process('zh', userMessage);
                 
                 // 若意圖為 None 或信心分數 (score) 低於 0.6，強制使用兜底回覆避免亂猜
-                if (response.intent === 'None' || response.score < 0.6) {
+                if (response.intent === 'None' || response.score < 0.75) {
                     answer = fallbackAnswerForUserMessage(userMessage);
                 } else {
                     answer = response.answer || fallbackAnswerForUserMessage(userMessage);
