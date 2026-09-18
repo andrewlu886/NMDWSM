@@ -31,8 +31,12 @@ function fallbackAnswerForUserMessage(userMessage) {
     }
 
     // 裝機、推薦、組裝等關鍵字
-    if (/估價|價錢|價格|價格估算|幾錢|多少|裝機|組裝|推薦|菜單|配電腦/.test(normalized)) {
-        return '需要估算電腦零件的價格或尋找裝機推薦嗎？請點擊這裡：[點此前往零件估價工具](/valuation)';
+    if (/裝機|組裝|推薦|菜單|配電腦/.test(normalized)) {
+        return '尋找裝機推薦嗎？請點擊這裡：[點此前往智慧推薦](/recommend)';
+    }
+    
+    if (/估價|價錢|價格|價格估算|幾錢|多少/.test(normalized)) {
+        return '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)';
     }
 
     if (/行情|市價|市場價格|價格查詢|買賣|價格/.test(normalized)) {
@@ -90,8 +94,11 @@ async function trainNlpModel() {
     manager.addDocument('zh', '主機板', 'intent.valuation');
     manager.addDocument('zh', '滑鼠鍵盤', 'intent.valuation');
     manager.addDocument('zh', '電腦零件', 'intent.valuation');
+    manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
 
     // 新增裝機與推薦相關詞彙
+    manager.addDocument('zh', '一體機', 'intent.valuation');
+    manager.addDocument('zh', '套裝機', 'intent.valuation');
     manager.addDocument('zh', '電腦裝機', 'intent.valuation');
     manager.addDocument('zh', '我想找電腦裝機', 'intent.valuation');
     manager.addDocument('zh', '組裝電腦', 'intent.valuation');
@@ -99,7 +106,7 @@ async function trainNlpModel() {
     manager.addDocument('zh', '推薦電腦', 'intent.valuation');
     manager.addDocument('zh', '電腦菜單', 'intent.valuation');
     manager.addDocument('zh', '幫我配電腦', 'intent.valuation');
-    manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格或尋找裝機推薦嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
+    manager.addAnswer('zh', 'intent.valuation', '需要尋找裝機推薦嗎？請點擊這裡：[點此前往智慧推薦](/recommend)');
 
     // 市價查詢意圖
     manager.addDocument('zh', '市場價格', 'intent.scrape');
