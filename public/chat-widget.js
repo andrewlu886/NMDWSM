@@ -35,6 +35,20 @@
             width: fit-content;
         }
 
+        .ai-chat-message.assistant a.ai-product-link {
+            color: #0066cc;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            overflow-wrap: anywhere;
+        }
+        .ai-chat-message.assistant a.ai-product-link:hover {
+            color: #004999;
+        }
+        .ai-chat-message.assistant a.ai-product-link:focus-visible {
+            outline: 2px solid #0066cc;
+            outline-offset: 2px;
+        }
+
         /* 建議問題的特殊樣式 */
         .suggestion-btn {
             background-color: var(--ai-chat-accent-soft, #eaf7ff);
@@ -270,7 +284,7 @@
                     const url = new URL(href);
                     if (!['http:', 'https:'].includes(url.protocol)) return match;
                     const safeHref = url.href.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-                    return `<a href="${safeHref}" class="ai-valuation-btn" target="_blank" rel="noopener noreferrer">${label}</a>`;
+                    return `<a href="${safeHref}" class="ai-product-link" target="_blank" rel="noopener noreferrer">${label}</a>`;
                 } catch {
                     return match;
                 }

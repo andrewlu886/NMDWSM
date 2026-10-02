@@ -395,6 +395,29 @@ async function executeTool(name, args) {
   }
 }
 
+function formatRecommendationAnswer(result) {
+  if (!result.recommendations.length) {
+    return '目前沒有找到符合條件的商品，可以調整預算或用途後再試一次。[調整推薦條件](/recommend)';
+  }
+  const lines = ['根據您的需求，找到以下推薦商品（點選藍字可查看商品頁）：'];
+  result.recommendations.slice(0, 3).forEach((item, index) => {
+    const title = String(item.title || '查看推薦商品').replace(/[\[\]\r\n]/g, '').trim();
+    let productUrl = `/scrape?keyword=${encodeURIComponent(title)}`;
+    try {
+      const url = new URL(item.url);
+      if (['http:', 'https:'].includes(url.protocol)) {
+        productUrl = url.href.replace(/\(/g, '%28').replace(/\)/g, '%29');
+      }
+    } catch {
+      // Use the product search page when no valid product URL is available.
+    }
+    const specs = [item.cpu, item.gpu, item.ram, item.os]
+      .filter(value => value && value !== 'UNKNOWN').join(' · ');
+    lines.push(`${index + 1}. [${title}](${productUrl})\n價格：NT$ ${Number(item.price).toLocaleString('zh-TW')} · ${item.platform || '通路資訊'}${specs ? `\n規格：${specs}` : ''}`);
+  });
+  return lines.join('\n\n');
+}
+
 function fallbackAnswerForUserMessage(userMessage) {
   const text = String(userMessage || '').trim().toLowerCase();
   if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安|你是誰|你是啥|你是什麼|自我介紹|機器人|客服/.test(text)) {
@@ -708,7 +731,7 @@ async function handle(req, res) {
         {
           role: 'system',
           content:
-            '你是「一次估夠」的繁體中文電腦硬體 AI agent。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制，語氣自然精簡。回答附上相關工具頁連結：[二手估價](/valuation)、[市價查詢](/scrape)、[智慧推薦](/recommend)、[瓦數計算](/tools)。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。不要執行工具之外的操作。'
+            '你是「一次估夠」的繁體中文電腦硬體 AI agent。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制，語氣自然精簡。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。回答附上相關工具頁連結：[二手估價](/valuation)、[市價查詢](/scrape)、[智慧推薦](/recommend)、[瓦數計算](/tools)。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。不要執行工具之外的操作。'
         },
         ...contextualConversation
       ];
@@ -756,6 +779,12 @@ async function handle(req, res) {
             toolResult = await executeTool(name, args);
           } catch (error) {
             toolResult = { error: error.message };
+          }
+          if (name === 'recommend_hardware' && Array.isArray(toolResult.recommendations)) {
+            const answer = formatRecommendationAnswer(toolResult);
+            appendChatLog(effectiveUserMessage, answer);
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            return res.end(JSON.stringify({ success: true, answer, provider: 'tools' }));
           }
           ollamaMessages.push({
             role: 'tool',
