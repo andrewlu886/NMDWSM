@@ -18,8 +18,9 @@ for (const envFile of envCandidates) {
 
 // SQLite 資料庫
 const db = require('./db.js');
-const { searchProducts } = require('../src/services/search');
-const { getRecommendations } = require('../src/services/recommendation');
+const { searchProductsWithMeta } = require('../src/services/search');
+const { getRecommendationsWithMeta } = require('../src/services/recommendation');
+const { DAY_MS: EXCHANGE_RATE_DAY_MS, getUsdNtdRate } = require('../src/services/exchange-rate');
 const { TEST_WARNING, calculateValuation } = require('../src/services/valuation');
 
 const PORT = process.env.PORT || 3000;
@@ -43,7 +44,7 @@ function isLegacyApiPath(pathname) {
     return LEGACY_API_PREFIXES.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/'));
 }
 // --- SQLite 資料庫初始化 ---
-db.initDatabase().then(() => {
+const databaseReady = db.initDatabase().then(() => {
     console.log('✅ 資料庫已連接');
 }).catch(err => {
     console.error('❌ 資料庫連接失敗:', err.message);
@@ -97,6 +98,7 @@ const server = http.createServer(async(req, res) => {
         res.end();
         return;
     }
+    await databaseReady;
     // ========================================================
     // 理瓦數計算與驅動程式 API
     // ========================================================
@@ -149,13 +151,27 @@ const server = http.createServer(async(req, res) => {
                     message: '選擇電腦零件時，componentType 必須為 cpu 或 gpu'
                 });
             }
-            const result = await getRecommendations(options);
+            const result = await getRecommendationsWithMeta(options);
             sendJson(res, 200, result);
         } catch (error) {
             console.error('❌ API 推薦處理發生錯誤:', error);
             if (!res.headersSent) {
                 sendJson(res, 500, { success: false, message: '伺服器內部錯誤' });
             }
+        }
+
+    } else if (pathname === '/api/valuation/model-options' && req.method === 'GET') {
+        setCorsHeaders(res);
+        try {
+            const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
+            if (!['cpu', 'gpu', 'motherboard', 'ram'].includes(category)) {
+                return sendJson(res, 400, { success: false, message: '不支援這個硬體分類。' });
+            }
+            const data = await db.HardwareCatalog.listModels({ category });
+            sendJson(res, 200, { success: true, data });
+        } catch (error) {
+            console.error('❌ 型號清單載入失敗:', error);
+            sendJson(res, 500, { success: false, message: '型號清單暫時無法載入。' });
         }
 
     } else if (pathname === '/api/valuation/models' && req.method === 'GET') {
@@ -331,6 +347,14 @@ const server = http.createServer(async(req, res) => {
             sendJson(res, 500, { success: false, message: '估價資料處理失敗，請稍後再試。' });
         }
 
+    } else if (pathname === '/api/chat/status' && req.method === 'GET') {
+        try {
+            const aiService = require('./AiService');
+            sendJson(res, 200, await aiService.getStatus());
+        } catch (error) {
+            sendJson(res, 200, { available: false, model: process.env.OLLAMA_MODEL || 'llama3.1:8b' });
+        }
+
     } else if ((pathname === '/api/chat' || pathname === '/api/chat/') && req.method === 'POST') {
         setCorsHeaders(res);
         // log incoming request for debugging client 403 issues
@@ -364,14 +388,14 @@ const server = http.createServer(async(req, res) => {
 
         try {
             console.log(`[系統] 收到搜尋請求: ${keyword}`);
-            const data = await searchProducts({
+            const result = await searchProductsWithMeta({
                 keyword,
                 platforms: parsedUrl.searchParams.get('platform') || 'all',
                 exclude: parsedUrl.searchParams.get('exclude') || '',
                 include: parsedUrl.searchParams.get('include') || '',
                 categories: parsedUrl.searchParams.get('categories') || ''
             });
-            sendJson(res, 200, { success: true, data });
+            sendJson(res, 200, { success: true, ...result });
             return;
         } catch (error) {
             console.error('❌ API 市價查詢發生錯誤:', error);
@@ -428,6 +452,25 @@ const server = http.createServer(async(req, res) => {
 //安裝 npm install dotenv
 //GitHub\NMDWSM\public> node server.js
 server.listen(PORT, () => {
+    databaseReady.then(() => {
+        let updatingExchangeRate = false;
+        const updateExchangeRate = async () => {
+            if (updatingExchangeRate) return;
+            updatingExchangeRate = true;
+            try {
+                const exchangeRate = await getUsdNtdRate();
+                console.log(`[匯率] USD/TWD ${exchangeRate.rate}；來源：${exchangeRate.source}；牌告日：${exchangeRate.quoteDate || '未提供'}`);
+            } catch (error) {
+                console.warn(`[匯率] 每日更新失敗：${error.message}`);
+            } finally {
+                updatingExchangeRate = false;
+            }
+        };
+
+        void updateExchangeRate();
+        const exchangeRateTimer = setInterval(updateExchangeRate, EXCHANGE_RATE_DAY_MS);
+        exchangeRateTimer.unref();
+    });
     console.log(`
     ==========================================
     🌟 伺服器已啟動！

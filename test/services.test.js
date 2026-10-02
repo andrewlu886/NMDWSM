@@ -1,5 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 const {
   RECOMMENDATION_PLATFORM_IDS,
   resolvePlatformIds,
@@ -23,7 +26,8 @@ const {
   filterSearchResults,
   extractGpuFamily,
   matchesGpuFamily,
-  searchProducts
+  searchProducts,
+  convertUsdProducts
 } = require('../src/services/search');
 const { matchesSearchKeyword } = require('../src/utils/search-keyword');
 const {
@@ -31,6 +35,19 @@ const {
   rankRecommendations,
   getRecommendations
 } = require('../src/services/recommendation');
+const { DAY_MS, createMarketCache } = require('../src/services/market-cache');
+const {
+  parseUsdSpotSellRate,
+  parseFallbackUsdNtdRate,
+  createExchangeRateProvider
+} = require('../src/services/exchange-rate');
+const { convertUsdPrice } = require('../src/scrapers/newegg');
+const {
+  extractYahooPrice,
+  isUnavailableYahooProductPage,
+  isPlausibleYahooPrice,
+  filterUnavailableYahooProducts
+} = require('../src/scrapers/yahoo');
 
 function product(name, price, platform = '測試平台') {
   return { name, price, platform, url: 'https://example.com/item' };
@@ -103,6 +120,50 @@ test('原價屋商品搜尋文字會移除價格與促銷資訊', () => {
     '華碩 TUF Ryzen AI 9 465/RTX5060/32G/1T/14吋 銀 FA401GM'
   );
   assert.equal(cleanCoolpcProductSearchText('$15990 ◆ ★'), '');
+});
+
+test('Yahoo 商品價錢擷取會略過刷卡金與折價券金額', () => {
+  const $ = cheerio.load(`
+    <a href="/gdsale/acer-mini-pc.html">
+      <span class="coupon" data-price="200">9/30 前登錄送 $200 元刷卡金</span>
+      <span>Acer Aspire Revo Box RB102 迷你桌機</span>
+      <span>NT$ 20,990</span>
+    </a>
+  `);
+  assert.equal(extractYahooPrice($, $('a')[0]), '20990');
+  const installment = cheerio.load('<a>每期 $500，商品價格 NT$ 20,990</a>');
+  assert.equal(extractYahooPrice(installment, installment('a')[0]), '20990');
+  assert.equal(isPlausibleYahooPrice('Acer RB102 迷你桌機', '200'), false);
+  assert.equal(isPlausibleYahooPrice('Acer RB102 迷你桌機', '159905'), false);
+  assert.equal(isPlausibleYahooPrice('Acer RB102 迷你桌機', '20990'), true);
+});
+
+test('Yahoo 商品頁明確查無商品或回應 404/410 時會判定失效', () => {
+  assert.equal(isUnavailableYahooProductPage(200, '<main>查無此商品</main>'), true);
+  assert.equal(isUnavailableYahooProductPage(200, '<main>商品已停售</main>'), true);
+  assert.equal(isUnavailableYahooProductPage(200, '<main>商品</main>', 'https://tw.buy.yahoo.com/search/product?p=RB102'), true);
+  assert.equal(isUnavailableYahooProductPage(404, '<main>Not Found</main>'), true);
+  assert.equal(isUnavailableYahooProductPage(410, '<main>Gone</main>'), true);
+  assert.equal(isUnavailableYahooProductPage(200, '<main>商品售價 NT$ 20,990</main>'), false);
+  assert.equal(isUnavailableYahooProductPage(503, '<main>暫時無法服務</main>'), false);
+});
+
+test('Yahoo 爬蟲排除失效商品頁但保留暫時無法驗證的商品', async () => {
+  const products = [
+    { name: '正常商品', url: 'https://tw.buy.yahoo.com/gdsale/valid.html' },
+    { name: '已下架商品', url: 'https://tw.buy.yahoo.com/gdsale/missing.html' },
+    { name: '其他平台商品', url: 'https://example.com/item' }
+  ];
+  const filtered = await filterUnavailableYahooProducts(products, async (url) => {
+    if (url.endsWith('valid.html')) return { status: 200, data: '<main>正常商品頁</main>' };
+    return { status: 200, data: '<main>查無此商品</main>' };
+  });
+  assert.deepEqual(filtered.map((item) => item.name), ['正常商品', '其他平台商品']);
+
+  const retainedOnNetworkError = await filterUnavailableYahooProducts(products.slice(0, 1), async () => {
+    throw new Error('network timeout');
+  });
+  assert.deepEqual(retainedOnNetworkError, products.slice(0, 1));
 });
 
 test('原價屋選項有商品網址時會優先使用直達頁', () => {
@@ -223,8 +284,25 @@ test('搜尋服務傳遞平台選項並執行包含、排除與價格排序', as
       ];
     }
   });
-  assert.equal(receivedPlatforms, 'sinya,coolpc');
+  assert.deepEqual(receivedPlatforms, ['sinya']);
   assert.deepEqual(results.map((item) => item.price), ['4,000', '6,000']);
+});
+
+test('市價查詢不再使用原價屋爬蟲，包括直接指定原價屋或全平台搜尋', async () => {
+  const calls = [];
+  const dependencies = {
+    scrapePlatforms: async (_keyword, platforms) => {
+      calls.push(platforms);
+      return [];
+    }
+  };
+
+  await searchProducts({ keyword: 'RTX 4060', platforms: 'coolpc' }, dependencies);
+  await searchProducts({ keyword: 'RTX 4060', platforms: 'all' }, dependencies);
+
+  assert.deepEqual(calls[0], []);
+  assert.ok(calls[1].length > 0);
+  assert.ok(!calls[1].includes('coolpc'));
 });
 
 test('市價查詢會統一全形字元並移除所有空白', () => {
@@ -272,6 +350,17 @@ test('同義詞擴充與顯卡搜尋防呆會排除周邊及低價商品', () =>
   assert.deepEqual(results.map((item) => item.name), ['RTX 4060 顯示卡']);
 });
 
+test('市價查詢會排除 Yahoo 迷你桌機舊快取中的明顯錯價', () => {
+  const results = filterSearchResults([
+    product('Acer RB102 迷你桌機 R5-7430U', '209,905', 'Yahoo購物'),
+    product('Acer RB102 迷你桌機 CU5-225H', '269,109', 'Yahoo購物'),
+    product('Acer RB102 迷你桌機 R7-7730U', '269,905', 'Yahoo購物'),
+    product('Acer RB102 迷你桌機 R5-7430U', '20,990', 'Yahoo購物')
+  ], { keyword: 'RB102', include: '', exclude: '', categories: '' });
+
+  assert.deepEqual(results.map((item) => item.price), ['20,990']);
+});
+
 test('主機與筆電依用途選擇關鍵字，零件依類別選擇', () => {
   assert.equal(getSearchKeyword('desktop', 'gaming'), '主機');
   assert.equal(getSearchKeyword('desktop', 'office'), '套裝機');
@@ -300,7 +389,7 @@ test('推薦排名維持分數優先、同分價格優先及 Top 3 schema', () =
 
 test('辦公推薦允許只有 CPU，零件推薦只保留所選類別', () => {
   const office = rankRecommendations({ budget: 30000, usage: 'office', productType: 'desktop' }, [
-    product('i7-13700 16GB Windows 11 套裝機', '25,000')
+    product('文書桌上型電腦 i7-13700 16GB Windows 11 套裝機', '25,000')
   ]);
   assert.equal(office.recommendations.length, 1);
   assert.equal(office.recommendations[0].gpu, 'UNKNOWN');
@@ -326,6 +415,57 @@ test('辦公推薦允許只有 CPU，零件推薦只保留所選類別', () => {
   assert.equal(gpuComponents.recommendations.length, 1);
   assert.equal(gpuComponents.recommendations[0].cpu, 'UNKNOWN');
   assert.equal(gpuComponents.recommendations[0].gpu, 'RTX4070SUPER');
+});
+
+test('文書推薦要求商品明確為電腦，避免把用途文字相同的工具或周邊列入', () => {
+  const desktop = rankRecommendations({ budget: 30000, usage: 'office', productType: 'desktop' }, [
+    product('文書桌上型電腦 8GB SSD 套裝機', '18,000'),
+    product('【家事達】HIKOKI 充電式無刷電鑽，適合文書工作', '9,900'),
+    product('【家事達】HIKOKI 日立 CS1810DD 手持式無刷 4 吋鏈鋸 套裝機（含電池+充電器）', '9,900'),
+    product('【家事達】德國 STIHL-ASA 20 充電式電剪 套裝機', '10,900'),
+    product('電腦滑鼠鍵盤組', '1,000')
+  ]);
+  const laptop = rankRecommendations({ budget: 30000, usage: 'office', productType: 'laptop' }, [
+    product('商用筆記型電腦 16GB Windows 11', '25,000'),
+    product('【家事達】HIKOKI 充電式無刷電鑽，適合文書工作', '9,900')
+  ]);
+
+  assert.deepEqual(desktop.recommendations.map((item) => item.title), ['文書桌上型電腦 8GB SSD 套裝機']);
+  assert.equal(desktop.recommendations[0].gpu, 'UNKNOWN');
+  assert.deepEqual(laptop.recommendations.map((item) => item.title), ['商用筆記型電腦 16GB Windows 11']);
+});
+
+test('推薦優先跨平台並去除同平台同型號不同顏色、活動頁及售完商品', () => {
+  const result = rankRecommendations({ budget: 30000, usage: 'office', productType: 'desktop' }, [
+    {
+      ...product('Acer Aspire TC-885 桌上型電腦 灰色', '15,000', 'Yahoo購物'),
+      url: 'https://tw.buy.yahoo.com/gdsale/acer-1'
+    },
+    {
+      ...product('Acer Aspire TC-885 桌上型電腦 白色', '15,000', 'Yahoo購物'),
+      url: 'https://tw.buy.yahoo.com/gdsale/acer-2'
+    },
+    {
+      ...product('Lenovo ThinkCentre 桌機', '20,000', 'PChome'),
+      url: 'https://24h.pchome.com.tw/prod/DRAA1A-A900EXAMPLE'
+    },
+    {
+      ...product('HP ProDesk 桌機', '18,000', 'Momo'),
+      url: 'https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=123'
+    },
+    {
+      ...product('售完 ASUS 桌機', '19,000', '露天'),
+      url: 'https://www.ruten.com.tw/item/show?123456'
+    },
+    {
+      ...product('Dell 桌機', '17,000', 'Yahoo購物'),
+      url: 'https://tw.buy.yahoo.com/activity/123'
+    }
+  ]);
+
+  assert.equal(result.recommendations.length, 3);
+  assert.deepEqual(new Set(result.recommendations.map((item) => item.platform)), new Set(['Yahoo購物', 'PChome', 'Momo']));
+  assert.equal(result.recommendations.filter((item) => item.title.startsWith('Acer Aspire TC-885')).length, 1);
 });
 
 test('顯示卡搜尋以基礎型號匹配同系列並排除誤匹配', () => {
@@ -379,4 +519,177 @@ test('getRecommendations 使用固定六平台並回傳空結果 schema', async 
   });
   assert.deepEqual(receivedPlatforms, RECOMMENDATION_PLATFORM_IDS);
   assert.deepEqual(result, { suggestedPrice: 0, recommendations: [] });
+});
+
+test('市價快取在 24 小時內重用資料，過期後更新並保存至磁碟', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'nmdwsm-market-cache-'));
+  const cachePath = path.join(directory, 'cache.json');
+  let timestamp = 1_800_000_000_000;
+  let scrapeCount = 0;
+  const scrape = async () => [{ name: `商品 ${++scrapeCount}`, price: '1000' }];
+
+  try {
+    const cache = createMarketCache({ cachePath, now: () => timestamp, scrape });
+    const first = await cache.get('RTX 4060', ['coolpc']);
+    assert.equal(first.meta.cached, false);
+    assert.equal(first.products[0].name, '商品 1');
+
+    const sameDay = await cache.get('RTX4060', ['coolpc']);
+    assert.equal(sameDay.meta.cached, true);
+    assert.equal(sameDay.products[0].name, '商品 1');
+    assert.equal(scrapeCount, 1);
+
+    const restored = createMarketCache({ cachePath, now: () => timestamp, scrape });
+    assert.equal((await restored.get('RTX4060', ['coolpc'])).products[0].name, '商品 1');
+    assert.equal(scrapeCount, 1);
+
+    timestamp += DAY_MS + 1;
+    const refreshed = await restored.get('RTX4060', ['coolpc']);
+    assert.equal(refreshed.meta.cached, false);
+    assert.equal(refreshed.products[0].name, '商品 2');
+    assert.equal(scrapeCount, 2);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('市價快取版本更新後不會沿用舊版錯誤價格', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'nmdwsm-market-cache-version-'));
+  const cachePath = path.join(directory, 'cache.json');
+  const oldKey = JSON.stringify(['桌機', ['yahoo']]);
+  fs.writeFileSync(cachePath, JSON.stringify({
+    [oldKey]: {
+      updatedAt: Date.now(),
+      products: [{ platform: 'Yahoo購物', name: '迷你桌機', price: '200' }]
+    }
+  }));
+  let scrapeCount = 0;
+
+  try {
+    const cache = createMarketCache({
+      cachePath,
+      scrape: async () => {
+        scrapeCount += 1;
+        return [{ platform: 'Yahoo購物', name: '迷你桌機', price: '20990' }];
+      }
+    });
+    const result = await cache.get('桌機', ['yahoo']);
+    assert.equal(result.meta.cached, false);
+    assert.equal(result.products[0].price, '20990');
+    assert.equal(scrapeCount, 1);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('同一組合的並行市價查詢只會觸發一次爬取', async () => {
+  let scrapeCount = 0;
+  const cache = createMarketCache({
+    cachePath: null,
+    scrape: async () => {
+      scrapeCount += 1;
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return [];
+    }
+  });
+  await Promise.all([
+    cache.get('RTX 5070', ['momo', 'coolpc']),
+    cache.get('RTX 5070', ['coolpc', 'momo'])
+  ]);
+  assert.equal(scrapeCount, 1);
+});
+
+test('Newegg 美元金額依臺銀即期賣出匯率轉為新台幣並保留原價', () => {
+  const csv = [
+    '"幣別","現金匯率","現金匯率","即期匯率","即期匯率"',
+    '"美金 (USD)","31.45","32.12","31.80","31.90"'
+  ].join('\n');
+  const rate = parseUsdSpotSellRate(csv);
+  const converted = convertUsdPrice('1,534', '29', {
+    rate,
+    fetchedAt: 1_800_000_000_000,
+    source: '臺灣銀行牌告匯率（美元即期賣出）',
+    sourceUrl: 'https://rate.bot.com.tw/xrt/flcsv/0/day'
+  });
+
+  assert.equal(rate, 31.9);
+  assert.equal(converted.priceNtd, 48944);
+  assert.equal(converted.price, '48944');
+  assert.equal(converted.originalPrice, 'USD $1,534.29');
+});
+
+test('臺銀美元匯率每日快取，來源暫時失敗時沿用最近成功匯率', async () => {
+  let timestamp = 1_800_000_000_000;
+  let fetchCount = 0;
+  let available = true;
+  let storedRate = null;
+  const provider = createExchangeRateProvider({
+    loadCached: async () => storedRate,
+    saveCached: async (rate) => { storedRate = rate; },
+    now: () => timestamp,
+    fetchCsv: async () => {
+      fetchCount += 1;
+      if (!available) throw new Error('offline');
+      return '"幣別","現金買入","現金賣出","即期買入","即期賣出"\n"美金 (USD)",31.45,32.12,31.80,31.90';
+    },
+    fetchFallback: async () => { throw new Error('backup offline'); }
+  });
+
+  assert.equal((await provider()).rate, 31.9);
+  assert.equal((await provider()).rate, 31.9);
+  assert.equal(fetchCount, 1);
+
+  timestamp += DAY_MS + 1;
+  available = false;
+  const stale = await provider();
+  assert.equal(stale.rate, 31.9);
+  assert.equal(stale.stale, true);
+  assert.equal(fetchCount, 2);
+});
+
+test('臺銀匯率抓取失敗時使用台灣央行收盤匯率備援來源', async () => {
+  const data = { date: '2026-09-30', base: 'USD', quote: 'TWD', rate: 31.82 };
+  assert.deepEqual(parseFallbackUsdNtdRate(data), { rate: 31.82, quoteDate: '2026-09-30' });
+
+  const provider = createExchangeRateProvider({
+    loadCached: async () => null,
+    saveCached: async () => {},
+    fetchCsv: async () => { throw new Error('Bank blocked'); },
+    fetchFallback: async () => data
+  });
+  const result = await provider();
+  assert.equal(result.rate, 31.82);
+  assert.equal(result.quoteDate, '2026-09-30');
+  assert.match(result.source, /備援/);
+});
+
+test('已快取的美元商品會在新台灣日期重新套用當日匯率', async () => {
+  const products = [{
+    name: 'RTX GPU',
+    currency: 'USD',
+    originalPrice: 'USD $100.00',
+    price: '3190',
+    priceNtd: 3190,
+    exchangeRate: 31.9
+  }];
+  const refreshed = await convertUsdProducts(products, async () => ({
+    rate: 32.1,
+    fetchedAt: 1_800_000_000_000,
+    source: '臺灣銀行牌告匯率（美元即期賣出）',
+    sourceUrl: 'https://rate.bot.com.tw/xrt/flcsv/0/day'
+  }));
+
+  assert.equal(refreshed[0].priceNtd, 3210);
+  assert.equal(refreshed[0].originalPrice, 'USD $100.00');
+});
+
+test('舊版 Newegg 快取仍能辨識並同時提供美元原價與新台幣換算價', async () => {
+  const [product] = await convertUsdProducts([{
+    platform: 'Newegg (US)',
+    price: 'USD $1,555.74'
+  }], async () => ({ rate: 31.9, fetchedAt: 1_800_000_000_000 }));
+
+  assert.equal(product.originalPrice, 'USD $1,555.74');
+  assert.equal(product.priceNtd, 49628);
+  assert.equal(product.currency, 'USD');
 });

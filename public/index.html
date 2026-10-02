@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>一次估夠 | 電腦硬體選購助手</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./style.css?v=20261001-docked-launcher">
     <style>
         :root {
             --primary-color: #2563eb;     /* 皇家藍 */
@@ -172,12 +172,6 @@
             max-width: 1100px; 
             margin: 2rem auto; 
             padding: 0 20px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* --- 大標題區塊與 RGB 特效 --- */
@@ -364,18 +358,13 @@
             box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
     </style>
-    <link rel="stylesheet" href="./site-theme.css">
+    <link rel="stylesheet" href="./site-theme.css?v=20261001-page-enter">
 </head>
 <body>
 
     <header>
         <div class="header-main">
             <a href="/" class="logo"> 一次估夠</a>
-            
-            <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)" aria-label="查詢硬體市價">
-            </div>
-
         </div>
         
         <nav class="main-nav">
@@ -387,7 +376,7 @@
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container page-enter">
         <section class="hero">
             <h1>組電腦免踩雷，價格效能一次比</h1>
             <p>查即時市價、看跑分數據，在預算之內選出最適合的電腦配備。</p>
@@ -403,20 +392,6 @@
         </section>
     </div>
 
-    <script>
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                triggerSearch();
-            }
-        }
-        
-        function triggerSearch() {
-            const input = document.querySelector('.nav-search');
-            if (input && input.value.trim()) {
-                window.location.href = `/scrape?keyword=${encodeURIComponent(input.value.trim())}`;
-            }
-        }
-    </script>
-    <script src="./chat-widget.js"></script>
+    <script src="./chat-widget.js?v=20261001-docked-launcher"></script>
 </body>
 </html>

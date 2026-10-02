@@ -99,6 +99,16 @@ function initDatabase() {
           updated_at TEXT NOT NULL
         );
 
+        CREATE TABLE IF NOT EXISTS exchange_rates (
+          currency_pair TEXT PRIMARY KEY,
+          rate REAL NOT NULL CHECK (rate > 0),
+          source TEXT NOT NULL,
+          source_url TEXT NOT NULL,
+          quote_date TEXT,
+          cache_date TEXT NOT NULL,
+          fetched_at INTEGER NOT NULL
+        );
+
         CREATE INDEX IF NOT EXISTS idx_hardware_models_category_normalized
           ON hardware_models(category, normalized_model);
         CREATE INDEX IF NOT EXISTS idx_hardware_aliases_normalized
@@ -149,6 +159,12 @@ async function seedHardwareCatalog() {
       `DELETE FROM hardware_models
        WHERE category = 'cpu' AND manufacturer = 'Intel'
          AND series IN ('Core 10th Gen', 'Core 11th Gen')`
+    );
+    await runUpdate(
+      `DELETE FROM hardware_models
+       WHERE category = 'cpu' AND manufacturer = 'Intel'
+         AND normalized_model = ?`,
+      [normalizeHardwareText('Core Ultra 7 365K')]
     );
 
     for (const item of hardwareModels) {
@@ -481,6 +497,24 @@ async function resolveWarranty({ category, brand, model, elapsedMonths = 0, exte
 }
 
 const HardwareCatalog = {
+  async listModels({ category }) {
+    if (!['cpu', 'gpu', 'motherboard', 'ram'].includes(category)) return [];
+    const rows = await runQuery(
+      `SELECT id, category, manufacturer, canonical_model, series, release_year
+       FROM hardware_models
+       WHERE category = ?
+       ORDER BY COALESCE(release_year, 0) DESC, manufacturer COLLATE NOCASE, canonical_model COLLATE NOCASE`,
+      [category]
+    );
+    return Promise.all(rows.map(async row => {
+      const model = formatModel(row);
+      model.cpuPricing = await findCpuPricingModel(model);
+      model.gpuPricing = await findGpuPricingModel(model);
+      model.referencePrice = await findReferencePrice(model);
+      return model;
+    }));
+  },
+
   async searchModels({ category, brand, query, limit = 8 }) {
     const normalizedQuery = normalizeHardwareText(query);
     if (!['cpu', 'gpu', 'motherboard'].includes(category) || !normalizedQuery) return [];
@@ -536,6 +570,42 @@ const HardwareCatalog = {
       warranty,
       canonicalBrand: await normalizeBrand(input.brand || (model && model.manufacturer))
     };
+  },
+
+  async getExchangeRate(currencyPair = 'USD/TWD') {
+    const row = await runQueryOne('SELECT * FROM exchange_rates WHERE currency_pair = ?', [currencyPair]);
+    if (!row) return null;
+    return {
+      rate: row.rate,
+      source: row.source,
+      sourceUrl: row.source_url,
+      quoteDate: row.quote_date,
+      cacheDate: row.cache_date,
+      fetchedAt: row.fetched_at
+    };
+  },
+
+  async saveExchangeRate(exchangeRate, currencyPair = 'USD/TWD') {
+    return runUpdate(
+      `INSERT INTO exchange_rates (currency_pair, rate, source, source_url, quote_date, cache_date, fetched_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(currency_pair) DO UPDATE SET
+         rate = excluded.rate,
+         source = excluded.source,
+         source_url = excluded.source_url,
+         quote_date = excluded.quote_date,
+         cache_date = excluded.cache_date,
+         fetched_at = excluded.fetched_at`,
+      [
+        currencyPair,
+        exchangeRate.rate,
+        exchangeRate.source,
+        exchangeRate.sourceUrl,
+        exchangeRate.quoteDate || null,
+        exchangeRate.cacheDate,
+        exchangeRate.fetchedAt
+      ]
+    );
   }
 };
 
@@ -544,6 +614,8 @@ module.exports = {
   runQuery,
   runQueryOne,
   runUpdate,
+  getExchangeRate: HardwareCatalog.getExchangeRate,
+  saveExchangeRate: HardwareCatalog.saveExchangeRate,
   HardwareCatalog,
   getValuationFormulaConfig,
   normalizeHardwareText

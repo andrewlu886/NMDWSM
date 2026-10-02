@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>實用工具：瓦數計算 & 官網查詢</title>
+    <link rel="stylesheet" href="./style.css?v=20261001-docked-launcher">
     <!-- 引入與全站統一的 Google 字體 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -172,6 +173,17 @@
             margin-bottom: 40px;
             position: relative;
         }
+        .container > .header-title {
+            display: flex;
+            min-height: 168px;
+            flex-direction: column;
+            justify-content: center;
+            padding: 34px 36px !important;
+            background:
+                linear-gradient(90deg, rgba(12, 20, 37, 0.84) 0%, rgba(12, 20, 37, 0.66) 48%, rgba(12, 20, 37, 0.22) 100%),
+                url('./assets/tools-banner.jpg') center 58% / cover no-repeat !important;
+            text-align: left !important;
+        }
         .header-title h1 {
             color: var(--text-main);
             margin-bottom: 0.5rem;
@@ -182,6 +194,13 @@
             color: var(--text-muted);
             margin-top: 0;
             font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            .container > .header-title {
+                min-height: 190px;
+                padding: 28px 22px !important;
+            }
         }
         
         /* 毛玻璃卡片主體 */
@@ -252,6 +271,7 @@
             background-color: rgba(255, 255, 255, 0.95);
             transform: translateY(-1px);
         }
+
         
         /* 特效按鈕 */
         .card button {
@@ -365,7 +385,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="./site-theme.css">
+    <link rel="stylesheet" href="./site-theme.css?v=20261001-page-enter">
 </head>
 <body>
 
@@ -375,11 +395,6 @@
     <header>
         <div class="header-main">
             <a href="/" class="logo">一次估夠</a>
-            
-            <div class="search-wrapper">
-                <input type="text" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)">
-            </div>
-
         </div>
         
         <nav class="main-nav">
@@ -394,7 +409,7 @@
     <!-- ==========================================
          主要工具區塊
          ========================================== -->
-    <div class="container">
+    <div class="container page-enter">
         
         <div class="header-title">
             <h1>裝機實用工具</h1>
@@ -406,20 +421,18 @@
             <h2>電源瓦數計算機</h2>
             <div class="form-group">
                 <label>處理器 (CPU) 型號</label>
-                <!-- 使用可搜尋 datalist，但保留數值在前方便自動計算 -->
-                <input list="cpu-list" id="cpu-power" placeholder="點擊選擇或輸入尋找 CPU 等級..." onchange="autoCalculate()">
-                <datalist id="cpu-list">
-                    <option value="65 - 入門級 (約 65W)"></option>
-                    <option value="125 - 中高階 (約 125W)"></option>
-                    <option value="250 - 旗艦級 (約 250W+)"></option>
-                </datalist>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">* 程式碼已預留 Excel 讀取接口，目前可手動選擇或輸入估算值；輸入時請以開頭數字（例如「65」）作為瓦數。</p>
+                <select id="cpu-power" class="model-picker" onchange="autoCalculate()" aria-label="選擇 CPU 型號">
+                    <option value="">請選擇 CPU 型號...</option>
+                </select>
+                <input id="cpu-custom-power" type="number" min="1" max="2000" placeholder="輸入此 CPU 瓦數 (W)" style="display:none; margin-top:8px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">* 資料庫未收錄的 CPU，可選擇「其他」並輸入功耗。</p>
             </div>
 
         <div class="form-group">
             <label>顯示卡 (GPU) 型號</label>
-            <input list="gpu-list" id="gpu-power" placeholder="讀取資料庫中..." disabled>
-            <datalist id="gpu-list"></datalist>
+            <select id="gpu-power" class="model-picker" aria-label="選擇 GPU 型號" disabled>
+                <option value="">讀取資料庫中...</option>
+            </select>
             <div id="loading-msg">正在自動載入 CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx...</div>
         </div>
             <!-- 顯示卡詳細規格區塊 -->
@@ -490,29 +503,16 @@
             </div>
             <div class="form-group">
                 <label>產品型號 (如：B650M AORUS ELITE 或 RTX 4060)</label>
-                <input type="text" id="model-input" placeholder="請輸入完整產品型號...">
+                <input type="text" id="model-input" placeholder="請輸入完整產品型號..." autocomplete="off">
+                <select id="nvidia-model-select" style="display:none" aria-label="選擇 NVIDIA 顯示卡型號">
+                    <option value="">請選擇 NVIDIA 顯示卡型號...</option>
+                </select>
+                <small id="driver-model-hint" style="display:block; margin-top:8px; color:var(--text-muted);">請輸入您的硬體型號。</small>
             </div>
-            <button onclick="searchOfficial()">前往搜尋原廠資源</button>
+            <button type="button" onclick="searchOfficial()">前往搜尋原廠資源</button>
         </div>
     </div>
 <script>
-    // ==========================================
-    // 頂部導覽列搜尋框的空函數 (避免錯誤)
-    // ==========================================
-    function handleSearch(event) {
-        if (event.key === "Enter") {
-            triggerSearch();
-        }
-    }
-    function triggerSearch() {
-        const query = document.querySelector('.nav-search').value;
-        if(query) {
-            // 在此處加入全站搜尋的跳轉邏輯
-            // window.location.href = `/search?q=${encodeURIComponent(query)}`;
-            alert("目前搜尋: " + query);
-        }
-    }
-    // ==========================================
     // 全域變數
     // ==========================================
     let gpuExcelData = [];
@@ -549,6 +549,7 @@
                 gpuExcelData = data; 
                 document.getElementById('loading-msg').style.display = 'none';
                 populateExcelSelect(); // 渲染 GPU 下拉選單
+                populateDriverModelOptions();
             })
             .catch(error => {
                 document.getElementById('loading-msg').innerHTML = '⚠️ 無法連接到資料庫 API，請確認後端伺服器已啟動。';
@@ -573,31 +574,128 @@
         // 3. 取得驅動程式連結
         fetch('/api/driver-links')
             .then(response => response.json())
-            .then(data => driverLinksData = data)
+            .then(data => {
+                driverLinksData = data;
+                populateDriverModelOptions();
+            })
             .catch(console.error);
+
+        document.getElementById('brand-select').addEventListener('change', populateDriverModelOptions);
+        populateDriverModelOptions();
     });
 
-    // ==========================================
-    // 將 CPU 資料寫入下拉選單並綁定事件
-    // ==========================================
-    function populateCpuSelect() {
-        const input = document.getElementById('cpu-power');
-        const datalist = document.getElementById('cpu-list');
-        
-        datalist.innerHTML = '<option value="自訂/其他 - 65W"></option>';
-        input.placeholder = "點擊選擇或輸入尋找 CPU 型號...";
+    function classifyCpuRow(row) {
+        const brand = String(getCleanVal(row, ['品牌']) || '').trim();
+        const model = String(getCleanVal(row, ['CPU型號']) || '').trim();
+        const series = String(getCleanVal(row, ['架構代別', '架構', '代別']) || '').trim();
+        const isIntel = /intel/i.test(brand);
 
-        cpuExcelData.forEach(row => {
-            const modelName = getCleanVal(row, ['CPU型號']);
-            if(modelName && modelName.trim() !== '') {
-                const option = document.createElement('option');
-                option.value = modelName;
-                datalist.appendChild(option);
+        if (isIntel) {
+            const ultra = /core\s*ultra/i.test(series) || /core\s*ultra/i.test(model);
+            const generation = Number(series.match(/core\s*(\d+)/i)?.[1] || 0);
+            return {
+                manufacturerOrder: 0,
+                groupOrder: ultra ? 99 : generation || 98,
+                groupLabel: ultra ? 'Intel Core Ultra' : `Intel Core 第${generation || '其他'}代`,
+                groupKey: ultra ? 'intel-ultra' : `intel-core-${generation || 'other'}`
+            };
+        }
+
+        const amdOrder = { 1000: 3, 2000: 4, 3000: 5, 5000: 6, 7000: 7, 8000: 8, 9000: 9 };
+        if (/amd/i.test(brand)) {
+            if (/phenom\s*ii/i.test(series) || /phenom\s*ii/i.test(model)) {
+                return { manufacturerOrder: 1, groupOrder: 0, groupKey: 'amd-phenom-ii', groupLabel: 'AMD Phenom II' };
             }
+            if (/fx/i.test(model) || /fx/i.test(series)) {
+                const isVishera = /vishera/i.test(series) || /fx\s*-?\s*9590/i.test(model);
+                return {
+                    manufacturerOrder: 1,
+                    groupOrder: isVishera ? 2 : 1,
+                    groupKey: isVishera ? 'amd-fx-vishera' : 'amd-fx',
+                    groupLabel: isVishera ? 'AMD FX Series (Vishera)' : 'AMD FX Series'
+                };
+            }
+
+            const ryzenNumber = Number(model.match(/ryzen\s+[3579]\s+(\d{4})/i)?.[1] || series.match(/ryzen\s+(\d{4})/i)?.[1] || 0);
+            if (ryzenNumber) {
+                const generation = Math.floor(ryzenNumber / 1000) * 1000;
+                return {
+                    manufacturerOrder: 1,
+                    groupOrder: amdOrder[generation] ?? 20 + generation,
+                    groupKey: `amd-ryzen-${generation}`,
+                    groupLabel: `AMD Ryzen ${generation}`
+                };
+            }
+        }
+
+        return { manufacturerOrder: isIntel ? 0 : 2, groupOrder: 100, groupKey: 'other', groupLabel: `${brand || '其他'} 其他型號` };
+    }
+
+    function makeFullWidthDivider(label, select) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        if (!context) return label;
+        context.font = getComputedStyle(select).font;
+        const availableWidth = Math.max(0, select.clientWidth - 48);
+        let line = label;
+        for (let count = 1; count <= 500; count += 1) {
+            const candidate = `${'='.repeat(count)}${label}${'='.repeat(count)}`;
+            if (context.measureText(candidate).width > availableWidth) break;
+            line = candidate;
+        }
+        return line;
+    }
+
+    function populateCpuSelect() {
+        const modelList = document.getElementById('cpu-power');
+        const customInput = document.getElementById('cpu-custom-power');
+        const groupedRows = new Map();
+        cpuExcelData.forEach(row => {
+            const modelName = String(getCleanVal(row, ['CPU型號']) || '').trim();
+            if (!modelName) return;
+            const group = classifyCpuRow(row);
+            const key = group.groupKey;
+            if (!groupedRows.has(key)) groupedRows.set(key, { ...group, rows: [] });
+            groupedRows.get(key).rows.push({ row, modelName });
         });
 
-        input.addEventListener('change', function() {
+        modelList.replaceChildren(new Option('請選擇 CPU 型號...', ''));
+        modelList.appendChild(new Option('其他 / 輸入此 CPU 瓦數', '__custom_cpu_wattage__'));
+        const groups = Array.from(groupedRows.values()).sort((a, b) =>
+            a.manufacturerOrder - b.manufacturerOrder || a.groupOrder - b.groupOrder || a.groupLabel.localeCompare(b.groupLabel)
+        );
+        let lastManufacturer = null;
+        groups.forEach(group => {
+            if (group.manufacturerOrder !== lastManufacturer) {
+                const manufacturerLabel = group.manufacturerOrder === 0
+                    ? '=======Intel======='
+                    : group.manufacturerOrder === 1
+                        ? '=======AMD======='
+                        : '=======其他=======';
+                const divider = new Option(makeFullWidthDivider(manufacturerLabel, modelList), '');
+                divider.disabled = true;
+                modelList.appendChild(divider);
+                lastManufacturer = group.manufacturerOrder;
+            }
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = group.groupLabel;
+            group.rows.sort((a, b) => a.modelName.localeCompare(b.modelName, 'en', { numeric: true, sensitivity: 'base' }));
+            group.rows.forEach(({ modelName }) => {
+                const option = new Option(modelName, modelName);
+                optgroup.appendChild(option);
+            });
+            modelList.appendChild(optgroup);
+        });
+
+        modelList.addEventListener('change', function() {
             const val = this.value;
+            if (val === '__custom_cpu_wattage__') {
+                customInput.style.display = '';
+                currentCpuTdp = Number(customInput.value) || 0;
+                autoCalculate();
+                return;
+            }
+            customInput.style.display = 'none';
             const row = cpuExcelData.find(r => getCleanVal(r, ['CPU型號']) === val);
             
             if (row) {
@@ -606,40 +704,64 @@
                 const tdpMatch = String(tdp).match(/\d+/);
                 currentCpuTdp = tdpMatch ? parseInt(tdpMatch[0]) : 65;
             } else {
-                // 若使用者自己輸入數字，則解析開頭數字
-                const manualMatch = val.match(/^\d+/);
-                currentCpuTdp = manualMatch ? parseInt(manualMatch[0]) : 0;
+                currentCpuTdp = 0;
             }
+            autoCalculate();
+        });
+        customInput.addEventListener('input', () => {
+            currentCpuTdp = Number(customInput.value) || 0;
             autoCalculate();
         });
     }
 
-    // ==========================================
-    // 將資料寫入下拉選單並綁定事件 (GPU)
-    // ==========================================
     function populateExcelSelect() {
-        const input = document.getElementById('gpu-power');
-        const datalist = document.getElementById('gpu-list');
-        
-        datalist.innerHTML = '<option value="無獨立顯卡 (內顯) - 0W"></option>';
-        input.disabled = false;
-        input.placeholder = "點擊選擇或輸入尋找顯示卡型號...";
+        const modelList = document.getElementById('gpu-power');
+        modelList.disabled = false;
+        modelList.replaceChildren(new Option('請選擇 GPU 型號...', ''));
 
-        // 將 Excel 資料載入 datalist 供搜尋
-        gpuExcelData.forEach((row, index) => {
-            const modelName = getCleanVal(row, ['顯示卡型號']);
-            
-            if(modelName && modelName.includes('Row') === false && modelName.trim() !== '') {
-                const option = document.createElement('option');
-                option.value = modelName; // 使用者選中後 input 內顯示的值
-                datalist.appendChild(option);
+        const integrated = document.createElement('optgroup');
+        integrated.label = '內顯 / 無獨立顯示卡';
+        integrated.appendChild(new Option('無獨立顯卡 (內顯) - 0W', '無獨立顯卡 (內顯) - 0W'));
+        modelList.appendChild(integrated);
+
+        const gpuRows = gpuExcelData
+            .map((row, index) => ({ row, index, modelName: String(getCleanVal(row, ['顯示卡型號']) || '').trim() }))
+            .filter(item => item.modelName && !item.modelName.includes('Row'))
+            .map(item => ({ ...item, ...classifyGpuRow(item.row, item.modelName) }));
+        const groupedRows = new Map();
+        gpuRows.forEach(item => {
+            if (!groupedRows.has(item.groupKey)) {
+                groupedRows.set(item.groupKey, {
+                    manufacturerOrder: item.manufacturerOrder,
+                    seriesOrder: item.seriesOrder,
+                    manufacturerLabel: item.manufacturerLabel,
+                    seriesLabel: item.seriesLabel,
+                    rows: []
+                });
             }
+            groupedRows.get(item.groupKey).rows.push(item);
         });
-
-        // 監聽 input 內容改變 (包含點擊選項或輸入文字)
-        input.addEventListener('change', function() {
+        const groups = Array.from(groupedRows.values()).sort((a, b) =>
+            a.manufacturerOrder - b.manufacturerOrder || a.seriesOrder - b.seriesOrder || a.seriesLabel.localeCompare(b.seriesLabel)
+        );
+        let lastManufacturer = null;
+        groups.forEach(group => {
+            if (group.manufacturerOrder !== lastManufacturer) {
+                const divider = new Option(makeFullWidthDivider(`=======${group.manufacturerLabel}=======`, modelList), '');
+                divider.disabled = true;
+                modelList.appendChild(divider);
+                lastManufacturer = group.manufacturerOrder;
+            }
+            const seriesGroup = document.createElement('optgroup');
+            seriesGroup.label = group.seriesLabel;
+            group.rows.sort((a, b) => a.modelName.localeCompare(b.modelName, 'en', { numeric: true, sensitivity: 'base' }) || a.index - b.index);
+            group.rows.forEach(({ modelName }) => {
+                seriesGroup.appendChild(new Option(modelName, modelName));
+            });
+            modelList.appendChild(seriesGroup);
+        });
+        modelList.addEventListener('change', function() {
             const val = this.value;
-            
             // 處理無顯卡或清空輸入框的狀況
             if (val === "無獨立顯卡 (內顯) - 0W" || val === "") {
                 document.getElementById('excel-result').style.display = 'none';
@@ -698,6 +820,69 @@
         });
     }
 
+    function classifyGpuRow(row, modelName) {
+        const brand = String(getCleanVal(row, ['品牌']) || '').trim();
+        const series = String(getCleanVal(row, ['架構', '系列']) || '').trim();
+        const model = String(modelName || getCleanVal(row, ['顯示卡型號']) || '').trim();
+
+        if (/nvidia/i.test(brand)) {
+            let generation;
+            let seriesOrder;
+            if (/^gtx\s*400/i.test(model) || /gtx\s*400/i.test(series)) [generation, seriesOrder] = ['GTX 400', 0];
+            else if (/^gtx\s*500/i.test(model) || /gtx\s*500/i.test(series)) [generation, seriesOrder] = ['GTX 500', 10];
+            else if (/^gtx\s*600/i.test(model) || /gtx\s*600/i.test(series)) [generation, seriesOrder] = ['GTX 600', 20];
+            else if (/^gtx\s*7[0-9]{2}/i.test(model) || /gtx\s*700/i.test(series)) [generation, seriesOrder] = ['GTX 700', 30];
+            else if (/^gtx\s*900/i.test(model) || /gtx\s*900/i.test(series)) [generation, seriesOrder] = ['GTX 900', 40];
+            else if (/^gtx\s*1[0-9]{3}/i.test(model) || /gtx\s*10/i.test(series)) [generation, seriesOrder] = ['GTX 10', 50];
+            else if (/^gtx\s*16/i.test(model) || /gtx\s*16/i.test(series)) [generation, seriesOrder] = ['GTX 16', 60];
+            else if (/^rtx\s*20/i.test(model) && /super/i.test(model)) [generation, seriesOrder] = ['RTX 20 Super', 75];
+            else if (/^rtx\s*20/i.test(model) || /rtx\s*20/i.test(series)) [generation, seriesOrder] = ['RTX 20', 70];
+            else if (/^rtx\s*30/i.test(model) || /rtx\s*30/i.test(series)) [generation, seriesOrder] = ['RTX 30', 80];
+            else if (/^rtx\s*40/i.test(model) && /super/i.test(model)) [generation, seriesOrder] = ['RTX 40 Super', 95];
+            else if (/^rtx\s*40/i.test(model) || /rtx\s*40/i.test(series)) [generation, seriesOrder] = ['RTX 40', 90];
+            else if (/^rtx\s*50/i.test(model) || /rtx\s*50/i.test(series)) [generation, seriesOrder] = ['RTX 50', 100];
+            else [generation, seriesOrder] = [series || '其他 NVIDIA 型號', 999];
+            return { manufacturerOrder: 0, manufacturerLabel: 'NVIDIA', seriesOrder, seriesLabel: `${generation} Series`, groupKey: `nvidia-${generation}` };
+        }
+
+        if (/amd/i.test(brand)) {
+            let generation;
+            let seriesOrder;
+            if (/^hd\s*6/i.test(model) || /hd\s*6000/i.test(series)) [generation, seriesOrder] = ['Radeon HD 6000', 0];
+            else if (/^hd\s*7/i.test(model) || /hd\s*7000/i.test(series)) [generation, seriesOrder] = ['Radeon HD 7000', 10];
+            else if (/^r[79]\s*2/i.test(model) || /r7\/r9\s*200/i.test(series)) [generation, seriesOrder] = ['Radeon R7/R9 200', 20];
+            else if (/^r9\s*3/i.test(model) || /r9\s*300|fury/i.test(series)) [generation, seriesOrder] = ['Radeon R9 300 / Fury', 30];
+            else if (/^rx\s*4/i.test(model) || /rx\s*400/i.test(series)) [generation, seriesOrder] = ['Radeon RX 400', 40];
+            else if (/^rx\s*5[0-9]{2}(?!\d)/i.test(model) || /rx\s*500(?!0)/i.test(series)) [generation, seriesOrder] = ['Radeon RX 500', 50];
+            else if (/vega/i.test(model) || /vega/i.test(series)) [generation, seriesOrder] = ['Radeon RX Vega', 60];
+            else if (/^rx\s*5[0-9]{3}/i.test(model) || /rx\s*5000/i.test(series)) [generation, seriesOrder] = ['Radeon RX 5000', 70];
+            else if (/^rx\s*6/i.test(model) || /rx\s*6000/i.test(series)) [generation, seriesOrder] = ['Radeon RX 6000', 80];
+            else if (/^rx\s*7/i.test(model) || /rx\s*7000/i.test(series)) [generation, seriesOrder] = ['Radeon RX 7000', 90];
+            else [generation, seriesOrder] = [series || '其他 AMD 型號', 999];
+            return { manufacturerOrder: 1, manufacturerLabel: 'AMD', seriesOrder, seriesLabel: `${generation} Series`, groupKey: `amd-${generation}` };
+        }
+
+        if (/intel/i.test(brand)) {
+            const battlemage = /\bB\s*\d{3}/i.test(model) || /battlemage/i.test(series);
+            const generation = battlemage ? 'Arc Battlemage' : 'Arc A-Series';
+            return {
+                manufacturerOrder: 2,
+                manufacturerLabel: 'Intel',
+                seriesOrder: battlemage ? 10 : 0,
+                seriesLabel: generation,
+                groupKey: `intel-${generation}`
+            };
+        }
+
+        return {
+            manufacturerOrder: 3,
+            manufacturerLabel: brand || '其他',
+            seriesOrder: 999,
+            seriesLabel: series || '其他型號',
+            groupKey: `${brand || 'other'}-${series || 'other'}`
+        };
+    }
+
     // ==========================================
     // 從網址參數抓取 GPU 與 CPU 型號並自動觸發
     // ==========================================
@@ -754,6 +939,10 @@
         const urlParams = new URLSearchParams(window.location.search);
         const queryGpu = urlParams.get('gpu') || urlParams.get('model');
         const queryCpu = urlParams.get('cpu');
+        const requestedMotherboard = urlParams.get('motherboard');
+        if (['25', '40', '15'].includes(requestedMotherboard)) {
+            document.getElementById('mb-power').value = requestedMotherboard;
+        }
         let gpuMatched = !queryGpu;
         
         // 1. 處理 GPU 自動配對
@@ -769,7 +958,7 @@
                 gpuMatched = true;
             } else {
                 const loadingMessage = document.getElementById('loading-msg');
-                loadingMessage.textContent = `找不到「${queryGpu}」的精確功耗資料，請手動選擇顯示卡後再計算。`;
+                loadingMessage.textContent = `找不到「${queryGpu}」的精確功耗資料，請從資料庫清單選擇顯示卡後再計算。`;
                 loadingMessage.style.display = 'block';
                 loadingMessage.style.color = '#b45309';
                 loadingMessage.dataset.matchWarning = 'true';
@@ -780,9 +969,12 @@
         if (queryCpu) {
             const cpuInput = document.getElementById('cpu-power');
             const matchedCpuRow = findCpuRow(queryCpu);
-            cpuInput.value = matchedCpuRow
-                ? getCleanVal(matchedCpuRow, ['CPU型號'])
-                : getCpuTierValue(queryCpu);
+            if (matchedCpuRow) {
+                cpuInput.value = getCleanVal(matchedCpuRow, ['CPU型號']);
+            } else {
+                cpuInput.value = '';
+                currentCpuTdp = Number(getCpuTierValue(queryCpu).match(/\d+/)?.[0]) || 0;
+            }
             cpuInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
@@ -829,9 +1021,72 @@
     // ==========================================
     // 驅動程式查詢邏輯 (NVIDIA/AMD 直達驅動專區，其餘跳轉搜尋)
     // ==========================================
+    function populateDriverModelOptions() {
+        const modelSelect = document.getElementById('nvidia-model-select');
+        const modelInput = document.getElementById('model-input');
+        const hint = document.getElementById('driver-model-hint');
+        if (!modelSelect || !modelInput || !hint) return;
+        const brand = document.getElementById('brand-select').value;
+        const isNvidia = brand === 'NVIDIA';
+        modelInput.style.display = isNvidia ? 'none' : '';
+        modelSelect.style.display = isNvidia ? '' : 'none';
+        if (!isNvidia) {
+            hint.textContent = '請輸入您的硬體型號。';
+            return;
+        }
+
+        const models = [...new Set(gpuExcelData
+            .filter(row => String(row['品牌'] || '').toLowerCase().includes('nvidia'))
+            .map(row => String(row['顯示卡型號'] || '').trim())
+            .filter(name => {
+                const match = name.match(/\b(RTX|GTX)\s*(\d{3,4})\b/i);
+                if (!match) return false;
+                const modelNumber = Number(match[2]);
+                return match[1].toUpperCase() === 'RTX'
+                    ? modelNumber >= 2000 && modelNumber <= 5090
+                    : modelNumber >= 580;
+            })
+        )].sort((left, right) => {
+            const sortKey = model => {
+                const modelNumber = Number(model.match(/\b(?:RTX|GTX)\s*(\d{3,4})\b/i)?.[1]);
+                const normalized = model.toUpperCase();
+                const suffixRank = /\bTI\b.*\bSUPER\b|\bSUPER\b.*\bTI\b/.test(normalized)
+                    ? 3
+                    : /\bTI\b/.test(normalized)
+                      ? 2
+                      : /\bSUPER\b/.test(normalized)
+                        ? 1
+                        : 0;
+                return {
+                    series: Math.floor(modelNumber / 100),
+                    tier: modelNumber % 100,
+                    suffixRank
+                };
+            };
+            const leftKey = sortKey(left);
+            const rightKey = sortKey(right);
+            return rightKey.series - leftKey.series ||
+                rightKey.tier - leftKey.tier ||
+                rightKey.suffixRank - leftKey.suffixRank ||
+                left.localeCompare(right, 'en', { numeric: true });
+        });
+        modelSelect.replaceChildren(new Option('請選擇 NVIDIA 顯示卡型號...', ''));
+        models.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name.replace(/\s+12GB\b/i, '');
+            modelSelect.appendChild(option);
+        });
+        hint.textContent = models.length
+            ? `請從本機資料庫選擇 NVIDIA 顯示卡型號（共 ${models.length} 款）。`
+            : 'NVIDIA 型號資料尚未載入，請稍後再試。';
+    }
+
     function searchOfficial() {
         const brand = document.getElementById('brand-select').value;
-        const model = document.getElementById('model-input').value.trim();
+        const model = brand.includes('NVIDIA')
+            ? document.getElementById('nvidia-model-select').value.trim()
+            : document.getElementById('model-input').value.trim();
         if (model && driverLinksData.length > 0) {
             // 轉小寫並去除空白，提高防呆配對成功率
             const searchStr = model.toLowerCase().replace(/\s+/g, '');
@@ -853,7 +1108,7 @@
             window.open("https://www.nvidia.com/zh-tw/geforce/drivers/", "_blank");
             return;
         }
-        
+
         if (brand.includes("AMD")) {
             window.open("https://www.amd.com/zh-tw/support/download/drivers.html", "_blank");
             return;
@@ -881,5 +1136,6 @@
         }
     }
 </script>
+<script src="./chat-widget.js?v=20261001-docked-launcher"></script>
 </body>
 </html>

@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cpuWarrantySelect = document.getElementById('cpu-warranty-months');
     const totalWarrantyLabel = document.getElementById('total-warranty-label');
     const totalWarrantyHint = document.getElementById('total-warranty-hint');
-    const conditionField = document.getElementById('condition-field');
-    const conditionSelect = document.getElementById('condition');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
@@ -311,10 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearDetected();
             hideSuggestions();
             formMessage.textContent = '';
-            const isGpu = tab.dataset.category === 'gpu';
-            conditionField.hidden = !isGpu;
-            if (!isGpu) conditionSelect.value = 'good';
-            originalPriceInput.required = !isGpu;
+            originalPriceInput.required = categoryInput.value !== 'gpu';
             originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
                 ? '參考價／晶片組估價基準價（NTD）' : '新品參考價（NTD）';
             originalPriceHint.textContent = {
@@ -350,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 : cpuWarrantySelect.value),
             elapsedMonths: Number(document.getElementById('elapsed-months').value),
             extensionRegistered: extensionSelect.value,
-            condition: conditionSelect.value,
+            condition: 'good',
             details: {}
         };
 
@@ -388,5 +383,47 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = '開始估價';
         }
     });
+
+    const initialParams = new URLSearchParams(window.location.search);
+    const initialCategory = initialParams.get('category');
+    if (['cpu', 'ram', 'gpu', 'motherboard'].includes(initialCategory)) {
+        document.querySelector(`.category-tab[data-category="${initialCategory}"]`)?.click();
+    }
+    const initialModel = initialParams.get('model');
+    const shouldAutoCalculate = initialParams.get('calculate') === '1';
+    if (initialModel) {
+        modelInput.value = initialModel;
+        if (shouldAutoCalculate) {
+            updateCpuWarrantyControl(initialModel);
+            hideSuggestions();
+        } else {
+            modelInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }
+    const initialMonths = initialParams.get('elapsedMonths');
+    if (initialMonths !== null && /^\d+$/.test(initialMonths)) {
+        document.getElementById('elapsed-months').value = initialMonths;
+    }
+    const initialWarrantyMonths = initialParams.get('totalWarrantyMonths');
+    if (initialWarrantyMonths !== null && /^\d+$/.test(initialWarrantyMonths)) {
+        totalWarrantyInput.value = initialWarrantyMonths;
+        cpuWarrantySelect.value = initialWarrantyMonths;
+    }
+    const initialModelId = initialParams.get('modelId');
+    if (initialModelId && /^\d+$/.test(initialModelId)) modelIdInput.value = initialModelId;
+    const initialPrice = Number(initialParams.get('originalPrice'));
+    if (Number.isFinite(initialPrice) && initialPrice > 0) {
+        originalPriceInput.value = String(initialPrice);
+        originalPriceInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    if (shouldAutoCalculate) {
+        window.setTimeout(() => {
+            window.clearTimeout(searchTimer);
+            if (searchController) searchController.abort();
+            hideSuggestions();
+            form.requestSubmit();
+        }, 0);
+    }
 
 });

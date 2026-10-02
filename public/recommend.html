@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智慧推薦 ｜ 一次估夠</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="./site-theme.css">
+    <link rel="stylesheet" href="./style.css?v=20261001-docked-launcher">
+    <link rel="stylesheet" href="./site-theme.css?v=20261001-page-enter">
     <style>
         /* --- 全站統一變數 --- */
         :root {
@@ -170,12 +170,6 @@
             max-width: 1100px;
             margin: 0 auto;
             padding: 32px 20px 70px;
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .recommend-hero {
@@ -184,20 +178,11 @@
             margin-bottom: 28px;
             padding: 46px 40px;
             border-radius: 18px;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background:
+                linear-gradient(90deg, rgba(12, 20, 37, 0.9) 0%, rgba(12, 20, 37, 0.76) 44%, rgba(12, 20, 37, 0.3) 100%),
+                url('./assets/smart-hardware-banner.jpg') center 48% / cover no-repeat;
             color: #fff;
             box-shadow: var(--shadow-lg);
-        }
-
-        .recommend-hero::after {
-            content: '';
-            position: absolute;
-            right: -70px;
-            bottom: -100px;
-            width: 280px;
-            height: 280px;
-            border: 42px solid rgba(56, 189, 248, 0.12);
-            border-radius: 50%;
         }
 
         .recommend-eyebrow {
@@ -451,6 +436,38 @@
             margin: 0;
         }
 
+        .recommend-agent-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .recommend-data-freshness {
+            flex: 1 1 100%;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .recommend-agent-button {
+            padding: 9px 13px;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .recommend-agent-button:hover {
+            background: #dbeafe;
+        }
+
         .recommend-calculator-link {
             display: inline-flex;
             align-items: center;
@@ -549,11 +566,6 @@
     <header>
         <div class="header-main">
             <a href="/" class="logo"> 一次估夠</a>
-            
-            <div class="search-wrapper">
-                <input type="text" id="site-search" class="nav-search" placeholder="查詢硬體市價..." onkeydown="handleSearch(event)" aria-label="查詢硬體市價">
-            </div>
-
         </div>
         
         <nav class="main-nav" aria-label="主要導覽">
@@ -565,7 +577,7 @@
         </nav>
     </header>
 
-    <main class="recommend-page">
+    <main class="recommend-page page-enter">
         <section class="recommend-hero">
             <p class="recommend-eyebrow">SMART HARDWARE GUIDE</p>
             <h1>智慧硬體配置推薦</h1>
@@ -623,20 +635,7 @@
         </div>
     </main>
 
-    <script>
-        // 頂部搜尋列邏輯
-        function handleSearch(event) {
-            if (event.key === 'Enter') triggerSearch();
-        }
-
-        function triggerSearch() {
-            const input = document.getElementById('site-search');
-            if (input && input.value.trim()) {
-                window.location.href = `/scrape?keyword=${encodeURIComponent(input.value.trim())}`;
-            }
-        }
-    </script>
-    <script src="./recommend.js?v=20260913-1"></script>
-    <script src="./chat-widget.js"></script>
+    <script src="./recommend.js?v=20261001-agent"></script>
+    <script src="./chat-widget.js?v=20261001-docked-launcher"></script>
 </body>
 </html>

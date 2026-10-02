@@ -2,6 +2,31 @@ const cheerio = require('cheerio');
 const puppeteer = require('./browser');
 const { loadProductPage } = require('./browser-page');
 const { fetchSearchHtml } = require('./search-html');
+const { getUsdNtdRate } = require('../services/exchange-rate');
+
+function convertUsdPrice(priceWhole, priceFraction, exchange) {
+  const whole = String(priceWhole || '').replace(/[^\d]/g, '');
+  const fraction = String(priceFraction || '').replace(/[^\d]/g, '');
+  const usd = Number(`${whole || '0'}.${fraction.padEnd(2, '0').slice(0, 2) || '00'}`);
+  if (!Number.isFinite(usd) || usd <= 0) return null;
+
+  const originalPrice = `USD $${usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (!exchange) return { price: originalPrice, originalPrice, currency: 'USD' };
+
+  const priceNtd = Math.round(usd * exchange.rate);
+  return {
+    price: String(priceNtd),
+    priceNtd,
+    originalPrice,
+    currency: 'USD',
+    exchangeRate: exchange.rate,
+    exchangeRateFetchedAt: exchange.fetchedAt,
+    exchangeRateQuoteDate: exchange.quoteDate,
+    exchangeRateStale: Boolean(exchange.stale),
+    exchangeRateSource: exchange.source,
+    exchangeRateSourceUrl: exchange.sourceUrl
+  };
+}
 
 async function scrape(keyword) {
   console.log(`[Newegg] 搜尋美國硬體: ${keyword}`);
@@ -32,15 +57,29 @@ async function scrape(keyword) {
         results.push({
           platform: 'Newegg (US)',
           name,
-          price: `USD $${priceWhole}${priceFraction}`,
+          priceWhole,
+          priceFraction,
           url: link,
           sales: 0
         });
       }
     });
 
-    console.log(`[Newegg] 搜尋完成，找到 ${results.length} 筆`);
-    return results.slice(0, 99);
+    let exchange = null;
+    if (results.length) {
+      try {
+        exchange = await getUsdNtdRate();
+      } catch (error) {
+        console.warn(`[Newegg] 暫時無法取得臺銀美元匯率：${error.message}`);
+      }
+    }
+    const convertedResults = results.map((item) => {
+      const { priceWhole: whole, priceFraction: fraction, ...product } = item;
+      return { ...product, ...convertUsdPrice(whole, fraction, exchange) };
+    });
+
+    console.log(`[Newegg] 搜尋完成，找到 ${convertedResults.length} 筆`);
+    return convertedResults.slice(0, 99);
   } catch (error) {
     console.error(`❌ Newegg 爬蟲失敗: ${error.message}`);
     return [];
@@ -49,4 +88,4 @@ async function scrape(keyword) {
   }
 }
 
-module.exports = { scrape };
+module.exports = { scrape, convertUsdPrice };

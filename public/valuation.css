@@ -63,15 +63,22 @@
     overflow: hidden;
 }
 
+.valuation-page .valuation-hero {
+    display: flex;
+    min-height: 230px;
+    align-items: center;
+    background:
+        linear-gradient(90deg, rgba(12, 20, 37, 0.88) 0%, rgba(12, 20, 37, 0.68) 48%, rgba(12, 20, 37, 0.22) 100%),
+        url('./assets/used-hardware-banner.jpg') center 48% / cover no-repeat !important;
+}
+
+.valuation-hero > div {
+    position: relative;
+    z-index: 1;
+}
+
 .valuation-hero::after {
-    position: absolute;
-    right: -55px;
-    bottom: -95px;
-    width: 230px;
-    height: 230px;
-    border: 34px solid rgba(56, 189, 248, 0.12);
-    border-radius: 50%;
-    content: '';
+    display: none;
 }
 
 .valuation-eyebrow {

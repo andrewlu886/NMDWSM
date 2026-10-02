@@ -1,5 +1,7 @@
-const { scrapePlatforms } = require('../scrapers');
 const { normalizeSearchKeyword } = require('../utils/search-keyword');
+const { PLATFORM_IDS } = require('../scrapers');
+const { getDailyMarketData } = require('./market-cache');
+const { getUsdNtdRate } = require('./exchange-rate');
 
 const SYNONYM_GROUPS = Object.freeze([
   ['w11', 'win11', 'windows11', 'windows 11'],
@@ -41,6 +43,12 @@ function parsePrice(price) {
   return digits ? parseInt(digits, 10) : Infinity;
 }
 
+function hasPlausibleYahooMiniPcPrice(item) {
+  if (!/yahoo/i.test(item?.platform || '') || !/迷你(?:桌機|電腦)/i.test(item?.name || '')) return true;
+  const price = parsePrice(item.price);
+  return price >= 1500 && price <= 100000;
+}
+
 function extractGpuFamily(keyword) {
   const normalized = normalizeSearchKeyword(keyword).toUpperCase();
   const match = normalized.match(/(?<!\d)(?:RTX|RX)?([3-9]\d{3})(?:TI|SUPER)?(?!\d)/);
@@ -78,6 +86,7 @@ function filterSearchResults(products, options) {
 
   const filtered = products.filter((item) => {
     const name = String(item?.name || '').toLowerCase();
+    if (!hasPlausibleYahooMiniPcPrice(item)) return false;
     const includeMatch = includeWords.length === 0
       || includeWords.every((word) => name.includes(word.toLowerCase()));
     const excludeMatch = excludeWords.length === 0
@@ -92,14 +101,75 @@ function filterSearchResults(products, options) {
   return filtered.sort((left, right) => parsePrice(left.price) - parsePrice(right.price));
 }
 
-async function searchProducts(options, dependencies = {}) {
-  const scrape = dependencies.scrapePlatforms || scrapePlatforms;
+async function convertUsdProducts(products, getRate = getUsdNtdRate) {
+  const usdProducts = products.map((item) => {
+    if (!item || (item.currency !== 'USD' && !/newegg/i.test(item.platform || ''))) return item;
+    const sourcePrice = item.originalPrice || item.price;
+    const match = String(sourcePrice || '').match(/(?:USD\s*)?\$?\s*([\d,]+(?:\.\d{1,2})?)/i);
+    const usd = match ? Number(match[1].replace(/,/g, '')) : NaN;
+    if (!Number.isFinite(usd) || usd <= 0) return item;
+    return {
+      ...item,
+      currency: 'USD',
+      originalPrice: `USD $${usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    };
+  });
+  if (!usdProducts.some((item) => item?.currency === 'USD' && item.originalPrice)) return products;
+
+  let exchange;
+  try {
+    exchange = await getRate();
+  } catch (error) {
+    console.warn(`[市價查詢] 美元商品暫時無法換算：${error.message}`);
+    return usdProducts;
+  }
+
+  return usdProducts.map((item) => {
+    if (item?.currency !== 'USD' || !item.originalPrice) return item;
+    const match = String(item.originalPrice).match(/USD\s*\$\s*([\d,]+(?:\.\d{1,2})?)/i);
+    const usd = match ? Number(match[1].replace(/,/g, '')) : NaN;
+    if (!Number.isFinite(usd) || usd <= 0) return item;
+    const priceNtd = Math.round(usd * exchange.rate);
+    return {
+      ...item,
+      price: String(priceNtd),
+      priceNtd,
+      exchangeRate: exchange.rate,
+      exchangeRateFetchedAt: exchange.fetchedAt,
+      exchangeRateQuoteDate: exchange.quoteDate,
+      exchangeRateStale: Boolean(exchange.stale),
+      exchangeRateSource: exchange.source,
+      exchangeRateSourceUrl: exchange.sourceUrl
+    };
+  });
+}
+
+async function searchProductsWithMeta(options, dependencies = {}) {
   const normalizedOptions = {
     ...options,
     keyword: normalizeSearchKeyword(options.keyword)
   };
-  const products = await scrape(normalizedOptions.keyword, normalizedOptions.platforms || 'all');
-  return filterSearchResults(products, normalizedOptions);
+  const requestedPlatforms = Array.isArray(normalizedOptions.platforms)
+    ? normalizedOptions.platforms
+    : String(normalizedOptions.platforms || 'all').split(',');
+  const platforms = PLATFORM_IDS
+    .filter(platform => platform !== 'coolpc')
+    .filter(platform => requestedPlatforms.includes('all') || requestedPlatforms.includes(platform));
+  normalizedOptions.platforms = platforms;
+  const marketData = dependencies.getMarketData
+    ? await dependencies.getMarketData(normalizedOptions.keyword, platforms)
+    : dependencies.scrapePlatforms
+      ? { products: await dependencies.scrapePlatforms(normalizedOptions.keyword, platforms), meta: null }
+      : await getDailyMarketData(normalizedOptions.keyword, platforms);
+  const products = await convertUsdProducts(marketData.products, dependencies.getUsdNtdRate || getUsdNtdRate);
+  return {
+    data: filterSearchResults(products, normalizedOptions),
+    meta: marketData.meta
+  };
+}
+
+async function searchProducts(options, dependencies = {}) {
+  return (await searchProductsWithMeta(options, dependencies)).data;
 }
 
 module.exports = {
@@ -110,5 +180,7 @@ module.exports = {
   filterSearchResults,
   extractGpuFamily,
   matchesGpuFamily,
-  searchProducts
+  convertUsdProducts,
+  searchProducts,
+  searchProductsWithMeta
 };

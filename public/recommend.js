@@ -52,6 +52,39 @@
         const calculatorLink = document.querySelector('.recommend-calculator-link');
         calculatorLink.href = '/tools';
 
+        const marketMeta = result.marketMeta;
+        const actions = document.createElement('div');
+        actions.className = 'recommend-agent-actions';
+        const freshness = addTextElement(
+            actions,
+            'span',
+            'recommend-data-freshness',
+            marketMeta?.updatedAt
+                ? `市場資料更新於 ${new Date(marketMeta.updatedAt).toLocaleString('zh-TW')}，每日更新一次`
+                : '市場資料每日更新一次'
+        );
+        freshness.setAttribute('role', 'status');
+
+        const agentPrompt = (mode) => {
+            const kind = productType === 'component'
+                ? `單一零件（${componentType === 'cpu' ? 'CPU' : '顯示卡'}）`
+                : `${productType === 'laptop' ? '筆電' : '套裝主機'}，用途為${usage === 'gaming' ? '遊戲' : '文書／影音'}`;
+            return mode === 'review'
+                ? `我剛在智慧推薦頁以預算 NT$${budget.toLocaleString()} 查詢${kind}。請依最新市場資料解讀推薦結果、說明挑選時的取捨，並提醒我購買前應確認的規格。`
+                : `我剛在智慧推薦頁以預算 NT$${budget.toLocaleString()} 查詢${kind}。請先詢問我最在意的條件，再協助調整條件並重新推薦；若市場資料不足也請明確說明。`;
+        };
+
+        [['請 AI 解讀推薦', 'review'], ['和 AI 一起調整條件', 'adjust']].forEach(([label, mode]) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'recommend-agent-button';
+            button.textContent = label;
+            button.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('nmdwsm:agent-prompt', { detail: { prompt: agentPrompt(mode) } }));
+            });
+            actions.appendChild(button);
+        });
+
         if (usage === 'gaming' && productType !== 'component' && budget < 30000) {
             addTextElement(
                 resultDisplay,
@@ -64,6 +97,7 @@
         if (!result.recommendations || result.recommendations.length === 0) {
             const empty = addTextElement(resultDisplay, 'div', 'recommend-empty', '目前找不到符合條件的結果，請調整預算或商品類型後再試一次。');
             empty.setAttribute('role', 'status');
+            resultDisplay.appendChild(actions);
             return;
         }
 
@@ -126,6 +160,7 @@
         });
 
         resultDisplay.appendChild(list);
+        resultDisplay.appendChild(actions);
     }
 
     form.addEventListener('submit', async (event) => {

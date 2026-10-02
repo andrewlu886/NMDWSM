@@ -68,7 +68,6 @@ const cpuModels = [
   [2026, 'Intel', 'Core Ultra 200S Plus', 'Core Ultra 5 250K Plus'],
   [2026, 'Intel', 'Core Ultra 200S Plus', 'Core Ultra 5 250KF Plus'],
   [2026, 'Intel', 'Core Ultra 200S Plus', 'Core Ultra 7 270K Plus'],
-  [2026, 'Intel', 'Core Ultra 300 Series', 'Core Ultra 7 365K'],
   [2020, 'AMD', 'Ryzen 5000', 'Ryzen 5 5600X'],
   [2020, 'AMD', 'Ryzen 5000', 'Ryzen 7 5800X'],
   [2020, 'AMD', 'Ryzen 5000', 'Ryzen 9 5900X'],
