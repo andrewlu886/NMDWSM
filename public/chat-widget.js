@@ -206,6 +206,14 @@
     let removedStaleRecommendation = false;
     let savedInterfaceState = { isOpen: false, recommendationText: '' };
     try {
+        const navigation = window.performance?.getEntriesByType?.('navigation')?.[0];
+        const isReload = navigation
+            ? navigation.type === 'reload'
+            : window.performance?.navigation?.type === 1;
+        if (isReload) {
+            sessionStorage.removeItem(historyStorageKey);
+            sessionStorage.removeItem(interfaceStorageKey);
+        }
         const storedHistory = JSON.parse(sessionStorage.getItem(historyStorageKey) || '[]');
         if (Array.isArray(storedHistory)) {
             chatHistory = storedHistory
