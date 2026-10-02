@@ -162,7 +162,6 @@ async function getRecommendations(options, dependencies = {}) {
   const { marketMeta, ...recommendations } = result;
   return recommendations;
 }
-}
 
 module.exports = {
   getSearchKeyword,

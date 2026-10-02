@@ -396,7 +396,6 @@ async function executeTool(name, args) {
 }
 
 function fallbackAnswerForUserMessage(userMessage) {
-function fallbackAnswerForUserMessage(userMessage) {
   const text = String(userMessage || '').trim().toLowerCase();
   if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安|你是誰|你是啥|你是什麼|自我介紹|機器人|客服/.test(text)) {
     return '您好！我是一次買夠的本機 AI 硬體助手，可以幫您估二手價格、查詢市價、推薦硬體或計算電源瓦數。';
@@ -618,15 +617,6 @@ async function handle(req, res) {
         res.writeHead(413, { 'Content-Type': 'application/json; charset=utf-8' });
         return res.end(JSON.stringify({ success: false, message: '訊息或圖片過大，請縮小後重試。' }));
       }
-    }
-    const parsed = body ? JSON.parse(body) : {};
-    const messages = Array.isArray(parsed.messages) ? parsed.messages : [];
-  } catch (error) {
-    console.error('handle error', error);
-  }
-}
-
-
     }
     const parsed = body ? JSON.parse(body) : {};
     const messages = Array.isArray(parsed.messages) ? parsed.messages : [];
