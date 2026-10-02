@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>二手硬體估價 | 一次估夠</title>
     <meta name="description" content="查詢硬體型號、保固狀態並測試二手硬體估價流程。">
-    <link rel="stylesheet" href="./style.css?v=20261001-docked-launcher">
+<link rel="stylesheet" href="./style.css?v=20261001-docked-launcher">
     <link rel="stylesheet" href="./valuation.css">
     <link rel="stylesheet" href="./site-theme.css?v=20261001-page-enter">
+    <link rel="stylesheet" href="./history.css">
     <style>
         /* =========================================
            主導覽列 (Main Nav) 動畫底線特效 (兩倍粗)
@@ -54,7 +55,7 @@
             <!-- 目前所在頁面會套用 active 樣式，底線會保持展開 -->
             <a href="/valuation.html" class="active">二手硬體估價</a>
             <a href="/scrape">市價查詢</a>
-            <a href="/tools">零件查詢與瓦數計算工具</a>
+            <a href="/tools">驅動查詢與瓦數計算工具</a>
         </nav>
     </header>
 
@@ -71,7 +72,7 @@
             <div class="valuation-heading-row">
                 <div>
                     <h2>選擇硬體種類</h2>
-                    <p>CPU、顯示卡提供型號與價格建議；主機板可選擇晶片組估價基準，記憶體請手動輸入。</p>
+                    <p>CPU、顯示卡、主機板與記憶體皆可搜尋已收錄型號。截圖報價僅供參考；主機板會優先使用估價參考價。</p>
                 </div>
             </div>
 
@@ -89,31 +90,33 @@
 
                     <div class="field full-width model-search-field">
                         <label for="model">完整型號</label>
-                        <input id="model" name="model" type="text" required autocomplete="off" aria-autocomplete="list" aria-controls="model-suggestions" placeholder="例如：Intel Core Ultra 7 265K">
+                        <input id="model" name="model" type="text" required maxlength="100" autocomplete="off" aria-autocomplete="list" aria-controls="model-suggestions" placeholder="例如：Intel Core Ultra 7 265K">
                         <div id="model-suggestions" class="model-suggestions" role="listbox" hidden></div>
-                        <span class="field-hint" id="model-hint">輸入至少 2 個字元即可搜尋型號。</span>
+                        <span class="field-hint" id="model-hint">輸入至少 2 個字元即可搜尋型號，最多 100 字。</span>
                     </div>
 
                     <div class="field full-width">
                         <label for="original-price" id="original-price-label">目前全新參考價（NTD）</label>
-                        <input id="original-price" name="originalPrice" type="number" min="1" step="1" required placeholder="例如：10200">
+                        <input id="original-price" name="originalPrice" type="number" min="1" step="1" required data-maxlength="100" placeholder="例如：10200">
                         <span class="field-hint" id="original-price-hint"></span>
                     </div>
 
                     <section class="warranty-fields full-width" aria-label="保固與使用時間">
-                        <div class="field">
+                        <div class="field" id="warranty-months-field">
                             <label for="total-warranty-months" id="total-warranty-label">保固總月數</label>
-                            <input id="total-warranty-months" name="totalWarrantyMonths" type="number" min="0" step="1" required placeholder="例如：36">
-                            <select id="cpu-warranty-months" aria-label="CPU 保固總月數" hidden disabled>
-                                <option value="36" selected>36 個月（基本保固）</option>
-                                <option value="60">60 個月（延長保固）</option>
+                            <select id="cpu-warranty-months" aria-label="常用保固總月數">
+                                <option value="" selected>選擇常用月數或自行輸入</option>
+                                <option value="36">36 個月</option>
+                                <option value="60">60 個月</option>
+                                <option value="custom">自行輸入</option>
                             </select>
-                            <span class="field-hint" id="total-warranty-hint">請填產品完整保固共有幾個月。</span>
+                            <input id="total-warranty-months" name="totalWarrantyMonths" type="number" min="0" step="1" required data-maxlength="100" aria-label="自行輸入保固總月數" placeholder="或自行輸入月數">
+                            <span class="field-hint" id="total-warranty-hint">可選 36／60 個月，或自行輸入；最多 100 字。</span>
                         </div>
-                        <div class="field">
+                        <div class="field" id="elapsed-months-field">
                             <label for="elapsed-months">已使用月數</label>
-                            <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required value="0">
-                            <span class="field-hint">請填從購買或保固起算至今已經過幾個月。</span>
+                            <input id="elapsed-months" name="elapsedMonths" type="number" min="0" step="1" required data-maxlength="100" value="0">
+                            <span class="field-hint" id="elapsed-months-hint">請填從購買或保固起算至今已經過幾個月。</span>
                         </div>
                     </section>
 
@@ -141,22 +144,33 @@
                 <aside class="valuation-result" aria-live="polite">
                     <div class="result-empty" id="result-empty">
                         <h3>等待估價資料</h3>
-                        <p>完成左側欄位後，測試計算結果會顯示在這裡。</p>
+                        <p>完成左側欄位後，估價結果會顯示在這裡。</p>
                     </div>
                     <div class="result-content" id="result-content" hidden>
-                        <p class="result-label">測試計算結果（<span id="result-category">CPU</span>）</p>
+                        <p class="history-snapshot" id="valuation-snapshot" hidden></p>
+                        <p class="result-label">估價結果（<span id="result-category">CPU</span>）</p>
                         <p class="result-price" id="result-price">NT$ 0</p>
                         <div class="result-range"><span>測試區間</span><strong id="result-range">—</strong></div>
                         <div class="result-meta"><span>辨識型號</span><strong id="result-model">—</strong></div>
-                        <div class="result-meta"><span>保固狀態</span><strong id="result-warranty">—</strong></div>
+                        <div class="result-meta" id="result-warranty-row"><span>保固狀態</span><strong id="result-warranty">—</strong></div>
                         <p class="result-note" id="result-note">保固為規則推定，最終以序號、發票與原廠判定為準。</p>
                     </div>
                 </aside>
             </div>
         </section>
+        <section class="history-panel" aria-labelledby="valuation-history-title">
+            <div class="history-heading">
+                <h2 id="valuation-history-title">估價歷史紀錄</h2>
+                <button type="button" id="valuation-history-clear" hidden>清除全部</button>
+            </div>
+            <p class="history-explanation">只保存在此網站的目前瀏覽器，最多 20 筆。舊估價僅供參考。</p>
+            <p class="history-status" id="valuation-history-status" role="status" aria-live="polite"></p>
+            <div class="history-list" id="valuation-history-list"></div>
+        </section>
     </main>
 
-    <script src="./valuation.js?v=20260914-1"></script>
+<script src="./history-store.js"></script>
+    <script src="./valuation.js?v=20260918-4"></script>
     <script src="./chat-widget.js?v=20261001-docked-launcher"></script>
 </body>
 </html>

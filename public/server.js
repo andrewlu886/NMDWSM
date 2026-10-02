@@ -18,13 +18,20 @@ for (const envFile of envCandidates) {
 
 // SQLite 資料庫
 const db = require('./db.js');
-const { searchProductsWithMeta } = require('../src/services/search');
-const { getRecommendationsWithMeta } = require('../src/services/recommendation');
+const { isBodyTooLarge, parseJsonBody } = require('./json-body');
+const { searchProductsWithMeta, searchProducts } = require('../src/services/search');
+const { getRecommendationsWithMeta, getRecommendations } = require('../src/services/recommendation');
 const { DAY_MS: EXCHANGE_RATE_DAY_MS, getUsdNtdRate } = require('../src/services/exchange-rate');
-const { TEST_WARNING, calculateValuation } = require('../src/services/valuation');
+const {
+    TEST_WARNING, UNSUPPORTED_MODEL_MESSAGE, calculateValuation, calculateNvidiaGpuValuation,
+    getNvidiaGpuPricingProfile, isNvidiaGpuModel, isLegacyIntelCoreCpuModel
+} = require('../src/services/valuation');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.resolve(__dirname);
+const SCRAPE_RATE_LIMIT = 5;
+const SCRAPE_RATE_WINDOW_MS = 60 * 1000;
+const scrapeRequestsByIp = new Map();
 const BLOCKED_STATIC_EXTENSIONS = new Set(['.db', '.sqlite', '.sqlite3']);
 const BLOCKED_STATIC_FILES = new Set(['users.json', 'products.json', 'posts.json']);
 const LEGACY_PAGE_ROUTES = new Set([
@@ -62,19 +69,39 @@ function isBlockedStaticFile(filePath) {
     return BLOCKED_STATIC_EXTENSIONS.has(ext) || BLOCKED_STATIC_FILES.has(fileName);
 }
 
-function parseJsonBody(req) {
-    return new Promise((resolve, reject) => {
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
-            try {
-                resolve(body ? JSON.parse(body) : {});
-            } catch (error) {
-                reject(error);
+function getClientIp(req) {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    if (forwardedFor) return String(forwardedFor).split(',')[0].trim();
+    return req.socket.remoteAddress || 'unknown';
+}
+
+function checkScrapeRateLimit(req) {
+    const now = Date.now();
+    const ip = getClientIp(req);
+    const recentRequests = (scrapeRequestsByIp.get(ip) || [])
+        .filter(timestamp => now - timestamp < SCRAPE_RATE_WINDOW_MS);
+
+    if (recentRequests.length >= SCRAPE_RATE_LIMIT) {
+        scrapeRequestsByIp.set(ip, recentRequests);
+        const retryAfterSeconds = Math.ceil(
+            (SCRAPE_RATE_WINDOW_MS - (now - recentRequests[0])) / 1000
+        );
+        return { allowed: false, retryAfterSeconds };
+    }
+
+    recentRequests.push(now);
+    scrapeRequestsByIp.set(ip, recentRequests);
+
+    // 清理已過期的 IP 記錄，避免長期累積。
+    if (scrapeRequestsByIp.size > 1000) {
+        for (const [storedIp, timestamps] of scrapeRequestsByIp) {
+            if (!timestamps.some(timestamp => now - timestamp < SCRAPE_RATE_WINDOW_MS)) {
+                scrapeRequestsByIp.delete(storedIp);
             }
-        });
-        req.on('error', reject);
-    });
+        }
+    }
+
+    return { allowed: true };
 }
 
 // --- 輔助函式 ---
@@ -145,10 +172,10 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const options = await parseJsonBody(req);
-            if (options.productType === 'component' && !['cpu', 'gpu'].includes(options.componentType)) {
+            if (!['desktop', 'laptop'].includes(options.productType)) {
                 return sendJson(res, 400, {
                     success: false,
-                    message: '選擇電腦零件時，componentType 必須為 cpu 或 gpu'
+                    message: '商品種類僅支援套裝主機或筆記型電腦'
                 });
             }
             const result = await getRecommendationsWithMeta(options);
@@ -156,7 +183,10 @@ const server = http.createServer(async(req, res) => {
         } catch (error) {
             console.error('❌ API 推薦處理發生錯誤:', error);
             if (!res.headersSent) {
-                sendJson(res, 500, { success: false, message: '伺服器內部錯誤' });
+                sendJson(res, isBodyTooLarge(error) ? 413 : 500, {
+                    success: false,
+                    message: isBodyTooLarge(error) ? error.message : '伺服器內部錯誤'
+                });
             }
         }
 
@@ -180,7 +210,7 @@ const server = http.createServer(async(req, res) => {
             const category = String(parsedUrl.searchParams.get('category') || '').trim().toLowerCase();
             const query = String(parsedUrl.searchParams.get('q') || '').trim();
             const brand = String(parsedUrl.searchParams.get('brand') || '').trim();
-            if (!['cpu', 'gpu', 'motherboard'].includes(category)) {
+            if (!['cpu', 'gpu', 'motherboard', 'ram'].includes(category)) {
                 return sendJson(res, 200, { success: true, data: [] });
             }
             if (!query) return sendJson(res, 200, { success: true, data: [] });
@@ -200,7 +230,7 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const payload = await parseJsonBody(req);
-            const requiredFields = ['category', 'model', 'elapsedMonths', 'condition'];
+            const requiredFields = ['category', 'model', 'elapsedMonths'];
             const missingField = requiredFields.find(field => payload[field] === undefined || payload[field] === null || payload[field] === '');
             if (missingField) {
                 return sendJson(res, 400, { success: false, message: '估價資料不完整，請檢查所有必填欄位。' });
@@ -208,6 +238,18 @@ const server = http.createServer(async(req, res) => {
             const category = String(payload.category).trim().toLowerCase();
             const brand = String(payload.brand || '').trim();
             const allowedCategories = new Set(['cpu', 'gpu', 'motherboard', 'ram']);
+            const inputLabels = {
+                model: '完整型號', originalPrice: '新品參考價',
+                totalWarrantyMonths: '保固總月數', elapsedMonths: '已使用月數'
+            };
+            const oversizedField = Object.keys(inputLabels).find(
+                field => String(payload[field] ?? '').length > 100
+            );
+            if (oversizedField) {
+                return sendJson(res, 400, {
+                    success: false, message: `${inputLabels[oversizedField]}不可超過 100 字。`
+                });
+            }
             const originalPrice = Number(payload.originalPrice);
             const hasSubmittedPrice = Number.isFinite(originalPrice) && originalPrice > 0;
             const submittedWarrantyMonths = payload.totalWarrantyMonths === undefined || payload.totalWarrantyMonths === ''
@@ -220,9 +262,12 @@ const server = http.createServer(async(req, res) => {
             if (!Number.isFinite(elapsedMonths) || elapsedMonths < 0) {
                 return sendJson(res, 400, { success: false, message: '已過月份不可小於 0。' });
             }
-            if (submittedWarrantyMonths !== null &&
+            if (category !== 'ram' && submittedWarrantyMonths !== null &&
                 (!Number.isFinite(submittedWarrantyMonths) || submittedWarrantyMonths < 0)) {
                 return sendJson(res, 400, { success: false, message: '保固總月數不可小於 0。' });
+            }
+            if (category === 'cpu' && isLegacyIntelCoreCpuModel(payload.model)) {
+                return sendJson(res, 400, { success: false, message: UNSUPPORTED_MODEL_MESSAGE });
             }
             const extensionRegistered = ['yes', 'no', 'unknown'].includes(payload.extensionRegistered)
                 ? payload.extensionRegistered
@@ -235,7 +280,7 @@ const server = http.createServer(async(req, res) => {
                 elapsedMonths,
                 extensionRegistered
             });
-            const warranty = submittedWarrantyMonths === null
+            const warranty = category === 'ram' || submittedWarrantyMonths === null
                 ? resolved.warranty
                 : {
                     ...resolved.warranty,
@@ -254,13 +299,24 @@ const server = http.createServer(async(req, res) => {
                     note: '保固期限由使用者輸入，最終仍以購買證明與原廠判定為準。'
                 };
             const formulaConfig = await db.getValuationFormulaConfig();
+            const nvidiaCandidate = category === 'gpu' && !resolved.gpuPricing &&
+                isNvidiaGpuModel(payload.model, resolved.model && resolved.model.manufacturer);
+            const hasNvidiaFormula = nvidiaCandidate && Boolean(getNvidiaGpuPricingProfile(
+                payload.model, warranty.totalMonths, formulaConfig.nvidiaGpu
+            ));
+            if (category === 'gpu' && !resolved.gpuPricing && !hasNvidiaFormula) {
+                return sendJson(res, 400, {
+                    success: false, message: UNSUPPORTED_MODEL_MESSAGE
+                });
+            }
             if (!resolved.gpuPricing && !resolved.cpuPricing && !resolved.referencePrice && (!Number.isFinite(originalPrice) || originalPrice <= 0)) {
                 return sendJson(res, 400, { success: false, message: '新品參考價需大於 0。' });
             }
             const formulaInput = {
                 category,
                 brand: resolved.canonicalBrand || brand,
-                model: resolved.model ? resolved.model.canonicalModel : String(payload.model).trim(),
+                model: resolved.model && resolved.model.manufacturer !== 'NVIDIA'
+                    ? resolved.model.canonicalModel : String(payload.model).trim(),
                 modelId: resolved.model ? resolved.model.id : null,
                 originalPrice,
                 elapsedMonths,
@@ -268,18 +324,19 @@ const server = http.createServer(async(req, res) => {
                 remainingWarrantyMonths: warranty.remainingMonths,
                 isWarrantyExpired: warranty.isExpired,
                 extensionRegistered,
-                condition: String(payload.condition),
+                condition: 'good',
                 details: payload.details && typeof payload.details === 'object' ? payload.details : {},
                 formulaConfig
             };
             if (resolved.gpuPricing) {
+                const gpuReferencePrice = hasSubmittedPrice
+                    ? originalPrice
+                    : resolved.referencePrice?.priceNtd ?? resolved.gpuPricing.launchPriceNtd;
                 formulaInput.gpuPricing = {
                     ...resolved.gpuPricing,
-                    ...(hasSubmittedPrice ? { launchPriceNtd: originalPrice } : {})
+                    launchPriceNtd: gpuReferencePrice
                 };
-                formulaInput.originalPrice = hasSubmittedPrice
-                    ? originalPrice
-                    : resolved.gpuPricing.launchPriceNtd;
+                formulaInput.originalPrice = gpuReferencePrice;
             } else if (resolved.cpuPricing) {
                 formulaInput.cpuPricing = resolved.cpuPricing;
                 formulaInput.originalPrice = hasSubmittedPrice
@@ -293,8 +350,13 @@ const server = http.createServer(async(req, res) => {
 
             let pricingResult = null;
             let fallbackReason = null;
-            const valuationApiUrl = String(process.env.VALUATION_API_URL || '').trim();
-            if (valuationApiUrl) {
+            if (nvidiaCandidate) {
+                pricingResult = calculateNvidiaGpuValuation(formulaInput);
+            }
+            const valuationApiUrl = category === 'ram'
+                ? ''
+                : String(process.env.VALUATION_API_URL || '').trim();
+            if (valuationApiUrl && !pricingResult) {
                 const headers = { 'Content-Type': 'application/json' };
                 const valuationApiKey = String(process.env.VALUATION_API_KEY || '').trim();
                 if (valuationApiKey) headers.Authorization = `Bearer ${valuationApiKey}`;
@@ -344,7 +406,10 @@ const server = http.createServer(async(req, res) => {
             });
         } catch (error) {
             console.error('❌ 估價處理失敗:', error);
-            sendJson(res, 500, { success: false, message: '估價資料處理失敗，請稍後再試。' });
+            sendJson(res, isBodyTooLarge(error) ? 413 : 500, {
+                success: false,
+                message: isBodyTooLarge(error) ? error.message : '估價資料處理失敗，請稍後再試。'
+            });
         }
 
     } else if (pathname === '/api/chat/status' && req.method === 'GET') {
@@ -384,6 +449,15 @@ const server = http.createServer(async(req, res) => {
         const keyword = parsedUrl.searchParams.get('keyword');
         if (!keyword) {
             return sendJson(res, 400, { success: false, message: '請輸入搜尋關鍵字' });
+        }
+
+        const rateLimit = checkScrapeRateLimit(req);
+        if (!rateLimit.allowed) {
+            res.setHeader('Retry-After', String(rateLimit.retryAfterSeconds));
+            return sendJson(res, 429, {
+                success: false,
+                message: '查詢過於頻繁，請稍後再試。'
+            });
         }
 
         try {

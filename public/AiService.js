@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { searchProductsWithMeta } = require('../src/services/search');
 const { getRecommendationsWithMeta } = require('../src/services/recommendation');
+const { isBodyTooLarge, parseJsonBody } = require('./json-body');
 
 const OLLAMA_BASE_URL = String(process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434').replace(
   /\/+$/,
@@ -395,21 +396,27 @@ async function executeTool(name, args) {
 }
 
 function fallbackAnswerForUserMessage(userMessage) {
-  const text = String(userMessage || '')
-    .trim()
-    .toLowerCase();
-  if (/你好|您好|嗨|哈囉|早安|午安|晚安|你是誰|自我介紹/.test(text)) {
+function fallbackAnswerForUserMessage(userMessage) {
+  const text = String(userMessage || '').trim().toLowerCase();
+  if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安|你是誰|你是啥|你是什麼|自我介紹|機器人|客服/.test(text)) {
     return '您好！我是一次買夠的本機 AI 硬體助手，可以幫您估二手價格、查詢市價、推薦硬體或計算電源瓦數。';
   }
-  if (/估價|二手/.test(text))
-    return '我可以協助估價，請告訴我零件類型與完整型號、使用多久，以及商品狀況（近全新、正常使用、明顯痕跡或狀況較差）。[開啟二手估價工具](/valuation)';
-  if (/市價|行情|價格查詢|查價/.test(text))
-    return '告訴我想查詢的完整硬體型號，我會搜尋支援通路的即時價格。[開啟市價查詢](/scrape)';
-  if (/推薦|配電腦|裝機|菜單/.test(text))
+  if (/謝謝|感謝|感恩|拜拜|再見|掰掰/.test(text)) {
+    return '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！';
+  }
+  if (/裝機|組裝|推薦|菜單|配電腦/.test(text)) {
     return '請告訴我預算、用途（遊戲或文書）及想推薦整機、筆電或 CPU/GPU 零件。[開啟智慧推薦](/recommend)';
-  if (/瓦數|電源|供電|電供/.test(text))
+  }
+  if (/估價|二手|價錢|價格|價格估算|幾錢|多少/.test(text))
+    return '我可以協助估價，請告訴我零件類型與完整型號、使用多久，以及商品狀況（近全新、正常使用、明顯痕跡或狀況較差）。[開啟二手估價工具](/valuation)';
+  if (/市價|行情|價格查詢|查價|市場價格|買賣|想買|要買|購買/.test(text))
+    return '告訴我想查詢的完整硬體型號，我會搜尋支援通路的即時價格。[開啟市價查詢](/scrape)';
+  if (/瓦數|電源|供電|電供|供應器/.test(text))
     return '請提供 CPU 與顯示卡型號（或各自瓦數）；如果沒有獨立顯卡也請告訴我。[開啟瓦數計算](/tools)';
-  return '目前本機 Llama 3.1 尚未連線。您仍可直接使用四項工具，或先告訴我需求：二手估價、市價查詢、硬體推薦、電源瓦數計算。';
+  if (/手機|平板|筆電|筆記型電腦/.test(text)) {
+    return '非常抱歉，目前我們僅針對電腦零組件提供估價喔！[點此前往零件估價工具](/valuation)';
+  }
+  return '不好意思，這部分超出了我的專業範圍😅。我能幫助你跳轉到電腦零組件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？';
 }
 
 function appendChatLog(userMessage, answer) {
@@ -459,6 +466,147 @@ async function getStatus() {
   }
 }
 
+async function trainNlpModel() {
+  if (!manager || isModelTrained) return;
+  manager.addDocument('zh', '你好', 'intent.greeting');
+  manager.addDocument('zh', '您好', 'intent.greeting');
+  manager.addDocument('zh', '嗨', 'intent.greeting');
+  manager.addDocument('zh', '哈囉', 'intent.greeting');
+  manager.addDocument('zh', '有人在嗎', 'intent.greeting');
+  manager.addDocument('zh', '早安', 'intent.greeting');
+  manager.addDocument('zh', '午安', 'intent.greeting');
+  manager.addDocument('zh', '晚安', 'intent.greeting');
+  manager.addDocument('zh', '你是誰', 'intent.greeting');
+  manager.addDocument('zh', '你是啥', 'intent.greeting');
+  manager.addDocument('zh', '你是什麼', 'intent.greeting');
+  manager.addDocument('zh', '自我介紹一下', 'intent.greeting');
+  manager.addDocument('zh', '你是機器人嗎', 'intent.greeting');
+  manager.addDocument('zh', '你是客服嗎', 'intent.greeting');
+  manager.addDocument('zh', '所以你是啥', 'intent.greeting');
+  manager.addAnswer('zh', 'intent.greeting', '您好！我是網站的專屬導遊，有什麼電腦零件估價或行情查詢的需求，都可以問我喔！');
+  manager.addDocument('zh', '謝謝', 'intent.thanks');
+  manager.addDocument('zh', '感謝', 'intent.thanks');
+  manager.addDocument('zh', '感恩', 'intent.thanks');
+  manager.addDocument('zh', '拜拜', 'intent.thanks');
+  manager.addDocument('zh', '再見', 'intent.thanks');
+  manager.addDocument('zh', '掰掰', 'intent.thanks');
+  manager.addAnswer('zh', 'intent.thanks', '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！');
+  manager.addDocument('zh', '買', 'intent.scrape');
+  manager.addDocument('zh', '我想買', 'intent.scrape');
+  manager.addDocument('zh', '我要買', 'intent.scrape');
+  manager.addDocument('zh', '我要買顯卡', 'intent.scrape');
+  manager.addDocument('zh', '我想購買', 'intent.scrape');
+  manager.addDocument('zh', '市場價格', 'intent.scrape');
+  manager.addDocument('zh', '市價', 'intent.scrape');
+  manager.addDocument('zh', '行情', 'intent.scrape');
+  manager.addAnswer('zh', 'intent.scrape', '想了解最新的市場行情嗎？[點此前往市價查詢](/scrape)');
+  manager.addDocument('zh', '我想估價', 'intent.valuation');
+  manager.addDocument('zh', '顯示卡', 'intent.valuation');
+  manager.addDocument('zh', 'CPU', 'intent.valuation');
+  manager.addDocument('zh', 'GPU', 'intent.valuation');
+  manager.addDocument('zh', '主機板', 'intent.valuation');
+  manager.addDocument('zh', '滑鼠鍵盤', 'intent.valuation');
+  manager.addDocument('zh', '電腦零件', 'intent.valuation');
+  manager.addAnswer('zh', 'intent.valuation', '需要估算電腦零件的價格嗎？請點擊這裡：[點此前往零件估價工具](/valuation)');
+  manager.addDocument('zh', '一體機', 'intent.recommend');
+  manager.addDocument('zh', '套裝機', 'intent.recommend');
+  manager.addDocument('zh', '電腦裝機', 'intent.recommend');
+  manager.addDocument('zh', '我想找電腦裝機', 'intent.recommend');
+  manager.addDocument('zh', '組裝電腦', 'intent.recommend');
+  manager.addDocument('zh', '智慧推薦', 'intent.recommend');
+  manager.addDocument('zh', '推薦電腦', 'intent.recommend');
+  manager.addDocument('zh', '電腦菜單', 'intent.recommend');
+  manager.addDocument('zh', '幫我配電腦', 'intent.recommend');
+  manager.addAnswer('zh', 'intent.recommend', '需要尋找裝機推薦嗎？請點擊這裡：[點此前往智慧推薦](/recommend)');
+  manager.addDocument('zh', '瓦數計算', 'intent.tools');
+  manager.addDocument('zh', '電源供應器', 'intent.tools');
+  manager.addDocument('zh', '電供', 'intent.tools');
+  manager.addAnswer('zh', 'intent.tools', '若需計算電源供應器瓦數：[點此前往瓦數計算工具](/tools)');
+  manager.addDocument('zh', '手機', 'intent.unsupported');
+  manager.addDocument('zh', '平板', 'intent.unsupported');
+  manager.addDocument('zh', '筆電', 'intent.unsupported');
+  manager.addDocument('zh', '筆記型電腦', 'intent.unsupported');
+  manager.addAnswer('zh', 'intent.unsupported', '非常抱歉，目前我們僅針對電腦零組件提供估價喔！[點此前往零件估價工具](/valuation)');
+  manager.addDocument('zh', '誰是', 'intent.none');
+  manager.addDocument('zh', '這是什麼', 'intent.none');
+  manager.addDocument('zh', '天氣', 'intent.none');
+  manager.addDocument('zh', 'BBB', 'intent.none');
+  manager.addDocument('zh', '123', 'intent.none');
+  manager.addDocument('zh', '測試', 'intent.none');
+  manager.addDocument('zh', '隨便', 'intent.none');
+  manager.addAnswer('zh', 'intent.none', '不好意思，這部分超出了我的專業範圍😅。我能幫助你跳轉到電腦零組件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？');
+
+  try {
+    await manager.train();
+    manager.save();
+    isModelTrained = true;
+    console.log('✅ 輕量級 NLP 模型訓練完成');
+  } catch (error) {
+    console.warn('⚠️ NLP 模型訓練失敗，將使用詞彙備援回應。');
+    isModelTrained = true;
+  }
+}
+
+function escapeCSV(text) {
+  if (!text) return '""';
+  return `"${String(text).replace(/"/g, '""')}"`;
+}
+
+async function handle(req, res) {
+  try {
+    let body;
+    try {
+      body = await parseJsonBody(req);
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      body = {};
+    }
+    const rawMessages = Array.isArray(body.messages) ? body.messages : [];
+    const userMessage = [...rawMessages].reverse().find(m => m.role === 'user')?.content || '';
+
+    if (!userMessage) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ success: false, message: '請提供有效的訊息內容' }));
+    }
+
+    await trainNlpModel();
+
+    let answer = fallbackAnswerForUserMessage(userMessage);
+
+    if (manager && !/智慧推薦/.test(userMessage)) {
+      try {
+        const response = await manager.process('zh', userMessage);
+        if (response.intent === 'None' || response.score < 0.75) {
+          answer = fallbackAnswerForUserMessage(userMessage);
+        } else {
+          answer = response.answer || fallbackAnswerForUserMessage(userMessage);
+        }
+      } catch (error) {
+        console.warn('⚠️ NLP 執行失敗，改用關鍵字備援回答。');
+        answer = fallbackAnswerForUserMessage(userMessage);
+      }
+    }
+
+    try {
+      const timeString = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+      const logPath = path.join(__dirname, 'chat_logs.csv');
+      const csvLine = `${escapeCSV(timeString)},${escapeCSV(userMessage)},${escapeCSV(answer)}\n`;
+      if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, '\uFEFF時間,使用者問題,AI回答\n');
+      fs.appendFile(logPath, csvLine, () => {});
+    } catch (e) {}
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ success: true, answer }));
+  } catch (error) {
+    console.error('❌ NLP 服務發生錯誤:', error);
+    res.writeHead(isBodyTooLarge(error) ? 413 : 500, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({
+      success: false,
+      message: isBodyTooLarge(error) ? error.message : '系統錯誤'
+    }));
+  }
+}
+
 async function handle(req, res) {
   let lastUserMessage = '';
   let imageRequested = false;
@@ -470,6 +618,15 @@ async function handle(req, res) {
         res.writeHead(413, { 'Content-Type': 'application/json; charset=utf-8' });
         return res.end(JSON.stringify({ success: false, message: '訊息或圖片過大，請縮小後重試。' }));
       }
+    }
+    const parsed = body ? JSON.parse(body) : {};
+    const messages = Array.isArray(parsed.messages) ? parsed.messages : [];
+  } catch (error) {
+    console.error('handle error', error);
+  }
+}
+
+
     }
     const parsed = body ? JSON.parse(body) : {};
     const messages = Array.isArray(parsed.messages) ? parsed.messages : [];

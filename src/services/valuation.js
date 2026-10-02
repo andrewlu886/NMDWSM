@@ -1,4 +1,5 @@
 const TEST_WARNING = '目前使用測試公式，結果僅供功能測試，不代表實際市場價格。';
+const UNSUPPORTED_MODEL_MESSAGE = '目前尚未支援此型號';
 const { valuationFormulaRules } = require('../data/valuation-formulas');
 
 const conditionFactors = {
@@ -102,6 +103,9 @@ function requireOriginalPrice(input) {
 }
 
 function calculateCpuAndMotherboardValuation(input) {
+  if (input.category === 'cpu' && isLegacyIntelCoreCpuModel(input.model)) {
+    throw new TypeError(UNSUPPORTED_MODEL_MESSAGE);
+  }
   const originalPrice = requireOriginalPrice(input);
   const elapsedMonths = Math.max(0, Number(input.elapsedMonths) || 0);
   const monthlyDecayRate = Number(getFormulaConfig(input).motherboard.monthlyDecayRate);
@@ -129,7 +133,7 @@ function getFormulaConfig(input = {}) {
     intelProfiles: stored.intelProfiles || intelCpuPricingProfiles,
     amdGpu: stored.amdGpu || { baseMonthlyDecayRate: 0.020, generationFactor: 0.002, vramFactor: -0.0006 },
     nvidiaGpu: stored.nvidiaGpu || valuationFormulaRules.nvidiaGpu,
-    ram: stored.ram || { marketCorrection: [], monthlyDecayRate: -0.11, specialDamageFactor: 0.8 },
+    ram: stored.ram || valuationFormulaRules.ram,
     generic: stored.generic || { maxMonths: 120, monthlyAgeRate: 0.008, minimumAgeFactor: 0.2 }
   };
 }
@@ -150,6 +154,18 @@ function calculateWarrantyDecay(profile, warrantyRate, inWarrantyMonths) {
     decay += (warrantyRate / (wholeMonths + 1)) * partialMonth;
   }
   return decay;
+}
+
+function isLegacyIntelCoreCpuModel(modelInput) {
+  const model = String(modelInput || '').normalize('NFKC').toUpperCase();
+  const match = model.match(/(?:^|[^A-Z0-9])(?:INTEL[\s-]+)?(?:CORE[\s-]+)?I[3579][\s-]*(\d{3,5})(?!\d)/);
+  if (!match) return false;
+  const digits = match[1];
+  const firstTwo = Number(digits.slice(0, 2));
+  const generation = digits.length === 3 ? 1
+    : digits.length === 5 || (firstTwo >= 10 && firstTwo <= 19)
+      ? firstTwo : Number(digits[0]);
+  return generation >= 1 && generation <= 11;
 }
 
 function getIntelCpuPricingProfile(modelInput, formulaProfiles = intelCpuPricingProfiles) {
@@ -260,12 +276,25 @@ function calculateAmdGpuValuation(input) {
   });
 }
 
+function isNvidiaGpuModel(model, manufacturer) {
+  if (manufacturer === 'NVIDIA') return true;
+  if (manufacturer === 'AMD') return false;
+  return /(?:^|[^A-Z0-9])(?:NVIDIA|GEFORCE|RTX|GTX)(?:$|[^A-Z0-9]|\d)/
+    .test(String(model || '').normalize('NFKC').toUpperCase());
+}
+
 function getNvidiaGpuPricingProfile(model, totalWarrantyMonths, profiles) {
   const normalized = String(model || '').normalize('NFKC').toUpperCase();
-  const match = normalized.match(/RTX[\s_-]*(5050|5060[\s_-]*TI|5060|5070[\s_-]*TI|5070|5080|5090)(?![A-Z0-9]|[\s_-]*(?:TI|SUPER))/);
+  const match = normalized.match(/(?:^|[^A-Z0-9])RTX[\s_-]*((?:30|40|50)(?:50|60|70|80|90))((?:[\s_-]*(?:TI|SUPER))*)(?![A-Z0-9])/);
   const months = Number(totalWarrantyMonths);
   if (!match || !Number.isFinite(months) || months < 0) return null;
-  const modelKey = match[1].replace(/[\s_-]/g, '').replace('TI', 'Ti');
+  const series = match[1].slice(0, 2);
+  const tier = match[1].slice(2);
+  const variants = match[2].replace(/[\s_-]/g, '');
+  const hasTi = variants.includes('TI');
+  if (series === '50' && (variants.includes('SUPER') || (hasTi && !['60', '70'].includes(tier)))) return null;
+  const modelKey = `50${tier}${hasTi && ['60', '70'].includes(tier) ? 'Ti' : ''}`;
+  const profileSourceModel = `RTX 50${tier}${modelKey.endsWith('Ti') ? ' Ti' : ''}`;
   const profile = profiles[modelKey];
   const rates = Object.entries(profile?.warrantyRates || {})
     .map(([duration, rate]) => [Number(duration), Number(rate)])
@@ -287,6 +316,8 @@ function getNvidiaGpuPricingProfile(model, totalWarrantyMonths, profiles) {
   if (!profile || !Number.isFinite(Number(profile.k)) || !Number.isFinite(warrantyRate)) return null;
   return {
     modelKey,
+    profileSourceModel,
+    estimatedModelProfile: series !== '50',
     k: Number(profile.k),
     warrantyRate,
     estimatedWarrantyRate: exactRate === undefined || (profile.estimatedWarrantyMonths || []).includes(months)
@@ -305,42 +336,40 @@ function calculateNvidiaGpuValuation(input) {
   const price = originalPrice
     * Math.exp(-profile.k)
     * Math.exp(-profile.warrantyRate * inWarrantyMonths);
-  return createResult(price, 'nvidia_rtx50_warranty_decay', {
+  const result = createResult(price,
+    profile.estimatedModelProfile ? 'nvidia_rtx_proxy_warranty_decay' : 'nvidia_rtx50_warranty_decay', {
     originalPrice,
     elapsedMonths,
     totalWarrantyMonths,
     inWarrantyMonths,
     modelKey: profile.modelKey,
+    profileSourceModel: profile.profileSourceModel,
+    estimatedModelProfile: profile.estimatedModelProfile,
     k: profile.k,
     warrantyRate: profile.warrantyRate,
     estimatedWarrantyRate: profile.estimatedWarrantyRate
   });
+  return {
+    ...result,
+    profileSourceModel: profile.profileSourceModel,
+    estimatedModelProfile: profile.estimatedModelProfile
+  };
 }
 
 function calculateRamValuation(input) {
   const originalPrice = requireOriginalPrice(input);
   const ramFormula = getFormulaConfig(input).ram;
   const elapsedMonths = Math.max(0, Math.floor(Number(input.elapsedMonths) || 0));
-  let marketCorrection = 0;
-  const correctionRule = (ramFormula.marketCorrection || []).find((rule) => (
-    elapsedMonths >= Number(rule.minMonths) &&
-    (rule.maxMonths === null || elapsedMonths <= Number(rule.maxMonths))
-  ));
-  if (correctionRule) marketCorrection = Number(correctionRule.value);
-
+  // 圖中的 n=9 是使用九個月的示例；上限 g 應取實際已使用月數。
   let decaySum = 0;
   for (let month = 1; month <= elapsedMonths; month += 1) {
     decaySum += Number(ramFormula.monthlyDecayRate) / month;
   }
-  const hasSpecialDamage = Boolean(String(input.details?.specialCondition || '').trim());
-  const damageFactor = hasSpecialDamage ? Number(ramFormula.specialDamageFactor) : 1;
-  const price = originalPrice * Math.exp(marketCorrection) * Math.exp(decaySum) * damageFactor;
+  const price = originalPrice * Math.exp(decaySum);
   return createResult(price, 'ram_sigma_decay', {
     originalPrice,
     elapsedMonths,
-    marketCorrection,
-    decaySum,
-    damageFactor
+    decaySum
   });
 }
 
@@ -357,7 +386,7 @@ function calculateTestValuation(input) {
 
   // 僅供串接測試：正式公式完成後只需替換這個函式。
   const ageFactor = Math.max(Number(formulaConfig.generic.minimumAgeFactor), 1 - Math.min(elapsedMonths, Number(formulaConfig.generic.maxMonths)) * Number(formulaConfig.generic.monthlyAgeRate));
-  const conditionFactor = formulaConfig.conditionFactors[input.condition] || formulaConfig.conditionFactors.good;
+  const conditionFactor = formulaConfig.conditionFactors.good;
   const price = Math.max(0, Math.round(originalPrice * ageFactor * conditionFactor));
 
   return {
@@ -375,6 +404,7 @@ function calculateTestValuation(input) {
 
 function calculateValuation(input) {
   if (input.category === 'cpu') {
+    if (isLegacyIntelCoreCpuModel(input.model)) throw new TypeError(UNSUPPORTED_MODEL_MESSAGE);
     return calculateIntelCpuValuation(input) || calculateCpuAndMotherboardValuation(input);
   }
   if (input.category === 'motherboard') {
@@ -386,6 +416,7 @@ function calculateValuation(input) {
   if (input.category === 'gpu') {
     const nvidiaResult = calculateNvidiaGpuValuation(input);
     if (nvidiaResult) return nvidiaResult;
+    throw new TypeError(UNSUPPORTED_MODEL_MESSAGE);
   }
   if (input.category === 'ram') {
     return calculateRamValuation(input);
@@ -395,14 +426,17 @@ function calculateValuation(input) {
 
 module.exports = {
   TEST_WARNING,
+  UNSUPPORTED_MODEL_MESSAGE,
   calculateValuation,
   calculateTestValuation,
   calculateCpuAndMotherboardValuation,
   calculateIntelCpuValuation,
+  isLegacyIntelCoreCpuModel,
   getIntelCpuPricingProfile,
   calculateAmdGpuValuation,
   calculateNvidiaGpuValuation,
   getNvidiaGpuPricingProfile,
+  isNvidiaGpuModel,
   calculateRamValuation,
   calculatePeripheralValuation,
   getPeripheralBrandTier

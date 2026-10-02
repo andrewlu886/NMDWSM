@@ -10,17 +10,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const extensionSelect = document.getElementById('extension-registered');
     const totalWarrantyInput = document.getElementById('total-warranty-months');
     const cpuWarrantySelect = document.getElementById('cpu-warranty-months');
+    const elapsedMonthsInput = document.getElementById('elapsed-months');
+    const totalWarrantyLabel = document.getElementById('total-warranty-label');
+    const totalWarrantyHint = document.getElementById('total-warranty-hint');
+const warrantyMonthsField = document.getElementById('warranty-months-field');
+    const elapsedMonthsHint = document.getElementById('elapsed-months-hint');
+    const warrantyResultRow = document.getElementById('result-warranty-row');
     const totalWarrantyLabel = document.getElementById('total-warranty-label');
     const totalWarrantyHint = document.getElementById('total-warranty-hint');
     const detectedPanel = document.getElementById('detected-hardware');
     const submitButton = document.getElementById('valuation-submit');
     const formMessage = document.getElementById('form-message');
+    const resultEmpty = document.getElementById('result-empty');
+    const resultContent = document.getElementById('result-content');
+    const resultEmptyTitle = resultEmpty.querySelector('h3');
+    const resultEmptyText = resultEmpty.querySelector('p');
     const originalPriceInput = document.getElementById('original-price');
     const originalPriceLabel = document.getElementById('original-price-label');
     const originalPriceHint = document.getElementById('original-price-hint');
+    const historyList = document.getElementById('valuation-history-list');
+    const historyStatus = document.getElementById('valuation-history-status');
+    const historyClear = document.getElementById('valuation-history-clear');
+    const snapshotLabel = document.getElementById('valuation-snapshot');
     let searchTimer;
     let searchController;
     let selectedModel = null;
+    let resultRequestId = 0;
 
     const categoryNames = {
         cpu: 'CPU',
@@ -36,14 +51,34 @@ document.addEventListener('DOMContentLoaded', () => {
         user_input: '使用者填寫資料'
     };
     const fieldExamples = {
-        cpu: { model: '例如：Intel Core Ultra 7 265K' },
-        gpu: { model: '例如：ASUS TUF Gaming RTX 4070 Super' },
-        motherboard: { model: '例如：ASUS TUF Gaming B650-Plus WiFi' },
+        cpu: { model: '例如：Intel Core i5 14400' },
+        gpu: { model: '例如：GIGABYTE AORUS RTX5070 MASTER 12G' },
+        motherboard: { model: '例如：AMD AM5 B650' },
         ram: { model: '例如：Kingston Fury Beast DDR5-6000 32GB' }
     };
 
     function formatMoney(value) {
         return `NT$ ${Number(value || 0).toLocaleString('zh-TW')}`;
+    }
+
+    function resetResult(category) {
+        resultRequestId += 1;
+        resultEmpty.hidden = true;
+        resultContent.hidden = false;
+        clearResultDetails(category);
+        submitButton.disabled = false;
+        submitButton.textContent = '開始估價';
+    }
+
+    function clearResultDetails(category) {
+        snapshotLabel.hidden = true;
+        document.getElementById('result-category').textContent = categoryNames[category];
+        document.getElementById('result-price').textContent = formatMoney(0);
+        document.getElementById('result-range').textContent = '—';
+        document.getElementById('result-model').textContent = '—';
+        document.getElementById('result-warranty').textContent = '—';
+        document.getElementById('result-note').textContent = '';
+        warrantyResultRow.hidden = category === 'ram';
     }
 
     function normalizeModel(value) {
@@ -62,35 +97,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return generation === 13 || generation === 14;
     }
 
+    function syncWarrantyPreset() {
+        const months = totalWarrantyInput.value;
+        cpuWarrantySelect.value = ['36', '60'].includes(months) ? months : months ? 'custom' : '';
+    }
+
     function updateCpuWarrantyControl(model) {
-        const showOptions = supportsFiveYearCpuWarranty(model);
-        if (showOptions) {
-            if (['36', '60'].includes(totalWarrantyInput.value)) {
-                cpuWarrantySelect.value = totalWarrantyInput.value;
-            }
-            totalWarrantyInput.hidden = true;
-            totalWarrantyInput.disabled = true;
-            totalWarrantyInput.required = false;
-            cpuWarrantySelect.hidden = false;
-            cpuWarrantySelect.disabled = false;
-            cpuWarrantySelect.required = true;
-            totalWarrantyLabel.htmlFor = 'cpu-warranty-months';
-            totalWarrantyHint.textContent = '此 CPU 可選擇 36 個月基本保固或 60 個月延長保固。';
+        const isRam = categoryInput.value === 'ram';
+        warrantyMonthsField.hidden = isRam;
+        totalWarrantyInput.disabled = isRam;
+        totalWarrantyInput.required = !isRam;
+        cpuWarrantySelect.disabled = isRam;
+        if (isRam) {
+            totalWarrantyInput.value = '';
+            cpuWarrantySelect.value = '';
+            totalWarrantyLabel.htmlFor = 'elapsed-months';
+            totalWarrantyHint.textContent = '記憶體估價不使用保固月數，僅依購買時間與公式計算。';
+            elapsedMonthsHint.textContent = '請填記憶體已使用幾個月。';
             return;
         }
-
-        if (!cpuWarrantySelect.hidden) totalWarrantyInput.value = cpuWarrantySelect.value;
-        cpuWarrantySelect.hidden = true;
-        cpuWarrantySelect.disabled = true;
-        cpuWarrantySelect.required = false;
-        totalWarrantyInput.hidden = false;
-        totalWarrantyInput.disabled = false;
-        totalWarrantyInput.required = true;
+        elapsedMonthsHint.textContent = '請填從購買或保固起算至今已經過幾個月。';
         totalWarrantyLabel.htmlFor = 'total-warranty-months';
-        totalWarrantyHint.textContent = categoryInput.value === 'gpu'
-            ? 'NVIDIA RTX 50 指定型號可輸入保固月數；非 36、48、60 個月的係數由已知數據推算。已使用月數為 0 時保固衰減尚未開始。'
-            : '請填產品完整保固共有幾個月。';
+        totalWarrantyHint.textContent = supportsFiveYearCpuWarranty(model)
+            ? '此 CPU 可選 36／60 個月，也可依實際保固自行輸入；最多 100 字。'
+            : '可選 36／60 個月，或自行輸入；最多 100 字。';
+        syncWarrantyPreset();
     }
+
+    for (const input of form.querySelectorAll('input[type="number"]')) {
+        input.addEventListener('input', () => {
+            if (input.value.length > 100) input.value = input.value.slice(0, 100);
+        });
+    }
+    cpuWarrantySelect.addEventListener('change', () => {
+        if (cpuWarrantySelect.value === 'custom') {
+            totalWarrantyInput.value = '';
+            totalWarrantyInput.focus();
+        } else {
+            totalWarrantyInput.value = cpuWarrantySelect.value;
+        }
+    });
+    totalWarrantyInput.addEventListener('input', syncWarrantyPreset);
 
     function clearAutoFilledPrice() {
         if (originalPriceInput.dataset.autoFilled) {
@@ -114,8 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceInput.value = price.priceNtd;
             originalPriceInput.dataset.autoFilled = 'reference';
             originalPriceLabel.textContent = price.basis === 'chipset_base'
-                ? '晶片組估價基準價（NTD，非新品售價）' : '新品參考價（NTD）';
-            originalPriceHint.textContent = `已帶入 ${formatMoney(price.priceNtd)} · ${price.notes}（來源：${price.source}）。修改後會以欄位內價格估價。`;
+                ? '估價參考價（NTD，非新品售價）'
+                : price.basis === 'retail_fallback' ? '截圖商品單買價（NTD，基準價例外）'
+                    : '新品參考價（NTD）';
+            originalPriceHint.textContent = price.basis === 'chipset_base' && price.productPriceNtd
+                ? `截圖商品單買價 ${formatMoney(price.productPriceNtd)}（${price.productPriceSource}）；估價使用 ${formatMoney(price.priceNtd)}。修改後以欄位價格估價。`
+                : `已帶入 ${formatMoney(price.priceNtd)} · 依主機板系列估算（來源：${price.source}）。修改後會以欄位內價格估價。`;
             return true;
         }
         if (applyCpuPrice(item)) return true;
@@ -161,11 +212,147 @@ document.addEventListener('DOMContentLoaded', () => {
         return `共 ${warranty.totalMonths} 個月，剩餘 ${warranty.remainingMonths} 個月${extensionText}`;
     }
 
+    function formatDate(value) {
+        return new Date(value).toLocaleString('zh-TW');
+    }
+
+    function renderValuationResult(result, payload, snapshotDate) {
+        resultEmpty.hidden = true;
+        resultContent.hidden = false;
+        snapshotLabel.hidden = !snapshotDate;
+        if (snapshotDate) snapshotLabel.textContent = `查詢當時的估價（${formatDate(snapshotDate)}），不會自動重新估價。`;
+        document.getElementById('result-category').textContent = categoryNames[payload.category] || payload.category;
+        document.getElementById('result-price').textContent = formatMoney(result.price);
+        document.getElementById('result-range').textContent =
+            `${formatMoney(result.range.min)} – ${formatMoney(result.range.max)}`;
+        document.getElementById('result-model').textContent =
+            `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
+        document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
+        warrantyResultRow.hidden = payload.category === 'ram';
+        const nvidiaNote = result.calculation?.profileSourceModel
+            ? `${result.estimatedModelProfile
+                ? `已借用 ${result.profileSourceModel} 係數估價；跨系列係數為推估值，不代表此型號的實測資料。`
+                : '已套用 NVIDIA RTX 50 公式。'}（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減。`
+            : '';
+        document.getElementById('result-note').textContent =
+            [result.fallbackReason, nvidiaNote,
+                payload.category === 'ram' ? '' : result.warranty.note]
+                .filter(Boolean).join(' ');
+    }
+
+    function savedResult(result) {
+        return {
+            price: result.price,
+            range: result.range,
+            hardware: {
+                canonicalBrand: result.hardware.canonicalBrand,
+                canonicalModel: result.hardware.canonicalModel
+            },
+            warranty: result.warranty,
+            fallbackReason: result.fallbackReason,
+            calculation: result.calculation,
+            estimatedModelProfile: result.estimatedModelProfile,
+            profileSourceModel: result.profileSourceModel
+        };
+    }
+
+    function restoreInput(input) {
+        if (categoryInput.value !== input.category) {
+            document.querySelector(`.category-tab[data-category="${input.category}"]`)?.click();
+        }
+        if (searchController) searchController.abort();
+        window.clearTimeout(searchTimer);
+        hideSuggestions();
+        clearDetected();
+        modelInput.value = input.model;
+        modelIdInput.value = input.modelId ?? '';
+        originalPriceInput.value = input.originalPrice;
+        originalPriceInput.dataset.userEdited = 'true';
+        delete originalPriceInput.dataset.autoFilled;
+        updateCpuWarrantyControl(input.model);
+        if (input.category !== 'ram') {
+            totalWarrantyInput.value = input.totalWarrantyMonths;
+            syncWarrantyPreset();
+        }
+        elapsedMonthsInput.value = input.elapsedMonths;
+        extensionSelect.value = input.extensionRegistered || 'unknown';
+        formMessage.textContent = '';
+    }
+
+    async function refreshHistory() {
+        try {
+            const records = await window.NMDHistory.list('valuations');
+            historyList.replaceChildren();
+            historyClear.hidden = records.length === 0;
+            if (!records.length) {
+                historyStatus.textContent = '目前沒有估價紀錄。';
+                return;
+            }
+            historyStatus.textContent = '';
+            records.forEach(record => {
+                const entry = document.createElement('article');
+                entry.className = 'history-entry';
+                const summary = document.createElement('div');
+                const title = document.createElement('strong');
+                title.textContent = `${categoryNames[record.input.category] || record.input.category} · ${record.input.model}`;
+                const meta = document.createElement('span');
+                meta.className = 'history-meta';
+                meta.textContent = `${formatDate(record.createdAt)} · ${formatMoney(record.result.price)}`;
+                summary.append(title, meta);
+                const actions = document.createElement('div');
+                actions.className = 'history-actions';
+                for (const [label, action] of [
+                    ['查看結果', () => {
+                        resultRequestId += 1;
+                        submitButton.disabled = false;
+                        submitButton.textContent = '開始估價';
+                        formMessage.textContent = '';
+                        renderValuationResult(record.result, record.input, record.createdAt);
+                    }],
+                    ['重新估價', () => {
+                        restoreInput(record.input);
+                        form.requestSubmit();
+                    }],
+                    ['刪除', async () => {
+                        try {
+                            await window.NMDHistory.remove('valuations', record.id);
+                            await refreshHistory();
+                        } catch (_) {
+                            historyStatus.textContent = '刪除紀錄失敗，請稍後再試。';
+                        }
+                    }]
+                ]) {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.textContent = label;
+                    button.addEventListener('click', action);
+                    actions.appendChild(button);
+                }
+                entry.append(summary, actions);
+                historyList.appendChild(entry);
+            });
+        } catch (_) {
+            historyStatus.textContent = '此瀏覽器目前無法使用歷史紀錄，估價功能仍可正常使用。';
+        }
+    }
+
+    historyClear.addEventListener('click', async () => {
+        if (!window.confirm('確定要清除所有估價歷史紀錄嗎？')) return;
+        try {
+            await window.NMDHistory.clear('valuations');
+            await refreshHistory();
+        } catch (_) {
+            historyStatus.textContent = '清除紀錄失敗，請稍後再試。';
+        }
+    });
+    refreshHistory();
+
     function showDetected(item) {
         selectedModel = item;
         detectedPanel.hidden = false;
         document.getElementById('detected-model').textContent =
-            `${item.manufacturer} ${item.canonicalModel}`;
+            item.canonicalModel.startsWith(item.manufacturer)
+                ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
         extensionField.hidden = !item.warranty.extensionAvailable;
         if (!item.warranty.extensionAvailable) extensionSelect.value = 'unknown';
         updateCpuWarrantyControl(item.canonicalModel);
@@ -204,7 +391,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? item.canonicalModel : `${item.manufacturer} ${item.canonicalModel}`;
             const detail = document.createElement('span');
             const price = item.referencePrice?.priceNtd ?? item.cpuPricing?.referencePriceNtd ?? item.gpuPricing?.launchPriceNtd;
-            detail.textContent = `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（基準底價，非完整產品型號）' : ''}`;
+            detail.textContent = item.referencePrice?.basis === 'chipset_base' && item.referencePrice.productPriceNtd
+                ? `商品單買價 ${formatMoney(item.referencePrice.productPriceNtd)} · 估價基準價 ${formatMoney(price)}`
+                : `${item.series} · ${price == null ? '尚無參考價' : formatMoney(price)}${item.referencePrice?.basis === 'chipset_base' ? '（估價參考價）' : item.referencePrice?.basis === 'retail_fallback' ? '（使用商品價）' : ''}`;
             button.append(title, detail);
             button.addEventListener('click', () => {
                 modelInput.value = item.canonicalModel;
@@ -222,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function searchModels() {
         const category = categoryInput.value;
         const query = modelInput.value.trim();
-        if (!['cpu', 'gpu', 'motherboard'].includes(category) || query.length < 2) {
+        if (!['cpu', 'gpu', 'motherboard', 'ram'].includes(category) || query.length < 2) {
             hideSuggestions();
             return;
         }
@@ -274,6 +463,10 @@ document.addEventListener('DOMContentLoaded', () => {
             originalPriceHint.textContent = '正在查詢顯示卡型號與參考價…';
         } else if (categoryInput.value === 'cpu') {
             originalPriceHint.textContent = '正在查詢已收錄的 CPU 新品價格…';
+        } else if (categoryInput.value === 'motherboard') {
+            originalPriceHint.textContent = '正在查詢主機板商品與估價參考價…';
+        } else if (categoryInput.value === 'ram') {
+            originalPriceHint.textContent = '正在查詢記憶體型號與截圖參考價…';
         }
         scheduleSearch();
     });
@@ -299,31 +492,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.setAttribute('aria-selected', String(active));
             });
             categoryInput.value = tab.dataset.category;
+            resetResult(tab.dataset.category);
             modelInput.value = '';
             originalPriceInput.value = '';
             delete originalPriceInput.dataset.autoFilled;
             delete originalPriceInput.dataset.userEdited;
             totalWarrantyInput.value = '';
-            cpuWarrantySelect.value = '36';
+            cpuWarrantySelect.value = '';
             modelInput.placeholder = fieldExamples[tab.dataset.category].model;
             clearDetected();
             hideSuggestions();
             formMessage.textContent = '';
-            originalPriceInput.required = categoryInput.value !== 'gpu';
+const isGpu = categoryInput.value === 'gpu';
+            originalPriceInput.required = !isGpu;
             originalPriceLabel.textContent = tab.dataset.category === 'motherboard'
-                ? '參考價／晶片組估價基準價（NTD）' : '新品參考價（NTD）';
+                ? '商品價／估價參考價（NTD）'
+                : tab.dataset.category === 'ram' ? '原價（NTD）' : '新品參考價（NTD）';
             originalPriceHint.textContent = {
                 cpu: '選取已收錄 CPU 可帶入新品參考價；修改後以欄位內價格估價。',
-                gpu: '已收錄顯示卡可帶入參考價，AMD 模型帶入發售價；修改後以欄位內價格估價。',
-                motherboard: '晶片組資料為二手估價基準底價，非新品售價；修改後以欄位內價格估價。',
-                ram: '記憶體尚未收錄型號價格，請手動填入；估價以欄位內價格計算。'
+                gpu: '',
+                motherboard: '商品單買價與估價參考價分開顯示；沒有參考價時才使用截圖商品價。',
+                ram: '選取已收錄記憶體可帶入截圖單條／整組參考價。'
             }[tab.dataset.category];
-            const hasAutocomplete = ['cpu', 'gpu', 'motherboard'].includes(tab.dataset.category);
+            const hasAutocomplete = ['cpu', 'gpu', 'motherboard', 'ram'].includes(tab.dataset.category);
             modelHint.textContent = hasAutocomplete
-                ? '輸入至少 2 個字元即可搜尋型號。'
+                ? '輸入至少 2 個字元即可搜尋型號，最多 100 字。'
                 : tab.dataset.category === 'gpu'
                     ? '請手動輸入完整顯示卡型號，系統會在送出後辨識保固資料。'
-                    : '此分類尚未收錄型號，可手動輸入並使用分類預設保固。';
+                    : '完整型號最多 100 字。';
             updateCpuWarrantyControl('');
         });
     });
@@ -331,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!form.reportValidity()) return;
+        const requestId = ++resultRequestId;
         submitButton.disabled = true;
         submitButton.textContent = '處理中...';
         formMessage.textContent = '';
@@ -340,47 +537,55 @@ document.addEventListener('DOMContentLoaded', () => {
             model: modelInput.value.trim(),
             modelId: modelIdInput.value ? Number(modelIdInput.value) : null,
             originalPrice: Number(document.getElementById('original-price').value),
-            totalWarrantyMonths: Number(cpuWarrantySelect.hidden
-                ? totalWarrantyInput.value
-                : cpuWarrantySelect.value),
-            elapsedMonths: Number(document.getElementById('elapsed-months').value),
+            totalWarrantyMonths: Number(totalWarrantyInput.value),
+            elapsedMonths: Number(elapsedMonthsInput.value),
             extensionRegistered: extensionSelect.value,
-            condition: 'good',
+condition: 'good',
             details: {}
         };
+        if (payload.category === 'ram') delete payload.totalWarrantyMonths;
 
         try {
+            clearResultDetails(payload.category);
+            resultEmptyTitle.textContent = '等待估價資料';
+            resultEmptyText.textContent = '完成左側欄位後，估價結果會顯示在這裡。';
+            resultContent.hidden = true;
+            resultEmpty.hidden = false;
             const response = await fetch('/api/valuation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
+            if (requestId !== resultRequestId || payload.category !== categoryInput.value) return;
             if (!response.ok || !result.success) throw new Error(result.message || '估價失敗');
 
-            document.getElementById('result-empty').hidden = true;
-            document.getElementById('result-content').hidden = false;
-            document.getElementById('result-category').textContent = categoryNames[payload.category];
-            document.getElementById('result-price').textContent = formatMoney(result.price);
-            document.getElementById('result-range').textContent =
-                `${formatMoney(result.range.min)} – ${formatMoney(result.range.max)}`;
-            document.getElementById('result-model').textContent =
-                `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
-            document.getElementById('result-warranty').textContent = formatWarranty(result.warranty);
-            const nvidiaNote = result.pricingFormula === 'nvidia_rtx50_warranty_decay'
-                ? `已套用 NVIDIA RTX 50 公式（k=${result.calculation.k}，g=${result.calculation.warrantyRate}${result.calculation.estimatedWarrantyRate ? '，此保固係數為推算值' : ''}）；過保後不再增加衰減，商品狀況不計入。`
-                : '';
-            document.getElementById('result-note').textContent =
-                [result.fallbackReason, nvidiaNote, result.warranty.note].filter(Boolean).join(' ');
+            renderValuationResult(result, payload);
             detectedPanel.hidden = false;
             document.getElementById('detected-model').textContent =
-                `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
+                result.hardware.canonicalModel.startsWith(result.hardware.canonicalBrand)
+                    ? result.hardware.canonicalModel
+                    : `${result.hardware.canonicalBrand} ${result.hardware.canonicalModel}`;
             extensionField.hidden = !result.warranty.extensionAvailable;
+            try {
+                await window.NMDHistory.add('valuations', { input: payload, result: savedResult(result) });
+                await refreshHistory();
+            } catch (_) {
+                historyStatus.textContent = '此次估價未能儲存；估價結果仍可正常查看。';
+            }
         } catch (error) {
-            formMessage.textContent = error.message || '估價失敗，請稍後再試。';
+            if (requestId === resultRequestId) {
+                formMessage.textContent = error.message || '估價失敗，請稍後再試。';
+                if (error.message === '目前尚未支援此型號') {
+                    resultEmptyTitle.textContent = error.message;
+                    resultEmptyText.textContent = '此型號目前沒有適用的估價公式，因此不提供估價金額。';
+                }
+            }
         } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = '開始估價';
+            if (requestId === resultRequestId) {
+                submitButton.disabled = false;
+                submitButton.textContent = '開始估價';
+            }
         }
     });
 
