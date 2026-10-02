@@ -101,6 +101,23 @@
         .ai-chat-message.user > img { flex: 0 0 auto; }
         .ai-chat-message.user > small { flex: 0 1 110px; overflow-wrap: anywhere; }
         .ai-chat-message.user > p { min-width: 0; overflow-wrap: anywhere; }
+        .ai-chat-avatar, .ai-chat-message-avatar { background: #fff; border-radius: 50%; overflow: hidden; }
+        .ai-chat-avatar img, .ai-chat-message-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        .ai-chat-status > i { display: block; flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+        .ai-chat-status[data-available="true"] > i { background: #22c55e; }
+        .ai-chat-launcher, .ai-chat-launcher:hover { background: #fff; overflow: hidden; box-shadow: none; }
+        .ai-chat-launcher-icon { display: block; width: 100%; height: 100%; border: 0; border-radius: 50%; overflow: hidden; background: #fff; }
+        .ai-chat-launcher-icon::after { display: none; }
+        .ai-chat-launcher-icon img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+        .ai-chat-idle-prompt { position: fixed; right: 24px; bottom: 98px; width: min(300px, calc(100vw - 32px)); box-sizing: border-box; display: flex; align-items: flex-start; gap: 4px; padding: 14px; border: 1px solid #bfe7fa; border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgba(35, 94, 135, 0.18); pointer-events: auto; }
+        .ai-chat-idle-prompt[hidden] { display: none; }
+        .ai-chat-idle-prompt:not([hidden]) { animation: ai-idle-pop 280ms ease-out; }
+        @keyframes ai-idle-pop { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @media (prefers-reduced-motion: reduce) { .ai-chat-idle-prompt:not([hidden]) { animation: none; } }
+        .ai-chat-idle-prompt::after { content: ''; position: absolute; right: 22px; bottom: -7px; width: 12px; height: 12px; background: #fff; border-right: 1px solid #bfe7fa; border-bottom: 1px solid #bfe7fa; transform: rotate(45deg); }
+        .ai-chat-idle-text { flex: 1; border: 0; padding: 0; background: transparent; color: #28658a; font: inherit; font-size: 14px; line-height: 1.6; text-align: left; cursor: pointer; }
+        .ai-chat-idle-close { border: 0; padding: 0 3px; background: transparent; color: #64748b; font-size: 20px; cursor: pointer; }
+        @media (max-width: 600px) { .ai-chat-idle-prompt { right: 16px; bottom: 90px; } }
         .ai-chat-user-group { display: flex; width: 100%; box-sizing: border-box; flex-direction: column; align-items: flex-end; align-self: flex-end; max-width: 100%; }
         .ai-chat-response { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; align-items: stretch; gap: 8px; }
         .ai-chat-response > p { width: fit-content; max-width: 100%; box-sizing: border-box; }
@@ -125,13 +142,13 @@
 
     // 修改 HTML：渲染 UI 結構
     widget.innerHTML = `
-        <section class="ai-chat-panel" id="ai-chat-panel" aria-label="一次估夠 AI 助手" aria-hidden="true">
+        <section class="ai-chat-panel" id="ai-chat-panel" aria-label="ai小幫手-紀亦緹" aria-hidden="true">
             <header class="ai-chat-header">
                 <div class="ai-chat-heading">
-                    <span class="ai-chat-avatar" aria-hidden="true">AI</span>
+                    <span class="ai-chat-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>
                     <div>
-                    <strong>一次估夠 AI 助手</strong>
-                        <span class="ai-chat-status"><i aria-hidden="true">●</i> 正在檢查 AI 服務…</span>
+                    <strong>ai小幫手-紀亦緹</strong>
+                        <span class="ai-chat-status" data-available="false" role="status"><i aria-hidden="true"></i><span>下線</span></span>
                     </div>
                 </div>
                 <div class="ai-chat-header-actions">
@@ -141,7 +158,7 @@
 
             <div class="ai-chat-messages" aria-live="polite">
                 <div class="ai-chat-message assistant">
-                    <span class="ai-chat-message-avatar" aria-hidden="true">AI</span>
+                    <span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>
                     <div class="message-content">
 <p>您好！我可以協助二手估價、市價查詢、智慧推薦與電源瓦數計算，也能辨識硬體照片中的型號。資料不夠時我會先問您。</p>
                     </div>
@@ -159,8 +176,12 @@
             </form>
         </section>
         <button class="ai-chat-launcher" type="button" aria-label="開啟 AI 助手" aria-controls="ai-chat-panel" aria-expanded="false">
-            <span class="ai-chat-launcher-icon" aria-hidden="true"></span>
+            <span class="ai-chat-launcher-icon" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>
         </button>
+        <aside class="ai-chat-idle-prompt" hidden aria-live="polite" aria-label="ai小幫手-紀亦緹的提示">
+            <button class="ai-chat-idle-text" type="button">看來你遇到困難了，有什麼心事想和姐姐說嗎?</button>
+            <button class="ai-chat-idle-close" type="button" aria-label="關閉提示">&times;</button>
+        </aside>
     `;
 
     document.body.appendChild(widget);
@@ -181,23 +202,44 @@
     let recommendationFlow = null;
     let marketQueryActive = false;
     let cancelActiveMessageEdit = null;
+    const idlePrompt = widget.querySelector('.ai-chat-idle-prompt');
+    let idlePromptTimer;
+    function resetIdlePromptTimer() {
+        window.clearTimeout(idlePromptTimer);
+        if (document.hidden || widget.classList.contains('is-open')) return;
+        idlePromptTimer = window.setTimeout(() => {
+            if (!document.hidden && !widget.classList.contains('is-open')) idlePrompt.hidden = false;
+        }, 20000);
+    }
+    for (const eventName of ['pointermove', 'pointerdown', 'wheel', 'keydown']) {
+        document.addEventListener(eventName, resetIdlePromptTimer, { passive: true });
+    }
+    document.addEventListener('visibilitychange', () => {
+        idlePrompt.hidden = true;
+        resetIdlePromptTimer();
+    });
+    idlePrompt.querySelector('.ai-chat-idle-text').addEventListener('click', () => setOpen(true));
+    idlePrompt.querySelector('.ai-chat-idle-close').addEventListener('click', () => {
+        idlePrompt.hidden = true;
+        resetIdlePromptTimer();
+    });
 
-    fetch('/api/chat/status')
-        .then(response => response.json())
-        .then(status => {
-            statusLabel.textContent =
-                status.available && status.modelInstalled
-                    ? `● ${status.serviceMode === 'shared' ? '共用 AI' : '本機'} ${status.model} 已連線${status.visionModelInstalled ? ' · 圖片辨識就緒' : ' · 圖片模型尚未安裝'}`
-                    : status.available
-                      ? `● Ollama 已連線，尚未安裝 ${status.model}`
-                      : '● AI 服務未連線，使用導覽備援';
-            statusLabel.dataset.available = String(
-                Boolean(status.available && status.modelInstalled)
-            );
-        })
-        .catch(() => {
-            statusLabel.textContent = 'AI 服務狀態無法確認';
-        });
+    async function refreshAiStatus() {
+        let online = false;
+        try {
+            const response = await fetch('/api/chat/status', { signal: AbortSignal.timeout(7000), cache: 'no-store' });
+            if (response.ok) {
+                const status = await response.json();
+                online = Boolean(status.available && status.modelInstalled && status.visionModelInstalled);
+            }
+        } catch {
+            // Unreachable or missing models are shown as offline.
+        }
+        statusLabel.dataset.available = String(online);
+        statusLabel.querySelector('span').textContent = online ? '上線中' : '下線';
+    }
+    refreshAiStatus();
+    window.setInterval(refreshAiStatus, 60000);
 
     const historyStorageKey = 'nmdwsm-ai-chat-history';
     const interfaceStorageKey = 'nmdwsm-ai-chat-interface';
@@ -554,7 +596,7 @@
     function renderAssistantMessage(answer, imageAnalysis = '') {
         const aiMessage = document.createElement('div');
         aiMessage.className = 'ai-chat-message assistant';
-        aiMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">專業</span>';
+        aiMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
         const responseContent = document.createElement('div');
         responseContent.className = 'ai-chat-response';
         const aiText = document.createElement('p');
@@ -581,7 +623,7 @@
         valuationFlow = { stage: 'category', catalogs: [] };
         const message = document.createElement('div');
         message.className = 'ai-chat-message assistant';
-        message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">專業</span>';
+        message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
         const response = document.createElement('div');
         response.className = 'ai-chat-response';
         const prompt = document.createElement('p');
@@ -701,7 +743,7 @@
         persistChatHistory();
         const message = document.createElement('div');
         message.className = 'ai-chat-message assistant';
-        message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">專業</span>';
+        message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
         const response = document.createElement('div');
         response.className = 'ai-chat-response';
         const paragraph = document.createElement('p');
@@ -952,7 +994,7 @@
 
         const loading = document.createElement('div');
         loading.className = 'ai-chat-message assistant';
-        loading.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span><p class="loading-text">正在依預算與用途整理推薦…</p>';
+        loading.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span><p class="loading-text">正在依預算與用途整理推薦…</p>';
         messages.appendChild(loading);
         messages.scrollTop = messages.scrollHeight;
 
@@ -1019,7 +1061,7 @@
         ];
         const message = document.createElement('div');
         message.className = 'ai-chat-message assistant ai-chat-reopen-suggestions';
-        message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span>';
+        message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
 
         const content = document.createElement('div');
         content.className = 'message-content';
@@ -1110,6 +1152,8 @@
 
     function setOpen(isOpen, focusInput = true) {
         widget.classList.toggle('is-open', isOpen);
+        idlePrompt.hidden = true;
+        resetIdlePromptTimer();
         document.body.classList.toggle('ai-chat-docked', isOpen);
         panel.setAttribute('aria-hidden', String(!isOpen));
         launcher.setAttribute('aria-expanded', String(isOpen));
@@ -1234,7 +1278,7 @@
         const loadingMessage = document.createElement('div');
         loadingMessage.className = 'ai-chat-message assistant';
         loadingMessage.innerHTML =
-            '<span class="ai-chat-message-avatar" aria-hidden="true">專業</span><p class="loading-text">思考中...</p>';
+            '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span><p class="loading-text">思考中...</p>';
         messages.appendChild(loadingMessage);
         messages.scrollTop = messages.scrollHeight;
 
@@ -1368,7 +1412,7 @@
                 persistChatHistory();
             }
             aiMessage.innerHTML =
-                '<span class="ai-chat-message-avatar" aria-hidden="true">專業</span>';
+                '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
             const responseContent = document.createElement('div');
             responseContent.className = 'ai-chat-response';
             responseContent.appendChild(aiText);
@@ -1391,7 +1435,7 @@
                     ? `無法連線到 AI 助手：${error.message}`
                     : '無法連線到 AI 助手，請稍後再試。';
             errorMessage.innerHTML =
-                '<span class="ai-chat-message-avatar" aria-hidden="true">AI</span>';
+                '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
             errorMessage.appendChild(errText);
             messages.appendChild(errorMessage);
         } finally {
