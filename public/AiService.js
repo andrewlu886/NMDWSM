@@ -159,7 +159,7 @@ function extractWattageModels(userTurns) {
   return models;
 }
 
-async function answerMarketQuery(keyword, userMessage, dependencies = {}) {
+async function answerMarketQuery(keyword, userMessage, dependencies = {}, options = {}) {
   if (!keyword) {
     return {
       answer: '可以，請告訴我想查的硬體型號，例如 RTX 5070。\n[前往市價查詢](/scrape)',
@@ -169,22 +169,49 @@ async function answerMarketQuery(keyword, userMessage, dependencies = {}) {
 
   const marketData = dependencies.searchProducts
     ? { data: await dependencies.searchProducts({ keyword, platforms: 'all', include: '', exclude: '', categories: '' }), meta: null }
-    : await searchProductsWithMeta({ keyword, platforms: 'all', include: '', exclude: '', categories: '' });
+    : await searchProductsWithMeta({ keyword, platforms: 'all', include: '', exclude: '', categories: '', forceRefresh: options.forceRefresh === true });
   const products = marketData.data;
   const updatedText = marketData.meta?.updatedAt
-    ? `\n資料更新時間：${new Date(marketData.meta.updatedAt).toLocaleString('zh-TW')}（同組關鍵字與通路每日更新一次）。`
+    ? `\n資料更新時間：${new Date(marketData.meta.updatedAt).toLocaleString('zh-TW')}。`
     : '';
   const marketUrl = `/scrape?keyword=${encodeURIComponent(keyword)}`;
   const entries = products.slice(0, 5).map(item => {
     const price = Number.isFinite(Number(item.priceNtd))
       ? `${item.originalPrice}（約 NT$ ${Number(item.priceNtd).toLocaleString('zh-TW')}）`
       : item.price && item.price !== '待實作 DOM 解析' ? `NT$ ${item.price}` : '請至通路查看價格';
-    return `- ${item.name}｜${price}｜${item.platform || '通路未標示'}`;
+    const name = String(item.name || '查看商品').replace(/[\[\]\r\n]/g, '').trim();
+    let title = name;
+    try {
+      const url = new URL(item.url);
+      if (['http:', 'https:'].includes(url.protocol)) title = '[' + name + '](' + url.href.replace(/\(/g, '%28').replace(/\)/g, '%29') + ')';
+    } catch { /* Keep the product name when no valid URL is available. */ }
+    return '- ' + title + '｜' + price + '｜' + (item.platform || '通路未標示');
   });
+  const staleWarning = marketData.meta?.stale ? '\n即時更新暫時失敗，以下為先前資料，請以商品頁價格為準。' : '';
   const answer = entries.length
-    ? `查到「${keyword}」的通路結果如下（以實際頁面為準）：\n${entries.join('\n')}${updatedText}\n\n[帶入「${keyword}」到市價頁](${marketUrl})`
+    ? `查到「${keyword}」的通路結果如下（以實際頁面為準）：\n${entries.join('\n')}${updatedText}${staleWarning}\n\n[帶入「${keyword}」到市價頁](${marketUrl})`
     : `目前沒有取得「${keyword}」的通路商品結果，因此我不會猜測價格。您可以改用更完整的型號或稍後再查。${updatedText}\n[帶入「${keyword}」到市價頁](${marketUrl})`;
   return { answer, products: products.slice(0, 5), userMessage, marketMeta: marketData.meta };
+}
+
+function getMarketQueryKeyword(text, imageAnalysis = '') {
+  const value = String(text || '').normalize('NFKC').trim();
+  const keyword = value
+    .replace(/^(?:(?:請|幫我|我想|我要|想要|查一下|查詢|搜尋|查價|市價查詢|看看|查)\s*)+/g, '')
+    .replace(/(?:的)?(?:最新|目前|當前)?(?:產品)?(?:資訊(?:與|和|及)?市價|資訊(?:與|和|及)?價格|市價|行情|價格|資訊)[？?。！!]*$/g, '').trim();
+  const isImagePrompt = /^(?:照片(?:中(?:的)?(?:產品|商品|硬體))?|圖片|產品|商品|硬體|這個|這張照片|照片中產品的資訊與市價|辨識這張電腦硬體照片|辨識這張硬體圖片|辨識這張硬體照片)$/.test(keyword);
+  if (keyword && !isImagePrompt) {
+    const corrected = /更正|修正|不是|改成|我說錯/.test(value) ? extractHardwareKeyword(value) : null;
+    return (corrected || keyword).slice(0, 100);
+  }
+  if (imageAnalysis) {
+    const match = imageAnalysis.match(/(?:^|\n)\s*(?:Model|型號)\s*[:：]\s*([^\n]+)/i);
+    const model = match?.[1]?.trim();
+    if (!model || /unknown|unreadable|uncertain|不明|無法|不確定/i.test(model)
+      || /(?:Confidence|信心|可信度)\s*[:：]\s*(?:low|uncertain|低|不確定)/i.test(imageAnalysis)) return null;
+    return model.replace(/^["「]|["」]$/g, '').slice(0, 100);
+  }
+  return null;
 }
 
 function validateImages(images) {
@@ -675,22 +702,26 @@ async function handle(req, res) {
         ? await analyzeHardwareImage(images[0], controller.signal, receiptRequested)
         : '';
       const userTurns = conversation.filter(message => message.role === 'user');
-      const marketIntent = isMarketIntent(effectiveUserMessage) || (
+      const explicitMarketQuery = parsed.intent === 'market';
+      const marketIntent = explicitMarketQuery || isMarketIntent(effectiveUserMessage) || (
         (/^(好|可以|是|對|沒錯|請查|查吧|幫我查)[！!。,. ]*$/.test(effectiveUserMessage.trim()) ||
           /更正|修正|不是|我說錯|應該是|改成/.test(effectiveUserMessage)) &&
         userTurns.slice(-3, -1).some(message => isMarketIntent(message.content))
       );
       if (marketIntent) {
         const userText = userTurns.map(message => message.content).join('\n');
-        const keyword = extractHardwareKeyword(userText) || extractHardwareKeyword(imageAnalysis);
-        if (imageRequested && keyword) {
-          const answer = `照片中可能辨識到「${keyword}」，但型號辨識尚未確認。請回覆「是，查詢 ${keyword}」或更正型號，我再查實際通路價格。`;
-          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          return res.end(JSON.stringify({ success: true, answer, imageAnalysis, provider: 'ollama-vision' }));
-        }
+        // A new photo must use its own recognized model, never an older conversation model.
+        const isConfirmation = /^(?:好|可以|是|對|沒錯|請查|查吧|幫我查)[！!。,. ]*$/.test(effectiveUserMessage.trim());
+        const keyword = imageRequested
+          ? getMarketQueryKeyword(effectiveUserMessage, imageAnalysis)
+          : isConfirmation
+            ? extractHardwareKeyword(conversation.at(-2)?.content) || extractHardwareKeyword(userText)
+            : getMarketQueryKeyword(effectiveUserMessage);
         let market;
         try {
-          market = await answerMarketQuery(keyword, effectiveUserMessage);
+          market = keyword
+            ? await answerMarketQuery(keyword, effectiveUserMessage, {}, { forceRefresh: true })
+            : { answer: imageRequested ? '照片中的型號不夠清楚，請上傳標籤清楚的照片，或直接輸入產品名稱與型號，我再查詢資訊與市價。' : '請輸入想查詢的產品名稱或完整型號，也可以上傳產品照片。' };
         } catch (error) {
           const marketUrl = keyword
             ? `/scrape?keyword=${encodeURIComponent(keyword)}`
@@ -732,7 +763,7 @@ async function handle(req, res) {
         {
           role: 'system',
           content:
-            '你是「一次估夠」的繁體中文電腦硬體 AI agent。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制，語氣自然精簡。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。回答附上相關工具頁連結：[二手估價](/valuation)、[市價查詢](/scrape)、[智慧推薦](/recommend)、[瓦數計算](/tools)。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。不要執行工具之外的操作。'
+            '你是「一次估夠」的繁體中文電腦硬體 AI agent。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制，語氣自然精簡。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。不要附上二手估價、智慧推薦或瓦數計算的工具頁連結。查詢市價時可以提供帶有查詢關鍵字的市價查詢頁連結。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。不要執行工具之外的操作。'
         },
         ...contextualConversation
       ];
@@ -820,6 +851,7 @@ module.exports = {
   extractWattageModels,
   answerWattageQuery,
   answerMarketQuery,
+  getMarketQueryKeyword,
   fallbackAnswerForUserMessage,
   TOOLS
 };

@@ -39,7 +39,7 @@ function createMarketCache({
     }
   }
 
-  async function get(keyword, platforms = 'all') {
+  async function get(keyword, platforms = 'all', options = {}) {
     const normalizedKeyword = normalizeSearchKeyword(keyword);
     const requestedPlatforms = Array.isArray(platforms) ? platforms : String(platforms || 'all').split(',');
     const platformIds = PLATFORM_IDS.filter((id) => requestedPlatforms.includes('all') || requestedPlatforms.includes(id));
@@ -47,7 +47,7 @@ function createMarketCache({
     const cachedEntry = entries.get(key);
     const timestamp = now();
 
-    if (cachedEntry && timestamp - cachedEntry.updatedAt < ttlMs) {
+    if (!options.forceRefresh && cachedEntry && timestamp - cachedEntry.updatedAt < ttlMs) {
       return {
         products: cachedEntry.products,
         meta: { cached: true, updatedAt: cachedEntry.updatedAt, nextUpdateAt: cachedEntry.updatedAt + ttlMs }
@@ -96,8 +96,8 @@ function createMarketCache({
 
 const marketCache = createMarketCache();
 
-async function getDailyMarketData(keyword, platforms = 'all') {
-  return marketCache.get(keyword, platforms);
+async function getDailyMarketData(keyword, platforms = 'all', options = {}) {
+  return marketCache.get(keyword, platforms, options);
 }
 
 module.exports = { DAY_MS, createMarketCache, getDailyMarketData };

@@ -97,6 +97,10 @@
         .ai-chat-edit-actions { display: flex; justify-content: flex-end; gap: 8px; }
         .ai-chat-edit-actions button { padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #314052; font: inherit; cursor: pointer; }
         .ai-chat-edit-actions button:first-child { border-color: var(--ai-chat-accent, #36a9e1); background: var(--ai-chat-accent, #36a9e1); color: #fff; }
+        .ai-chat-message.user { align-items: center; }
+        .ai-chat-message.user > img { flex: 0 0 auto; }
+        .ai-chat-message.user > small { flex: 0 1 110px; overflow-wrap: anywhere; }
+        .ai-chat-message.user > p { min-width: 0; overflow-wrap: anywhere; }
         .ai-chat-user-group { display: flex; width: 100%; box-sizing: border-box; flex-direction: column; align-items: flex-end; align-self: flex-end; max-width: 100%; }
         .ai-chat-response { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; align-items: stretch; gap: 8px; }
         .ai-chat-response > p { width: fit-content; max-width: 100%; box-sizing: border-box; }
@@ -175,6 +179,7 @@
     let pendingImage = null;
     let valuationFlow = null;
     let recommendationFlow = null;
+    let marketQueryActive = false;
     let cancelActiveMessageEdit = null;
 
     fetch('/api/chat/status')
@@ -230,6 +235,7 @@
         savedInterfaceState = {
             isOpen: Boolean(storedInterfaceState.isOpen),
             isExpanded: Boolean(storedInterfaceState.isExpanded),
+            marketQueryActive: Boolean(storedInterfaceState.marketQueryActive),
             recommendationText: typeof storedInterfaceState.recommendationText === 'string'
                 ? storedInterfaceState.recommendationText
                 : ''
@@ -237,16 +243,18 @@
     } catch {
         chatHistory = [];
     }
+    marketQueryActive = Boolean(savedInterfaceState.marketQueryActive);
     if (savedInterfaceState.recommendationText) {
         recommendationFlow = { text: savedInterfaceState.recommendationText };
     }
 
     function persistChatHistory() {
         try {
-            const savedHistory = chatHistory.slice(-40).map(({ role, content, displayContent, imageName, imageAnalysis }) => ({
+            const savedHistory = chatHistory.slice(-40).map(({ role, content, displayContent, imageName, imageAnalysis, thumbnailUrl }) => ({
                 role,
                 content,
                 displayContent,
+                thumbnailUrl: thumbnailUrl || '',
                 imageName: imageName || '',
                 imageAnalysis: imageAnalysis || ''
             }));
@@ -288,9 +296,14 @@
             div.textContent = str;
             return div.innerHTML;
         };
+        // Hide unrelated tool shortcuts, including replies restored from history.
+        const cleanedAnswer = String(answer)
+            .replace(/(?:^[ \t]*[-*]\s*)?\[(?:[^\]]+)\]\(\/(?:valuation|recommend|tools)(?:\?[^)]*)?\)[ \t]*/gm, '')
+            .replace(/^[ \t]*(?:\*\*)?相關工具頁連結\s*[：:](?:\*\*)?[ \t]*$/gm, '')
+            .replace(/\n{3,}/g, '\n\n').trim();
         const source = suppressMarketAction
-            ? String(answer).replace(/\s*(?:工具結果\s*[：:]?\s*)?\[[^\]]+\]\(\/scrape(?:\?[^)]*)?\)/g, '')
-            : answer;
+            ? cleanedAnswer.replace(/\s*(?:工具結果\s*[：:]?\s*)?\[[^\]]+\]\(\/scrape(?:\?[^)]*)?\)/g, '')
+            : cleanedAnswer;
         return escapeHTML(source).replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, escapedHref) => {
             const href = escapedHref.replace(/&amp;/g, '&');
             if (/^https?:\/\//i.test(href)) {
@@ -304,8 +317,6 @@
                 }
             }
             if (!href.startsWith('/')) return match;
-            const allowedRoutes = new Set(['/valuation', '/recommend', '/tools']);
-            if (allowedRoutes.has(href)) return `<a href="${href}" class="ai-valuation-btn">${label}</a>`;
             const marketRoute = href.match(/^\/scrape(?:\?([^)]*))?$/);
             if (!marketRoute) return match;
             const params = new URLSearchParams(marketRoute[1] || '');
@@ -323,11 +334,12 @@
         imagePreview.classList.remove('is-visible');
     }
 
-    function setPendingImage(file, data) {
+    function setPendingImage(file, data, thumbnailUrl = '') {
         clearPendingImage();
         pendingImage = {
             name: file.name,
             data,
+            thumbnailUrl,
             previewUrl: file.size ? URL.createObjectURL(file) : ''
         };
         const thumbnail = document.createElement('img');
@@ -350,16 +362,16 @@
         userText.textContent = historyItem.displayContent || historyItem.content;
         userMessage.appendChild(userText);
 
-        if (historyItem.previewUrl) {
+        if (historyItem.thumbnailUrl || historyItem.previewUrl) {
             const thumbnail = document.createElement('img');
-            thumbnail.src = historyItem.previewUrl;
+            thumbnail.src = historyItem.thumbnailUrl || historyItem.previewUrl;
             thumbnail.alt = '使用者上傳的硬體圖片';
             thumbnail.style.cssText = 'width: 96px; max-height: 96px; object-fit: cover; border-radius: 8px;';
-            userMessage.appendChild(thumbnail);
+            userMessage.prepend(thumbnail);
         } else if (historyItem.imageName) {
             const imageNote = document.createElement('small');
             imageNote.textContent = `已上傳圖片：${historyItem.imageName}`;
-            userMessage.appendChild(imageNote);
+            userMessage.prepend(imageNote);
         }
 
         const messageGroup = document.createElement('div');
@@ -441,7 +453,10 @@
         const isCpu = /\b(?:cpu|processor|central processing unit)\b|處理器/i.test(analysis);
         if (!isGpu && !isCpu) return;
 
-        const model = latestProductKeyword(analysis);
+        const identifiedModel = analysis.match(/(?:^|\n)\s*(?:Model|型號)\s*[：:]\s*([^\n]+)/i)?.[1]?.trim();
+        if (identifiedModel && /^(?:unknown|unclear|unreadable|不明|未知|無法辨識)/i.test(identifiedModel)) return;
+        if (/(?:Confidence|信心)\s*[：:]\s*(?:low|低)/i.test(analysis)) return;
+        const model = identifiedModel;
         if (!model) return;
 
         const actions = document.createElement('div');
@@ -983,12 +998,22 @@
         }
     }
 
+    function startMarketQuery(model = '') {
+        marketQueryActive = true;
+        valuationFlow = null;
+        recommendationFlow = null;
+        saveInterfaceState({ marketQueryActive: true, recommendationText: '' });
+        appendRecommendationReply('想查詢哪一項產品的資訊與市價？請在對話框輸入產品名稱或完整型號，也可以按「圖片查詢」上傳型號清楚的照片。');
+        if (model) input.value = model;
+        input.focus();
+    }
+
     function showQuickActions() {
         messages.querySelectorAll('.ai-chat-reopen-suggestions').forEach(message => message.remove());
 
         const quickActions = [
             ['二手估價', '幫我估二手 RTX 4070，使用 18 個月，外觀正常'],
-            ['市價查詢', '查一下 RTX 5070 的通路市價'],
+            ['市價查詢', ''],
             ['智慧推薦', '我有 4 萬元，想組一台打遊戲的桌機'],
             ['瓦數計算', '幫我算 i5-14600K 加 RTX 4070 要幾瓦電源']
         ];
@@ -1011,6 +1036,12 @@
             button.type = 'button';
             button.textContent = label;
             button.addEventListener('click', () => {
+                if (label === '市價查詢') {
+                    startMarketQuery();
+                    return;
+                }
+                marketQueryActive = false;
+                saveInterfaceState({ marketQueryActive: false });
                 if (label === '二手估價') {
                     const action = { role: 'user', content: '我要進行二手估價' };
                     renderUserMessage(action, chatHistory.length);
@@ -1065,7 +1096,12 @@
                 if (imageData.length <= 2_400_000) break;
             }
             if (imageData.length > 2_400_000) throw new Error('壓縮後圖片仍太大，請改用較小的照片。');
-            setPendingImage(file, imageData);
+            const thumbnail = document.createElement('canvas');
+            const thumbnailScale = Math.min(1, 160 / Math.max(canvas.width, canvas.height));
+            thumbnail.width = Math.max(1, Math.round(canvas.width * thumbnailScale));
+            thumbnail.height = Math.max(1, Math.round(canvas.height * thumbnailScale));
+            thumbnail.getContext('2d').drawImage(canvas, 0, 0, thumbnail.width, thumbnail.height);
+            setPendingImage(file, imageData, thumbnail.toDataURL('image/jpeg', 0.65));
         } catch (error) {
             window.alert(error.message || '圖片讀取失敗，請重新選擇。');
             imageInput.value = '';
@@ -1144,8 +1180,9 @@
         // 顯示使用者的訊息
         const userHistory = {
             role: 'user',
-            content: text || (valuationFlow?.stage === 'price' ? '請辨識這張發票收據，擷取購買日期、品名與實付金額。' : '請辨識這張硬體圖片'),
-            displayContent: text || (valuationFlow?.stage === 'price' ? '請辨識這張發票收據' : '請辨識這張硬體圖片'),
+            content: text || (marketQueryActive ? '請查詢照片中產品的資訊與市價' : valuationFlow?.stage === 'price' ? '請辨識這張發票收據，擷取購買日期、品名與實付金額。' : '請辨識這張硬體圖片'),
+            displayContent: text || (marketQueryActive ? '請查詢照片中產品的資訊與市價' : valuationFlow?.stage === 'price' ? '請辨識這張發票收據' : '請辨識這張硬體圖片'),
+            thumbnailUrl: pendingImage?.thumbnailUrl || '',
             imageData: pendingImage?.data || null,
             imageName: pendingImage?.name || '',
             previewUrl: pendingImage?.previewUrl || ''
@@ -1217,7 +1254,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ messages: payloadMessages })
+                body: JSON.stringify({ messages: payloadMessages, ...(marketQueryActive ? { intent: 'market' } : {}) })
             });
 
             let data;

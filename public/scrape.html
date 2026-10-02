@@ -779,14 +779,13 @@ const precisionToggle = document.getElementById('precision-toggle');
 
             try {
                 const response = await fetch(`/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${encodeURIComponent(selectedPlatforms)}&exclude=${encodeURIComponent(exclude)}`);
-                if (!response.ok) throw new Error('網路回應不正常');
-                
                 const result = await response.json();
+                if (!response.ok) throw new Error(result.message || '市價查詢暫時無法連線，請稍後重試。');
                 if (requestId !== marketRequestId) return;
                 if (!result.success || !Array.isArray(result.data)) throw new Error('查詢失敗');
 
                 loading.style.display = 'none';
-if (result.success && result.data && result.data.length > 0) {
+                if (result.data.length > 0) {
                     result.data.forEach(item => {
                         const card = document.createElement('div');
                         card.className = 'result-card';
@@ -852,10 +851,8 @@ if (result.success && result.data && result.data.length > 0) {
                     } catch (_) {
                     }
                 }
-                    });
-                    await refreshMarketHistory();
-                } catch (_) {
-                    marketHistoryStatus.textContent = '此次查詢未能儲存；查詢結果仍可正常查看。';
+                else {
+                    renderMarketResults([]);
                 }
 
                 const freshness = document.createElement('div');
@@ -863,7 +860,7 @@ if (result.success && result.data && result.data.length > 0) {
                 const updatedAt = result.meta?.updatedAt
                     ? new Date(result.meta.updatedAt).toLocaleString('zh-TW')
                     : '剛更新';
-                freshness.textContent = `資料更新時間：${updatedAt}（每日更新一次）`;
+                freshness.textContent = `資料更新時間：${updatedAt}${result.meta?.stale ? '（即時更新失敗，顯示先前資料）' : '（每日更新一次）'}`;
                 container.appendChild(freshness);
 
             } catch (error) {
@@ -872,7 +869,7 @@ if (result.success && result.data && result.data.length > 0) {
                 console.error('Fetch 發生錯誤:', error);
                 const message = document.createElement('p');
                 message.className = 'history-search-error';
-                message.textContent = '連線失敗：請確認後端伺服器 (server.js) 是否已啟動。';
+                message.textContent = error.message || '市價查詢暫時無法完成，請稍後重試。';
                 container.replaceChildren(message);
             }
         }

@@ -264,7 +264,7 @@ test('CPU/GPU 圖片動作可帶入市價與瓦數工具', () => {
   const widget = fs.readFileSync(path.join(projectRoot, 'public', 'chat-widget.js'), 'utf8');
   const toolsPage = fs.readFileSync(path.join(projectRoot, 'public', 'tools.html'), 'utf8');
   assert.match(widget, /function appendImageActionButtons\(container, analysis\)/);
-  assert.match(widget, /\/scrape\?keyword=\$\{encodeURIComponent\(model\)\}/);
+  assert.match(widget, /marketLink\.addEventListener\('click', \(\) => startMarketQuery\(model\)\)/);
   assert.match(widget, /\/api\/cpu-data/);
   assert.match(widget, /\/api\/gpu-data/);
   assert.match(widget, /new URLSearchParams\(\{ cpu, gpu, motherboard, calculate: '1' \}\)/);

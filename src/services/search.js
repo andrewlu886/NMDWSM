@@ -157,10 +157,10 @@ async function searchProductsWithMeta(options, dependencies = {}) {
     .filter(platform => requestedPlatforms.includes('all') || requestedPlatforms.includes(platform));
   normalizedOptions.platforms = platforms;
   const marketData = dependencies.getMarketData
-    ? await dependencies.getMarketData(normalizedOptions.keyword, platforms)
+    ? await dependencies.getMarketData(normalizedOptions.keyword, platforms, { forceRefresh: normalizedOptions.forceRefresh === true })
     : dependencies.scrapePlatforms
       ? { products: await dependencies.scrapePlatforms(normalizedOptions.keyword, platforms), meta: null }
-      : await getDailyMarketData(normalizedOptions.keyword, platforms);
+      : await getDailyMarketData(normalizedOptions.keyword, platforms, { forceRefresh: normalizedOptions.forceRefresh === true });
   const products = await convertUsdProducts(marketData.products, dependencies.getUsdNtdRate || getUsdNtdRate);
   return {
     data: filterSearchResults(products, normalizedOptions),
