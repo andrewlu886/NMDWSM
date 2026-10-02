@@ -121,13 +121,6 @@
                     <span class="ai-chat-message-avatar" aria-hidden="true">AI</span>
                     <div class="message-content">
 <p>您好！我可以協助二手估價、市價查詢、智慧推薦與電源瓦數計算，也能辨識硬體照片中的型號。資料不夠時我會先問您。</p>
-<p style="font-size: 13px; color: #666; margin-top: 8px;">您可以試著點擊下方按鈕，或是在聊天欄直接輸入問題：</p>
-<div class="suggestions-container" style="margin-top: 8px;">
-  <button class="ai-valuation-btn suggestion-btn" data-query="可以幫我智慧推薦一台電腦嗎？" type="button">可以幫我智慧推薦一台電腦嗎？</button>
-  <button class="ai-valuation-btn suggestion-btn" data-query="我想估算我的顯示卡價值" type="button">我想估算我的顯示卡價值</button>
-  <button class="ai-valuation-btn suggestion-btn" data-query="查詢最近的硬體行情" type="button">查詢最近的硬體行情</button>
-  <button class="ai-valuation-btn suggestion-btn" data-query="我要計算電源供應器瓦數" type="button">我要計算電源供應器瓦數</button>
-</div>
                     </div>
                 </div>
             </div>
