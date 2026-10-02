@@ -147,3 +147,5 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 models/*.bin
+# Local tunnel executable and runtime state
+tools/cloudflared.exe

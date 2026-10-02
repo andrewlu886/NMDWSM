@@ -4,10 +4,8 @@ const { searchProductsWithMeta } = require('../src/services/search');
 const { getRecommendationsWithMeta } = require('../src/services/recommendation');
 const { isBodyTooLarge, parseJsonBody } = require('./json-body');
 
-const OLLAMA_BASE_URL = String(process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434').replace(
-  /\/+$/,
-  ''
-);
+const { createOllamaClient } = require('../src/services/ollama-client');
+const ollamaClient = createOllamaClient();
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.1:8b';
 const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL || 'gemma3:4b';
 const OLLAMA_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 90000);
@@ -200,17 +198,19 @@ function validateImages(images) {
 }
 
 async function analyzeHardwareImage(image, signal, receipt = false) {
-  const tagResponse = await fetch(`${OLLAMA_BASE_URL}/api/tags`, { signal });
-  if (!tagResponse.ok) throw new Error(`無法確認本機圖片辨識模型 ${OLLAMA_VISION_MODEL} 是否已安裝。`);
+  const tagResponse = await ollamaClient.request('/api/tags', { signal });
+  if (!tagResponse.ok) throw new Error(`無法確認圖片辨識模型 ${OLLAMA_VISION_MODEL} 是否已安裝。`);
   const tags = await tagResponse.json();
   const installed = (tags.models || []).some(model => model.name === OLLAMA_VISION_MODEL);
   if (!installed) {
     throw new Error(
-      `本機尚未安裝圖片辨識模型 ${OLLAMA_VISION_MODEL}。請先執行：ollama pull ${OLLAMA_VISION_MODEL}`
+      ollamaClient.serviceMode === 'shared'
+        ? '共用 AI 的圖片辨識模型尚未準備好，請聯絡網站管理者。'
+        : `AI 服務主機尚未安裝圖片辨識模型 ${OLLAMA_VISION_MODEL}。請先執行：ollama pull ${OLLAMA_VISION_MODEL}`
     );
   }
 
-  const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+  const response = await ollamaClient.request('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -227,7 +227,7 @@ async function analyzeHardwareImage(image, signal, receipt = false) {
     }),
     signal
   });
-  if (!response.ok) throw new Error(`本機圖片辨識模型回應錯誤（HTTP ${response.status}）。`);
+  if (!response.ok) throw new Error(`圖片辨識模型回應錯誤（HTTP ${response.status}）。`);
   const result = await response.json();
   const analysis = String(result.message?.content || '').trim();
   if (!analysis) throw new Error('圖片辨識沒有取得結果，請換一張標籤較清楚的照片。');
@@ -459,9 +459,9 @@ function appendChatLog(userMessage, answer) {
 
 async function getStatus() {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1500);
+  const timeout = setTimeout(() => controller.abort(), Number(process.env.OLLAMA_STATUS_TIMEOUT_MS || 5000));
   try {
-    const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, { signal: controller.signal });
+    const response = await ollamaClient.request('/api/tags', { signal: controller.signal });
     if (!response.ok) return { available: false, model: OLLAMA_MODEL };
     const data = await response.json();
     const models = (data.models || []).map(model => model.name);
@@ -471,6 +471,7 @@ async function getStatus() {
     const visionModelInstalled = models.some(name => name === OLLAMA_VISION_MODEL);
     return {
       available: true,
+      serviceMode: ollamaClient.serviceMode,
       model: OLLAMA_MODEL,
       modelInstalled: loadedModel,
       visionModel: OLLAMA_VISION_MODEL,
@@ -737,7 +738,7 @@ async function handle(req, res) {
       ];
 
       for (let round = 0; round <= MAX_TOOL_ROUNDS; round += 1) {
-        const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+        const response = await ollamaClient.request('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

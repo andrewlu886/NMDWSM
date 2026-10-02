@@ -9,7 +9,10 @@
     "test:unit": "node --test test/hardware.test.js test/services.test.js test/valuation.test.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "ai:setup": "node scripts/setup-ai-gateway.js",
+    "ai:gateway": "node scripts/ai-gateway.js",
+    "test:ai": "node --test test/ollama-remote.test.js"
   },
   "dependencies": {
     "axios": "^1.16.1",

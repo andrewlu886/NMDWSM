@@ -92,6 +92,11 @@
         .ai-chat-preview img { width: 42px; height: 42px; border-radius: 7px; object-fit: cover; }
         .ai-chat-preview button { margin-left: auto; border: 0; background: transparent; color: #64748b; cursor: pointer; }
         .ai-chat-edit { margin: 0 0 4px 35px; padding: 3px 7px; border: 0; background: transparent; color: #64748b; cursor: pointer; font-size: 11px; }
+        .ai-chat-message-editor { display: grid; gap: 8px; width: 100%; max-width: 100%; box-sizing: border-box; }
+        .ai-chat-message-editor textarea { width: 100%; min-height: 90px; box-sizing: border-box; resize: vertical; padding: 10px 12px; border: 1px solid #94a3b8; border-radius: 10px; background: #fff; color: #314052; font: inherit; }
+        .ai-chat-edit-actions { display: flex; justify-content: flex-end; gap: 8px; }
+        .ai-chat-edit-actions button { padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #314052; font: inherit; cursor: pointer; }
+        .ai-chat-edit-actions button:first-child { border-color: var(--ai-chat-accent, #36a9e1); background: var(--ai-chat-accent, #36a9e1); color: #fff; }
         .ai-chat-user-group { display: flex; width: 100%; box-sizing: border-box; flex-direction: column; align-items: flex-end; align-self: flex-end; max-width: 100%; }
         .ai-chat-response { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; align-items: stretch; gap: 8px; }
         .ai-chat-response > p { width: fit-content; max-width: 100%; box-sizing: border-box; }
@@ -122,7 +127,7 @@
                     <span class="ai-chat-avatar" aria-hidden="true">AI</span>
                     <div>
                     <strong>一次估夠 AI 助手</strong>
-                        <span class="ai-chat-status"><i aria-hidden="true">●</i> 正在檢查本機模型…</span>
+                        <span class="ai-chat-status"><i aria-hidden="true">●</i> 正在檢查 AI 服務…</span>
                     </div>
                 </div>
                 <div class="ai-chat-header-actions">
@@ -170,22 +175,23 @@
     let pendingImage = null;
     let valuationFlow = null;
     let recommendationFlow = null;
+    let cancelActiveMessageEdit = null;
 
     fetch('/api/chat/status')
         .then(response => response.json())
         .then(status => {
             statusLabel.textContent =
                 status.available && status.modelInstalled
-                    ? `● 本機 ${status.model} 已連線${status.visionModelInstalled ? ' · 圖片辨識就緒' : ' · 圖片模型尚未安裝'}`
+                    ? `● ${status.serviceMode === 'shared' ? '共用 AI' : '本機'} ${status.model} 已連線${status.visionModelInstalled ? ' · 圖片辨識就緒' : ' · 圖片模型尚未安裝'}`
                     : status.available
                       ? `● Ollama 已連線，尚未安裝 ${status.model}`
-                      : '● 本機模型未連線，使用導覽備援';
+                      : '● AI 服務未連線，使用導覽備援';
             statusLabel.dataset.available = String(
                 Boolean(status.available && status.modelInstalled)
             );
         })
         .catch(() => {
-            statusLabel.textContent = '本機模型狀態無法確認';
+            statusLabel.textContent = 'AI 服務狀態無法確認';
         });
 
     const historyStorageKey = 'nmdwsm-ai-chat-history';
@@ -356,23 +362,67 @@
         editButton.textContent = '編輯';
         editButton.addEventListener('click', () => {
             const item = chatHistory[historyIndex];
-            if (!item) return;
-            input.value = item.displayContent || item.content;
-            if (item.imageData) {
-                if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-                const restoredFile = new File([], item.imageName || 'hardware.jpg', { type: 'image/jpeg' });
-                setPendingImage(restoredFile, item.imageData);
-            } else {
-                clearPendingImage();
-            }
-            chatHistory.splice(historyIndex);
-            persistChatHistory();
-            let remove = false;
-            Array.from(messages.children).forEach(node => {
-                if (node === messageGroup) remove = true;
-                if (remove) node.remove();
+            if (!item || input.disabled) return;
+            if (cancelActiveMessageEdit) cancelActiveMessageEdit();
+
+            const editor = document.createElement('div');
+            editor.className = 'ai-chat-message-editor';
+            const textarea = document.createElement('textarea');
+            textarea.value = item.displayContent || item.content;
+            textarea.maxLength = 500;
+            textarea.setAttribute('aria-label', '編輯訊息內容');
+            const actions = document.createElement('div');
+            actions.className = 'ai-chat-edit-actions';
+            const saveButton = document.createElement('button');
+            saveButton.type = 'button';
+            saveButton.textContent = '儲存';
+            const cancelButton = document.createElement('button');
+            cancelButton.type = 'button';
+            cancelButton.textContent = '取消';
+
+            const closeEditor = () => {
+                editor.remove();
+                userText.hidden = false;
+                editButton.hidden = false;
+                if (cancelActiveMessageEdit === closeEditor) cancelActiveMessageEdit = null;
+                editButton.focus();
+            };
+            cancelActiveMessageEdit = closeEditor;
+            saveButton.addEventListener('click', () => {
+                const updatedText = textarea.value.trim();
+                if (!updatedText) {
+                    textarea.setCustomValidity('請輸入訊息內容。');
+                    textarea.reportValidity();
+                    return;
+                }
+                if (input.disabled || chatHistory[historyIndex] !== item) return;
+                item.displayContent = updatedText;
+                item.content = item.imageAnalysis
+                    ? `${updatedText}\n\n[圖片辨識結果：${item.imageAnalysis}]`
+                    : updatedText;
+                userText.textContent = updatedText;
+                persistChatHistory();
+                closeEditor();
             });
-            input.focus();
+            cancelButton.addEventListener('click', closeEditor);
+            textarea.addEventListener('input', () => textarea.setCustomValidity(''));
+            textarea.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    closeEditor();
+                } else if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                    event.preventDefault();
+                    saveButton.click();
+                }
+            });
+            actions.append(saveButton, cancelButton);
+            editor.append(textarea, actions);
+            userText.hidden = true;
+            editButton.hidden = true;
+            messageGroup.appendChild(editor);
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
         });
         messageGroup.append(userMessage, editButton);
         messages.appendChild(messageGroup);

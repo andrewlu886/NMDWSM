@@ -6,3 +6,14 @@ services:
     buildCommand: npm install && npx puppeteer browsers install chrome && npm rebuild sqlite3 --build-from-source
     startCommand: npm start
     autoDeploy: true
+    envVars:
+      - key: OLLAMA_BASE_URL
+        sync: false
+      - key: OLLAMA_API_KEY
+        sync: false
+      - key: OLLAMA_MODEL
+        value: llama3.1:8b
+      - key: OLLAMA_VISION_MODEL
+        value: gemma3:4b
+      - key: OLLAMA_TIMEOUT_MS
+        value: "90000"
