@@ -179,7 +179,7 @@ test('聊天歷史限於目前分頁，市價連結可帶入最近產品型號',
   assert.match(widget, /Intel 第 \$\{generation\} 代 CPU/);
   assert.match(widget, /selectValuationWarranty\(60, '5 年延長保固'\)/);
   assert.match(widget, /此 AMD CPU.*3 年（36 個月）/);
-  assert.match(widget, /目前型號目前無新品價，可提供發票或當初購買價格嗎/);
+  assert.match(widget, /缺少新品參考價。你還記得當初買多少嗎/);
   assert.match(widget, /totalWarrantyMonths/);
   assert.match(widget, /calculate: '1'/);
   assert.match(widget, /fetch\('\/api\/valuation'/);

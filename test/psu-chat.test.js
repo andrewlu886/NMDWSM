@@ -13,12 +13,22 @@ const gpu = [{ 顯示卡型號: 'NVIDIA GeForce RTX 4070', TDP: '200W', 官方�
 test('chat PSU wizard and calculator handoff in a browser', { skip: !fs.existsSync(puppeteer.executablePath()) }, async t => {
   let failCpu = false;
   let chatCalls = 0;
+  const chatRequests = [];
   const server = http.createServer((req, res) => {
     const pathname = new URL(req.url, 'http://localhost').pathname;
     if (pathname.startsWith('/api/')) {
       res.setHeader('Content-Type', 'application/json');
       if (pathname === '/api/cpu-data' && failCpu) { failCpu = false; res.writeHead(503); res.end('{}'); return; }
-      if (pathname === '/api/chat') chatCalls++;
+      if (pathname === '/api/chat') {
+        chatCalls++;
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+          chatRequests.push(JSON.parse(body));
+          res.end(JSON.stringify({ success: true, answer: '姐姐在這裡。', provider: 'conversation' }));
+        });
+        return;
+      }
       res.end(JSON.stringify(pathname === '/api/cpu-data' ? cpu : pathname === '/api/gpu-data' ? gpu : pathname === '/api/chat/status' ? { available: false } : []));
       return;
     }
@@ -89,6 +99,29 @@ test('chat PSU wizard and calculator handoff in a browser', { skip: !fs.existsSy
         assert.equal(await page.$eval('#recommend-watt', el => el.textContent), '650');
         assert.equal(await page.$eval('#power-result', el => getComputedStyle(el).display), 'block');
 
+      } finally { await context.close(); }
+    });
+    await t.test('a social reply during the PSU wizard keeps the CPU step active', async () => {
+      const { page, context } = await createPage();
+      try {
+        await start(page);
+        const before = chatCalls;
+        await send(page, '謝謝');
+        await page.waitForFunction(() => document.querySelector('.ai-chat-messages').textContent.includes('姐姐在這裡'));
+        assert.equal(chatCalls, before + 1);
+        await send(page, 'i5-14600K');
+        assert.match(await page.$eval('.ai-chat-messages', el => el.textContent), /好極了，那可以再告訴我你的GPU型號嗎/);
+      } finally { await context.close(); }
+    });
+    await t.test('market mode treats thanks as conversation and keeps the next product query in market mode', async () => {
+      const { page, context } = await createPage();
+      try {
+        await page.evaluate(() => [...document.querySelectorAll('.ai-chat-reopen-suggestions button')].find(button => button.textContent === '市價查詢').click());
+        await send(page, '謝謝');
+        await page.waitForFunction(() => document.querySelector('.ai-chat-messages').textContent.includes('姐姐在這裡'));
+        assert.equal(chatRequests.at(-1).intent, undefined);
+        await send(page, 'RTX 5060');
+        assert.equal(chatRequests.at(-1).intent, 'market');
       } finally { await context.close(); }
     });
     await t.test('unknown GPU links to tools with the recognized CPU and unknown GPU intact', async () => {

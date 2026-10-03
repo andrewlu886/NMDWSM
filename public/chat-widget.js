@@ -160,7 +160,7 @@
                 <div class="ai-chat-message assistant">
                     <span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>
                     <div class="message-content">
-<p>您好！我可以協助二手估價、市價查詢、智慧推薦與電源瓦數計算，也能辨識硬體照片中的型號。資料不夠時我會先問您。</p>
+<p>嗨，我是紀亦緹！想查價格、估二手價、配電腦或算瓦數，都可以直接跟我說。也可以傳硬體照片；型號看不清楚時，我會再跟你確認。</p>
                     </div>
                 </div>
             </div>
@@ -179,7 +179,7 @@
             <span class="ai-chat-launcher-icon" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>
         </button>
         <aside class="ai-chat-idle-prompt" hidden aria-live="polite" aria-label="ai小幫手-紀亦緹的提示">
-            <button class="ai-chat-idle-text" type="button">看來你遇到困難了，有什麼心事想和姐姐說嗎?</button>
+            <button class="ai-chat-idle-text" type="button">卡在哪一步了？告訴我型號或需求，我陪你一起找。</button>
             <button class="ai-chat-idle-close" type="button" aria-label="關閉提示">&times;</button>
         </aside>
     `;
@@ -577,7 +577,7 @@
         marketQueryActive = false;
         powerFlow = { stage: 'cpu', cpuModel: '', gpuModel: '' };
         saveInterfaceState({ powerFlow, marketQueryActive: false, recommendationText: '' });
-        appendPowerReply('可以先告訴我你使用的CPU嗎');
+        appendPowerReply('可以先告訴我你使用的CPU嗎？例如 i5-14600K 或 Ryzen 5 7600。');
         input.focus();
     }
 
@@ -596,7 +596,7 @@
         if (/^(?:取消|結束|重新開始)$/.test(text)) {
             resetPowerFlow();
             if (text === '重新開始') startPowerWizard();
-            else appendPowerReply('已結束這次瓦數計算。');
+            else appendPowerReply('好，這次先算到這裡。需要時再叫我就好。');
             return;
         }
         if (flow.stage === 'components') {
@@ -609,7 +609,7 @@
         const match = await requestPowerModel(category, text);
         if (powerFlow !== flow) return;
         if (match.status === 'ambiguous') {
-            appendPowerReply(`這個型號可能對應多筆資料：${match.candidates.slice(0, 5).join('、')}。請在對話框輸入完整型號。`);
+            appendPowerReply(`我找到幾個相近型號：${match.candidates.slice(0, 5).join('、')}。可以再補完整型號嗎？這樣比較不會算錯。`);
             return;
         }
         if (match.status !== 'matched') {
@@ -625,7 +625,7 @@
         if (category === 'gpu') flow.gpuRecommendedPsu = match.recommendedPsu;
         flow.stage = category === 'cpu' ? 'gpu' : 'components';
         saveInterfaceState({ powerFlow: flow });
-        if (category === 'cpu') appendPowerReply('好極了，那可以再告訴我你的GPU型號嗎');
+        if (category === 'cpu') appendPowerReply('好極了，那可以再告訴我你的GPU型號嗎？如果沒有獨立顯卡，說「內顯」就好。');
         else await showPowerOptions();
     }
 
@@ -633,7 +633,7 @@
         const api = await powerApiReady;
         const flow = powerFlow;
         if (!flow || flow.stage !== 'components') return;
-        if (recordPrompt) appendPowerReply('那最後，選擇你用的主板與散熱系統吧');
+        if (recordPrompt) appendPowerReply('那最後，選擇你用的主板與散熱系統吧。選好後我就能幫你算建議瓦數。');
         const optionsForm = document.createElement('form');
         optionsForm.className = 'ai-valuation-wizard ai-power-options';
         const createSelect = (caption, choices, selected) => {
@@ -693,7 +693,7 @@
                 motherboard.disabled = true;
                 cooling.disabled = true;
                 resetPowerFlow();
-                appendPowerReply(`CPU「${cpu.model}」約 ${cpu.watts}W，GPU「${gpu.model}」約 ${gpu.watts}W。
+                appendPowerReply(`算好了，我們一起看看：CPU「${cpu.model}」約 ${cpu.watts}W，GPU「${gpu.model}」約 ${gpu.watts}W。
 主機板約 ${motherboard.value}W，散熱約 ${cooling.value}W，硬碟以 1 顆、10W 估算。
 整機滿載預估約 ${result.totalWatts}W，建議選擇至少 ${result.recommendedWatts}W 的電源供應器。
 建議已加入 30% 餘裕，進位至 50W、最低 300W，並採納較高的顯卡原廠建議。
@@ -927,7 +927,7 @@
         if (!response.ok || !result.success) {
             if (String(result.message || '').includes('新品參考價')) {
                 flow.stage = 'price';
-                appendValuationReply('目前型號目前無新品價，可提供發票或當初購買價格嗎？請直接輸入當初價格，或按「圖片查詢」上傳發票。');
+                appendValuationReply('我查到型號了，但目前缺少新品參考價。你還記得當初買多少嗎？可以直接輸入價格，或按「圖片查詢」上傳發票。');
                 return;
             }
             throw new Error(result.message || '估價失敗，請確認型號及資料。');
@@ -1068,11 +1068,11 @@
             return;
         }
         if (!budget) {
-            appendRecommendationReply('收到用途了，請再告訴我預算上限，例如「4萬元」或「NT$ 40,000」；也可以只輸入「50000」。');
+            appendRecommendationReply('用途收到！再給我一個預算上限就好，例如「4萬元」或「50000」。');
             return;
         }
         if (!usage) {
-            appendRecommendationReply('收到預算了，請再告訴我主要用途，例如「3A 遊戲」或「文書／影音」。');
+            appendRecommendationReply('預算記下來了。你主要拿來做什麼？例如玩 3A 遊戲，或是文書、看影片。');
             return;
         }
 
@@ -1125,7 +1125,7 @@
             }
             appendRecommendationReply(lines.join('\n\n'));
         } catch (error) {
-            appendRecommendationReply(`推薦時遇到問題：${error.message || '請稍後再試。'}你可以再傳一次預算與用途，我會重新查詢。`);
+            appendRecommendationReply(`剛才查推薦時遇到問題：${error.message || '請稍後再試。'} 再傳一次預算和用途，我會重新查。`);
             recommendationFlow = { text: requestText };
             saveInterfaceState({ recommendationText: requestText });
         } finally {
@@ -1160,7 +1160,7 @@
         const content = document.createElement('div');
         content.className = 'message-content';
         const prompt = document.createElement('p');
-        prompt.textContent = '試著點選一項，或直接用平常說話的方式描述需求：';
+        prompt.textContent = '想先做哪件事？點一下，或直接告訴我你的需求：';
         prompt.style.cssText = 'font-size: 13px; color: #666; margin-top: 8px;';
         const buttons = document.createElement('div');
         buttons.className = 'suggestions-container';
@@ -1200,7 +1200,7 @@
                 if (label === '智慧推薦') {
                     recommendationFlow = { text: '' };
                     saveInterfaceState({ recommendationText: '' });
-                    appendRecommendationReply('請輸入預算和主要用途，例如「4萬元，主要玩 3A 遊戲，想組桌機」；預算也可以只打「50000」。也能補充想找筆電或 CPU／顯示卡單品。');
+                    appendRecommendationReply('我們先從預算和用途開始吧，例如「4萬元，主要玩 3A 遊戲，想組桌機」。只知道預算也沒關係，先告訴我就好。');
                     return;
                 }
                 input.value = query;
@@ -1350,7 +1350,14 @@
         input.style.height = 'auto';
         messages.scrollTop = messages.scrollHeight;
 
-        if (!imageToSend && (powerFlow || (!marketQueryActive && !valuationFlow && !recommendationFlow && /瓦數|電源|供電|電供|PSU|幾瓦/i.test(text)))) {
+        // Let standalone social turns reach the server without consuming an
+        // in-progress CPU, valuation, recommendation or market answer.
+        const socialText = text.normalize('NFKC').trim().replace(/[\s，,。.!！?？～~]+/g, '').toLowerCase();
+        const standaloneSocialTurn = !imageToSend && (
+            /^(?:你好|您好|哈囉|哈啰|嗨|hi|hello|早安|午安|晚安|有人在嗎|在嗎|你在嗎|你是誰|你是啥|所以你是啥|你是什麼|你叫什麼名字|你能做什麼|你會做什麼|自我介紹|自我介紹一下|你是機器人嗎|你是客服嗎|謝謝|謝謝你|感謝|感謝你|感恩|多謝|辛苦了|拜拜|再見|掰掰|今天天氣(?:如何|怎樣|怎麼樣)?|天氣(?:如何|怎樣|怎麼樣)?|誰是.{0,30}|bbb|123|隨便|測試)(?:呀|啊|喔|哦)?$/.test(socialText)
+            || /^(?:(?:我想|我要|想)?(?:幫我)?(?:估價|估算|查二手價|算二手價)(?:一台|一下)?(?:手機|平板)|(?:手機|平板)(?:可以)?(?:估價|估算|查二手價|算二手價)(?:嗎)?)$/.test(socialText)
+        );
+        if (!standaloneSocialTurn && !imageToSend && (powerFlow || (!marketQueryActive && !valuationFlow && !recommendationFlow && /瓦數|電源|供電|電供|PSU|幾瓦/i.test(text)))) {
             input.disabled = true;
             submitBtn.disabled = true;
             try {
@@ -1366,7 +1373,7 @@
             return;
         }
 
-        if (recommendationFlow && !imageToSend) {
+        if (recommendationFlow && !imageToSend && !standaloneSocialTurn) {
             input.disabled = true;
             submitBtn.disabled = true;
             try {
@@ -1381,7 +1388,7 @@
             return;
         }
 
-        if (valuationFlow && !imageToSend) {
+        if (valuationFlow && !imageToSend && !standaloneSocialTurn) {
             try {
                 await handleValuationText(text);
             } catch (error) {
@@ -1399,7 +1406,7 @@
         const loadingMessage = document.createElement('div');
         loadingMessage.className = 'ai-chat-message assistant';
         loadingMessage.innerHTML =
-            '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span><p class="loading-text">思考中...</p>';
+            '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span><p class="loading-text">我來看看…</p>';
         messages.appendChild(loadingMessage);
         messages.scrollTop = messages.scrollHeight;
 
@@ -1419,7 +1426,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ messages: payloadMessages, ...(marketQueryActive ? { intent: 'market' } : {}) })
+                body: JSON.stringify({ messages: payloadMessages, ...(marketQueryActive && !standaloneSocialTurn ? { intent: 'market' } : {}) })
             });
 
             let data;

@@ -163,7 +163,7 @@ function extractWattageModels(userTurns) {
 async function answerMarketQuery(keyword, userMessage, dependencies = {}, options = {}) {
   if (!keyword) {
     return {
-      answer: '可以，請告訴我想查的硬體型號，例如 RTX 5070。\n[前往市價查詢](/scrape)',
+      answer: '可以呀，想查哪個硬體？給我完整型號就好，例如 RTX 5070。\n[前往市價查詢](/scrape)',
       products: []
     };
   }
@@ -188,10 +188,10 @@ async function answerMarketQuery(keyword, userMessage, dependencies = {}, option
     } catch { /* Keep the product name when no valid URL is available. */ }
     return '- ' + title + '｜' + price + '｜' + (item.platform || '通路未標示');
   });
-  const staleWarning = marketData.meta?.stale ? '\n即時更新暫時失敗，以下為先前資料，請以商品頁價格為準。' : '';
+  const staleWarning = marketData.meta?.stale ? '\n這次沒有更新到通路資料，以下是先前結果；實際價格請以商品頁為準。' : '';
   const answer = entries.length
-    ? `查到「${keyword}」的通路結果如下（以實際頁面為準）：\n${entries.join('\n')}${updatedText}${staleWarning}\n\n[帶入「${keyword}」到市價頁](${marketUrl})`
-    : `目前沒有取得「${keyword}」的通路商品結果，因此我不會猜測價格。您可以改用更完整的型號或稍後再查。${updatedText}\n[帶入「${keyword}」到市價頁](${marketUrl})`;
+    ? `我查到「${keyword}」的通路結果了，先給你幾筆參考（實際價格以商品頁為準）：\n${entries.join('\n')}${updatedText}${staleWarning}\n\n[帶入「${keyword}」到市價頁](${marketUrl})`
+    : `我還沒查到「${keyword}」的通路商品，先不猜價格。你可以試試更完整的型號，或稍後再查。${updatedText}\n[帶入「${keyword}」到市價頁](${marketUrl})`;
   return { answer, products: products.slice(0, 5), userMessage, marketMeta: marketData.meta };
 }
 
@@ -423,7 +423,7 @@ async function executeTool(name, args) {
 
 function formatRecommendationAnswer(result) {
   if (!result.recommendations.length) {
-    return '目前沒有找到符合條件的商品，可以調整預算或用途後再試一次。[調整推薦條件](/recommend)';
+    return '這組條件暫時沒有找到合適商品。要不要調整預算或用途，我再幫你找一次？[調整推薦條件](/recommend)';
   }
   const lines = ['根據您的需求，找到以下推薦商品（點選藍字可查看商品頁）：'];
   result.recommendations.slice(0, 3).forEach((item, index) => {
@@ -444,27 +444,43 @@ function formatRecommendationAnswer(result) {
   return lines.join('\n\n');
 }
 
+// Handle only complete social/off-topic turns. A mixed request must continue to the
+// hardware tools, e.g. "你好，幫我查 RTX 5060 市價".
+function getConversationalReply(userMessage) {
+  const text = String(userMessage || '').normalize('NFKC').trim()
+    .replace(/[\s，,。.!！?？～~]+/g, '').toLowerCase();
+  if (/^(?:你好|您好|哈囉|哈啰|嗨|hi|hello|早安|午安|晚安|有人在嗎|在嗎|你在嗎|你是誰|你是啥|所以你是啥|你是什麼|你叫什麼名字|你能做什麼|你會做什麼|自我介紹|自我介紹一下|你是機器人嗎|你是客服嗎)(?:呀|啊|喔|哦)?$/.test(text)) {
+    return '嗨，我是紀亦緹！想查零件市價、估二手價格、配電腦，或算電源瓦數，都可以告訴我。我們一步一步來。';
+  }
+  if (/^(?:謝謝|謝謝你|感謝|感謝你|感恩|多謝|辛苦了|拜拜|再見|掰掰)(?:呀|啊|喔|哦)?$/.test(text)) {
+    return '不客氣，能幫上忙就好！還有硬體問題，隨時找我。';
+  }
+  if (/^(?:今天天氣(?:如何|怎樣|怎麼樣)?|天氣(?:如何|怎樣|怎麼樣)?|誰是.{0,30}|bbb|123|隨便|測試)$/.test(text)) {
+    return '這題我可能幫不上忙耶。我比較熟電腦硬體；想查市價、估二手價格、配電腦或算瓦數，我可以陪你一起看。';
+  }
+  if (/^(?:(?:我想|我要|想)?(?:幫我)?(?:估價|估算|查二手價|算二手價)(?:一台|一下)?(?:手機|平板)|(?:手機|平板)(?:可以)?(?:估價|估算|查二手價|算二手價)(?:嗎)?)$/.test(text)) {
+    return '手機和平板目前沒有可用的二手估價資料。如果是電腦零件，告訴我完整型號與使用狀況，我再幫你估。';
+  }
+  return null;
+}
+
 function fallbackAnswerForUserMessage(userMessage) {
+  const conversationalReply = getConversationalReply(userMessage);
+  if (conversationalReply) return conversationalReply;
   const text = String(userMessage || '').trim().toLowerCase();
-  if (/你好|您好|嗨|哈囉|有人在嗎|早安|午安|晚安|你是誰|你是啥|你是什麼|自我介紹|機器人|客服/.test(text)) {
-    return '您好！我是一次買夠的本機 AI 硬體助手，可以幫您估二手價格、查詢市價、推薦硬體或計算電源瓦數。';
-  }
-  if (/謝謝|感謝|感恩|拜拜|再見|掰掰/.test(text)) {
-    return '不會！很高興能為您服務。如果有其他問題，隨時歡迎再來找我喔！';
-  }
   if (/裝機|組裝|推薦|菜單|配電腦/.test(text)) {
-    return '請告訴我預算、用途（遊戲或文書）及想推薦整機、筆電或 CPU/GPU 零件。[開啟智慧推薦](/recommend)';
+    return '想配電腦嗎？先告訴我預算和主要用途，再說想找桌機、筆電或 CPU／顯卡，我會幫你縮小範圍。[開啟智慧推薦](/recommend)';
   }
   if (/估價|二手|價錢|價格|價格估算|幾錢|多少/.test(text))
-    return '我可以協助估價，請告訴我零件類型與完整型號、使用多久，以及商品狀況（近全新、正常使用、明顯痕跡或狀況較差）。[開啟二手估價工具](/valuation)';
+    return '可以，我們來估看看。先告訴我零件種類和完整型號，再補上使用時間與外觀狀況就好。[開啟二手估價工具](/valuation)';
   if (/市價|行情|價格查詢|查價|市場價格|買賣|想買|要買|購買/.test(text))
-    return '告訴我想查詢的完整硬體型號，我會搜尋支援通路的即時價格。[開啟市價查詢](/scrape)';
+    return '想查哪個零件的價格？給我完整型號，我會看看支援通路目前查得到哪些商品。[開啟市價查詢](/scrape)';
   if (/瓦數|電源|供電|電供|供應器/.test(text))
-    return '請提供 CPU 與顯示卡型號（或各自瓦數）；如果沒有獨立顯卡也請告訴我。[開啟瓦數計算](/tools)';
-  if (/手機|平板|筆電|筆記型電腦/.test(text)) {
-    return '非常抱歉，目前我們僅針對電腦零組件提供估價喔！[點此前往零件估價工具](/valuation)';
+    return '我們先確認 CPU 和顯示卡型號，再來估整機瓦數；如果只用內顯，直接說「內顯」就可以。[開啟瓦數計算](/tools)';
+  if (/手機|平板/.test(text)) {
+    return '手機和平板目前沒有可用的二手估價資料。如果是電腦零件，告訴我完整型號與使用狀況，我再幫你估。';
   }
-  return '不好意思，這部分超出了我的專業範圍😅。我能幫助你跳轉到電腦零組件的估價、裝機推薦與行情查詢，您要不要試試看問我這類的問題呢？';
+  return '我還不太確定你想做哪一件事。你可以直接說「查 RTX 5060 市價」、「幫我估二手價」或「我想配電腦」，我就能接著幫你。';
 }
 
 function appendChatLog(userMessage, answer) {
@@ -692,6 +708,17 @@ async function handle(req, res) {
     }
     lastUserMessage = userMessage || '請辨識這張電腦硬體照片';
 
+    // Market/photo requests keep their existing workflow even when the caption
+    // looks like a greeting or another short social message.
+    const conversationalReply = !imageRequested && parsed.intent !== 'market'
+      ? getConversationalReply(userMessage)
+      : null;
+    if (conversationalReply) {
+      appendChatLog(userMessage, conversationalReply);
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      return res.end(JSON.stringify({ success: true, answer: conversationalReply, provider: 'conversation' }));
+    }
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), OLLAMA_TIMEOUT_MS);
     try {
@@ -762,7 +789,7 @@ async function handle(req, res) {
         {
           role: 'system',
           content:
-            '你是「一次估夠」的繁體中文電腦硬體 AI agent。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制，語氣自然精簡。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。不要附上二手估價、智慧推薦或瓦數計算的工具頁連結。查詢市價時可以提供帶有查詢關鍵字的市價查詢頁連結。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。不要執行工具之外的操作。'
+            '你是「一次估夠」的電腦硬體小幫手紀亦緹，以台灣常用的繁體中文和使用者對話。像耐心、懂硬體的朋友一樣說話：先回應對方的需求，再說下一步；一次只問最必要的一件事。可以偶爾用「好，我來看看」等自然口語，但不要每句都自稱姐姐、堆疊表情符號或反覆道歉。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制。查不到資料時坦白說明原因，並給一個可行的下一步。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。不要附上二手估價、智慧推薦或瓦數計算的工具頁連結。查詢市價時可以提供帶有查詢關鍵字的市價查詢頁連結。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。不要執行工具之外的操作。'
         },
         ...contextualConversation
       ];
@@ -851,6 +878,7 @@ module.exports = {
   answerWattageQuery,
   answerMarketQuery,
   getMarketQueryKeyword,
+  getConversationalReply,
   fallbackAnswerForUserMessage,
   TOOLS
 };

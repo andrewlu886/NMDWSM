@@ -68,11 +68,26 @@ test('AI service uses authenticated remote requests for status, text and vision 
  const context={require:name=>name==='../src/services/ollama-client'?{createOllamaClient:()=>client}:name==='fs'?{existsSync:()=>true,appendFile:()=>{}}:requireAi(name),module:{exports:{}},__dirname:path.resolve('public'),process:{env:{}},console,URL,AbortController,setTimeout,clearTimeout};
  vm.runInNewContext(fs.readFileSync('public/AiService.js','utf8'),context);
  const status=await context.module.exports.getStatus();assert.equal(status.available,true);assert.equal(status.serviceMode,'shared');assert.equal(status.visionModelInstalled,true);assert.equal(JSON.stringify(status).includes(token),false);
- for(const image of [false,true]){
-  let result;const req=Readable.from([JSON.stringify({messages:[{role:'user',content:'你好',...(image?{images:['aGVsbG8=']}:{})}]})]);
+ for(const {content,image,expectedProvider} of [
+  {content:'你好',image:false,expectedProvider:'conversation'},
+  {content:'你好，我想找電腦推薦',image:false,expectedProvider:'ollama'},
+  {content:'你好',image:true,expectedProvider:'ollama'}
+ ]){
+  let result;const req=Readable.from([JSON.stringify({messages:[{role:'user',content,...(image?{images:['aGVsbG8=']}:{})}]})]);
   await context.module.exports.handle(req,{writeHead:code=>assert.equal(code,200),end:body=>{result=JSON.parse(body);}});
-  assert.equal(result.success,true);assert.equal(result.answer,'測試模型回覆');
+  assert.equal(result.success,true);assert.equal(result.provider,expectedProvider);
+  assert.equal(result.answer,expectedProvider==='conversation'?context.module.exports.getConversationalReply(content):'測試模型回覆');
  }
  assert.ok(calls.some(call=>call.options.body&&JSON.parse(call.options.body).model==='gemma3:4b'));
  for(const call of calls)assert.equal(call.options.headers.get('authorization'),'Bearer '+token);
+});
+
+test('short social and off-topic turns use a consistent reply without swallowing hardware requests',()=>{
+ const {getConversationalReply}=require('../public/AiService');
+ for(const message of ['你好！','你是誰？','你是啥','Hello','謝謝你','掰掰','今天天氣如何？','誰是周杰倫？','測試','手機可以估價嗎']){
+  assert.ok(getConversationalReply(message),message);
+ }
+ for(const message of ['你好，我想查 RTX 5060 市價','謝謝，順便幫我算 650W 夠不夠','筆電推薦','手機跟顯卡都想估價']){
+  assert.equal(getConversationalReply(message),null,message);
+ }
 });
