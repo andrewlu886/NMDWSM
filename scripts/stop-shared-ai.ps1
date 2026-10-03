@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $statePath = Join-Path $projectRoot 'logs\shared-ai-processes.json'
 if (-not (Test-Path -LiteralPath $statePath)) { Write-Output '沒有記錄中的共用 AI 程序。'; exit }
