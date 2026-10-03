@@ -87,6 +87,29 @@ body > header .logo,
     justify-self: start;
 }
 
+/* Shared brand artwork and fixed header geometry for every page. */
+body > header .header-main {
+    min-height: 86px !important;
+}
+body > header .logo {
+    width: 264px;
+    height: 56px;
+    gap: 0 !important;
+    line-height: 1 !important;
+    background: transparent !important;
+    -webkit-text-fill-color: currentColor !important;
+    transform: none !important;
+    transition: none !important;
+}
+body > header .logo .site-brand-mark {
+    display: block;
+    width: 264px;
+    height: 56px;
+    max-width: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
 body > header .search-wrapper,
 .recommend-search {
     position: relative !important;
@@ -439,9 +462,12 @@ textarea:focus {
     body > header .header-main,
     .recommend-header-main {
         display: flex !important;
+        flex-direction: row !important;
         flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        align-content: flex-start !important;
         gap: 12px !important;
-        padding: 12px 14px !important;
+        padding: 15px 14px !important;
     }
 
     body > header .search-wrapper,

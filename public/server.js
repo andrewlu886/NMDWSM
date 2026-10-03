@@ -504,6 +504,7 @@ const server = http.createServer(async(req, res) => {
             '.html': 'text/html',
             '.css': 'text/css',
             '.js': 'text/javascript',
+            '.svg': 'image/svg+xml',
             '.png': 'image/png',
             '.jpg': 'image/jpeg',
             '.jpeg': 'image/jpeg',
