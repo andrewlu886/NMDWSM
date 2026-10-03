@@ -7,18 +7,18 @@ const { Readable } = require('node:stream');
 const { createRequire } = require('node:module');
 const { createMarketCache } = require('../src/services/market-cache');
 function service(vision = 'Category: graphics card\nModel: ASUS RTX 4070 SUPER\nConfidence: high') {
-  const queries = [];
+  const queries = [], modelCalls = [];
   const requireAi = createRequire(path.resolve('public/AiService.js'));
   const context = {
     require: name => name === '../src/services/search' ? { searchProductsWithMeta: async options => {
       queries.push(options);
-      return { data: [{ name: '測試商品', price: '25000', platform: 'PChome', url: 'https://24h.pchome.com.tw/prod/TEST' }], meta: { updatedAt: 1800000000000, stale: false } };
-    } } : name === '../src/services/ollama-client' ? { createOllamaClient: () => ({serviceMode:'shared',request:async route => ({ok:true,json:async()=>route==='/api/tags'?{models:[{name:'gemma3:4b'}]}:{message:{content:vision}}})}) }
+      return { data: [{ name: options.keyword, price: '25000', platform: 'PChome', url: 'https://24h.pchome.com.tw/prod/TEST' }], meta: { updatedAt: 1800000000000, stale: false } };
+    } } : name === '../src/services/ollama-client' ? { createOllamaClient: () => ({serviceMode:'shared',request:async route => (modelCalls.push(route), {ok:true,json:async()=>route==='/api/tags'?{models:[{name:'gemma3:4b'}]}:{message:{content:vision}}})}) }
       : name === 'fs' ? {existsSync:()=>true,appendFile:()=>{}} : requireAi(name),
     module:{exports:{}},__dirname:path.resolve('public'),process:{env:{}},console,URL,AbortController,setTimeout,clearTimeout
   };
   vm.runInNewContext(fs.readFileSync('public/AiService.js','utf8'),context);
-  return { queries, async ask(content, images) {
+  return { queries, modelCalls, async ask(content, images) {
     let result;
     const req=Readable.from([JSON.stringify({intent:'market',messages:[{role:'user',content,...(images?{images}:{})}]})]);
     await context.module.exports.handle(req,{writeHead:code=>assert.equal(code,200),end:body=>{result=JSON.parse(body);}});
@@ -28,7 +28,7 @@ function service(vision = 'Category: graphics card\nModel: ASUS RTX 4070 SUPER\n
 test('explicit market queries preserve full product names and force current prices with links',async()=>{
  const agent=service();const result=await agent.ask('查詢 ASUS TUF RTX 4070 SUPER 的目前資訊與市價');
  assert.equal(agent.queries[0].keyword,'ASUS TUF RTX 4070 SUPER');assert.equal(agent.queries[0].forceRefresh,true);
- assert.match(result.answer,/\[測試商品\]\(https:\/\/24h.pchome.com.tw\/prod\/TEST\)/);assert.match(result.answer,/25000/);assert.match(result.answer,/資料更新時間/);
+ assert.match(result.answer,/\[ASUS TUF RTX 4070 SUPER\]\(https:\/\/24h.pchome.com.tw\/prod\/TEST\)/);assert.match(result.answer,/25000/);assert.match(result.answer,/資料更新時間/);
 });
 test('clear product images search their identified model directly',async()=>{
  const agent=service();const result=await agent.ask('請查詢照片中產品的資訊與市價',['aGVsbG8=']);
@@ -52,4 +52,22 @@ test('explicit fresh searches bypass the daily cache and flag stale fallback on 
  await cache.get('RTX 5070',['pchome']);await cache.get('RTX 5070',['pchome']);assert.equal(calls,1);
  const fresh=await cache.get('RTX 5070',['pchome'],{forceRefresh:true});assert.equal(calls,2);assert.equal(fresh.meta.cached,false);
  fail=true;const stale=await cache.get('RTX 5070',['pchome'],{forceRefresh:true});assert.equal(stale.meta.stale,true);assert.equal(stale.products[0].name,'商品2');
+});
+
+test('off-topic turns never search, even while the market quick action is active', async () => {
+  for (const text of ['賴清德是好皇帝嗎?', '台灣會獨立嗎?', '流螢 AR-26710 格拉默共和國量產', '有一說一，這種事情我見得多了，不懂的我也不多說了']) {
+    const agent = service();
+    const reply = await agent.ask(text);
+    assert.equal(agent.queries.length, 0);
+    assert.equal(reply.provider, 'conversation');
+    assert.equal(agent.modelCalls.length, 0);
+    assert.doesNotMatch(reply.answer, /函數呼叫|通路結果|NT\$/);
+  }
+});
+
+test('partial CPU family asks for a complete model before searching', async () => {
+  const agent = service();
+  const reply = await agent.ask('查詢 Intel i5 市價');
+  assert.equal(agent.queries.length, 0);
+  assert.match(reply.answer, /完整型號/);
 });

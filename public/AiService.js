@@ -10,7 +10,9 @@ const ollamaClient = createOllamaClient();
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.1:8b';
 const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL || 'gemma3:4b';
 const OLLAMA_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 90000);
-const MAX_TOOL_ROUNDS = 4;
+const MAX_TOOL_ROUNDS = 2;
+let activeAiRequests = 0;
+const { getScopeReply, validMarketKeyword, matchesMarketProduct, pruneHardwareHistory } = require('../src/services/chat-scope');
 
 const TOOLS = [
   {
@@ -161,7 +163,7 @@ function extractWattageModels(userTurns) {
 }
 
 async function answerMarketQuery(keyword, userMessage, dependencies = {}, options = {}) {
-  if (!keyword) {
+  if (!validMarketKeyword(keyword)) {
     return {
       answer: '可以呀，想查哪個硬體？給我完整型號就好，例如 RTX 5070。\n[前往市價查詢](/scrape)',
       products: []
@@ -171,7 +173,7 @@ async function answerMarketQuery(keyword, userMessage, dependencies = {}, option
   const marketData = dependencies.searchProducts
     ? { data: await dependencies.searchProducts({ keyword, platforms: 'all', include: '', exclude: '', categories: '' }), meta: null }
     : await searchProductsWithMeta({ keyword, platforms: 'all', include: '', exclude: '', categories: '', forceRefresh: options.forceRefresh === true });
-  const products = marketData.data;
+  const products = marketData.data.filter(item => matchesMarketProduct(item, keyword));
   const updatedText = marketData.meta?.updatedAt
     ? `\n資料更新時間：${new Date(marketData.meta.updatedAt).toLocaleString('zh-TW')}。`
     : '';
@@ -395,7 +397,7 @@ async function executeTool(name, args) {
     return data;
   }
   case 'search_market_prices': {
-    if (!String(args.keyword || '').trim()) throw new Error('請提供要查詢的硬體型號。');
+    if (!validMarketKeyword(args.keyword)) throw new Error('請提供電腦硬體的完整型號，不接受無關對話作為搜尋關鍵字。');
     const result = await searchProductsWithMeta({
       keyword: String(args.keyword).slice(0, 100),
       platforms: args.platforms || 'all',
@@ -403,7 +405,8 @@ async function executeTool(name, args) {
       include: String(args.include || '').slice(0, 100),
       categories: ''
     });
-    return { keyword: args.keyword, count: result.data.length, products: result.data.slice(0, 8), marketMeta: result.meta };
+    const products = result.data.filter(item => matchesMarketProduct(item, args.keyword));
+    return { keyword: args.keyword, count: products.length, products: products.slice(0, 8), marketMeta: result.meta };
   }
   case 'recommend_hardware': {
     const budget = Number(args.budget);
@@ -694,10 +697,10 @@ async function handle(req, res) {
         message =>
           ['user', 'assistant'].includes(message.role) && typeof message.content === 'string'
       )
-      .slice(imageRequested ? -8 : -20)
+      .slice(imageRequested ? -8 : -12)
       .map(message => ({
         role: message.role,
-        content: message.content.slice(0, imageRequested ? 1200 : 4000)
+        content: message.content.slice(0, 2000)
       }));
     const userMessage = [...conversation]
       .reverse()
@@ -719,6 +722,19 @@ async function handle(req, res) {
       return res.end(JSON.stringify({ success: true, answer: conversationalReply, provider: 'conversation' }));
     }
 
+    if (!imageRequested) {
+      const socialReply = getConversationalReply(userMessage);
+      const scopeReply = socialReply || getScopeReply(latestUser?.content || userMessage, conversation.slice(0, -1));
+      if (scopeReply) {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        return res.end(JSON.stringify({ success: true, answer: scopeReply, provider: 'conversation' }));
+      }
+    }
+    if (activeAiRequests >= 2) {
+      res.writeHead(429, { 'Content-Type': 'application/json; charset=utf-8', 'Retry-After': '10' });
+      return res.end(JSON.stringify({ success: false, message: '姐姐正在處理其他硬體問題，請稍後再試一次。' }));
+    }
+    activeAiRequests += 1;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), OLLAMA_TIMEOUT_MS);
     try {
@@ -789,11 +805,12 @@ async function handle(req, res) {
         {
           role: 'system',
           content:
-            '你是「一次估夠」的電腦硬體小幫手紀亦緹，以台灣常用的繁體中文和使用者對話。像耐心、懂硬體的朋友一樣說話：先回應對方的需求，再說下一步；一次只問最必要的一件事。可以偶爾用「好，我來看看」等自然口語，但不要每句都自稱姐姐、堆疊表情符號或反覆道歉。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制。查不到資料時坦白說明原因，並給一個可行的下一步。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。不要附上二手估價、智慧推薦或瓦數計算的工具頁連結。查詢市價時可以提供帶有查詢關鍵字的市價查詢頁連結。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。不要執行工具之外的操作。'
+            '你是「一次估夠」的電腦硬體小幫手紀亦緹，以台灣常用的繁體中文和使用者對話。像耐心、懂硬體的朋友一樣說話：先回應對方的需求，再說下一步；一次只問最必要的一件事。可以偶爾用「好，我來看看」等自然口語，但不要每句都自稱姐姐、堆疊表情符號或反覆道歉。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制。查不到資料時坦白說明原因，並給一個可行的下一步。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。不要附上二手估價、智慧推薦或瓦數計算的工具頁連結。查詢市價時可以提供帶有查詢關鍵字的市價查詢頁連結。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。只處理電腦硬體相關需求。政治、歷史、角色扮演及無關話題請簡短引導回硬體功能；不要為無關訊息呼叫工具，不要將整段對話當搜尋關鍵字。沒有匹配型號的工具結果就說查不到，不得引用其他型號。不要執行工具之外的操作。'
         },
-        ...contextualConversation
+        ...pruneHardwareHistory(contextualConversation, imageRequested)
       ];
 
+      const executedTools = new Set();
       for (let round = 0; round <= MAX_TOOL_ROUNDS; round += 1) {
         const response = await ollamaClient.request('/api/chat', {
           method: 'POST',
@@ -802,6 +819,7 @@ async function handle(req, res) {
             model: OLLAMA_MODEL,
             messages: ollamaMessages,
             tools: TOOLS,
+            options: { num_predict: 512, num_ctx: 8192 },
             stream: false
           }),
           signal: controller.signal
@@ -828,10 +846,14 @@ async function handle(req, res) {
           }));
         }
 
+        if (round === MAX_TOOL_ROUNDS || toolCalls.length > 2) throw new Error('AI 工具呼叫次數超出限制。');
         for (const call of toolCalls) {
           const name = call.function?.name;
           let args = call.function?.arguments || {};
           if (typeof args === 'string') args = JSON.parse(args);
+          const signature = JSON.stringify([name, args]);
+          if (executedTools.has(signature)) throw new Error('AI 重複呼叫相同工具，已停止本次處理。');
+          executedTools.add(signature);
           let toolResult;
           try {
             toolResult = await executeTool(name, args);
@@ -854,6 +876,7 @@ async function handle(req, res) {
       throw new Error('AI 工具呼叫次數超出限制。');
     } finally {
       clearTimeout(timeout);
+      activeAiRequests -= 1;
     }
   } catch (error) {
     const answer = imageRequested
