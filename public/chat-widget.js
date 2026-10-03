@@ -1077,11 +1077,12 @@
         }
 
         const productType = getRecommendationProductType(requestText);
+        const condition = /二手|中古/.test(requestText) ? 'used' : 'new';
         const componentType = productType === 'component' ? getRecommendationComponentType(requestText) : '';
         const productTypes = !productType && usage === 'office' ? ['desktop', 'laptop'] : [productType || 'desktop'];
         const payloads = productTypes.map((type) => type === 'component'
-            ? { budget, usage, productType: type, componentType }
-            : { budget, usage, productType: type });
+            ? { budget, usage, productType: type, componentType, condition }
+            : { budget, usage, productType: type, condition });
         recommendationFlow = null;
         saveInterfaceState({ recommendationText: '' });
 

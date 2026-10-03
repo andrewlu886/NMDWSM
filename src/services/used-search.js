@@ -34,6 +34,8 @@ function sold(text) { return SOLD.test(plain(text).replace(/尚未售出|未售�
 function textHtml(value) { return plain(cheerio.load(String(value || ''))('body').text()); }
 function fixedPrice(value) {
   const text = plain(value);
+  const amounts = [...text.matchAll(/(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g)];
+  if (amounts.length !== 1) return null;
   if (VARIABLE_PRICE.test(text) || /\d[\d,]*\s*(?:元|\$)?\s*[-~～至/]\s*(?:NT\$?)?\s*\d/i.test(text)) return null;
   const numbers = [...text.matchAll(/(?:NT\$?|\$|售價[:：]?|價格[:：]?)\s*([\d,]+(?:\.\d+)?)|^([\d,]+(?:\.\d+)?)\s*(?:元)?$/gi)]
     .map(match => Number((match[1] || match[2]).replace(/,/g, '')));
@@ -104,7 +106,10 @@ function parsePttArticle(html, title, url) {
     .map(match => Number(match[0].replace(/,/g, '')));
   if (numbers.length !== 1 || !Number.isSafeInteger(numbers[0]) || numbers[0] <= 0) return null;
   const condition = section('品樣狀況|商品狀況|使用狀況');
-  return verified('ptt', title.replace(/^\[[^\]]+\]\s*/, ''), numbers[0], url, { evidence: `${title} ${condition}` });
+  return verified('ptt', title.replace(/^\[[^\]]+\]\s*/, ''), numbers[0], url, {
+    evidence: `${title} ${condition}`,
+    specificationText: `${section('硬體型號|商品名稱|產品名稱')} ${condition}`
+  });
 }
 async function searchPtt(keyword) {
   const posts = new Map();
@@ -147,7 +152,7 @@ function parseYahooDetail(html, url) {
     || item.hasMultiplePrice || (Number(range.lowPrice) > 0 && Number(range.lowPrice) !== Number(range.highPrice))
     || (Number(item.endTime) > 0 && Number(item.endTime) * 1000 <= Date.now()) || String(item.condition) !== '2') return null;
   return verified('yahoo-auction', item.title, Number(item.price), url, {
-    evidence: `${item.title} ${textHtml(item.description)}`, usedCondition: true
+    evidence: `${item.title} ${textHtml(item.description)}`, specificationText: textHtml(item.description), usedCondition: true
   });
 }
 async function searchYahoo(keyword) {
@@ -188,7 +193,7 @@ function parseCarousellDetail(html, url) {
   if (!/\/InStock$/.test(offer.availability || '') || !/\/(UsedCondition|RefurbishedCondition)$/.test(offer.itemCondition || '')
     || offer.priceCurrency !== 'TWD' || ('lowPrice' in offer) || ('highPrice' in offer)
     || (offer.priceValidUntil && new Date(`${offer.priceValidUntil}T23:59:59+08:00`).getTime() < Date.now())) return null;
-  return verified('carousell', product.name, Number(offer.price), url, { evidence: product.description, usedCondition: true });
+  return verified('carousell', product.name, Number(offer.price), url, { evidence: product.description, specificationText: textHtml(product.description), usedCondition: true });
 }
 async function searchCarousell(keyword) {
   const puppeteer = require('../scrapers/browser');
@@ -247,7 +252,7 @@ async function searchUsedProducts({ keyword, platforms = 'all', exclude = '', pr
       if (!item.verified || item.source !== id || !eligible(item, query, exclude, precise) || seen.has(item.url)) continue;
       seen.add(item.url); count += 1;
       data.push({ source: item.source, platform: item.platform, name: item.name, price: item.price, url: item.url,
-        verifiedAt: item.verifiedAt || Date.now(), condition: 'used' });
+        verifiedAt: item.verifiedAt || Date.now(), condition: 'used', specificationText: plain(item.specificationText).slice(0, 8000) });
     }
     const scanned = collection.scanned ?? items.length;
     sourceStatus[id] = { name: SOURCES[id], status: failures ? 'partial' : count ? 'ok' : 'empty', count,

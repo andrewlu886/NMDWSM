@@ -1,5 +1,7 @@
 const { RECOMMENDATION_PLATFORM_IDS } = require('../scrapers');
 const { getDailyMarketData } = require('./market-cache');
+const { searchUsedProducts, fixedPrice } = require('./used-search');
+const { matchesProductCondition } = require('./product-condition');
 const {
   extractCPU,
   extractGPU,
@@ -11,7 +13,8 @@ const {
   getOsBonusScore
 } = require('./hardware');
 
-function getSearchKeyword(productType, usage) {
+function getSearchKeyword(productType, usage, componentType) {
+  if (productType === 'component') return componentType === 'cpu' ? '處理器' : '顯示卡';
   if (productType === 'laptop') return usage === 'gaming' ? '筆電' : '筆記型電腦';
   return usage === 'gaming' ? '主機' : '套裝機';
 }
@@ -22,7 +25,7 @@ function isComputerListing(name, productType, cpu, gpu) {
   if (productType === 'laptop') {
     return /筆電|筆記型|laptop|notebook|macbook|chromebook|電競本/i.test(text);
   }
-  return /桌機|桌上型電腦|桌上型主機|桌電|桌上電腦|電腦主機|主機電腦|套裝電腦|電腦套裝|迷你電腦|mini\s*pc|desktop(?:\s*pc)?|個人電腦|all[- ]?in[- ]?one|一體成型電腦/i.test(text)
+  return /桌機|桌上型電腦|桌上型主機|套裝主機|電競主機|文書主機|桌電|桌上電腦|電腦主機|主機電腦|套裝電腦|電腦套裝|迷你電腦|mini\s*pc|desktop(?:\s*pc)?|個人電腦|all[- ]?in[- ]?one|一體成型電腦/i.test(text)
     || (cpu !== 'UNKNOWN' && gpu !== 'UNKNOWN');
 }
 
@@ -81,20 +84,23 @@ function selectDiverseRecommendations(products, limit = 3) {
 
 function rankRecommendations(options, products) {
   const validProducts = [];
-  const minimumPrice = 5000;
+  const minimumPrice = options.condition === 'used' ? 1000 : 5000;
 
   products.forEach((item) => {
     if (!item || !item.price) return;
-    if (!hasProductDetailUrl(item)) return;
-    if (/售完|已售完|缺貨|無庫存|下架|暫停販售|補貨中/i.test(item.name)) return;
-    const cleanPrice = parseInt(String(item.price).replace(/[^\d]/g, ''), 10);
-    if (Number.isNaN(cleanPrice) || cleanPrice === 0 || cleanPrice > options.budget || cleanPrice < minimumPrice) return;
+    if (!hasProductDetailUrl(item) || item.available === false) return;
+    if (!matchesProductCondition(item, options.condition || 'new')) return;
+    if (options.condition === 'used' && /零件機|故障|不知好壞|無法開機|不能開機|報廢|僅供拆件/.test(item.name)) return;
+    if (/已售出|售出|已成交|售完|已售完|缺貨|無庫存|下架|暫停販售|補貨中|\bsold\b/i.test(String(item.name).replace(/尚未售出|未售出/g, ''))) return;
+    const cleanPrice = fixedPrice(item.price);
+    if (!cleanPrice || cleanPrice > options.budget || cleanPrice < minimumPrice) return;
     if (options.usage === 'gaming' && item.name.includes('文書')) return;
 
-    const cpu = extractCPU(item.name);
-    const gpu = extractGPU(item.name);
-    const ram = extractRAM(item.name);
-    const os = extractOS(item.name);
+    const specifications = options.condition === 'used' ? `${item.name} ${item.specificationText || ''}` : item.name;
+    const cpu = extractCPU(specifications);
+    const gpu = extractGPU(specifications);
+    const ram = extractRAM(specifications);
+    const os = extractOS(specifications);
     if (options.productType !== 'component' && !isComputerListing(item.name, options.productType, cpu, gpu)) return;
     if (options.productType === 'component' && options.componentType === 'cpu' && cpu === 'UNKNOWN') return;
     if (options.productType === 'component' && options.componentType === 'gpu' && gpu === 'UNKNOWN') return;
@@ -145,21 +151,51 @@ function rankRecommendations(options, products) {
 }
 
 async function getRecommendationsWithMeta(options, dependencies = {}) {
+  const condition = options.condition === undefined ? 'new' : options.condition;
+  if (!['new', 'used'].includes(condition)) throw new Error('商品狀況僅支援全新或二手');
+  const normalized = { ...options, condition };
   const keyword = getSearchKeyword(options.productType, options.usage, options.componentType);
-  const marketData = dependencies.getMarketData
-    ? await dependencies.getMarketData(keyword, RECOMMENDATION_PLATFORM_IDS)
+  const retailKeyword = condition === 'used' ? `二手${keyword}` : keyword;
+  const loadRetail = () => dependencies.getMarketData
+    ? dependencies.getMarketData(retailKeyword, RECOMMENDATION_PLATFORM_IDS, condition === 'used' ? { forceRefresh: true } : {})
     : dependencies.scrapePlatforms
-      ? { products: await dependencies.scrapePlatforms(keyword, RECOMMENDATION_PLATFORM_IDS), meta: null }
-      : await getDailyMarketData(keyword, RECOMMENDATION_PLATFORM_IDS);
-  return { ...rankRecommendations(options, marketData.products), marketMeta: marketData.meta };
+      ? Promise.resolve(dependencies.scrapePlatforms(retailKeyword, RECOMMENDATION_PLATFORM_IDS)).then(products => ({ products, meta: null }))
+      : getDailyMarketData(retailKeyword, RECOMMENDATION_PLATFORM_IDS, condition === 'used' ? { forceRefresh: true } : {});
+  if (condition === 'new') {
+    const marketData = await loadRetail();
+    return { ...rankRecommendations(normalized, marketData.products), condition, marketMeta: marketData.meta };
+  }
+  // Reuse the existing crawlers and scoring; second-hand sources verify their original listings.
+  const [retail, used] = await Promise.allSettled([
+    Promise.resolve().then(loadRetail),
+    Promise.resolve().then(() => (dependencies.searchUsedProducts || searchUsedProducts)({
+      keyword: options.productType === 'desktop' ? '主機' : keyword,
+      platforms: 'ptt,carousell,yahoo-auction'
+    }))
+  ]);
+  if (retail.status === 'rejected' && used.status === 'rejected') throw new Error('二手商品來源暫時無法讀取');
+  const marketData = retail.status === 'fulfilled' ? retail.value : { products: [], meta: null };
+  const listings = used.status === 'fulfilled' ? used.value : { data: [], meta: { sourceStatus: {} } };
+  const seen = new Set();
+  const retailProducts = marketData.meta?.stale ? [] : marketData.products;
+  const products = [...retailProducts, ...listings.data].filter(item => {
+    if (!item || seen.has(item.url)) return false;
+    seen.add(item.url); return true;
+  });
+  return { ...rankRecommendations(normalized, products), condition,
+    marketMeta: { ...marketData.meta, updatedAt: Date.now(), liveListings: true,
+      sourceStatus: listings.meta?.sourceStatus || {},
+      partial: retail.status === 'rejected' || used.status === 'rejected' || Boolean(marketData.meta?.stale)
+        || Object.values(listings.meta?.sourceStatus || {}).some(source => ['partial', 'unavailable'].includes(source.status)),
+      retailUpdatedAt: marketData.meta?.updatedAt || null }
+  };
 }
-
 async function getRecommendations(options, dependencies = {}) {
   if (!['desktop', 'laptop', 'component'].includes(options.productType)) {
     throw new Error('商品種類僅支援套裝主機、筆記型電腦或零件');
   }
   const result = await getRecommendationsWithMeta(options, dependencies);
-  const { marketMeta, ...recommendations } = result;
+  const { marketMeta, condition, ...recommendations } = result;
   return recommendations;
 }
 

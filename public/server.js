@@ -178,6 +178,9 @@ const server = http.createServer(async(req, res) => {
                     message: '商品種類僅支援套裝主機或筆記型電腦'
                 });
             }
+            if (options.condition !== undefined && !['new', 'used'].includes(options.condition)) {
+                return sendJson(res, 400, { success: false, message: '商品狀況僅支援全新或二手' });
+            }
             const result = await getRecommendationsWithMeta(options);
             sendJson(res, 200, result);
         } catch (error) {

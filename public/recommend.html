@@ -469,28 +469,6 @@
             background: #dbeafe;
         }
 
-        .recommend-calculator-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 13px;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            font-size: 0.86rem;
-            font-weight: 700;
-            line-height: 1.4;
-            text-decoration: none;
-            white-space: nowrap;
-            transition: background 0.2s ease, border-color 0.2s ease;
-        }
-
-        .recommend-calculator-link:hover {
-            border-color: #93c5fd;
-            background: #dbeafe;
-        }
-
         .recommend-warning,
         .recommend-error {
             margin-bottom: 16px;
@@ -554,11 +532,6 @@
                 align-items: stretch;
                 flex-direction: column;
             }
-
-            .recommend-calculator-link {
-                width: 100%;
-                box-sizing: border-box;
-            }
         }
     </style>
 </head>
@@ -588,13 +561,20 @@
         <div class="recommend-layout">
             <section class="recommend-card recommend-form-card" aria-labelledby="recommend-form-title">
                 <h2 id="recommend-form-title">設定需求</h2>
-                <p class="recommend-intro">填寫三個條件，即可產生推薦清單。</p>
+                <p class="recommend-intro">選擇商品狀況並填寫需求，即可產生推薦清單。</p>
                 <form id="recommend-form">
                     <div class="recommend-field">
                         <label for="productType">商品種類</label>
                         <select id="productType" name="productType">
                             <option value="desktop">套裝主機（Desktop）</option>
                             <option value="laptop">筆記型電腦（Laptop）</option>
+                        </select>
+                    </div>
+                    <div class="recommend-field">
+                        <label for="condition">商品狀況</label>
+                        <select id="condition" name="condition">
+                            <option value="new">全新</option>
+                            <option value="used">二手</option>
                         </select>
                     </div>
                     <div class="recommend-field">
@@ -615,7 +595,6 @@
             <section class="recommend-card recommend-results" aria-labelledby="recommend-results-title">
                 <div class="recommend-results-heading">
                     <h2 id="recommend-results-title">推薦結果</h2>
-                    <a class="recommend-calculator-link" href="/tools">開啟瓦數計算器</a>
                 </div>
                 <div id="result-display" aria-live="polite">
                     <div class="recommend-empty">
@@ -627,7 +606,7 @@
         </div>
     </main>
 
-<script src="./recommend.js?v=20261001-agent"></script>
-    <script src="./chat-widget.js?v=20261001-docked-launcher"></script>
+<script src="./recommend.js?v=20261004-condition"></script>
+    <script src="./chat-widget.js?v=20261004-recommend-condition"></script>
 </body>
 </html>

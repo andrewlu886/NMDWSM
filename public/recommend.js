@@ -4,6 +4,7 @@
     const resultDisplay = document.getElementById('result-display');
     const productTypeSelect = document.getElementById('productType');
     const usageSelect = document.getElementById('usage');
+    const conditionSelect = document.getElementById('condition');
 
     function addTextElement(parent, tag, className, text) {
         const element = document.createElement(tag);
@@ -22,12 +23,11 @@
         return `/tools.html?${params.toString()}`;
     }
 
-    function renderResults(result, budget, usage) {
+    function renderResults(result, budget, usage, productType, condition) {
         resultDisplay.replaceChildren();
-        const calculatorLink = document.querySelector('.recommend-calculator-link');
-        calculatorLink.href = '/tools';
 
-const marketMeta = result.marketMeta;
+        const marketMeta = result.marketMeta;
+        const conditionLabel = condition === 'used' ? '二手' : '全新';
         const actions = document.createElement('div');
         actions.className = 'recommend-agent-actions';
         const freshness = addTextElement(
@@ -35,18 +35,19 @@ const marketMeta = result.marketMeta;
             'span',
             'recommend-data-freshness',
             marketMeta?.updatedAt
-                ? `市場資料更新於 ${new Date(marketMeta.updatedAt).toLocaleString('zh-TW')}，每日更新一次`
-                : '市場資料每日更新一次'
+                ? `市場資料更新於 ${new Date(marketMeta.updatedAt).toLocaleString('zh-TW')}${marketMeta.liveListings ? '，二手刊登即時查詢' : '，每日更新一次'}`
+                : condition === 'used' ? '二手刊登即時查詢；實際狀態請在原頁確認' : '市場資料每日更新一次'
         );
         freshness.setAttribute('role', 'status');
+        if (marketMeta?.partial) {
+            addTextElement(resultDisplay, 'div', 'recommend-warning', '部分商品來源暫時無法讀取，以下顯示其餘來源的推薦結果。');
+        }
 
         const agentPrompt = (mode) => {
-            const kind = productType === 'component'
-                ? `單一零件（${componentType === 'cpu' ? 'CPU' : '顯示卡'}）`
-                : `${productType === 'laptop' ? '筆電' : '套裝主機'}，用途為${usage === 'gaming' ? '遊戲' : '文書／影音'}`;
+            const kind = `${productType === 'laptop' ? '筆電' : '套裝主機'}，用途為${usage === 'gaming' ? '遊戲' : '文書／影音'}`;
             return mode === 'review'
-                ? `我剛在智慧推薦頁以預算 NT$${budget.toLocaleString()} 查詢${kind}。請依最新市場資料解讀推薦結果、說明挑選時的取捨，並提醒我購買前應確認的規格。`
-                : `我剛在智慧推薦頁以預算 NT$${budget.toLocaleString()} 查詢${kind}。請先詢問我最在意的條件，再協助調整條件並重新推薦；若市場資料不足也請明確說明。`;
+                ? `我剛在智慧推薦頁以預算 NT$${budget.toLocaleString()} 查詢${conditionLabel}${kind}。請依最新市場資料解讀推薦結果、說明挑選時的取捨，並提醒我購買前應確認的規格。`
+                : `我剛在智慧推薦頁以預算 NT$${budget.toLocaleString()} 查詢${conditionLabel}${kind}。請先詢問我最在意的條件，再協助調整條件並重新推薦；若市場資料不足也請明確說明。`;
         };
 
         [['請 AI 解讀推薦', 'review'], ['和 AI 一起調整條件', 'adjust']].forEach(([label, mode]) => {
@@ -76,8 +77,6 @@ const marketMeta = result.marketMeta;
             return;
         }
 
-        // 上方的捷徑預設帶入第一筆推薦，每張卡片則帶入各自的型號。
-        calculatorLink.href = getCalculatorUrl(result.recommendations[0]);
 
         const list = document.createElement('div');
         list.className = 'recommend-result-list';
@@ -104,6 +103,7 @@ const marketMeta = result.marketMeta;
             const tags = document.createElement('div');
             tags.className = 'recommend-tags';
             const specs = [
+                `商品狀況：${conditionLabel}`,
                 `CPU：${item.cpu && item.cpu !== 'UNKNOWN' ? item.cpu : '未提供'}`,
                 `GPU：${item.gpu && item.gpu !== 'UNKNOWN' ? item.gpu : '未提供'}`,
                 `RAM：${item.ram && item.ram !== 'UNKNOWN' ? item.ram : '未提供'}`,
@@ -137,6 +137,7 @@ const marketMeta = result.marketMeta;
         const budget = Number(document.getElementById('budget').value);
         const productType = productTypeSelect.value;
         const usage = usageSelect.value;
+        const condition = conditionSelect.value;
 
         if (!Number.isFinite(budget) || budget <= 0) {
             document.getElementById('budget').focus();
@@ -151,11 +152,12 @@ const marketMeta = result.marketMeta;
             const response = await fetch('/api/recommend', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ budget, usage, productType })
+                body: JSON.stringify({ budget, usage, productType, condition })
             });
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            renderResults(await response.json(), budget, usage);
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || `HTTP ${response.status}`);
+            renderResults(result, budget, usage, productType, condition);
         } catch (error) {
             console.error('推薦服務錯誤：', error);
             resultDisplay.innerHTML = '<div class="recommend-error">目前無法取得推薦資料，請確認網站伺服器正在運作，稍後再試一次。</div>';

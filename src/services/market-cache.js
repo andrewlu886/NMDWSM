@@ -4,7 +4,7 @@ const { scrapePlatforms, PLATFORM_IDS } = require('../scrapers');
 const { normalizeSearchKeyword } = require('../utils/search-keyword');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const CACHE_SCHEMA_VERSION = 6;
+const CACHE_SCHEMA_VERSION = 7;
 const DEFAULT_CACHE_PATH = path.join(__dirname, '../../.cache/market-search-cache.json');
 
 function createMarketCache({

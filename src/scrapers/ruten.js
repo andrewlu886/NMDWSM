@@ -43,6 +43,8 @@ async function scrape(keyword) {
         || /\d[\d,]*\s*(?:元)?\s*[-~～至]\s*(?:NT\$?|\$)?\s*\d/.test(String(itemPrice))) return;
       results.push({
         platform: '露天',
+        available: (item.StockQty === undefined || Number(item.StockQty) > 0)
+          && (!item.CloseTime || new Date(item.CloseTime).getTime() > Date.now()),
         name: item.ProdName || '露天商品',
         price: itemPrice ? itemPrice.toLocaleString() : '請至賣場確認',
         url: item.ProdId

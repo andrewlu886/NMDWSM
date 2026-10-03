@@ -68,7 +68,8 @@ const TOOLS = [
           budget: { type: 'number', description: '新台幣預算' },
           productType: { type: 'string', enum: ['desktop', 'laptop', 'component'] },
           usage: { type: 'string', enum: ['gaming', 'office'] },
-          componentType: { type: 'string', enum: ['cpu', 'gpu'] }
+          componentType: { type: 'string', enum: ['cpu', 'gpu'] },
+          condition: { type: 'string', enum: ['new', 'used'], description: '商品狀況；未指定預設全新' }
         },
         required: ['budget', 'productType', 'usage']
       }
