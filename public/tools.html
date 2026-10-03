@@ -247,6 +247,22 @@
         }
 
         
+        /* Keep native dropdown anchors stationary during hover and focus. */
+        .power-calculator-card,
+        .power-calculator-card:hover {
+            transform: none;
+        }
+        .power-calculator-card select,
+        .power-calculator-card select:focus {
+            transform: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        body.ai-chat-docked #cpu-power,
+        body.ai-chat-docked #gpu-power {
+            position: relative;
+            left: -32px;
+        }
+
         /* 特效按鈕 */
         .card button {
             background: linear-gradient(135deg, var(--primary-blue), #2980b9, #1a4b8c);
@@ -387,7 +403,7 @@
         </div>
 
         <!-- 區塊 1：瓦數計算機 -->
-        <div class="card">
+        <div class="card power-calculator-card">
             <h2>電源瓦數計算機</h2>
             <div class="form-group">
                 <label>處理器 (CPU) 型號</label>
@@ -405,6 +421,7 @@
             </select>
             <div id="loading-msg">正在自動載入 CPU_GPU_Power_Supply_Data_2010_TO_2026.xlsx...</div>
         </div>
+            <p id="power-model-warning" role="status" style="display:none; color:#b45309;"></p>
             <!-- 顯示卡詳細規格區塊 -->
             <div id="excel-result" class="result-box excel-details">
                 <p>品牌： <span id="ex-brand">-</span></p>
@@ -482,6 +499,7 @@
             <button type="button" onclick="searchOfficial()">前往搜尋原廠資源</button>
         </div>
     </div>
+<script src="/psu-flow.js?v=20261003"></script>
 <script>
     // 全域變數
     let gpuExcelData = [];
@@ -658,6 +676,14 @@
 
         modelList.addEventListener('change', function() {
             const val = this.value;
+            const unmatchedOptions = this.querySelectorAll('option[data-unmatched="true"]');
+            if (this.selectedOptions[0]?.dataset.unmatched !== 'true' && unmatchedOptions.length) {
+                unmatchedOptions.forEach(option => option.remove());
+                const url = new URL(window.location.href);
+                if (val && val !== '__custom_cpu_wattage__') url.searchParams.set('cpu', val);
+                else url.searchParams.delete('cpu');
+                window.history.replaceState(window.history.state, '', url);
+            }
             if (val === '__custom_cpu_wattage__') {
                 customInput.style.display = '';
                 currentCpuTdp = Number(customInput.value) || 0;
@@ -744,7 +770,13 @@
             const row = gpuExcelData.find(r => getCleanVal(r, ['顯示卡型號']) === val);
             
             // 若使用者只輸入一半還沒完整選擇，則先不執行畫面更新
-            if (!row) return;
+            if (!row) {
+                currentGpuTdp = 0;
+                currentGpuPsu = 0;
+                document.getElementById('excel-result').style.display = 'none';
+                autoCalculate();
+                return;
+            }
 
             const loadingMessage = document.getElementById('loading-msg');
             if (loadingMessage.dataset.matchWarning === 'true') {
@@ -855,53 +887,22 @@
     // ==========================================
     // 從網址參數抓取 GPU 與 CPU 型號並自動觸發
     // ==========================================
-    function normalizeHardwareName(value) {
-        return String(value || '')
-            .toLowerCase()
-            .replace(/\b(nvidia|geforce|amd|radeon|intel|core|processor|graphics|cpu|gpu)\b/g, '')
-            .replace(/[^a-z0-9]+/g, '');
-    }
-
-    function findHardwareRow(data, modelKeywords, requestedModel) {
-        const query = normalizeHardwareName(requestedModel);
-        if (!query) return null;
-
-        const candidates = data
-            .map(row => ({ row, model: String(getCleanVal(row, modelKeywords) || '') }))
-            .filter(item => item.model.trim())
-            .map(item => ({ ...item, normalized: normalizeHardwareName(item.model) }))
-            .filter(item => item.normalized);
-
-        const exact = candidates.find(item => item.normalized === query);
-        if (exact) return exact.row;
-
-        const partialMatches = candidates
-            .filter(item => item.normalized.includes(query) || query.includes(item.normalized))
-            .sort((a, b) => Math.abs(a.normalized.length - query.length) - Math.abs(b.normalized.length - query.length));
-
-        return partialMatches.length ? partialMatches[0].row : null;
-    }
-
     function findGpuRow(queryGpu) {
-        return findHardwareRow(gpuExcelData, ['顯示卡型號'], queryGpu);
+        const match = PsuFlow.resolveModel(gpuExcelData, 'gpu', queryGpu);
+        return match.status === 'matched' ? match.row : null;
     }
 
     function findCpuRow(queryCpu) {
-        return findHardwareRow(cpuExcelData, ['CPU型號'], queryCpu);
+        const match = PsuFlow.resolveModel(cpuExcelData, 'cpu', queryCpu);
+        return match.status === 'matched' ? match.row : null;
     }
 
-    function getCpuTierValue(queryCpu) {
-        const cpu = String(queryCpu || '').toLowerCase();
-
-        if (/\b(i9|r9)\b/.test(cpu) || cpu.includes('ryzen 9') || cpu.includes('threadripper') || cpu.includes('extreme')) {
-            return '250W - 旗艦級 (如 Intel Core i9 / AMD Ryzen 9)';
-        }
-
-        if (/\b(i7|r7)\b/.test(cpu) || cpu.includes('ryzen 7') || /\d+k\b/.test(cpu)) {
-            return '125W - 中高階 (如 Intel Core i5-K版, i7 / AMD Ryzen 7)';
-        }
-
-        return '65W - 入門級 (如 Intel Core i3, i5 非K版 / AMD Ryzen 3, 5)';
+    function showPowerModelWarning() {
+        const unknown = ['cpu-power', 'gpu-power'].map(id => document.getElementById(id).selectedOptions[0])
+            .filter(option => option?.dataset.unmatched === 'true').map(option => option.value);
+        const warning = document.getElementById('power-model-warning');
+        warning.textContent = unknown.length ? `已帶入「${unknown.join('、')}」，但資料庫沒有可確認的功耗，請重新選擇型號；CPU 也可選「其他」手動輸入瓦數。` : '';
+        warning.style.display = unknown.length ? 'block' : 'none';
     }
 
     function autoSelectModelFromURL() {
@@ -909,54 +910,57 @@
         const queryGpu = urlParams.get('gpu') || urlParams.get('model');
         const queryCpu = urlParams.get('cpu');
         const requestedMotherboard = urlParams.get('motherboard');
-        if (['25', '40', '15'].includes(requestedMotherboard)) {
-            document.getElementById('mb-power').value = requestedMotherboard;
-        }
-        let gpuMatched = !queryGpu;
-        
-        // 1. 處理 GPU 自動配對
+        const requestedCooling = urlParams.get('cooling');
+        if (['25', '40', '15'].includes(requestedMotherboard)) document.getElementById('mb-power').value = requestedMotherboard;
+        if (['15', '30', '45'].includes(requestedCooling)) document.getElementById('fan-power').value = requestedCooling;
+        const fillModel = (inputId, model, row, columns) => {
+            const select = document.getElementById(inputId);
+            if (row) select.value = getCleanVal(row, columns);
+            else {
+                const option = new Option(model + '（待確認功耗，請重新選擇）', model);
+                option.dataset.unmatched = 'true';
+                select.appendChild(option);
+                select.value = model;
+            }
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        };
         if (queryGpu) {
             document.getElementById('model-input').value = queryGpu;
-
-            const matchedRow = findGpuRow(queryGpu);
-            if (matchedRow) {
-                const matchedModel = getCleanVal(matchedRow, ['顯示卡型號']);
+            if (PsuFlow.integrated(queryGpu)) {
                 const gpuInput = document.getElementById('gpu-power');
-                gpuInput.value = matchedModel;
+                gpuInput.value = '無獨立顯卡 (內顯) - 0W';
                 gpuInput.dispatchEvent(new Event('change', { bubbles: true }));
-                gpuMatched = true;
-            } else {
-                const loadingMessage = document.getElementById('loading-msg');
-                loadingMessage.textContent = `找不到「${queryGpu}」的精確功耗資料，請從資料庫清單選擇顯示卡後再計算。`;
-                loadingMessage.style.display = 'block';
-                loadingMessage.style.color = '#b45309';
-                loadingMessage.dataset.matchWarning = 'true';
-            }
+            } else fillModel('gpu-power', queryGpu, findGpuRow(queryGpu), ['顯示卡型號']);
         }
-
-        // 2. 優先選中資料庫內的 CPU 實際型號，找不到時才使用等級估算。
         if (queryCpu) {
-            const cpuInput = document.getElementById('cpu-power');
             const matchedCpuRow = findCpuRow(queryCpu);
-            if (matchedCpuRow) {
-                cpuInput.value = getCleanVal(matchedCpuRow, ['CPU型號']);
-            } else {
-                cpuInput.value = '';
-                currentCpuTdp = Number(getCpuTierValue(queryCpu).match(/\d+/)?.[0]) || 0;
-            }
-            cpuInput.dispatchEvent(new Event('change', { bubbles: true }));
+            fillModel('cpu-power', queryCpu, matchedCpuRow, ['CPU型號']);
         }
+        showPowerModelWarning();
+        if (queryCpu && queryGpu && canCalculatePower()) calculatePower();
+    }
 
-        // 有可用的 GPU 資料時，頁面開啟後直接顯示計算結果。
-        if ((queryGpu || queryCpu) && gpuMatched) {
-            calculatePower();
-        }
+    function canCalculatePower() {
+        const cpu = document.getElementById('cpu-power');
+        const gpu = document.getElementById('gpu-power');
+        return Boolean(cpu.value && gpu.value && currentCpuTdp > 0 &&
+            cpu.selectedOptions[0]?.dataset.unmatched !== 'true' && gpu.selectedOptions[0]?.dataset.unmatched !== 'true');
     }
 
     // ==========================================
     // 瓦數計算邏輯
     // ==========================================
     function calculatePower() {
+        showPowerModelWarning();
+        if (!canCalculatePower()) {
+            document.getElementById('power-result').style.display = 'none';
+            const warning = document.getElementById('power-model-warning');
+            if (!warning.textContent) {
+                warning.textContent = '請先選擇 CPU 與 GPU 型號，並確認功耗資料；沒有獨顯請選擇內顯。';
+                warning.style.display = 'block';
+            }
+            return;
+        }
         const cpuW = currentCpuTdp > 0 ? currentCpuTdp : (parseInt(document.getElementById('cpu-power').value) || 0);
         const gpuW = currentGpuTdp;
         
@@ -982,6 +986,7 @@
     }
     
     function autoCalculate() {
+        showPowerModelWarning();
         if (document.getElementById('power-result').style.display === 'block') {
             calculatePower();
         }

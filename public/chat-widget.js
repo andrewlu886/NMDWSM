@@ -198,6 +198,12 @@
     const attachButton = widget.querySelector('.ai-chat-attach');
     const imagePreview = widget.querySelector('.ai-chat-preview');
     let pendingImage = null;
+    let powerFlow = null;
+    const powerApiReady = import('/psu-flow.js?v=20261003').then(() => window.PsuFlow).catch(() => {
+        throw new Error('瓦數計算暫時無法載入，請重新整理後再試。');
+    });
+    // Attach a handler immediately; a failed load is also reported when the flow is used.
+    powerApiReady.catch(() => {});
     let valuationFlow = null;
     let recommendationFlow = null;
     let marketQueryActive = false;
@@ -277,6 +283,7 @@
         savedInterfaceState = {
             isOpen: Boolean(storedInterfaceState.isOpen),
             isExpanded: Boolean(storedInterfaceState.isExpanded),
+            powerFlow: storedInterfaceState.powerFlow || null,
             marketQueryActive: Boolean(storedInterfaceState.marketQueryActive),
             recommendationText: typeof storedInterfaceState.recommendationText === 'string'
                 ? storedInterfaceState.recommendationText
@@ -285,6 +292,7 @@
     } catch {
         chatHistory = [];
     }
+    powerFlow = savedInterfaceState.powerFlow;
     marketQueryActive = Boolean(savedInterfaceState.marketQueryActive);
     if (savedInterfaceState.recommendationText) {
         recommendationFlow = { text: savedInterfaceState.recommendationText };
@@ -340,7 +348,7 @@
         };
         // Hide unrelated tool shortcuts, including replies restored from history.
         const cleanedAnswer = String(answer)
-            .replace(/(?:^[ \t]*[-*]\s*)?\[(?:[^\]]+)\]\(\/(?:valuation|recommend|tools)(?:\?[^)]*)?\)[ \t]*/gm, '')
+            .replace(/(?:^[ \t]*[-*]\s*)?\[(?:[^\]]+)\]\(\/(?:valuation|recommend)(?:\?[^)]*)?\)[ \t]*/gm, '')
             .replace(/^[ \t]*(?:\*\*)?相關工具頁連結\s*[：:](?:\*\*)?[ \t]*$/gm, '')
             .replace(/\n{3,}/g, '\n\n').trim();
         const source = suppressMarketAction
@@ -359,6 +367,10 @@
                 }
             }
             if (!href.startsWith('/')) return match;
+            if (/^\/tools(?:\?[^)]*)?$/.test(href)) {
+                const safeHref = href.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+                return `<a href="${safeHref}" class="ai-valuation-btn">${label}</a>`;
+            }
             const marketRoute = href.match(/^\/scrape(?:\?([^)]*))?$/);
             if (!marketRoute) return match;
             const params = new URLSearchParams(marketRoute[1] || '');
@@ -511,83 +523,9 @@
         const wattageButton = document.createElement('button');
         wattageButton.type = 'button';
         wattageButton.textContent = '瓦數計算';
-        wattageButton.addEventListener('click', async () => {
-            const counterpartType = isGpu ? 'CPU' : 'GPU';
-            const question = `照片辨識到 ${model}。請選擇或輸入搭配的 ${counterpartType} 型號；若清單沒有您要的型號，可直接輸入。`;
-            const form = document.createElement('form');
-            form.className = 'ai-counterpart-form';
-            const prompt = document.createElement('p');
-            prompt.textContent = question;
-            const counterpartInput = document.createElement('input');
-            const optionsId = `hardware-options-${Date.now()}`;
-            counterpartInput.setAttribute('list', optionsId);
-            counterpartInput.required = true;
-            counterpartInput.autocomplete = 'off';
-            counterpartInput.placeholder = `選擇或輸入 ${counterpartType} 型號`;
-            const datalist = document.createElement('datalist');
-            datalist.id = optionsId;
-            const submit = document.createElement('button');
-            submit.type = 'submit';
-            submit.textContent = '帶入瓦數計算';
-            const motherboardLabel = document.createElement('label');
-            motherboardLabel.textContent = '選擇主機板類型';
-            const motherboardSelect = document.createElement('select');
-            motherboardSelect.setAttribute('aria-label', '選擇主機板類型');
-            [
-                ['25', '標準主機板 (M-ATX / ATX) - 約 25W'],
-                ['40', '高階主機板 (E-ATX / 旗艦供電) - 約 40W'],
-                ['15', 'ITX 迷你主機板 - 約 15W']
-            ].forEach(([value, label]) => {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = label;
-                motherboardSelect.appendChild(option);
-            });
-            form.append(prompt, counterpartInput, datalist, motherboardLabel, motherboardSelect, submit);
-            actions.replaceWith(form);
-            counterpartInput.focus();
-
-            form.addEventListener('submit', event => {
-                event.preventDefault();
-                const counterpart = counterpartInput.value.trim();
-                if (!counterpart) return;
-                const cpu = isGpu ? counterpart : model;
-                const gpu = isGpu ? model : counterpart;
-                const motherboard = motherboardSelect.value;
-                const motherboardName = motherboardSelect.selectedOptions[0].textContent;
-                chatHistory.push({ role: 'assistant', content: question });
-                chatHistory.push({
-                    role: 'user',
-                    content: `搭配的 ${counterpartType} 型號：${counterpart}；主機板：${motherboardName}`
-                });
-                chatHistory.push({
-                    role: 'assistant',
-                    content: `已將 CPU「${cpu}」、GPU「${gpu}」與${motherboardName}帶入瓦數計算頁。`
-                });
-                persistChatHistory();
-                const params = new URLSearchParams({ cpu, gpu, motherboard, calculate: '1' });
-                window.location.href = `/tools?${params.toString()}`;
-            }, { once: true });
-
-            const endpoint = isGpu ? '/api/cpu-data' : '/api/gpu-data';
-            const columnName = isGpu ? 'CPU型號' : '顯示卡型號';
-            try {
-                const response = await fetch(endpoint);
-                if (!response.ok) return;
-                const rows = await response.json();
-                rows.forEach(row => {
-                    const modelName = Object.entries(row).find(([key]) =>
-                        key.replace(/\s/g, '').includes(columnName)
-                    )?.[1];
-                    if (modelName) {
-                        const option = document.createElement('option');
-                        option.value = String(modelName);
-                        datalist.appendChild(option);
-                    }
-                });
-            } catch {
-                // Keep the input usable for a manually entered model if suggestions fail.
-            }
+        wattageButton.addEventListener('click', () => {
+            startPowerWizard();
+            appendPowerReply(`照片初步辨識為「${model}」；請在對話框輸入並確認 CPU 型號，再繼續提供 GPU。`);
         });
         actions.appendChild(wattageButton);
         container.appendChild(actions);
@@ -619,7 +557,162 @@
     });
     if (chatHistory.length) messages.scrollTop = messages.scrollHeight;
 
+    function appendPowerReply(text) {
+        chatHistory.push({ role: 'assistant', content: text });
+        persistChatHistory();
+        renderAssistantMessage(text);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function resetPowerFlow() {
+        powerFlow = null;
+        saveInterfaceState({ powerFlow: null });
+        messages.querySelectorAll('.ai-power-options button').forEach(button => { button.disabled = true; });
+    }
+
+    function startPowerWizard() {
+        resetPowerFlow();
+        valuationFlow = null;
+        recommendationFlow = null;
+        marketQueryActive = false;
+        powerFlow = { stage: 'cpu', cpuModel: '', gpuModel: '' };
+        saveInterfaceState({ powerFlow, marketQueryActive: false, recommendationText: '' });
+        appendPowerReply('可以先告訴我你使用的CPU嗎');
+        input.focus();
+    }
+
+    async function requestPowerModel(category, model) {
+        const api = await powerApiReady;
+        const response = await fetch(category === 'cpu' ? '/api/cpu-data' : '/api/gpu-data', { signal: AbortSignal.timeout(15000) });
+        if (!response.ok) throw new Error('功耗資料庫暫時無法連線，請稍後再輸入型號。');
+        const rows = await response.json();
+        if (!Array.isArray(rows)) throw new Error('功耗資料庫暫時無法讀取，請稍後再試。');
+        return api.resolveModel(rows, category, model);
+    }
+
+    async function handlePowerText(text) {
+        const flow = powerFlow;
+        if (!flow) return;
+        if (/^(?:取消|結束|重新開始)$/.test(text)) {
+            resetPowerFlow();
+            if (text === '重新開始') startPowerWizard();
+            else appendPowerReply('已結束這次瓦數計算。');
+            return;
+        }
+        if (flow.stage === 'components') {
+            appendPowerReply('請使用下方選單選擇主機板與散熱系統，再按「計算建議瓦數」。');
+            return;
+        }
+        const category = flow.stage;
+        flow[category + 'Model'] = text;
+        saveInterfaceState({ powerFlow: flow });
+        const match = await requestPowerModel(category, text);
+        if (powerFlow !== flow) return;
+        if (match.status === 'ambiguous') {
+            appendPowerReply(`這個型號可能對應多筆資料：${match.candidates.slice(0, 5).join('、')}。請在對話框輸入完整型號。`);
+            return;
+        }
+        if (match.status !== 'matched') {
+            const api = await powerApiReady;
+            const url = api.calculatorUrl(flow);
+            resetPowerFlow();
+            appendPowerReply(`這個型號人家貌似不太知道餒，要不我們去頁面看看
+[前往瓦數計算](${url})`);
+            return;
+        }
+        flow[category + 'Model'] = match.model;
+        flow[category + 'Watts'] = match.watts;
+        if (category === 'gpu') flow.gpuRecommendedPsu = match.recommendedPsu;
+        flow.stage = category === 'cpu' ? 'gpu' : 'components';
+        saveInterfaceState({ powerFlow: flow });
+        if (category === 'cpu') appendPowerReply('好極了，那可以再告訴我你的GPU型號嗎');
+        else await showPowerOptions();
+    }
+
+    async function showPowerOptions(recordPrompt = true) {
+        const api = await powerApiReady;
+        const flow = powerFlow;
+        if (!flow || flow.stage !== 'components') return;
+        if (recordPrompt) appendPowerReply('那最後，選擇你用的主板與散熱系統吧');
+        const optionsForm = document.createElement('form');
+        optionsForm.className = 'ai-valuation-wizard ai-power-options';
+        const createSelect = (caption, choices, selected) => {
+            const label = document.createElement('label');
+            label.textContent = caption;
+            const select = document.createElement('select');
+            select.required = true;
+            select.setAttribute('aria-label', caption);
+            select.appendChild(new Option('請選擇' + caption, ''));
+            choices.forEach(([value, label]) => select.appendChild(new Option(label, value)));
+            if (selected != null) select.value = String(selected);
+            label.appendChild(select);
+            optionsForm.appendChild(label);
+            return select;
+        };
+        const motherboard = createSelect('主機板', api.motherboardOptions, flow.motherboardWatts);
+        const cooling = createSelect('散熱系統', api.coolingOptions, flow.coolingWatts);
+        const saveChoices = () => {
+            if (powerFlow !== flow) return;
+            flow.motherboardWatts = motherboard.value;
+            flow.coolingWatts = cooling.value;
+            saveInterfaceState({ powerFlow: flow });
+        };
+        motherboard.addEventListener('change', saveChoices);
+        cooling.addEventListener('change', saveChoices);
+        const calculate = document.createElement('button');
+        calculate.type = 'submit';
+        calculate.textContent = '計算建議瓦數';
+        const errorText = document.createElement('p');
+        errorText.className = 'ai-valuation-error';
+        errorText.setAttribute('role', 'alert');
+        optionsForm.append(calculate, errorText);
+        const responseBubble = [...messages.querySelectorAll('.ai-chat-response')].pop();
+        responseBubble.appendChild(optionsForm);
+        optionsForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            if (powerFlow !== flow || !optionsForm.reportValidity()) return;
+            calculate.disabled = true;
+            errorText.textContent = '';
+            try {
+                // Revalidate against the database so restored or changed records cannot produce stale estimates.
+                const [cpu, gpu] = await Promise.all([requestPowerModel('cpu', flow.cpuModel), requestPowerModel('gpu', flow.gpuModel)]);
+                if (powerFlow !== flow) return;
+                if (cpu.status !== 'matched' || gpu.status !== 'matched') {
+                    const url = api.calculatorUrl(flow);
+                    resetPowerFlow();
+                    appendPowerReply(`這個型號人家貌似不太知道餒，要不我們去頁面看看
+[前往瓦數計算](${url})`);
+                    return;
+                }
+                const result = api.estimate({ cpuWatts: cpu.watts, gpuWatts: gpu.watts, gpuRecommendedPsu: gpu.recommendedPsu, motherboardWatts: Number(motherboard.value), coolingWatts: Number(cooling.value) });
+                const calculatorUrl = api.calculatorUrl({ ...flow, cpuModel: cpu.model, gpuModel: gpu.model, motherboardWatts: motherboard.value, coolingWatts: cooling.value });
+                const selection = { role: 'user', content: `主機板：${motherboard.selectedOptions[0].textContent}；散熱系統：${cooling.selectedOptions[0].textContent}` };
+                renderUserMessage(selection, chatHistory.length);
+                chatHistory.push(selection);
+                persistChatHistory();
+                motherboard.disabled = true;
+                cooling.disabled = true;
+                resetPowerFlow();
+                appendPowerReply(`CPU「${cpu.model}」約 ${cpu.watts}W，GPU「${gpu.model}」約 ${gpu.watts}W。
+主機板約 ${motherboard.value}W，散熱約 ${cooling.value}W，硬碟以 1 顆、10W 估算。
+整機滿載預估約 ${result.totalWatts}W，建議選擇至少 ${result.recommendedWatts}W 的電源供應器。
+建議已加入 30% 餘裕，進位至 50W、最低 300W，並採納較高的顯卡原廠建議。
+[瓦數計算](${calculatorUrl})`);
+            } catch (error) {
+                errorText.textContent = error.message || '計算暫時無法完成，請再試一次。';
+                if (powerFlow === flow) calculate.disabled = false;
+            }
+            messages.scrollTop = messages.scrollHeight;
+        });
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    if (powerFlow?.stage === 'components') {
+        showPowerOptions(false).catch(() => appendPowerReply('選單暫時無法載入，請重新開始瓦數計算。'));
+    }
+
     function startValuationWizard() {
+        resetPowerFlow();
         valuationFlow = { stage: 'category', catalogs: [] };
         const message = document.createElement('div');
         message.className = 'ai-chat-message assistant';
@@ -1041,6 +1134,7 @@
     }
 
     function startMarketQuery(model = '') {
+        resetPowerFlow();
         marketQueryActive = true;
         valuationFlow = null;
         recommendationFlow = null;
@@ -1057,7 +1151,7 @@
             ['二手估價', '幫我估二手 RTX 4070，使用 18 個月，外觀正常'],
             ['市價查詢', ''],
             ['智慧推薦', '我有 4 萬元，想組一台打遊戲的桌機'],
-            ['瓦數計算', '幫我算 i5-14600K 加 RTX 4070 要幾瓦電源']
+            ['瓦數計算', '']
         ];
         const message = document.createElement('div');
         message.className = 'ai-chat-message assistant ai-chat-reopen-suggestions';
@@ -1078,6 +1172,17 @@
             button.type = 'button';
             button.textContent = label;
             button.addEventListener('click', () => {
+                if (label === '瓦數計算') {
+                    const action = { role: 'user', content: '我要進行瓦數計算' };
+                    renderUserMessage(action, chatHistory.length);
+                    chatHistory.push(action);
+                    persistChatHistory();
+                    startPowerWizard();
+                    return;
+                }
+                resetPowerFlow();
+                valuationFlow = null;
+                recommendationFlow = null;
                 if (label === '市價查詢') {
                     startMarketQuery();
                     return;
@@ -1244,6 +1349,22 @@
         input.value = '';
         input.style.height = 'auto';
         messages.scrollTop = messages.scrollHeight;
+
+        if (!imageToSend && (powerFlow || (!marketQueryActive && !valuationFlow && !recommendationFlow && /瓦數|電源|供電|電供|PSU|幾瓦/i.test(text)))) {
+            input.disabled = true;
+            submitBtn.disabled = true;
+            try {
+                if (powerFlow) await handlePowerText(text);
+                else startPowerWizard();
+            } catch (error) {
+                appendPowerReply(error.message || '功耗資料庫暫時無法讀取，請稍後再試。');
+            } finally {
+                input.disabled = false;
+                submitBtn.disabled = false;
+                input.focus();
+            }
+            return;
+        }
 
         if (recommendationFlow && !imageToSend) {
             input.disabled = true;

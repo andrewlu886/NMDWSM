@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { estimate: estimatePsu } = require('./psu-flow');
 const { searchProductsWithMeta } = require('../src/services/search');
 const { getRecommendationsWithMeta } = require('../src/services/recommendation');
 const { isBodyTooLarge, parseJsonBody } = require('./json-body');
@@ -342,9 +343,7 @@ async function calculatePsu(args, dependencies = {}) {
   const motherboardWatts = toPositiveNumber(args.motherboardWatts, 25);
   const coolingWatts = toPositiveNumber(args.coolingWatts, 15);
   const driveCount = toPositiveNumber(args.driveCount, 1);
-  const totalWatts = cpuWatts + gpuWatts + motherboardWatts + coolingWatts + driveCount * 10;
-  let recommendedWatts = Math.max(300, Math.ceil((totalWatts * 1.3) / 50) * 50);
-  recommendedWatts = Math.max(recommendedWatts, gpuRecommendedPsu);
+  const { totalWatts, recommendedWatts } = estimatePsu({ cpuWatts, gpuWatts, motherboardWatts, coolingWatts, driveCount, gpuRecommendedPsu });
 
   return {
     cpuWatts,

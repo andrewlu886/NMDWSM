@@ -219,7 +219,6 @@ test('瓦數 CPU/GPU 型號使用可捲動分組清單並按世代排序', () =>
   const intelDividerIndex = toolsPage.indexOf('\'=======Intel=======\'');
   assert.ok(customCpuOptionIndex >= 0 && customCpuOptionIndex < intelDividerIndex, '未收錄 CPU 選項應位於 Intel 大分隔線上方');
   assert.doesNotMatch(toolsPage, /Intel 其他/);
-  assert.match(toolsPage, /currentCpuTdp = Number\(getCpuTierValue\(queryCpu\)\.match\(/);
   assert.doesNotMatch(toolsPage, /id="gpu-custom-power"|自訂 GPU 瓦數|customGroup\.label = '手動輸入'/);
   assert.match(toolsPage, /function classifyCpuRow\(row\)/);
   assert.match(toolsPage, /function makeFullWidthDivider\(label, select\)/);
@@ -258,20 +257,6 @@ test('瓦數 CPU/GPU 型號使用可捲動分組清單並按世代排序', () =>
   assert.equal(classify('AMD', 'Radeon RX 5000', 'RX 5700 XT').seriesOrder, 70);
   assert.equal(classify('AMD', 'Radeon RX 6000/7000', 'RX 6500 XT').seriesOrder, 80);
   assert.equal(classify('Intel', 'Arc Battlemage', 'Arc B580').manufacturerOrder, 2);
-});
-
-test('CPU/GPU 圖片動作可帶入市價與瓦數工具', () => {
-  const widget = fs.readFileSync(path.join(projectRoot, 'public', 'chat-widget.js'), 'utf8');
-  const toolsPage = fs.readFileSync(path.join(projectRoot, 'public', 'tools.html'), 'utf8');
-  assert.match(widget, /function appendImageActionButtons\(container, analysis\)/);
-  assert.match(widget, /marketLink\.addEventListener\('click', \(\) => startMarketQuery\(model\)\)/);
-  assert.match(widget, /\/api\/cpu-data/);
-  assert.match(widget, /\/api\/gpu-data/);
-  assert.match(widget, /new URLSearchParams\(\{ cpu, gpu, motherboard, calculate: '1' \}\)/);
-  assert.match(widget, /高階主機板 \(E-ATX \/ 旗艦供電\) - 約 40W/);
-  assert.match(widget, /ITX 迷你主機板 - 約 15W/);
-  assert.match(toolsPage, /requestedMotherboard = urlParams\.get\('motherboard'\)/);
-  assert.match(toolsPage, /\.then\(autoSelectModelFromURL\)/);
 });
 
 test('只在 NVIDIA 廠牌顯示資料庫顯卡選單並恢復原驅動網址', () => {
