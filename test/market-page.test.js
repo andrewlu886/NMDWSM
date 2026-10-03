@@ -1,3 +1,4 @@
+/* global document, getComputedStyle */
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -39,18 +40,23 @@ test('market page button, Enter, URL keyword, results, history and failures work
       } else if (url.pathname === '/scrape') {
         contentType = 'text/html';
         body = html;
-      } else if (url.hostname === 'localhost' && /^\/(?:history-store\.js|style\.css|site-theme\.css|history\.css)$/.test(url.pathname)) {
+      } else if (url.hostname === 'localhost' && /^\/(?:history-store\.js|style\.css|site-theme\.css|history\.css|market-page\.css)$/.test(url.pathname)) {
         contentType = url.pathname.endsWith('.js') ? 'application/javascript' : 'text/css';
         body = fs.readFileSync(path.join(publicDir, url.pathname.slice(1)), 'utf8');
       }
       request.respond({ status: responseStatus, contentType, body }).catch(() => {});
     });
     await page.goto('http://localhost:3999/scrape');
+    assert.equal(await page.$('.market-mode-tabs'), null);
+    assert.equal(await page.$('input[value="facebook"]'), null);
+    assert.equal(await page.$$eval('input[type="checkbox"][value="ruten"]', nodes => nodes.length), 1);
+    assert.equal(await page.$eval('#platform-checkboxes input[value="ptt"]', node => getComputedStyle(node).accentColor), 'rgb(47, 159, 224)');
     await page.type('#keyword-input', 'rtx 5080');
     await page.click('.btn-search');
     await page.waitForSelector('.result-card');
     assert.equal(requests[0].searchParams.get('keyword'), 'rtx 5080');
-    assert.equal(requests[0].searchParams.get('platform').split(',').length, 6);
+    assert.equal(requests[0].searchParams.has('mode'), false);
+    assert.equal(requests[0].searchParams.get('platform').split(',').length, 9);
     assert.match(await page.$eval('.result-card', node => node.textContent), /RTX 5080.*NT\$ 40,000/);
     await page.waitForSelector('.history-entry');
     // Enter also submits, with precision exclusions carried to the backend.

@@ -2,6 +2,7 @@ const { normalizeSearchKeyword } = require('../utils/search-keyword');
 const { PLATFORM_IDS } = require('../scrapers');
 const { getDailyMarketData } = require('./market-cache');
 const { getUsdNtdRate } = require('./exchange-rate');
+const { searchUsedProducts, SOURCES: USED_SOURCES } = require('./used-search');
 
 const SYNONYM_GROUPS = Object.freeze([
   ['w11', 'win11', 'windows11', 'windows 11'],
@@ -86,7 +87,12 @@ function filterSearchResults(products, options) {
 
   const filtered = products.filter((item) => {
     const name = String(item?.name || '').toLowerCase();
-    if (!hasPlausibleYahooMiniPcPrice(item)) return false;
+    if (!item || !hasPlausibleYahooMiniPcPrice(item)) return false;
+    const amount = String(item.price ?? '').normalize('NFKC');
+    if (/\d[\d,]*\s*(?:元)?\s*[-~～至/]\s*(?:NT\$?|\$)?\s*\d/.test(amount)
+      || /面議|議價|起標|價格浮動/.test(amount) || !Number.isFinite(parsePrice(item.price))) return false;
+    if (/已售出|售完|已成交|已下架/.test(name)) return false;
+    if (options.precise && !name.replace(/[\s_-]+/g, '').includes(String(options.keyword).toLowerCase().replace(/[\s_-]+/g, ''))) return false;
     const includeMatch = includeWords.length === 0
       || includeWords.every((word) => name.includes(word.toLowerCase()));
     const excludeMatch = excludeWords.length === 0
@@ -156,15 +162,47 @@ async function searchProductsWithMeta(options, dependencies = {}) {
     .filter(platform => platform !== 'coolpc')
     .filter(platform => requestedPlatforms.includes('all') || requestedPlatforms.includes(platform));
   normalizedOptions.platforms = platforms;
-  const marketData = dependencies.getMarketData
-    ? await dependencies.getMarketData(normalizedOptions.keyword, platforms, { forceRefresh: normalizedOptions.forceRefresh === true })
-    : dependencies.scrapePlatforms
-      ? { products: await dependencies.scrapePlatforms(normalizedOptions.keyword, platforms), meta: null }
-      : await getDailyMarketData(normalizedOptions.keyword, platforms, { forceRefresh: normalizedOptions.forceRefresh === true });
+  const usedPlatforms = Object.keys(USED_SOURCES).filter(id => requestedPlatforms.includes('all') || requestedPlatforms.includes(id));
+  const retail = async () => {
+    if (!platforms.length && !dependencies.getMarketData && !dependencies.scrapePlatforms) return { products: [], meta: null };
+    return dependencies.getMarketData
+      ? dependencies.getMarketData(normalizedOptions.keyword, platforms, { forceRefresh: normalizedOptions.forceRefresh === true })
+      : dependencies.scrapePlatforms
+        ? { products: await dependencies.scrapePlatforms(normalizedOptions.keyword, platforms), meta: null }
+        : getDailyMarketData(normalizedOptions.keyword, platforms, { forceRefresh: normalizedOptions.forceRefresh === true });
+  };
+  const used = async () => usedPlatforms.length
+    ? (dependencies.searchUsedProducts || searchUsedProducts)({ ...normalizedOptions, platforms: usedPlatforms })
+    : { data: [], meta: { sourceStatus: {} } };
+  const [retailResult, usedResult] = await Promise.allSettled([retail(), used()]);
+  if (retailResult.status === 'rejected' && !usedPlatforms.length) throw retailResult.reason;
+  if (usedResult.status === 'rejected' && !platforms.length) throw usedResult.reason;
+  const marketData = retailResult.status === 'fulfilled' ? retailResult.value : { products: [], meta: null };
+  const usedData = usedResult.status === 'fulfilled' ? usedResult.value : { data: [], meta: { sourceStatus: {} } };
   const products = await convertUsdProducts(marketData.products, dependencies.getUsdNtdRate || getUsdNtdRate);
+  const sourceStatus = { ...(usedData.meta?.sourceStatus || {}) };
+  if (retailResult.status === 'rejected') sourceStatus.retail = { name: '購物通路', status: 'unavailable', count: 0, message: '購物通路暫時無法讀取' };
+  if (usedResult.status === 'rejected') sourceStatus.used = { name: '二手刊登', status: 'unavailable', count: 0, message: '二手刊登暫時無法讀取' };
+  const seen = new Set();
+  const data = filterSearchResults([...products, ...usedData.data], normalizedOptions).filter(item => {
+    const key = item.url || `${item.platform}:${item.name}:${item.price}`;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+  for (const id of usedPlatforms) {
+    if (!sourceStatus[id]) continue;
+    const status = sourceStatus[id];
+    const count = data.filter(item => item.source === id).length;
+    sourceStatus[id] = { ...status, count,
+      filtered: (status.filtered || 0) + Math.max(0, (status.count || 0) - count),
+      status: status.status === 'ok' && !count ? 'empty' : status.status,
+      message: status.status === 'ok' && !count ? '沒有符合共同搜尋條件的商品' : status.message };
+  }
   return {
-    data: filterSearchResults(products, normalizedOptions),
-    meta: marketData.meta
+    data,
+    meta: { ...marketData.meta, mode: 'unified', sourceStatus,
+      updatedAt: Math.max(Number(marketData.meta?.updatedAt) || 0, Number(usedData.meta?.updatedAt) || 0) || Date.now(),
+      retailUpdatedAt: marketData.meta?.updatedAt || null, liveListings: usedPlatforms.length > 0 }
   };
 }
 

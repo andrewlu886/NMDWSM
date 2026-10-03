@@ -179,7 +179,7 @@
             <span class="ai-chat-launcher-icon" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>
         </button>
         <aside class="ai-chat-idle-prompt" hidden aria-live="polite" aria-label="ai小幫手-紀亦緹的提示">
-            <button class="ai-chat-idle-text" type="button">卡在哪一步了？告訴我型號或需求，我陪你一起找。</button>
+            <button class="ai-chat-idle-text" type="button">看來你遇到困難了，有什麼心事想和姐姐說嗎?</button>
             <button class="ai-chat-idle-close" type="button" aria-label="關閉提示">&times;</button>
         </aside>
     `;
@@ -616,7 +616,7 @@
             const api = await powerApiReady;
             const url = api.calculatorUrl(flow);
             resetPowerFlow();
-            appendPowerReply(`這個型號人家貌似不太知道餒，要不我們去頁面看看
+            appendPowerReply(`這個型號姐姐貌似不知道唷~，要不我們去頁面看看
 [前往瓦數計算](${url})`);
             return;
         }
@@ -680,7 +680,7 @@
                 if (cpu.status !== 'matched' || gpu.status !== 'matched') {
                     const url = api.calculatorUrl(flow);
                     resetPowerFlow();
-                    appendPowerReply(`這個型號人家貌似不太知道餒，要不我們去頁面看看
+                    appendPowerReply(`這個型號姐姐貌似不知道唷~，要不我們去頁面看看
 [前往瓦數計算](${url})`);
                     return;
                 }

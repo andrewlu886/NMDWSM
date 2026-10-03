@@ -32,9 +32,15 @@ async function scrape(keyword) {
     const results = [];
     const items = detailResponse.data || [];
     items.forEach((item) => {
+      const range = Array.isArray(item.PriceRange) ? item.PriceRange : [];
+      if (range.some(value => !Number.isFinite(Number(value)) || Number(value) <= 0)
+        || new Set(range.map(Number)).size > 1) return;
+      if (/已售出|售完|已成交|已下架/.test(item.ProdName || '')) return;
       const itemPrice = item.PriceRange && item.PriceRange.length > 0
         ? item.PriceRange[0]
         : item.Price || item.DirectPrice;
+      if (!Number.isFinite(Number(itemPrice)) || Number(itemPrice) <= 0
+        || /\d[\d,]*\s*(?:元)?\s*[-~～至]\s*(?:NT\$?|\$)?\s*\d/.test(String(itemPrice))) return;
       results.push({
         platform: '露天',
         name: item.ProdName || '露天商品',

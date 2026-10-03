@@ -525,6 +525,7 @@
     </style>
 <link rel="stylesheet" href="./site-theme.css?v=20261003-png">
     <link rel="stylesheet" href="./history.css">
+    <link rel="stylesheet" href="./market-page.css?v=20261004-tabs">
 </head>
 <body>
 
@@ -558,14 +559,16 @@
                 <label><input type="checkbox" value="momo" checked> Momo 購物網</label>
                 <label><input type="checkbox" value="newegg" checked> Newegg</label>
                 <label><input type="checkbox" value="yahoo" checked> Yahoo 購物中心</label>
+                <label><input type="checkbox" value="ptt" checked> PTT 硬體版</label>
+                <label><input type="checkbox" value="carousell" checked> 旋轉拍賣</label>
+                <label><input type="checkbox" value="yahoo-auction" checked> Yahoo 拍賣</label>
             </div>
-            
             <div class="input-group">
                 <input type="text" id="keyword-input" placeholder="請輸入硬體關鍵字 (例如: RTX 4060)" onkeypress="handleKeyPressSearch(event)">
                 <input type="text" id="exclude-input" placeholder="排除關鍵字 (例: 筆電 主機)" onkeypress="handleKeyPressSearch(event)">
                 <button class="btn-search" onclick="fetchPrices()">搜尋</button>
             </div>
-            <div class="precision-control">
+            <div class="precision-control" id="precision-control">
                 <label class="precision-toggle" for="precision-toggle">
                     <span>精確搜尋</span>
                     <input id="precision-toggle" type="checkbox" aria-label="開啟精確搜尋">
@@ -582,7 +585,7 @@
                 <h2 id="market-history-title">市價查詢歷史紀錄</h2>
                 <button type="button" id="market-history-clear" hidden>清除全部</button>
             </div>
-            <p class="history-explanation">只保存在此網站的目前瀏覽器，最多 20 筆。紀錄的是查詢當時的刊登價格，並非成交價格。</p>
+            <p class="history-explanation">只保存在此網站的目前瀏覽器，最多 20 筆。購物通路保留查詢時的價格；二手來源不保存商品快照，請重新查詢。</p>
             <p class="history-status" id="market-history-status" role="status" aria-live="polite"></p>
             <div class="history-list" id="market-history-list"></div>
         </section>
@@ -595,7 +598,6 @@
         const marketHistoryClear = document.getElementById('market-history-clear');
         const marketSnapshot = document.getElementById('market-snapshot');
         let marketRequestId = 0;
-
         function marketDate(value) {
             return new Date(value).toLocaleString('zh-TW');
         }
@@ -672,7 +674,7 @@
                     title.textContent = record.criteria.keyword;
                     const meta = document.createElement('span');
                     meta.className = 'history-meta';
-                    meta.textContent = `${marketDate(record.createdAt)} · ${record.results.length} 筆商品 · ${record.criteria.platforms.join('、')}${record.criteria.exclude ? ` · 排除：${record.criteria.exclude}` : ''}`;
+                    meta.textContent = `${marketDate(record.createdAt)} · ${record.criteria.mode === 'used' ? '二手查詢（不保存商品快照）' : `${record.results.length} 筆商品`} · ${record.criteria.platforms.join('、')}${record.criteria.exclude ? ` · 排除：${record.criteria.exclude}` : ''}`;
                     summary.append(title, meta);
                     const actions = document.createElement('div');
                     actions.className = 'history-actions';
@@ -697,7 +699,7 @@
                                 marketHistoryStatus.textContent = '刪除紀錄失敗，請稍後再試。';
                             }
                         }]
-                    ]) {
+                    ].filter(([label]) => label !== '查看結果' || record.criteria.mode !== 'used')) {
                         const button = document.createElement('button');
                         button.type = 'button';
                         button.textContent = label;
@@ -779,12 +781,12 @@ const precisionToggle = document.getElementById('precision-toggle');
             }
 
             try {
-                const response = await fetch(`/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${encodeURIComponent(selectedPlatforms)}&exclude=${encodeURIComponent(exclude)}`);
+                const precise = precisionToggle.checked ? '1' : '0';
+                const response = await fetch(`/api/scrape?keyword=${encodeURIComponent(keyword)}&platform=${encodeURIComponent(selectedPlatforms)}&exclude=${encodeURIComponent(exclude)}&precise=${precise}`);
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message || '市價查詢暫時無法連線，請稍後重試。');
                 if (requestId !== marketRequestId) return;
                 if (!result.success || !Array.isArray(result.data)) throw new Error('查詢失敗');
-
                 loading.style.display = 'none';
                 if (result.data.length > 0) {
                     result.data.forEach(item => {
@@ -839,14 +841,14 @@ const precisionToggle = document.getElementById('precision-toggle');
                         link.href = item.url || '#';
                         link.target = '_blank';
                         link.rel = 'noopener noreferrer';
-                        link.textContent = '前往商場確認';
+                        link.textContent = item.condition === 'used' ? '查看原刊登' : '前往商場確認';
                         card.append(info, link);
                         container.appendChild(card);
                     });
                     try {
                         await window.NMDHistory.add('marketSearches', {
-                            criteria: { keyword, exclude, platforms },
-                            results: result.data
+                            criteria: { keyword, exclude, platforms, mode: 'unified' },
+                            results: result.data.filter(item => item.condition !== 'used')
                         });
                         await refreshMarketHistory();
                     } catch (_) {
@@ -854,14 +856,40 @@ const precisionToggle = document.getElementById('precision-toggle');
                 }
                 else {
                     renderMarketResults([]);
+                    if (Object.keys(result.meta?.sourceStatus || {}).length) {
+                        const sources = Object.values(result.meta?.sourceStatus || {});
+                        const unavailable = sources.filter(source => source.status === 'unavailable');
+                        const empty = container.querySelector('.history-no-results');
+                        if (empty && sources.length && unavailable.length === sources.length) {
+                            empty.className = 'history-search-error';
+                            empty.textContent = unavailable.map(source => `${source.name}：${source.message || '來源暫時無法讀取'}`).join('；');
+                        } else if (empty) {
+                            empty.textContent = sources.some(source => source.status === 'partial')
+                                ? '部分來源無法讀取，其餘來源沒有符合條件且有固定價格的商品。'
+                                : '目前沒有取得符合條件且有固定價格的商品。';
+                        }
+                    }
                 }
 
+                if (Object.keys(result.meta?.sourceStatus || {}).length) {
+                    const notice = document.createElement('p');
+                    notice.className = 'source-status';
+                    notice.setAttribute('role', 'status');
+                    notice.textContent = Object.values(result.meta.sourceStatus).map(source => {
+                        const count = Number(source.count) || 0;
+                        if (source.status === 'ok') return `${source.name}：${count} 筆`;
+                        if (source.status === 'partial') return `${source.name}：${count} 筆（${source.message}）`;
+                        if (source.status === 'empty') return `${source.name}：0 筆（${source.message}）`;
+                        return `${source.name}：${source.message || '暫時無法讀取'}`;
+                    }).join('；');
+                    container.appendChild(notice);
+                }
                 const freshness = document.createElement('div');
                 freshness.className = 'market-data-freshness';
                 const updatedAt = result.meta?.updatedAt
                     ? new Date(result.meta.updatedAt).toLocaleString('zh-TW')
                     : '剛更新';
-                freshness.textContent = `資料更新時間：${updatedAt}${result.meta?.stale ? '（即時更新失敗，顯示先前資料）' : '（每日更新一次）'}`;
+                freshness.textContent = `資料更新時間：${updatedAt}（購物通路沿用每日快取；二手來源即時查詢，請於原頁確認仍在售）`;
                 container.appendChild(freshness);
 
             } catch (error) {

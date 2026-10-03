@@ -462,13 +462,15 @@ const server = http.createServer(async(req, res) => {
 
         try {
             console.log(`[系統] 收到搜尋請求: ${keyword}`);
-            const result = await searchProductsWithMeta({
+            const options = {
                 keyword,
                 platforms: parsedUrl.searchParams.get('platform') || 'all',
                 exclude: parsedUrl.searchParams.get('exclude') || '',
+                precise: parsedUrl.searchParams.get('precise') === '1',
                 include: parsedUrl.searchParams.get('include') || '',
                 categories: parsedUrl.searchParams.get('categories') || ''
-            });
+            };
+            const result = await searchProductsWithMeta(options);
             sendJson(res, 200, { success: true, ...result });
             return;
         } catch (error) {

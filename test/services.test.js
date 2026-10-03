@@ -277,10 +277,10 @@ test('搜尋服務傳遞平台選項並執行包含、排除與價格排序', as
     scrapePlatforms: async (_keyword, platforms) => {
       receivedPlatforms = platforms;
       return [
-        product('桌機 DDR5 64GB', '6,000'),
+        { ...product('桌機 DDR5 64GB', '6,000'), url: 'https://example.com/item/64' },
         product('Laptop DDR5 32GB', '3,000'),
         product('桌機 DDR4 32GB', '2,000'),
-        product('桌機 DDR5 32GB', '4,000')
+        { ...product('桌機 DDR5 32GB', '4,000'), url: 'https://example.com/item/32' }
       ];
     }
   });
@@ -291,6 +291,7 @@ test('搜尋服務傳遞平台選項並執行包含、排除與價格排序', as
 test('市價查詢不再使用原價屋爬蟲，包括直接指定原價屋或全平台搜尋', async () => {
   const calls = [];
   const dependencies = {
+    searchUsedProducts: async () => ({ data: [], meta: { sourceStatus: {} } }),
     scrapePlatforms: async (_keyword, platforms) => {
       calls.push(platforms);
       return [];
@@ -315,6 +316,7 @@ test('市價查詢會統一全形字元並移除所有空白', () => {
 test('有空格與無空格的搜尋會送出相同關鍵字並產生相同結果', async () => {
   const receivedKeywords = [];
   const dependencies = {
+    searchUsedProducts: async () => ({ data: [], meta: { sourceStatus: {} } }),
     scrapePlatforms: async (keyword) => {
       receivedKeywords.push(keyword);
       return [

@@ -1,0 +1,80 @@
+/* Unified market search controls. */
+body > main.market-page {
+    max-width: 1200px !important;
+}
+
+.market-page .search-box {
+    margin-bottom: 64px;
+    padding: 28px !important;
+}
+
+.market-page .platform-options[hidden] {
+    display: none;
+}
+
+.market-page #platform-checkboxes {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 28px;
+    row-gap: 12px;
+}
+
+.market-page #platform-checkboxes[hidden] {
+    display: none;
+}
+
+.market-page .platform-options label {
+    padding: 6px 4px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.market-page .source-status {
+    padding: 10px 14px;
+    border: 1px solid #f1d9a9;
+    border-radius: 10px;
+    background: #fff8e9;
+    color: #80601c;
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 1000px) {
+    .market-page #platform-checkboxes {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .market-page .search-box {
+        padding: 20px !important;
+        margin-bottom: 40px;
+    }
+
+    .market-page #platform-checkboxes {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .market-page .input-group {
+        flex-wrap: wrap;
+    }
+
+    .market-page .input-group input {
+        min-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .market-page .input-group .btn-search {
+        width: 100%;
+    }
+
+    .market-page .precision-control {
+        padding-right: 64px;
+    }
+}
+
+
+.market-page #platform-checkboxes input[type="checkbox"] { accent-color: #2f9fe0; }
