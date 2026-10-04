@@ -425,6 +425,16 @@
             background: #dbeafe;
         }
 
+        .recommend-tools-link { cursor: pointer; font-family: inherit; }
+        .recommend-psu-panel { margin-top: 16px; padding: 16px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border-color); }
+        .recommend-psu-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+        .recommend-psu-fields label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+        .recommend-psu-fields input, .recommend-psu-fields select { box-sizing: border-box; width: 100%; min-width: 0; padding: 9px; border: 1px solid var(--border-color); border-radius: 7px; background: white; color: #1e293b; font: inherit; }
+        .recommend-psu-result { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; color: #1d4ed8; }
+        .recommend-psu-result strong { font-size: 1.15rem; }
+        .recommend-psu-result span, .recommend-psu-note { font-size: 0.8rem; }
+        .recommend-psu-note { margin: 12px 0 0; color: #64748b; line-height: 1.6; }
+
         .recommend-results-heading {
             display: flex;
             align-items: center;
@@ -606,7 +616,8 @@
         </div>
     </main>
 
-<script src="./recommend.js?v=20261004-condition"></script>
+<script src="./psu-flow.js?v=20261003"></script>
+<script src="./recommend.js?v=20261005-inline-psu"></script>
     <script src="./chat-widget.js?v=20261004-recommend-chat-condition"></script>
 </body>
 </html>
