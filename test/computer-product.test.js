@@ -9,6 +9,24 @@ function product(name, price = 500) {
   return { name, price, platform: '測試平台', url: `https://example.com/item/${encodeURIComponent(name)}` };
 }
 
+test('laptop recommendations and market searches reject books even when titles mention computer models', () => {
+  const ebook = product('行動運算新體驗:筆記型電腦市場與產品發展趨勢分析(電子書)', 7200);
+  const books = [ebook,
+    product('RTX4060 顯示卡與 i5-14400 電腦選購指南 電子書', 6000),
+    product('筆電維修手冊 紙本書', 6000),
+    product('Kindle 電子書閱讀器 laptop notebook', 6000),
+    product('Laptop buying guide e-book', 6000)];
+  const laptop = product('【筆記型電腦 手提電腦】14吋高刷款 全新固態盤 WIN10系統 辦公娛樂本 超長續航本', 7000);
+  const knownLaptop = product('ASUS Vivobook 筆記型電腦 i5-12400 16GB SSD 附贈電子書', 15000);
+  const bag = product('BORDER CARRY-ON 40 多功能旅行背包40L(可調節肩帶).雙肩後背包.行李箱.旅行袋/可容筆記型電腦/ 154920', 7500);
+  const result = rankRecommendations({ budget: 20000, usage: 'office', productType: 'laptop', condition: 'new' }, [...books, bag, laptop, knownLaptop]);
+  assert.deepEqual(new Set(result.recommendations.map(item => item.title)), new Set([laptop.name, knownLaptop.name]));
+  for (const book of books) assert.equal(isComputerProduct(book), false, book.name);
+  for (const precise of [false, true]) {
+    assert.deepEqual(filterSearchResults([ebook, bag, laptop], { keyword: '筆記型電腦', precise }).map(item => item.name), [laptop.name]);
+  }
+});
+
 test('computer filter preserves whole computers, components and peripherals without a recommendation price floor', () => {
   const names = ['Acer RB102 迷你桌機', 'MacBook Air M4', 'Intel Core i5-12400F',
     'ASUS RTX5060-O8G', '二手 GTX 970', 'DDR5 32GB', 'Samsung NVMe SSD 1TB',

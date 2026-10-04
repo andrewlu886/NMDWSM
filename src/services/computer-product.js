@@ -15,13 +15,16 @@ const LAPTOP = /筆電|筆記型|laptop|notebook|macbook|chromebook|電競本/i;
 const DESKTOP = /桌機|桌上型電腦|桌上型主機|套裝主機|電競主機|文書主機|商用主機|桌電|桌上電腦|電腦主機|主機電腦|套裝電腦|電腦套裝|迷你(?:電腦|桌機)|mini\s*pc|desktop(?:\s*pc)?|個人電腦|all[- ]?in[- ]?one|一體成型電腦|工作站|伺服器|工控機|\b(?:imac|mac\s*mini|mac\s*studio)\b/i;
 const HARDWARE = /電腦|筆電|筆記型|顯示卡|顯卡|處理器|主機板|記憶體|硬碟|固態|機殼|散熱|水冷|螢幕|顯示器|鍵盤|滑鼠|網卡|路由器|交換器|電源供應器|\b(?:cpu|gpu|ssd|hdd|ram|ddr[3-6]|psu|nvme|geforce|radeon|ryzen|xeon|threadripper|thinkpad|zenbook|vivobook|ideapad|motherboard|monitor|keyboard|mouse|router|nas)\b/i;
 const GPU_FAN_ACCESSORY = /顯(?:示)?卡(?:專用|替換|更換)?(?:散熱)?(?:器)?風扇|繪圖卡(?:專用|替換|更換)?(?:散熱)?(?:器)?風扇/i;
+const PUBLICATIONS = /電子書|有聲書|紙本書|電子(?:紙)?閱讀器|(?:電腦|筆電|筆記型電腦|主機板|顯示卡).*?(?:書籍|維修手冊|選購指南)|\b(?:e[- ]?books?|e[- ]?readers?|kindle|kobo)\b/i;
+const LAPTOP_BAGS = /筆電包|電腦包|後背包|旅行背包|旅行袋|行李箱|(?:筆電|筆記型電腦).*(?:保護套|內膽包|收納包)|\b(?:laptop\s*(?:bag|sleeve)|backpack)\b/i;
 
 function isUnrelatedProduct(name) {
   const text = productTitle(name)
     .replace(/(?:支援|適用|相容|連接)\s*(?:Apple\s*)?(?:iPhone|Galaxy)[a-z0-9]*/gi, '')
     .replace(/球鞋造型(?=電腦主機|機殼)/g, '')
-    .replace(/公仔(?:平臺|平台|展示架)/g, '');
-  if (UNRELATED.test(text) || /^(?:.{0,20})手機(?:\s*\d+\s*GB)?$/i.test(text.trim())) return true;
+    .replace(/公仔(?:平臺|平台|展示架)/g, '')
+    .replace(/(?:附贈|贈送|加贈)\s*電子書(?!閱讀器)/g, '');
+  if (UNRELATED.test(text) || PUBLICATIONS.test(text) || /^(?:.{0,20})手機(?:\s*\d+\s*GB)?$/i.test(text.trim())) return true;
   if (PC_CONTROLLER.test(text)) return false;
   if (/掌上遊戲機|Switch\s*(?:2|OLED|主機|電光)|Nintendo|任天堂|PlayStation|Xbox|\bPS[1-5]\b/i.test(text)) return true;
   const found = policy.models(text);
@@ -36,6 +39,7 @@ function classifyComputerProduct(name, predict = classifyProduct) {
   const found = policy.models(text);
   // Explicit product/compatibility language wins over model names mentioned in the title.
   if (PC_CONTROLLER.test(text)) return rule('accessory_controller');
+  if (LAPTOP_BAGS.test(text.replace(/(?:附贈|贈送|加贈)(?:原廠)?(?:筆電包|電腦包|後背包|旅行背包|保護套|內膽包|收納包)/g, ''))) return rule('accessory');
   if (GPU_FAN_ACCESSORY.test(text) || /不含\s*(?:CPU|處理器|顯卡|顯示卡)|(?:處理器|CPU|顯卡|顯示卡)空盒|顯卡支架|主機(?:托架|支架)|(?:顯卡|RTX|GTX|RX).*?(?:延長線|轉接線|替換風扇)/i.test(text)) return rule('accessory');
   if (/散熱器|塔式散熱|CPU\s*塔散|水冷頭|誰稜頭|替換散熱風扇|CPU\s*散熱風扇/i.test(text)
     && !/附(?:贈)?(?:原廠)?散熱器|含原廠散熱器/.test(text)) return rule('part_cooling');

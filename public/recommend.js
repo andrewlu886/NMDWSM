@@ -112,16 +112,18 @@
             specs.forEach((spec) => addTextElement(tags, 'span', 'recommend-tag', spec));
             card.appendChild(tags);
 
-            const actions = document.createElement('div');
-            actions.className = 'recommend-result-actions';
+            if (productType === 'desktop') {
+                const actions = document.createElement('div');
+                actions.className = 'recommend-result-actions';
 
-            const toolsLink = document.createElement('a');
-            toolsLink.className = 'recommend-tools-link';
-            toolsLink.href = getCalculatorUrl(item);
-            toolsLink.target = '_self';
-            toolsLink.textContent = '計算整機建議瓦數';
-            actions.appendChild(toolsLink);
-            card.appendChild(actions);
+                const toolsLink = document.createElement('a');
+                toolsLink.className = 'recommend-tools-link';
+                toolsLink.href = getCalculatorUrl(item);
+                toolsLink.target = '_self';
+                toolsLink.textContent = '計算整機建議瓦數';
+                actions.appendChild(toolsLink);
+                card.appendChild(actions);
+            }
 
             list.appendChild(card);
         });
