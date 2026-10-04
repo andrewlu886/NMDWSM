@@ -118,8 +118,7 @@
             const toolsLink = document.createElement('a');
             toolsLink.className = 'recommend-tools-link';
             toolsLink.href = getCalculatorUrl(item);
-            toolsLink.target = '_blank';
-            toolsLink.rel = 'noopener noreferrer';
+            toolsLink.target = '_self';
             toolsLink.textContent = '計算整機建議瓦數';
             actions.appendChild(toolsLink);
             card.appendChild(actions);
