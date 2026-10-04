@@ -111,7 +111,7 @@ function parsePttArticle(html, title, url) {
     specificationText: `${section('硬體型號|商品名稱|產品名稱')} ${condition}`
   });
 }
-async function searchPtt(keyword) {
+async function searchPttDirect(keyword) {
   const posts = new Map();
   let url = `https://www.ptt.cc/bbs/HardwareSale/search?q=${encodeURIComponent(keyword)}`;
   for (let page = 0; page < 3 && url; page += 1) {
@@ -127,6 +127,22 @@ async function searchPtt(keyword) {
     if (posts.size >= 30) break;
   }
   return checkedMap([...posts.values()].slice(0, 30), async post => parsePttArticle(await get(post.url, 8000), post.title, post.url));
+}
+async function searchPtt(keyword) {
+  const base = process.env.PTT_GATEWAY_URL || (process.env.RENDER === 'true' ? process.env.OLLAMA_BASE_URL : '');
+  if (!base) return searchPttDirect(keyword);
+  const endpoint = new URL(base);
+  if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) throw new Error('PTT gateway 必須使用 HTTPS 網址');
+  const token = process.env.PTT_GATEWAY_API_KEY || process.env.OLLAMA_API_KEY;
+  if (!token) throw new Error('PTT gateway 尚未設定驗證金鑰');
+  const headers = { Authorization: `Bearer ${token}` };
+  if (process.env.OLLAMA_CF_ACCESS_CLIENT_ID && process.env.OLLAMA_CF_ACCESS_CLIENT_SECRET) {
+    headers['CF-Access-Client-Id'] = process.env.OLLAMA_CF_ACCESS_CLIENT_ID;
+    headers['CF-Access-Client-Secret'] = process.env.OLLAMA_CF_ACCESS_CLIENT_SECRET;
+  }
+  const response = await axios.post(base.replace(/\/+$/, '') + '/api/ptt/search', { keyword }, { headers, timeout: 60000, maxRedirects: 0, maxContentLength: 2 * 1024 * 1024 });
+  if (!Array.isArray(response.data?.items)) throw new Error('PTT gateway 回傳格式不正確');
+  return response.data;
 }
 
 function parseYahoo(html) {
@@ -262,5 +278,5 @@ async function searchUsedProducts({ keyword, platforms = 'all', exclude = '', pr
   data.sort((left, right) => left.price - right.price);
   return { data, meta: { updatedAt: Date.now(), sourceStatus, mode: 'used' } };
 }
-module.exports = { SOURCES, eligible, fixedPrice, parsePttArticle,
+module.exports = { SOURCES, eligible, fixedPrice, parsePttArticle, searchPttDirect,
   parseYahoo, parseYahooDetail, parseCarousell, parseCarousellDetail, searchUsedProducts };

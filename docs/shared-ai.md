@@ -37,7 +37,7 @@ Windows 的 Ollama 應保持執行；沒有啟動時才另外執行 `ollama serv
 `ai:setup` 會建立隨機密鑰到 `.env.ai-gateway`，重複執行不會覆蓋原有密鑰。
 此檔案已由 `.gitignore` 的 `.env.*` 規則排除。不要把密鑰放在前端或 GitHub。
 轉接服務只監聽 `127.0.0.1:11435`，不需要將 Ollama 改成對外監聽，也不需要開放路由器連入連接埠。
-它只允許已驗證的 `GET /api/tags` 與 `POST /api/chat`，只允許上述兩個模型，預設最多同時 2 個請求。
+它允許已驗證的 `GET /api/tags`、`POST /api/chat` 與 `POST /api/ptt/search`。AI 只允許上述兩個模型，預設最多同時 2 個請求。PTT 只查詢 HardwareSale 公開搜尋與文章，不接受自訂 URL；獨立限制最多 2 個查詢，同一關鍵字快取 60 秒。
 
 ## 2. 建立通道
 
@@ -68,6 +68,7 @@ cloudflared tunnel --url http://127.0.0.1:11435
 | OLLAMA_STATUS_TIMEOUT_MS | 5000 |
 
 儲存並重新部署；只修改本機 .env 不會更新 Render。現有 Render 服務仍需手動填入這些變數；render.yaml 提供新 Blueprint 的設定欄位。
+Render 的 PTT 查詢預設共用 `OLLAMA_BASE_URL` 與 `OLLAMA_API_KEY`，經由本機取得資料，避免 Render 直接讀取 PTT 遭拒絕。無須新增環境變數；仍需部署新版程式及重啟本機 gateway。要使用獨立的轉接服務，可設定 `PTT_GATEWAY_URL`（HTTPS 基底網址）與 `PTT_GATEWAY_API_KEY`。一般本機執行網站時仍直接查詢 PTT。gateway 失聯時會回報來源無法使用，不會顯示過期快取或假商品。
 如果採用 Cloudflare Access Service Auth，再於 Render 設定 `OLLAMA_CF_ACCESS_CLIENT_ID` 和 `OLLAMA_CF_ACCESS_CLIENT_SECRET`；兩者需一起提供。
 [Service token 官方文件](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/)。
 所有密鑰只由網站後端送出，瀏覽器和狀態 API 不會取得它們。
