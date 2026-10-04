@@ -215,7 +215,7 @@
         if (document.hidden || widget.classList.contains('is-open')) return;
         idlePromptTimer = window.setTimeout(() => {
             if (!document.hidden && !widget.classList.contains('is-open')) idlePrompt.hidden = false;
-        }, 20000);
+        }, 60000);
     }
     for (const eventName of ['pointermove', 'pointerdown', 'wheel', 'keydown']) {
         document.addEventListener(eventName, resetIdlePromptTimer, { passive: true });
