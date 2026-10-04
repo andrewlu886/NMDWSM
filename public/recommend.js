@@ -14,109 +14,13 @@
         return element;
     }
 
-    let powerDataPromise;
-    function loadPowerData() {
-        if (!powerDataPromise) {
-            powerDataPromise = Promise.all(['cpu', 'gpu'].map(async category => {
-                const response = await fetch(`/api/${category}-data`);
-                if (!response.ok) throw new Error('暫時無法載入功耗資料，請稍後再試。');
-                const rows = await response.json();
-                if (!Array.isArray(rows)) throw new Error('功耗資料格式不正確。');
-                return rows;
-            })).catch(error => { powerDataPromise = null; throw error; });
-        }
-        return powerDataPromise;
-    }
-
-    function addInlineCalculator(card, actions, item, index) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'recommend-tools-link';
-        button.textContent = '計算整機建議瓦數';
-        button.setAttribute('aria-expanded', 'false');
-        actions.appendChild(button);
-        const panel = document.createElement('section');
-        panel.className = 'recommend-psu-panel';
-        panel.id = `recommend-psu-${index}`;
-        panel.hidden = true;
-        panel.setAttribute('aria-label', '整機建議瓦數計算');
-        button.setAttribute('aria-controls', panel.id);
-        const fields = document.createElement('div');
-        fields.className = 'recommend-psu-fields';
-        panel.appendChild(fields);
-        function field(labelText, element) {
-            const label = document.createElement('label');
-            addTextElement(label, 'span', '', labelText);
-            label.appendChild(element);
-            fields.appendChild(label);
-            element.addEventListener('change', calculate);
-            return element;
-        }
-        const inputs = {};
-        const lists = {};
-        for (const category of ['cpu', 'gpu']) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = item[category] && item[category] !== 'UNKNOWN' ? item[category] : '';
-            input.placeholder = category === 'cpu' ? '請選擇或輸入完整 CPU 型號' : '請選擇顯卡型號，或輸入「內顯」';
-            const list = document.createElement('datalist');
-            list.id = `${panel.id}-${category}`;
-            input.setAttribute('list', list.id);
-            panel.appendChild(list);
-            inputs[category] = field(`${category.toUpperCase()} 型號`, input);
-            lists[category] = list;
-        }
-        function select(label, options) {
-            const element = document.createElement('select');
-            options.forEach(([value, text]) => {
-                const option = document.createElement('option');
-                option.value = value; option.textContent = text; element.appendChild(option);
-            });
-            return field(label, element);
-        }
-        const motherboard = select('主機板', window.PsuFlow.motherboardOptions);
-        const cooling = select('散熱配置', window.PsuFlow.coolingOptions);
-        const drives = document.createElement('input');
-        drives.type = 'number'; drives.min = '0'; drives.max = '20'; drives.step = '1'; drives.value = '1';
-        field('硬碟數量', drives);
-        const result = addTextElement(panel, 'div', 'recommend-psu-result', '');
-        result.setAttribute('role', 'status');
-        result.setAttribute('aria-live', 'polite');
-        addTextElement(panel, 'p', 'recommend-psu-note', '依 CPU／GPU 功耗及所選配置估算，含 30% 餘裕並參考顯卡官方電源建議。筆電請以原廠變壓器規格為準。');
-        let rows;
-        async function calculate() {
-            result.textContent = '正在計算建議瓦數…';
-            try {
-                if (!rows) {
-                    rows = await loadPowerData();
-                    ['cpu', 'gpu'].forEach((category, position) => {
-                        rows[position].forEach(row => {
-                            const key = Object.keys(row).find(name => name.replace(/\s/g, '').includes(category === 'cpu' ? 'CPU型號' : '顯示卡型號'));
-                            if (!key || !row[key]) return;
-                            const option = document.createElement('option'); option.value = row[key]; lists[category].appendChild(option);
-                        });
-                    });
-                }
-                const cpu = window.PsuFlow.resolveModel(rows[0], 'cpu', inputs.cpu.value);
-                const gpu = window.PsuFlow.resolveModel(rows[1], 'gpu', inputs.gpu.value);
-                for (const [category, match] of [['CPU', cpu], ['GPU', gpu]]) {
-                    if (match.status !== 'matched') throw new Error(`${category} 型號${match.status === 'ambiguous' ? '對應多筆資料' : '或功耗資料不完整'}，請從上方選擇完整型號後再計算。`);
-                }
-                const driveCount = Number(drives.value);
-                if (drives.value === '' || !Number.isInteger(driveCount) || driveCount < 0 || driveCount > 20) throw new Error('硬碟數量請填入 0 至 20 的整數。');
-                const estimate = window.PsuFlow.estimate({ cpuWatts: cpu.watts, gpuWatts: gpu.watts, gpuRecommendedPsu: gpu.recommendedPsu, motherboardWatts: Number(motherboard.value), coolingWatts: Number(cooling.value), driveCount });
-                result.replaceChildren();
-                addTextElement(result, 'strong', '', `建議電源：${estimate.recommendedWatts} W`);
-                addTextElement(result, 'span', '', `估算整機功耗：${estimate.totalWatts} W（CPU ${cpu.watts} W／GPU ${gpu.watts} W）`);
-            } catch (error) { result.textContent = error.message; }
-        }
-        button.addEventListener('click', () => {
-            panel.hidden = !panel.hidden;
-            button.setAttribute('aria-expanded', String(!panel.hidden));
-            button.textContent = panel.hidden ? '計算整機建議瓦數' : '收合瓦數計算';
-            if (!panel.hidden) calculate();
+    function getCalculatorUrl(item) {
+        const knownModel = (value) => value && value !== 'UNKNOWN' ? value : '';
+        const params = new URLSearchParams({
+            gpu: knownModel(item.gpu),
+            cpu: knownModel(item.cpu)
         });
-        card.appendChild(panel);
+        return `/tools.html?${params.toString()}`;
     }
 
     function renderResults(result, budget, usage, productType, condition) {
@@ -211,8 +115,14 @@
             const actions = document.createElement('div');
             actions.className = 'recommend-result-actions';
 
+            const toolsLink = document.createElement('a');
+            toolsLink.className = 'recommend-tools-link';
+            toolsLink.href = getCalculatorUrl(item);
+            toolsLink.target = '_blank';
+            toolsLink.rel = 'noopener noreferrer';
+            toolsLink.textContent = '計算整機建議瓦數';
+            actions.appendChild(toolsLink);
             card.appendChild(actions);
-            addInlineCalculator(card, actions, item, index);
 
             list.appendChild(card);
         });
