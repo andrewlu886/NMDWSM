@@ -129,19 +129,24 @@ async function searchPttDirect(keyword) {
   return checkedMap([...posts.values()].slice(0, 30), async post => parsePttArticle(await get(post.url, 8000), post.title, post.url));
 }
 async function searchPtt(keyword) {
-  const base = process.env.PTT_GATEWAY_URL || (process.env.RENDER === 'true' ? process.env.OLLAMA_BASE_URL : '');
-  if (!base) return searchPttDirect(keyword);
+  return searchViaGateway('ptt', keyword, searchPttDirect);
+}
+async function searchViaGateway(source, keyword, directSearch) {
+  const envPrefix = source.toUpperCase();
+  const label = SOURCES[source];
+  const base = process.env[`${envPrefix}_GATEWAY_URL`] || (process.env.RENDER === 'true' ? process.env.OLLAMA_BASE_URL : '');
+  if (!base) return directSearch(keyword);
   const endpoint = new URL(base);
-  if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) throw new Error('PTT gateway 必須使用 HTTPS 網址');
-  const token = process.env.PTT_GATEWAY_API_KEY || process.env.OLLAMA_API_KEY;
-  if (!token) throw new Error('PTT gateway 尚未設定驗證金鑰');
+  if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) throw new Error(`${label} gateway 必須使用 HTTPS 網址`);
+  const token = process.env[`${envPrefix}_GATEWAY_API_KEY`] || process.env.OLLAMA_API_KEY;
+  if (!token) throw new Error(`${label} gateway 尚未設定驗證金鑰`);
   const headers = { Authorization: `Bearer ${token}` };
   if (process.env.OLLAMA_CF_ACCESS_CLIENT_ID && process.env.OLLAMA_CF_ACCESS_CLIENT_SECRET) {
     headers['CF-Access-Client-Id'] = process.env.OLLAMA_CF_ACCESS_CLIENT_ID;
     headers['CF-Access-Client-Secret'] = process.env.OLLAMA_CF_ACCESS_CLIENT_SECRET;
   }
-  const response = await axios.post(base.replace(/\/+$/, '') + '/api/ptt/search', { keyword }, { headers, timeout: 60000, maxRedirects: 0, maxContentLength: 2 * 1024 * 1024 });
-  if (!Array.isArray(response.data?.items)) throw new Error('PTT gateway 回傳格式不正確');
+  const response = await axios.post(base.replace(/\/+$/, '') + `/api/${source}/search`, { keyword }, { headers, timeout: source === 'carousell' ? 120000 : 60000, maxRedirects: 0, maxContentLength: 2 * 1024 * 1024 });
+  if (!Array.isArray(response.data?.items)) throw new Error(`${label} gateway 回傳格式不正確`);
   return response.data;
 }
 
@@ -211,7 +216,7 @@ function parseCarousellDetail(html, url) {
     || (offer.priceValidUntil && new Date(`${offer.priceValidUntil}T23:59:59+08:00`).getTime() < Date.now())) return null;
   return verified('carousell', product.name, Number(offer.price), url, { evidence: product.description, specificationText: textHtml(product.description), usedCondition: true });
 }
-async function searchCarousell(keyword) {
+async function searchCarousellDirect(keyword) {
   const puppeteer = require('../scrapers/browser');
   const browser = await puppeteer.launch({ headless: true, pipe: true, timeout: 15000, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   try {
@@ -233,6 +238,9 @@ async function searchCarousell(keyword) {
       } finally { await detail.close(); }
     }, 2);
   } finally { await browser.close(); }
+}
+async function searchCarousell(keyword) {
+  return searchViaGateway('carousell', keyword, searchCarousellDirect);
 }
 
 const SEARCHERS = { ptt: searchPtt, carousell: searchCarousell, 'yahoo-auction': searchYahoo };
@@ -278,5 +286,5 @@ async function searchUsedProducts({ keyword, platforms = 'all', exclude = '', pr
   data.sort((left, right) => left.price - right.price);
   return { data, meta: { updatedAt: Date.now(), sourceStatus, mode: 'used' } };
 }
-module.exports = { SOURCES, eligible, fixedPrice, parsePttArticle, searchPttDirect,
+module.exports = { SOURCES, eligible, fixedPrice, parsePttArticle, searchPttDirect, searchCarousellDirect,
   parseYahoo, parseYahooDetail, parseCarousell, parseCarousellDetail, searchUsedProducts };
