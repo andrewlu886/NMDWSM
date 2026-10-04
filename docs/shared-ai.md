@@ -70,6 +70,8 @@ cloudflared tunnel --url http://127.0.0.1:11435
 儲存並重新部署；只修改本機 .env 不會更新 Render。現有 Render 服務仍需手動填入這些變數；render.yaml 提供新 Blueprint 的設定欄位。
 Render 的 PTT 與旋轉拍賣查詢預設共用 `OLLAMA_BASE_URL` 與 `OLLAMA_API_KEY`，經由本機取得資料。無須新增環境變數；仍需部署新版程式及重啟本機 gateway。要使用獨立的轉接服務，可設定 `PTT_GATEWAY_URL` 與 `PTT_GATEWAY_API_KEY`，或 `CAROUSELL_GATEWAY_URL` 與 `CAROUSELL_GATEWAY_API_KEY`；網址必須為 HTTPS 基底網址。一般本機執行網站時仍直接查詢。gateway 失聯時會回報來源無法使用，不會顯示過期快取或假商品。本機也可能遭來源限制，轉接不保證一直可用。
 如果採用 Cloudflare Access Service Auth，再於 Render 設定 `OLLAMA_CF_ACCESS_CLIENT_ID` 和 `OLLAMA_CF_ACCESS_CLIENT_SECRET`；兩者需一起提供。
+
+本機訓練 CPU 圖片模型後，新版 gateway 會把 Gemma 觀察送入 CPU worker，未核對通過時以圖片文字區域放大、校正與 OCR 補查，再將證據和疑點送回 Gemma 重看原圖。若 Gemma 新讀出型號，CPU worker 可再接收新觀察補查；Llama 比較更新證據並完成審閱。既有 Render 端即可收到共同判讀的證據與候選；不需要更換 tunnel 或推送網站。詳見 [CPU 圖片模型](cpu-vision.md)。
 [Service token 官方文件](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/)。
 所有密鑰只由網站後端送出，瀏覽器和狀態 API 不會取得它們。
 

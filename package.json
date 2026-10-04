@@ -9,6 +9,7 @@
     "test:unit": "node --test test/hardware.test.js test/services.test.js test/valuation.test.js test/computer-product.test.js test/market-classifier.test.js test/used-search.test.js",
     "model:train": "node train.js",
     "model:evaluate": "node scripts/evaluate-market-classifier.js",
+    "model:cpu:train": "node scripts/train-cpu-vision.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

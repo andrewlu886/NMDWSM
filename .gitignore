@@ -149,3 +149,9 @@ vite.config.ts.timestamp-*
 models/*.bin
 # Local tunnel executable and runtime state
 tools/cloudflared.exe
+
+# CPU vision weights and OCR downloads stay on the AI host; reproducible trainer is tracked.
+models/cpu-vision/model.pt
+models/cpu-vision/model.pt.tmp
+models/cpu-vision/ocr/
+__pycache__/

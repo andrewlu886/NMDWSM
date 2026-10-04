@@ -1,7 +1,7 @@
 const http = require('node:http');
 const crypto = require('node:crypto');
 const path = require('node:path');
-function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcurrent = 2, timeoutMs = 120000, fetchImpl = fetch, pttSearch = keyword => require('../src/services/used-search').searchPttDirect(keyword), carousellSearch = keyword => require('../src/services/used-search').searchCarousellDirect(keyword) } = {}) {
+function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcurrent = 2, timeoutMs = 120000, fetchImpl = fetch, cpuRecognize = (image, options) => require('../src/services/cpu-vision').recognizeLocalCpu(image, options), pttSearch = keyword => require('../src/services/used-search').searchPttDirect(keyword), carousellSearch = keyword => require('../src/services/used-search').searchCarousellDirect(keyword) } = {}) {
   if (!token || token.length < 32) throw new Error('AI_GATEWAY_TOKEN 必須至少 32 字元；請先執行 npm run ai:setup。');
   const upstream = new URL(ollamaUrl);
   if (!['http:', 'https:'].includes(upstream.protocol) || !['localhost', '127.0.0.1', '[::1]'].includes(upstream.hostname) || upstream.username || upstream.password || upstream.search || upstream.hash) throw new Error('轉接服務只能連線到本機 Ollama。');
@@ -9,6 +9,7 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
   const expected = crypto.createHash('sha256').update('Bearer ' + token).digest();
   let active = 0;
   let marketActive = 0;
+  let cpuActive = 0;
   const marketCache = new Map();
   const marketPending = new Map();
   const marketRoutes = { '/api/ptt/search': { search: pttSearch, label: 'PTT' }, '/api/carousell/search': { search: carousellSearch, label: '旋轉拍賣' } };
@@ -16,6 +17,34 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
   return http.createServer(async (req, res) => {
     const received = crypto.createHash('sha256').update(String(req.headers.authorization || '')).digest();
     if (!crypto.timingSafeEqual(expected, received)) return send(res,401,'驗證失敗。');
+    if (req.method === 'POST' && req.url === '/api/cpu/recognize') {
+      if (cpuActive >= 2) return send(res,503,'CPU 圖片辨識忙碌中。');
+      cpuActive++;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30000);
+      const onClose = () => { if (!res.writableEnded) controller.abort(); };
+      res.on('close', onClose);
+      try {
+        const chunks = []; let length = 0;
+        for await (const chunk of req) {
+          length += chunk.length;
+          if (length > 2508100) return send(res,413,'圖片過大。');
+          chunks.push(chunk);
+        }
+        let data;
+        try { data = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
+        catch { return send(res,400,'請提供 JSON 圖片。'); }
+        if (typeof data?.image === 'string' && data.image.length > 2500000) return send(res,413,'圖片過大。');
+        if (typeof data?.image !== 'string' || !data.image || !/^[A-Za-z0-9+/]+={0,2}$/.test(data.image) || Object.keys(data).some(key => !['image', 'gemmaObservation'].includes(key)) ||
+            (data.gemmaObservation !== undefined && (typeof data.gemmaObservation !== 'string' || data.gemmaObservation.length > 2000))) return send(res,400,'圖片格式不正確。');
+        const result = await cpuRecognize(data.image, { signal: controller.signal, gemmaObservation: data.gemmaObservation || '' });
+        if (!result) return send(res,503,'CPU 圖片模型尚未安裝。');
+        res.writeHead(200, {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
+        res.end(JSON.stringify(result));
+      } catch { if (!res.destroyed) send(res,502,'CPU 圖片模型暫時無法回應。'); }
+      finally { clearTimeout(timer); res.off('close', onClose); cpuActive--; }
+      return;
+    }
     const marketRoute = Object.hasOwn(marketRoutes, req.url) ? marketRoutes[req.url] : null;
     if (req.method === 'POST' && marketRoute) {
       if (marketActive >= 2) return send(res,503,'商品查詢忙碌中，請稍後重試。');
@@ -65,6 +94,7 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
     res.on('close',onClose);
     try {
       let body;
+      let cpuImage = '';
       if (isChat) {
         const chunks=[];let length=0;
         for await (const chunk of req) {
@@ -77,6 +107,9 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
         catch { return send(res,400,'請提供 JSON 訊息。'); }
         if (!data || !['llama3.1:8b','gemma3:4b'].includes(data.model) || !Array.isArray(data.messages)) return send(res,400,'模型或訊息格式不正確。');
         if (data.stream === true) return send(res,400,'此服務使用完整回覆模式。');
+        const photo = [...data.messages].reverse().find(message => message.role === 'user');
+        if (data.model === 'gemma3:4b' && Array.isArray(photo?.images) && photo.images.length === 1 &&
+            typeof photo.images[0] === 'string' && !/invoice|receipt|發票|收據/i.test(String(photo.content || ''))) cpuImage = photo.images[0];
         body=JSON.stringify({...data,stream:false});
       }
       const response=await fetchImpl(ollamaUrl.replace(/\/+$/, '') + req.url, {
@@ -85,6 +118,22 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
       });
       const data=await response.json();
       if (!response.ok) return send(res,response.status,'本機模型未能完成請求。');
+      if (cpuImage) {
+        const { isCpuAnalysis, collaborateCpuAnalysis } = require('../src/services/cpu-vision');
+        if (isCpuAnalysis(data.message?.content || '')) {
+          try {
+            const result = await cpuRecognize(cpuImage, { signal: controller.signal, gemmaObservation: String(data.message.content).slice(0, 2000) });
+            if (result) {
+              data.message.content = await collaborateCpuAnalysis(data.message.content, result,
+                (route, options) => fetchImpl(ollamaUrl.replace(/\/+$/, '') + route, { ...options, redirect: 'error' }),
+                { signal: controller.signal, image: cpuImage,
+                  recheckCpu: observation => cpuRecognize(cpuImage, { signal: controller.signal, gemmaObservation: observation }) });
+              data.cpuVisionChecked = true;
+              data.cpuVisionVersion = result.version;
+            }
+          } catch { /* Optional CPU worker failure preserves the original vision answer. */ }
+        }
+      }
       res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
       res.end(JSON.stringify(data));
     } catch { if (!res.destroyed) send(res, controller.signal.aborted ? 504 : 502,'AI 服務暫時無法回應。'); }

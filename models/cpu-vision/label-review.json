@@ -1,0 +1,20 @@
+[
+  {
+    "split": "validation",
+    "image": "i7-12700\\散片\\i7-12700_散片_008.jpg",
+    "folderLabel": "i7-12700",
+    "readModel": "i7-12700K"
+  },
+  {
+    "split": "validation",
+    "image": "R7-7700X\\散片\\R7-7700X_散片_001.jpg",
+    "folderLabel": "R7-7700X",
+    "readModel": "R7-7700"
+  },
+  {
+    "split": "test",
+    "image": "i5-13400F\\散片\\i5-13400F_散片_005.jpg",
+    "folderLabel": "i5-13400F",
+    "readModel": "i5-13400"
+  }
+]

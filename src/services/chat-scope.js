@@ -12,7 +12,10 @@ function getScopeReply(text, previous = []) {
   if (related(value) || /^(?:請|我要|幫我)?(?:查詢|搜尋|查)(?:產品|商品|市價|價格)?[?？。!！]*$/.test(value)) return null;
   const previousUser = [...previous].reverse().filter(message => message.role === 'user').slice(0, 3).find(message => related(message.content));
   const shortFollowup = value.length <= 100 && /^(?:好|可以|是|對|沒錯|請查|查吧|幫我查|不要|不對|不合理|重新查|更正|改成|不是|\d|遊戲|文書|剪輯|直播|面交|寄送|風冷|水冷|標準|高階|ITX|ATX)/i.test(value);
-  if (shortFollowup && previousUser && related(previousUser.content)) return null;
+  // A condition choice is meaningful within hardware conversations, but is not
+  // a standalone product keyword (e.g. used books/cars must not become hardware).
+  const conditionFollowup = /^(?:(?:我想要|我想|我要|我選擇|我選|選擇|想要|選|要|偏好)\s*)?(?:二手|中古|全新品?|新品|新機)(?:的|就好|即可|可以)?[?？。!！～~]*$/.test(value);
+  if ((shortFollowup || conditionFollowup) && previousUser) return null;
   return BOUNDARY_REPLY;
 }
 function validMarketKeyword(keyword) {

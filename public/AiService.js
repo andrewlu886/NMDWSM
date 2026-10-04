@@ -7,6 +7,8 @@ const { isBodyTooLarge, parseJsonBody } = require('./json-body');
 
 const { createOllamaClient } = require('../src/services/ollama-client');
 const ollamaClient = createOllamaClient();
+const { createCpuVisionClient, isCpuAnalysis, collaborateCpuAnalysis, cpuConfirmationReply } = require('../src/services/cpu-vision');
+const cpuVisionClient = createCpuVisionClient(ollamaClient);
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.1:8b';
 const OLLAMA_VISION_MODEL = process.env.OLLAMA_VISION_MODEL || 'gemma3:4b';
 const OLLAMA_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 90000);
@@ -262,7 +264,18 @@ async function analyzeHardwareImage(image, signal, receipt = false) {
   const result = await response.json();
   const analysis = String(result.message?.content || '').trim();
   if (!analysis) throw new Error('圖片辨識沒有取得結果，請換一張標籤較清楚的照片。');
-  return analysis.slice(0, 3000);
+  if (!receipt && result.cpuVisionChecked !== true && isCpuAnalysis(analysis)) {
+    try {
+      const cpuResult = await cpuVisionClient.recognize(image, signal, analysis.slice(0, 2000));
+      return (await collaborateCpuAnalysis(analysis, cpuResult, ollamaClient.request.bind(ollamaClient),
+        { signal, model: OLLAMA_MODEL, visionModel: OLLAMA_VISION_MODEL, image,
+          recheckCpu: observation => cpuVisionClient.recognize(image, signal, observation) })).slice(0, 5000);
+    } catch (error) {
+      console.warn('CPU 圖片模型未完成核對:', error.message);
+      // Keep existing vision behavior when the optional local model is offline.
+    }
+  }
+  return analysis.slice(0, 5000);
 }
 
 function toPositiveNumber(value, fallback) {
@@ -747,6 +760,12 @@ async function handle(req, res) {
       const imageAnalysis = imageRequested
         ? await analyzeHardwareImage(images[0], controller.signal, receiptRequested)
         : '';
+      const confirmationReply = cpuConfirmationReply(imageAnalysis);
+      if (confirmationReply) {
+        appendChatLog(effectiveUserMessage, confirmationReply);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        return res.end(JSON.stringify({ success: true, answer: confirmationReply, imageAnalysis, provider: 'ollama', model: OLLAMA_MODEL }));
+      }
       const userTurns = conversation.filter(message => message.role === 'user');
       const explicitMarketQuery = parsed.intent === 'market';
       const marketIntent = explicitMarketQuery || isMarketIntent(effectiveUserMessage) || (

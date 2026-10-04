@@ -1,0 +1,10 @@
+{
+  "modelVersion": "2026-10-04T20:25:27.473272+00:00",
+  "checkedAt": "2026-10-04T20:36:33.474517+00:00",
+  "model": "i3-12100",
+  "localCpuEndpoint": true,
+  "localGemmaFusion": true,
+  "renderPhotoFlow": true,
+  "renderProvider": "ollama",
+  "gitPushed": false
+}

@@ -380,6 +380,31 @@
         });
     }
 
+    function enableImageZoom(thumbnail, source) {
+        thumbnail.style.cursor = 'zoom-in';
+        thumbnail.tabIndex = 0;
+        thumbnail.setAttribute('role', 'button');
+        thumbnail.setAttribute('aria-label', '放大查看圖片');
+        const open = () => {
+            const dialog = document.createElement('dialog');
+            dialog.setAttribute('aria-label', '圖片放大檢視');
+            dialog.style.cssText = 'max-width:95vw;max-height:95vh;padding:16px;border:0;border-radius:12px;overflow:auto;';
+            const close = document.createElement('button');
+            close.type = 'button'; close.textContent = '關閉';
+            const image = document.createElement('img');
+            image.src = source; image.alt = thumbnail.alt;
+            image.style.cssText = 'display:block;max-width:88vw;max-height:82vh;object-fit:contain;';
+            close.addEventListener('click', () => dialog.close());
+            dialog.addEventListener('close', () => { dialog.remove(); thumbnail.focus(); });
+            dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+            dialog.append(close, image); document.body.appendChild(dialog); dialog.showModal(); close.focus();
+        };
+        thumbnail.addEventListener('click', open);
+        thumbnail.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
+        });
+    }
+
     function clearPendingImage(revokePreview = true) {
         if (revokePreview && pendingImage?.previewUrl) URL.revokeObjectURL(pendingImage.previewUrl);
         pendingImage = null;
@@ -399,6 +424,7 @@
         const thumbnail = document.createElement('img');
         thumbnail.src = pendingImage.previewUrl || `data:image/jpeg;base64,${data}`;
         thumbnail.alt = '待上傳硬體圖片預覽';
+        enableImageZoom(thumbnail, thumbnail.src);
         const name = document.createElement('span');
         name.textContent = file.name;
         const remove = document.createElement('button');
@@ -421,6 +447,7 @@
             thumbnail.src = historyItem.thumbnailUrl || historyItem.previewUrl;
             thumbnail.alt = '使用者上傳的硬體圖片';
             thumbnail.style.cssText = 'width: 96px; max-height: 96px; object-fit: cover; border-radius: 8px;';
+            enableImageZoom(thumbnail, historyItem.previewUrl || thumbnail.src);
             userMessage.prepend(thumbnail);
         } else if (historyItem.imageName) {
             const imageNote = document.createElement('small');
@@ -860,13 +887,15 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    async function chooseValuationCategory(category, label = valuationCategoryLabels[category]) {
+    async function chooseValuationCategory(category, label = valuationCategoryLabels[category], recordSelection = true) {
         if (!valuationFlow) valuationFlow = {};
         valuationFlow.category = category;
         valuationFlow.stage = 'model';
-        renderUserMessage({ role: 'user', content: label }, chatHistory.length);
-        chatHistory.push({ role: 'user', content: label });
-        persistChatHistory();
+        if (recordSelection) {
+            renderUserMessage({ role: 'user', content: label }, chatHistory.length);
+            chatHistory.push({ role: 'user', content: label });
+            persistChatHistory();
+        }
         try {
             const response = await fetch(`/api/valuation/model-options?category=${encodeURIComponent(category)}`);
             const result = await response.json();
@@ -952,7 +981,33 @@
     async function handleValuationText(text) {
         const flow = valuationFlow;
         if (!flow) return;
-        if (flow.stage === 'model') {
+        if (flow.stage === 'photo-confirm') {
+            const value = text.normalize('NFKC').trim().replace(/[。!！?？]+$/g, '');
+            if (/^(?:是|對|正確|沒錯|好|可以|確認|是的|就是這個)$/.test(value)) {
+                if (flow.photoCandidates.length === 1) await confirmValuationPhotoModel(flow.photoCandidates[0]);
+                else appendValuationReply('請選擇或輸入照片上的完整型號，這次有多個候選，不能只用「是」決定。');
+            } else if (/^(?:不是|不對|錯了|否|重新輸入|重新輸入型號)$/.test(value)) {
+                flow.stage = 'model';
+                flow.photoCandidates = [];
+                appendValuationReply('請輸入正確的完整型號，我會依你的修正繼續估價。');
+            } else {
+                flow.stage = 'model';
+                await handleValuationText(text);
+            }
+        } else if (flow.stage === 'category') {
+            const categories = [
+                ['cpu', 'CPU', /\b(?:cpu|processor)\b|處理器|处理器/i],
+                ['ram', '記憶體', /\b(?:ram|memory)\b|記憶體|内存|內存/i],
+                ['gpu', '顯卡', /\b(?:gpu|graphics\s*card|video\s*card)\b|顯卡|顯示卡|显卡/i],
+                ['motherboard', '主機板', /\b(?:motherboard|mainboard|mb)\b|主機板|主板|母板/i]
+            ];
+            const matches = categories.filter(([, , pattern]) => pattern.test(text.normalize('NFKC')));
+            if (matches.length !== 1) {
+                appendValuationReply('請先選一種欲估價的零件：CPU（處理器）、記憶體、顯卡或主機板。可以直接輸入名稱，也可以點按鈕。');
+                return;
+            }
+            await chooseValuationCategory(matches[0][0], matches[0][1], false);
+        } else if (flow.stage === 'model') {
             flow.model = text.trim();
             await resolveValuationModel(flow.model);
             requestWarrantyOrUsage();
@@ -982,6 +1037,18 @@
             flow.originalPrice = price;
             await submitValuationEstimate();
         }
+    }
+
+    async function confirmValuationPhotoModel(model, automatically = false) {
+        const flow = valuationFlow;
+        if (!flow || flow.stage !== 'photo-confirm' || !flow.photoCandidates.includes(model)) return;
+        flow.model = model;
+        flow.modelId = null;
+        flow.brand = '';
+        flow.originalPrice = 0;
+        await resolveValuationModel(model);
+        appendValuationReply(`已${automatically ? '辨識' : '確認'}型號「${flow.model}」，接著填寫估價條件。若型號不對，可直接輸入正確型號修正。`);
+        requestWarrantyOrUsage();
     }
 
     function parseRecommendationBudget(text) {
@@ -1160,15 +1227,47 @@
         input.focus();
     }
 
+    function featureCommand(text) {
+        const command = String(text).normalize('NFKC').trim()
+            .replace(/^(?:你好|您好|嗨)[，,\s]*/, '')
+            .replace(/[\s，,。.!！?？～~]+/g, '');
+        const prefix = '(?:(?:請幫我|幫我|請|我想要|我想|我要|我需要|想要|想))?(?:使用|開啟|進行|做)?';
+        const suffix = '(?:功能|工具|一下|看看)?';
+        const features = [
+            ['二手估價', '二手估價|二手估值|估二手價|估二手價格|估價'],
+            ['市價查詢', '市價查詢|市場價格查詢|查市價|查價|市價'],
+            ['智慧推薦', '智慧推薦|硬體推薦|配置推薦|裝機推薦|配電腦|組電腦'],
+            ['瓦數計算', '瓦數計算|功耗計算|計算瓦數|算瓦數|算整機瓦數|計算電源瓦數']
+        ];
+        return features.find(([, aliases]) => new RegExp(`^${prefix}(?:${aliases})${suffix}$`).test(command))?.[0] || null;
+    }
+
+    function activateChatFeature(label, recordAction = false) {
+        if (recordAction && ['二手估價', '瓦數計算'].includes(label)) {
+            const action = { role: 'user', content: `我要進行${label}` };
+            renderUserMessage(action, chatHistory.length);
+            chatHistory.push(action);
+            persistChatHistory();
+        }
+        resetPowerFlow();
+        valuationFlow = null;
+        recommendationFlow = null;
+        marketQueryActive = false;
+        saveInterfaceState({ marketQueryActive: false, recommendationText: '' });
+        if (label === '二手估價') startValuationWizard();
+        else if (label === '市價查詢') startMarketQuery();
+        else if (label === '瓦數計算') startPowerWizard();
+        else if (label === '智慧推薦') {
+            recommendationFlow = { text: '' };
+            appendRecommendationReply('我們先從預算和用途開始吧，例如「4萬元，主要玩 3A 遊戲，想組桌機」。只知道預算也沒關係，先告訴我就好。');
+            input.focus();
+        }
+    }
+
     function showQuickActions() {
         messages.querySelectorAll('.ai-chat-reopen-suggestions').forEach(message => message.remove());
 
-        const quickActions = [
-            ['二手估價', '幫我估二手 RTX 4070，使用 18 個月，外觀正常'],
-            ['市價查詢', ''],
-            ['智慧推薦', '我有 4 萬元，想組一台打遊戲的桌機'],
-            ['瓦數計算', '']
-        ];
+        const quickActions = ['二手估價', '市價查詢', '智慧推薦', '瓦數計算'];
         const message = document.createElement('div');
         message.className = 'ai-chat-message assistant ai-chat-reopen-suggestions';
         message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
@@ -1182,46 +1281,12 @@
         buttons.className = 'suggestions-container';
         buttons.style.marginTop = '8px';
 
-        quickActions.forEach(([label, query]) => {
+        quickActions.forEach(label => {
             const button = document.createElement('button');
             button.className = 'ai-valuation-btn suggestion-btn';
             button.type = 'button';
             button.textContent = label;
-            button.addEventListener('click', () => {
-                if (label === '瓦數計算') {
-                    const action = { role: 'user', content: '我要進行瓦數計算' };
-                    renderUserMessage(action, chatHistory.length);
-                    chatHistory.push(action);
-                    persistChatHistory();
-                    startPowerWizard();
-                    return;
-                }
-                resetPowerFlow();
-                valuationFlow = null;
-                recommendationFlow = null;
-                if (label === '市價查詢') {
-                    startMarketQuery();
-                    return;
-                }
-                marketQueryActive = false;
-                saveInterfaceState({ marketQueryActive: false });
-                if (label === '二手估價') {
-                    const action = { role: 'user', content: '我要進行二手估價' };
-                    renderUserMessage(action, chatHistory.length);
-                    chatHistory.push(action);
-                    persistChatHistory();
-                    startValuationWizard();
-                    return;
-                }
-                if (label === '智慧推薦') {
-                    recommendationFlow = { text: '' };
-                    saveInterfaceState({ recommendationText: '' });
-                    appendRecommendationReply('我們先從預算和用途開始吧，例如「4萬元，主要玩 3A 遊戲，想組桌機」。只知道預算也沒關係，先告訴我就好。');
-                    return;
-                }
-                input.value = query;
-                form.requestSubmit();
-            });
+            button.addEventListener('click', () => activateChatFeature(label, true));
             buttons.appendChild(button);
         });
 
@@ -1243,7 +1308,7 @@
 
         try {
             const bitmap = await createImageBitmap(file);
-            const scale = Math.min(1, 1024 / Math.max(bitmap.width, bitmap.height));
+            let scale = Math.min(1, 4096 / Math.max(bitmap.width, bitmap.height));
             const canvas = document.createElement('canvas');
             canvas.width = Math.max(1, Math.round(bitmap.width * scale));
             canvas.height = Math.max(1, Math.round(bitmap.height * scale));
@@ -1251,14 +1316,28 @@
             context.fillStyle = '#fff';
             context.fillRect(0, 0, canvas.width, canvas.height);
             context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-            bitmap.close();
             let imageData = '';
-            for (const quality of [0.78, 0.68, 0.58]) {
-                const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                imageData = dataUrl.slice(dataUrl.indexOf(',') + 1);
-                if (imageData.length <= 2_400_000) break;
+            if (file.size <= 1_800_000 && bitmap.width * bitmap.height <= 16_000_000) {
+                const original = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('圖片讀取失敗。'));
+                    reader.readAsDataURL(file);
+                });
+                imageData = original.slice(original.indexOf(',') + 1);
             }
-            if (imageData.length > 2_400_000) throw new Error('壓縮後圖片仍太大，請改用較小的照片。');
+            while (!imageData && scale > 0.01) {
+                canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+                canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+                context.fillStyle = '#fff';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                const encoded = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+                if (encoded.length <= 2_400_000) imageData = encoded;
+                else scale *= 0.85;
+            }
+            bitmap.close();
+            if (!imageData) throw new Error('圖片仍太大，請裁切至產品標籤後再上傳。');
             const thumbnail = document.createElement('canvas');
             const thumbnailScale = Math.min(1, 160 / Math.max(canvas.width, canvas.height));
             thumbnail.width = Math.max(1, Math.round(canvas.width * thumbnailScale));
@@ -1365,6 +1444,12 @@
         input.value = '';
         input.style.height = 'auto';
         messages.scrollTop = messages.scrollHeight;
+
+        const requestedFeature = !imageToSend && featureCommand(text);
+        if (requestedFeature) {
+            activateChatFeature(requestedFeature);
+            return;
+        }
 
         // Let standalone social turns reach the server without consuming an
         // in-progress CPU, valuation, recommendation or market answer.
@@ -1492,13 +1577,18 @@
                     }
                 } else {
                     const analysis = String(data.imageAnalysis || '');
-                    const category = /主機板|motherboard/i.test(analysis) ? 'motherboard'
-                        : /記憶體|memory|ram/i.test(analysis) ? 'ram'
-                            : /顯示卡|顯卡|graphics card|video card|gpu/i.test(analysis) ? 'gpu'
-                                : /處理器|processor|\bcpu\b/i.test(analysis) ? 'cpu' : '';
-                    const modelMatch = analysis.match(/(?:model|型號|identified as|product)\s*[:：]?\s*["「]?([^\n,.;」"]{3,80})/i);
+                    const categoryText = analysis.match(/^(?:Category|種類)\s*[:：]\s*([^\n]+)/im)?.[1] || analysis;
+                    const category = /主機板|motherboard/i.test(categoryText) ? 'motherboard'
+                        : /記憶體|memory|ram/i.test(categoryText) ? 'ram'
+                            : /顯示卡|顯卡|graphics card|video card|gpu/i.test(categoryText) ? 'gpu'
+                                : /處理器|processor|\bcpu\b/i.test(categoryText) ? 'cpu' : '';
+                    const modelMatch = analysis.match(/^(?:model|型號)\s*[:：]\s*["「]?([^\n,.;」"]{3,80})/im);
                     const model = modelMatch?.[1]?.trim();
-                    if (category && (!valuationFlow.category || valuationFlow.stage === 'model')) {
+                    const isKnown = value => value && !/^(?:unknown|unreadable|unclear|uncertain|不明|未知|無法辨識)$/i.test(value);
+                    const candidateText = analysis.match(/^Candidate\s*:\s*([^\n]+)/im)?.[1] || '';
+                    const candidates = [...new Set([...(isKnown(model) ? [model] : []),
+                        ...candidateText.split(' / ').map(value => value.trim()).filter(isKnown)])].filter(value => value.length <= 80);
+                    if (category && ['category', 'model', 'photo-confirm'].includes(valuationFlow.stage)) {
                         valuationFlow.category = category;
                         try {
                             const optionsResponse = await fetch(`/api/valuation/model-options?category=${encodeURIComponent(category)}`);
@@ -1508,11 +1598,38 @@
                             valuationFlow.catalogs = [];
                         }
                     }
-                    if (category && model && !/^unknown|不明$/i.test(model) && ['category', 'model'].includes(valuationFlow.stage)) {
-                        valuationFlow.model = model;
-                        await resolveValuationModel(model);
-                        appendValuationReply(`圖片初步辨識為${valuationCategoryLabels[category]}「${valuationFlow.model}」。若型號需修正，請直接輸入正確型號；若正確，請繼續提供保固／使用時間。`);
-                        requestWarrantyOrUsage();
+                    if (category && candidates.length && ['category', 'model', 'photo-confirm'].includes(valuationFlow.stage)) {
+                        valuationFlow.stage = 'photo-confirm';
+                        valuationFlow.photoCandidates = candidates;
+                        let gemma = null, recheck = null;
+                        try { gemma = JSON.parse(analysis.match(/^Gemma observation:\s*(.+)$/im)?.[1] || 'null'); } catch {}
+                        try { recheck = JSON.parse(analysis.match(/^Gemma recheck:\s*(.+)$/im)?.[1] || 'null'); } catch {}
+                        const normalizedSku = value => String(value || '').normalize('NFKC').replace(/intel|core|amd|ryzen|[®™]/gi, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+                        const readableObservation = observation => {
+                            if (!observation) return false;
+                            const raw = observation.observation || '';
+                            // Gemma sometimes returns all fields on one line. A parser failure
+                            // must not turn clearly printed model text into an unreadable photo.
+                            const reported = observation.model || raw.match(/(?:^|[\n,])\s*Model:\s*([^\n,]+)/i)?.[1]?.trim();
+                            if (!isKnown(reported) || normalizedSku(reported) !== normalizedSku(candidates[0])) return false;
+                            if (/(?:unknown|unreadable|illegible|not legible|cannot read|無法看清|不清楚|模糊)/i.test(raw)) return false;
+                            const visibleText = raw.match(/(?:^|[\n,])\s*Evidence:\s*([^\n]+)/i)?.[1] || '';
+                            const hasPrintedModel = normalizedSku(visibleText).includes(normalizedSku(candidates[0]));
+                            return hasPrintedModel || !/Confidence:\s*(?:low|uncertain|低|不確定)/i.test(raw);
+                        };
+                        const readableGemma = readableObservation(gemma) && (!recheck || readableObservation(recheck));
+                        const readableModel = isKnown(model) && !/^Confidence:\s*(?:low|uncertain|低)/im.test(analysis);
+                        if (candidates.length === 1 && !/^Review:\s*conflict/im.test(analysis) && (readableModel || readableGemma)) {
+                            await confirmValuationPhotoModel(candidates[0], true);
+                            return;
+                        }
+                        appendValuationReply(`照片初步辨識為${valuationCategoryLabels[category]}「${candidates.join('」或「')}」。${candidates.length === 1 ? '若正確可回覆「是」或點確認；' : '判讀有分歧，請選擇正確型號；'}也可以直接輸入正確型號，確認後繼續估價。`, [
+                            ...candidates.map(candidate => [`確認 ${candidate}`, () => confirmValuationPhotoModel(candidate).catch(error => appendValuationReply(error.message || '型號確認暫時失敗，請再試一次。'))]),
+                            ['重新輸入型號', () => {
+                                if (valuationFlow?.stage !== 'photo-confirm' || valuationFlow.photoCandidates !== candidates) return;
+                                valuationFlow.stage = 'model'; appendValuationReply('請輸入正確的完整型號。');
+                            }]
+                        ]);
                     } else if (category && valuationFlow.stage === 'category') {
                         valuationFlow.stage = 'model';
                         chooseValuationCategory(category, valuationCategoryLabels[category]);
