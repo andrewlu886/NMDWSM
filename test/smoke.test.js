@@ -259,12 +259,12 @@ test('瓦數 CPU/GPU 型號使用可捲動分組清單並按世代排序', () =>
   assert.equal(classify('Intel', 'Arc Battlemage', 'Arc B580').manufacturerOrder, 2);
 });
 
-test('只在 NVIDIA 廠牌顯示資料庫顯卡選單並恢復原驅動網址', () => {
+test('NVIDIA 與 AMD 廠牌顯示資料庫顯卡選單並保留原驅動網址', () => {
   const toolsPage = fs.readFileSync(path.join(projectRoot, 'public', 'tools.html'), 'utf8');
-  assert.match(toolsPage, /id="nvidia-model-select" style="display:none"/);
+  assert.match(toolsPage, /id="driver-model-select" style="display:none"/);
   assert.match(toolsPage, /function populateDriverModelOptions\(\)/);
   assert.match(toolsPage, /gpuExcelData\s*\.filter\(row => String\(row\['品牌'\]/);
-  assert.match(toolsPage, /includes\('nvidia'\)/);
+  assert.match(toolsPage, /includes\(brand\.toLowerCase\(\)\)/);
   assert.match(toolsPage, /modelNumber >= 2000 && modelNumber <= 5090/);
   assert.match(toolsPage, /modelNumber >= 580/);
   assert.match(toolsPage, /series: Math\.floor\(modelNumber \/ 100\)/);
@@ -272,10 +272,11 @@ test('只在 NVIDIA 廠牌顯示資料庫顯卡選單並恢復原驅動網址', 
   assert.match(toolsPage, /rightKey\.series - leftKey\.series/);
   assert.match(toolsPage, /rightKey\.tier - leftKey\.tier/);
   assert.match(toolsPage, /rightKey\.suffixRank - leftKey\.suffixRank/);
-  assert.match(toolsPage, /option\.textContent = name\.replace\(\/\\s\+12GB\\b\/i, ''\)/);
+  assert.match(toolsPage, /option\.textContent = isNvidia \? name\.replace\(\/\\s\+12GB\\b\/i, ''\) : name/);
   assert.match(toolsPage, /https:\/\/www\.nvidia\.com\/zh-tw\/geforce\/drivers\//);
-  assert.match(toolsPage, /modelInput\.style\.display = isNvidia \? 'none' : ''/);
-  assert.match(toolsPage, /modelSelect\.style\.display = isNvidia \? '' : 'none'/);
+  assert.match(toolsPage, /const isGpuBrand = isNvidia \|\| brand === 'AMD'/);
+  assert.match(toolsPage, /modelInput\.style\.display = isGpuBrand \? 'none' : ''/);
+  assert.match(toolsPage, /modelSelect\.style\.display = isGpuBrand \? '' : 'none'/);
   assert.ok(
     toolsPage.indexOf('if (model && driverLinksData.length > 0)') < toolsPage.indexOf('https://www.nvidia.com/zh-tw/geforce/drivers/'),
     'NVIDIA 應先嘗試資料庫專屬網址，未配對時才回到原廠牌驅動頁'

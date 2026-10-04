@@ -491,8 +491,8 @@
             <div class="form-group">
                 <label>產品型號 (如：B650M AORUS ELITE 或 RTX 4060)</label>
                 <input type="text" id="model-input" placeholder="請輸入完整產品型號..." autocomplete="off">
-                <select id="nvidia-model-select" style="display:none" aria-label="選擇 NVIDIA 顯示卡型號">
-                    <option value="">請選擇 NVIDIA 顯示卡型號...</option>
+                <select id="driver-model-select" style="display:none" aria-label="選擇顯示卡型號">
+                    <option value="">請選擇顯示卡型號...</option>
                 </select>
                 <small id="driver-model-hint" style="display:block; margin-top:8px; color:var(--text-muted);">請輸入您的硬體型號。</small>
             </div>
@@ -996,23 +996,26 @@
     // 驅動程式查詢邏輯 (NVIDIA/AMD 直達驅動專區，其餘跳轉搜尋)
     // ==========================================
     function populateDriverModelOptions() {
-        const modelSelect = document.getElementById('nvidia-model-select');
+        const modelSelect = document.getElementById('driver-model-select');
         const modelInput = document.getElementById('model-input');
         const hint = document.getElementById('driver-model-hint');
         if (!modelSelect || !modelInput || !hint) return;
         const brand = document.getElementById('brand-select').value;
         const isNvidia = brand === 'NVIDIA';
-        modelInput.style.display = isNvidia ? 'none' : '';
-        modelSelect.style.display = isNvidia ? '' : 'none';
-        if (!isNvidia) {
+        const isGpuBrand = isNvidia || brand === 'AMD';
+        modelInput.style.display = isGpuBrand ? 'none' : '';
+        modelSelect.style.display = isGpuBrand ? '' : 'none';
+        if (!isGpuBrand) {
             hint.textContent = '請輸入您的硬體型號。';
             return;
         }
 
         const models = [...new Set(gpuExcelData
-            .filter(row => String(row['品牌'] || '').toLowerCase().includes('nvidia'))
+            .filter(row => String(row['品牌'] || '').toLowerCase().includes(brand.toLowerCase()))
             .map(row => String(row['顯示卡型號'] || '').trim())
             .filter(name => {
+                if (!name) return false;
+                if (!isNvidia) return true;
                 const match = name.match(/\b(RTX|GTX)\s*(\d{3,4})\b/i);
                 if (!match) return false;
                 const modelNumber = Number(match[2]);
@@ -1021,6 +1024,14 @@
                     : modelNumber >= 580;
             })
         )].sort((left, right) => {
+            if (!isNvidia) {
+                const seriesOrder = model => {
+                    const order = classifyGpuRow({ '品牌': brand, '顯示卡型號': model }, model).seriesOrder;
+                    return order === 999 ? -1 : order;
+                };
+                return seriesOrder(right) - seriesOrder(left) ||
+                    right.localeCompare(left, 'en', { numeric: true });
+            }
             const sortKey = model => {
                 const modelNumber = Number(model.match(/\b(?:RTX|GTX)\s*(\d{3,4})\b/i)?.[1]);
                 const normalized = model.toUpperCase();
@@ -1044,22 +1055,23 @@
                 rightKey.suffixRank - leftKey.suffixRank ||
                 left.localeCompare(right, 'en', { numeric: true });
         });
-        modelSelect.replaceChildren(new Option('請選擇 NVIDIA 顯示卡型號...', ''));
+        modelSelect.setAttribute('aria-label', `選擇 ${brand} 顯示卡型號`);
+        modelSelect.replaceChildren(new Option(`請選擇 ${brand} 顯示卡型號...`, ''));
         models.forEach(name => {
             const option = document.createElement('option');
             option.value = name;
-            option.textContent = name.replace(/\s+12GB\b/i, '');
+            option.textContent = isNvidia ? name.replace(/\s+12GB\b/i, '') : name;
             modelSelect.appendChild(option);
         });
         hint.textContent = models.length
-            ? `請從本機資料庫選擇 NVIDIA 顯示卡型號（共 ${models.length} 款）。`
-            : 'NVIDIA 型號資料尚未載入，請稍後再試。';
+            ? `請從本機資料庫選擇 ${brand} 顯示卡型號（共 ${models.length} 款）。`
+            : `${brand} 型號資料尚未載入，請稍後再試。`;
     }
 
     function searchOfficial() {
         const brand = document.getElementById('brand-select').value;
-        const model = brand.includes('NVIDIA')
-            ? document.getElementById('nvidia-model-select').value.trim()
+        const model = brand === 'NVIDIA' || brand === 'AMD'
+            ? document.getElementById('driver-model-select').value.trim()
             : document.getElementById('model-input').value.trim();
         if (model && driverLinksData.length > 0) {
             // 轉小寫並去除空白，提高防呆配對成功率
