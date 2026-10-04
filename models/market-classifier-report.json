@@ -1,0 +1,394 @@
+{
+  "schema": 1,
+  "sourceHash": "e7ef279b5c011174f2fa2ad5b49e96fad686d7b3362bd48f807030b3bddd751e",
+  "splitMethod": "deterministic group-stratified 60/20/20; synthetic held-out rows excluded",
+  "trainingRows": 2665,
+  "validation": {
+    "samples": 857,
+    "correct": 840,
+    "accuracy": 0.9801633605600933,
+    "confusion": {
+      "part_cpu": {
+        "part_cpu": 25
+      },
+      "part_gpu": {
+        "part_gpu": 44,
+        "not_pc": 1
+      },
+      "part_motherboard": {
+        "part_motherboard": 67,
+        "not_pc": 1,
+        "part_psu": 1
+      },
+      "part_ram": {
+        "part_ram": 35,
+        "whole_laptop": 1
+      },
+      "part_ssd": {
+        "part_ssd": 41
+      },
+      "part_hdd": {
+        "part_hdd": 28
+      },
+      "part_case": {
+        "part_case": 131
+      },
+      "part_psu": {
+        "part_psu": 9
+      },
+      "part_monitor": {
+        "part_monitor": 121,
+        "not_pc": 1,
+        "whole_laptop": 1
+      },
+      "part_network": {
+        "part_network": 30,
+        "not_pc": 1
+      },
+      "whole_desktop": {
+        "whole_desktop": 26,
+        "not_pc": 2
+      },
+      "whole_laptop": {
+        "whole_laptop": 54,
+        "accessory": 1,
+        "part_hdd": 1
+      },
+      "accessory_mouse": {
+        "accessory_mouse": 33
+      },
+      "accessory_keyboard": {
+        "accessory_keyboard": 32
+      },
+      "accessory_controller": {
+        "accessory_controller": 1
+      },
+      "accessory_printer": {
+        "accessory_printer": 1
+      },
+      "accessory": {
+        "part_case": 1,
+        "accessory": 116,
+        "not_pc": 4
+      },
+      "not_pc": {
+        "not_pc": 46,
+        "whole_laptop": 1
+      }
+    },
+    "failures": [
+      {
+        "line": 329,
+        "expected": "part_gpu",
+        "predicted": "not_pc",
+        "score": 0.1074547506617726,
+        "title": "藍寶石 氮動 NITRO+ RX9070XT Crimson Desert 赤血沙漠版/註五年-附限量塗裝背板"
+      },
+      {
+        "line": 687,
+        "expected": "part_motherboard",
+        "predicted": "not_pc",
+        "score": 0.5017261289691861,
+        "title": "精粵X99主機板"
+      },
+      {
+        "line": 688,
+        "expected": "part_motherboard",
+        "predicted": "part_psu",
+        "score": 0.16836675200224052,
+        "title": "華南金牌x99"
+      },
+      {
+        "line": 869,
+        "expected": "part_ram",
+        "predicted": "whole_laptop",
+        "score": 0.15227296334605683,
+        "title": "Dell戴爾XPS890089108920 16G DDR42400記憶體條"
+      },
+      {
+        "line": 1930,
+        "expected": "part_monitor",
+        "predicted": "not_pc",
+        "score": 0.29540590347060197,
+        "title": "華碩 VS207DF 〈1A/TN〉Splendid 影像智慧技術"
+      },
+      {
+        "line": 2526,
+        "expected": "part_monitor",
+        "predicted": "whole_laptop",
+        "score": 0.40040331287181125,
+        "title": "LG gram+view 16MR70 〈16吋/2C/IPS〉抗反光面板"
+      },
+      {
+        "line": 2603,
+        "expected": "part_network",
+        "predicted": "not_pc",
+        "score": 0.7524491705266844,
+        "title": "TP-LINK TL-MR100-Outdoor 300M/4G LTE 行動WIFI分享/IP65防水/戶外型"
+      },
+      {
+        "line": 2875,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.29936996449225706,
+        "title": "迷妳電腦酷睿11代 I5/I7OPS電腦 適用教學會議壹體機插拔式主機"
+      },
+      {
+        "line": 2880,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.38138138652995524,
+        "title": "聯達12代全鋁迷妳小主機酷"
+      },
+      {
+        "line": 3060,
+        "expected": "whole_laptop",
+        "predicted": "accessory",
+        "score": 0.3760587404947664,
+        "title": "Genuine捷元 輕巧可拆卸電池 15V i7-1355U/8G/500G/3年保 黑 J0076616 10/10 23:59"
+      },
+      {
+        "line": 3153,
+        "expected": "whole_laptop",
+        "predicted": "part_hdd",
+        "score": 0.5295198502579128,
+        "title": "HP ZBook Firefly G11A 升級3年保"
+      },
+      {
+        "line": 3510,
+        "expected": "accessory",
+        "predicted": "part_case",
+        "score": 0.4522938672843458,
+        "title": "顯卡支架"
+      },
+      {
+        "line": 3641,
+        "expected": "accessory",
+        "predicted": "not_pc",
+        "score": 0.5109961146703589,
+        "title": "銀欣 MR03 螢幕增高架(可拆式手機架、耳機架、收納托盤/承重 20 公斤/黑色)"
+      },
+      {
+        "line": 3717,
+        "expected": "accessory",
+        "predicted": "not_pc",
+        "score": 0.2106797243369104,
+        "title": "羅技 Ue Miniroll 藍芽喇叭(潮玩黑)/最高12小時使用/最多2台裝置/防塵-防水"
+      },
+      {
+        "line": 4103,
+        "expected": "accessory",
+        "predicted": "not_pc",
+        "score": 0.44979624760524384,
+        "title": "電腦主機支架"
+      },
+      {
+        "line": 4104,
+        "expected": "accessory",
+        "predicted": "not_pc",
+        "score": 0.20301225144434343,
+        "title": "電腦顯示器護眼掛燈"
+      },
+      {
+        "line": 4391,
+        "expected": "not_pc",
+        "predicted": "whole_laptop",
+        "score": 0.43960806395397023,
+        "title": "TCL NXTPAPER 14 星鑽灰 / 14.3吋 / 聯發科 MT8781 八核 / 8+8G / 256G / WIFI"
+      }
+    ]
+  },
+  "test": {
+    "samples": 847,
+    "correct": 830,
+    "accuracy": 0.9799291617473436,
+    "confusion": {
+      "part_cpu": {
+        "part_cpu": 22
+      },
+      "part_gpu": {
+        "part_gpu": 40,
+        "accessory": 2,
+        "part_monitor": 1
+      },
+      "part_motherboard": {
+        "part_motherboard": 69
+      },
+      "part_ram": {
+        "part_ram": 36
+      },
+      "part_ssd": {
+        "part_ssd": 40
+      },
+      "part_hdd": {
+        "part_hdd": 28
+      },
+      "part_case": {
+        "part_case": 130
+      },
+      "part_psu": {
+        "part_psu": 8
+      },
+      "part_monitor": {
+        "part_monitor": 123
+      },
+      "part_network": {
+        "part_network": 32
+      },
+      "whole_desktop": {
+        "whole_desktop": 22,
+        "not_pc": 6
+      },
+      "whole_laptop": {
+        "whole_laptop": 55,
+        "part_ram": 1
+      },
+      "accessory_mouse": {
+        "accessory_mouse": 32
+      },
+      "accessory_keyboard": {
+        "accessory_keyboard": 30,
+        "accessory": 1
+      },
+      "accessory_controller": {
+        "accessory_controller": 1
+      },
+      "accessory_printer": {
+        "accessory_printer": 1
+      },
+      "accessory": {
+        "accessory": 117,
+        "not_pc": 2,
+        "accessory_keyboard": 1,
+        "part_monitor": 1
+      },
+      "not_pc": {
+        "not_pc": 44,
+        "accessory": 1,
+        "part_ssd": 1
+      }
+    },
+    "failures": [
+      {
+        "line": 150,
+        "expected": "part_gpu",
+        "predicted": "accessory",
+        "score": 0.2330153449748955,
+        "title": "微星 GT1030 AERO ITX 2GD4 OCV1 1430MHz/DDR4/15cm/三年保/類比輸出"
+      },
+      {
+        "line": 151,
+        "expected": "part_gpu",
+        "predicted": "part_monitor",
+        "score": 0.1730312639146593,
+        "title": "ZOTAC GT1030 2GB GDDR5 HDMI/DVI Low Profile (P10300A-10L)"
+      },
+      {
+        "line": 152,
+        "expected": "part_gpu",
+        "predicted": "accessory",
+        "score": 0.18544550870982754,
+        "title": "ZOTAC GT1030 2GB GDDR5 HDMI/VGA Low Profile P10300E-10L) 類比輸出"
+      },
+      {
+        "line": 2873,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.47600706013508837,
+        "title": "研華工控機IPC-610L原裝4U主機上架式視覺工控電腦"
+      },
+      {
+        "line": 2874,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.35303604571863945,
+        "title": "研華 IPC-610L 工業電腦 工控機"
+      },
+      {
+        "line": 2876,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.6497191150075018,
+        "title": "研拓現貨J1900工控機兩COM雙網NANO工控小主機嵌入式工業主機電腦"
+      },
+      {
+        "line": 2877,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.2987629416168448,
+        "title": "臺式電腦學校教育考試培訓電腦"
+      },
+      {
+        "line": 2878,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.26177025220375066,
+        "title": "美視訊微型工控機國產兆芯飛騰J1900 I3I5I7安卓鋁合金工業主機"
+      },
+      {
+        "line": 2879,
+        "expected": "whole_desktop",
+        "predicted": "not_pc",
+        "score": 0.40283367529293157,
+        "title": "跨境新款口袋迷妳主機WIN11電腦棒"
+      },
+      {
+        "line": 3065,
+        "expected": "whole_laptop",
+        "predicted": "part_ram",
+        "score": 0.6847335439404679,
+        "title": "創見JetRam 16GB DDR5-5600 NB"
+      },
+      {
+        "line": 3460,
+        "expected": "accessory_keyboard",
+        "predicted": "accessory",
+        "score": 0.44491748581921975,
+        "title": "羅技 Slim Solar+ K980 光能無線鍵盤/無線(Logi Bolt)-藍牙/光能供電/支援Mac/接受器需另購"
+      },
+      {
+        "line": 3520,
+        "expected": "accessory",
+        "predicted": "not_pc",
+        "score": 0.6951239081922105,
+        "title": "桌機電腦主機滑輪移動托架底座 附滾輪可伸縮調節寬度主機支架"
+      },
+      {
+        "line": 3523,
+        "expected": "accessory",
+        "predicted": "accessory_keyboard",
+        "score": 0.6057036821938676,
+        "title": "免打孔鍵盤架 帶滑軌鍵盤架"
+      },
+      {
+        "line": 3644,
+        "expected": "accessory",
+        "predicted": "not_pc",
+        "score": 0.5269213693759671,
+        "title": "Raymii LGR-8 夾桌式旋轉洞洞板 (收納架/耳機＆遊戲手把掛架/杯架)【紅黑色】"
+      },
+      {
+        "line": 4102,
+        "expected": "accessory",
+        "predicted": "part_monitor",
+        "score": 0.10960078495348594,
+        "title": "螢幕掛燈"
+      },
+      {
+        "line": 4179,
+        "expected": "not_pc",
+        "predicted": "accessory",
+        "score": 0.1328871842658549,
+        "title": "手臂肘托支撐架"
+      },
+      {
+        "line": 4188,
+        "expected": "not_pc",
+        "predicted": "part_ssd",
+        "score": 0.13373482099392506,
+        "title": "寫字桌"
+      }
+    ]
+  },
+  "limits": "Offline labeled-title classification. No live marketplace accuracy claim. Scores are uncalibrated."
+}

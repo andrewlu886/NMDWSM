@@ -1,0 +1,1437 @@
+{
+  "purpose": "Development validation from local marketplace cache; labels reviewed from titles. Not a blind test and not used to train model weights.",
+  "cases": [
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-藍寶石獨家特仕機】AMD R7 7700/B650/DDR5 16G/SSD 1TB/RX 7650 GRE/650W電源/海景機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228303",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-藍寶石獨家特仕機】AMD R5 7500F/B650/DDR5 16G/SSD 1TB/RX 7650 GRE/650W電源/海景機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228302",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "[組合價]SONY 索尼 PlayStation SONY PS5 Pro 主機 (CFI-7022B01)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228041",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【欣亞JOHN選 限定主機】Ultra 5 250K Plus / RTX5060TI 16G / B860 / DDR5-6000 32G / SSD 1TB / 雙塔空冷 / 750W / T300透側機殼 / Windows 11 Home / 四年完美保固<span style=\"color: #ff0000\">【市價73386元】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/227192",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【欣亞JOHN選 限定主機】AMD R5 7500F / RTX5060 / B850 / DDR5-5600 16G / SSD 1TB / ARGB空冷 / 750W / 海景房機殼  / Windows 11 Home / 四年完美保固<span style=\"color: #ff0000\">【市價49526元】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/227119",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "SONY 索尼 PlayStation 5 數位版主機(PS5 Slim)(CFI-2118B01)\r\n",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/225011",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "PlayStation SONY PS5 Slim 輕型光碟版主機(CFI-2118A01)\r\n",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/225010",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "銀欣 SST-RM4A 工業機殼 (4U高水冷相容性機架式伺服器機殼，最大可支援至SSI-EEB主機板)<span style=\"color: #ff0000\">【客訂商品】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/216646",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "酷碼SNEAKER X 球鞋造型電腦主機/I9-14900K/Z790/32G(16G*2)/RTX4070/4TB Gen4 SSD/850W/一年保固",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/196696",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "酷碼SNEAKER X 球鞋造型電腦主機/I5-14600K/Z790/32G(16G*2)/RTX4070/4TB Gen4 SSD/850W/一年保固",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/196695",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "銀欣 SST-RM42-502 工業機殼 (具有水冷相容性的4U 機架式伺服器機殼 支援一組240mm水冷 最大可支援至SSI-EEB主機板)<span style=\"color: #ff0000\">【客訂商品】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/196231",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "銀欣 SST-RM44 工業機殼 (高水冷相容性的4U機架式伺服器機殼 支援一組360mm水冷 最大可支援至SSI-EEB主機板)<span style=\"color: #ff0000\">【客訂商品】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/196230",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "銀欣 SST-RM400 工業機殼 (支援ATX (PS2)/ Mini redundant電源供應器深度達160mm 最大可支援至SSI-CEB主機板)<span style=\"color: #ff0000\">【客訂商品】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/196229",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【欣亞JOHN選 限定主機】AMD R7 7800X3D / RTX 5070TI / B850 / DDR5 32G / SSD 1TB / 360水冷 / 850W / 華碩海景房機殼  / Windows 11 Home / 四年完美保固<span style=\"color: #ff0000\">【市價98226元】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228406",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機搭購優惠】狼蛛 AULA F99 PRO 煙藍海霧 機械式鍵盤 (星矢軸/中文/96%/有線/無線/藍芽/RGB燈光/熱插拔/多功能旋鈕/二年保固/一年換新)<span style=\"color: #ff0000\">【原價2190】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228380",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機搭購優惠】狼蛛 AULA F108 PRO 曜夜流光 機械鍵盤 (收割者軸/中文/有線/無線/藍芽/自定義RGB燈光/熱插拔/1.14吋彩色LED螢幕/多功能旋鈕/二年保固/一年換新)<span style=\"color: #ff0000\">【原價2690】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228379",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機搭購優惠】狼蛛 AULA WIN68 MAX 熔岩矩陣 機械鍵盤 (咏春磁軸/中文/65%/有線/RGB燈光/熱插拔/8K回報率/二年保固/一年換新)\r\n<span style=\"color: #ff0000\">【原價1590】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228378",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機搭購優惠】狼蛛 AULA HERO68 HE 擎翼幻紫 機械式鍵盤 (黑皇磁軸/側刻/65%/有線/RGB燈光/熱插拔/8K回報率/二年保固/一年換新)<span style=\"color: #ff0000\">【原價1590】</span>",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228377",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R5 9600X/B850/DDR5 32G/SSD 1TB/RTX 5060TI 16GB/850W電源/原廠機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228369",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R7 9700X/B850/DDR5 32G/SSD 1TB/RTX 5060TI 16GB/850W電源/原廠機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228368",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R7 7800X3D/B850/DDR5 32G/SSD 1TB/RTX 5070 12GB/850W電源/原廠機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228367",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R7 9700X/B850/DDR5 32G/SSD 1TB/RTX 5070 12GB/850W電源/原廠機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228365",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R5 9600X/B850/DDR5 32G/SSD 1TB/RTX 5070 12GB/850W電源/原廠機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228364",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R7 7700/B650/DDR5 16G/SSD 1TB/RTX 5060Ti 8GB/650W電源/原廠機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228363",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R5 7500F/B650/DDR5 16G/SSD 1TB/RTX 5060Ti 8GB/650W電源/原廠機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228362",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選遊戲主機-決勝時刻】AMD R5 5600X/B550/DDR4 16G/SSD 1TB/RTX 5060Ti 8GB/650W電源/RGB機殼/Windows 11 作業系統(試用版)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/228304",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "追風者 Phanteks NV9 PREMIUM LED KIT 燈效套件 白 (磁吸式設計/支援多家主機板/NV9系列專用)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/220653",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "追風者 Phanteks NV9 PREMIUM LED KIT 燈效套件 黑 (磁吸式設計/支援多家主機板/NV9系列專用)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/220652",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "APC 艾比希 Easy UPS SRV2KRA-TW 在線式不斷電系統 (2000VA/120V/主機3年保固/電池2年保固)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/212712",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "APC 艾比希 BV1000-TW 在線互動式不斷電系統 (1000VA/6個不斷電插座/主機3年保固/電池2年保固)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/212700",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "APC 艾比希 BV800-TW 在線互動式不斷電系統 (800VA/6個不斷電插座/主機3年保固/電池2年保固)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/212699",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "APC 艾比希 BV500-TW 在線互動式不斷電系統 (500VA/6個不斷電插座/主機3年保固/電池2年保固)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/212698",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【主機筆電加購價】【PowerA】PC專用無線遊戲手把- 戰龍",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/208763",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "雷爵RockTek G2 4K影音串流遊戲主機/Netflix/Disney+/Google認證(開通APP送Litv一個月)",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/182176",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "ASROCK 華擎 2Port USB2.0 擴充埠 - 限搭華擎主機使用",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/129449",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【精選之家】良值(IINE)適用索尼PS5主機豎放底座  PS5SlimPRO全機型通用多功能支架 手柄快充充電座",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22629131285775",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【原裝深藍】NDSL遊戲機 任天堂主機 掌上型遊戲機 復古遊戲機 懷舊主機 深藍色",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22639707131562",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【毀滅戰士5】PS4遊戲片 毀滅戰士 永恆 中文版 射擊遊戲 動作遊戲 家用主機遊戲",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637598041366",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【休閒模擬】Switch卡帶 遊戲片 模擬經營遊戲 休閒遊戲 熱門遊戲 任天堂主機專用",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637597844399",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【早期大板】世嘉MD遊戲機 復古遊戲機 懷舊主機 插卡遊戲機 電視遊戲機 經典款 95年購入",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637596252133",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【直讀通吃】PS1遊戲機 復古主機 電視遊戲機 懷舊遊戲主機 光碟遊戲機 已改直讀 正版盜版刻錄盤通吃 正常執行",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637596111294",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【升級版】復古掌機 RG35XX 便攜式遊戲機 掌上遊戲機 MINI遊戲機 懷舊遊戲機 經典遊戲主機",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637589593582",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "★御玩家★活動品 買SEGA 掌上型主機 內建20款遊戲 Gopher 遊戲機 可外接電視 送800款遊戲EX30088",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?21746323972095",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "限時下殺索尼PS一代主機專用SUNSOFT可編程手柄 功能強悍 日本原裝老貨",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22415306988839",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "限時下殺任天堂SFC 超級任天堂 超任主機專用手柄四分插 1拖4 手柄分配器",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22415306901070",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "出清價! 網路最便宜 福箱 稀有 1600-16 SEGA MD MD1 單 主機 + 1手把 2手功能完好 無其他配件",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?21931308878404",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "出清價! 功能完好 全零件都是 原廠 網路最便宜 任天堂 2手 GB GAME BOY POCKET 主機 GBP 如圖",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22222273655097",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "出清價! 功能完好 全零件都是 原廠 網路最便宜 任天堂 2手 GB GAME BOY POCKET 主機 GBP 如圖",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22143729906173",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "出清價! 僅小斑功能完好 全零件都是 原廠 網路最便宜 任天堂 2手 GB GAME BOY POCKET 主機 GBP",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22046932053309",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "稀有 美規 SEGA MD Mini 主機 GENESIS Mini 未使用全新機 僅拆檢",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22640778507749",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【動作冒險】NS2遊戲 導演剪輯版 原封全新 港版遊戲 原裝盒裝 電視遊戲 主機遊戲",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637597377817",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【經典懷舊】SFC超任遊戲機 復古遊戲機 日版主機 懷舊電玩 經典遊戲機 功能正常 整體成色優",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637596525361",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【正常使用】初代版本遊戲主機 復古遊戲機 電視遊樂器 懷舊主機 經典遊戲機 功能正常",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637596330556",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "GBC 皮卡黃主機",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22636542662802",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "SEGA MD  世嘉主機 電視遊樂器",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22635517100686",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【精品現貨】玩嘉三體 臺式電腦主機機箱 全透網咖電競遊戲RGB燈光水冷ATX機箱",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22629131706414",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "(DIY)【鯨魚島】GeForce RTX 5060 Ti電競主機(I5-14400F/H610/32G/1TB)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURA-A900IYRJC",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【星系戰艦】I5-12400F六核RTX3050電玩娛樂主機(16G D4/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC69-A900IX0LD",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【星系戰艦II】I5-12400F六核RTX3050電玩娛樂Win11主機(16G D4/1TB)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC69-A900IX0LY",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【星系戰艦II】I5-12400F六核RTX3050電玩Win11Pro主機(16G D4/1TB)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC69-A900IX0LF",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【冥攤之上】R7-7700八核RTX5060電競主機(32G/1TB SSD/WIFI)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC69-A900IZCCN",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "微星認證主機{值得}R7八核 RTX 5060 電競電玩電腦主機 (R7-7700/B650/32G D5/1TB SSD/PBM)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUK1-A900J5BLY",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【不由分說】I7-14700二十核RTX5060電競主機(32G D5/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC69-A900J2ZH6",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "(DIY)【鯨魚島II】GeForce RTX 5060 Ti Win11電競主機(I5-14400F/H610/32G/1TB)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURA-A900IYRQU",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【不由分說II】I7-14700二十核RTX5060電競Win11主機(32G D5/1TB)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC69-A900J2ZKP",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【急流勇退】I7-14700二十核WIFI商務主機(32G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC68-A900J5WAG",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【急流勇退II】I7-14700二十核WIFI商務主機Win11主機(32G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC68-A900J5WDS",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "(DIY)B650平台【劍魔II】RTX 3050 電玩主機(R7-7700/B650/16G D5/1TB SSD/Win11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURK-A900IIS8O",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "DIY平台【獸神武士II】I5-14400十核商務Win11主機(16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSBC68-A900J4OWR",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "系列【混沌鍛爐】Ultra5 225 10核 RTX5060Ti 電腦主機(16G/500G SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUX3-A900K7838",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "系列【橙汁高麗】R5-9600X 6核 RTX3050 電腦主機(16G/500G SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUX3-A900KEKYN",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "系列【橙汁魚頭】R5-9600X 6核 RTX3050 電腦主機(16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUX3-A900KEKWH",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "系列【剁椒肉片】R7-8700G 8核 電腦主機(32G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUX3-A900K6V2O",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "系列【泡椒牛筋】R7-8700G 8核 RTX3050 電腦主機(16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUX3-A900K5WD8",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "系列【擎天厚德】Ultra5 225 10核 電腦主機(16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUX3-A900K5WGR",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "系列【剁椒牛筋】R7-8700G 8核 電腦主機(32G/500G SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAUX3-A900K5DIB",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【技嘉平台】i5十核GeForce RTX 5060 {完美世界}電競電腦主機(I5-14400F/H610/16G/1TB_M.2)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14181666",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【Philips 飛利浦】2.2L免安裝瞬熱濾淨飲水機 ADD5910M(主機內含濾芯)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9737754",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機+《NS2卡比的馭天飛行者》+《9H鋼化貼》",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14667880",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【SONY 索尼】PlayStation 5 光碟版主機(PS5 Slim)(CFI-2118A01)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14881502",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【雷達】momo獨規品 超智慧薄型液體電蚊香-無臭無味/無香精(10補充贈1主機)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=13713898",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機(台灣公司貨)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=13875042",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【技嘉平台】i5十核GeForce RTX 5060 Win11{完美世界W}電競電腦主機(I5-14400F/H610/16G/1TB_M.2)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14181667",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【華碩平台】i5六核{日向V}文書電腦主機(i5-12400/H610/16G D4/500G)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=12853285",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機(台灣公司貨)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=13883480",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 單主機+NS2 遊戲任選 贈攜帶包+保護貼",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15343138",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch電光藍紅Joy-Con續航力加強版(日規主機)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=11558097",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【佳貝恩】上寰電動吸鼻器 創意象 SH-596(含主機x1、鼻腔吸引瓶組件x1)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=13530339",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機+《瑪利歐賽車世界》+《原廠 NS2 賽車手把方向盤》+《9H鋼化貼》",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=13893836",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Steam Deck】【就是要玩】STEAM DECK OLED 512G 1T 掌上遊戲主機 台灣公司貨 STEAM DECK 掌機 LCD",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00059560007861",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【finamill】電動香料研磨器(一主機可換多個調味料罐 節省收納空間)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14744331",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機+《NS2寶可夢傳說 Z-A》+《9H鋼化貼》",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14571765",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【ASUS 華碩】TUF GAMING B760M-PLUS WIFI D4 主機板",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15612452",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【MSI 微星】MPG X870E CARBON WIFI MAX 主機板",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15370209",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【華碩】C+M組合★TUF GAMING B850M-PLUS II 主機板+AMD Ryzen R7-9800X3D CPU處理器",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15147621",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Meta Quest】Meta Quest 3 VR頭戴式裝置主機512G(周邊大全配)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=12772736",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【賀眾牌】桌上型溫熱純水飲水機UR-672BW-1(主機含濾芯/全濾芯NSF認證/RO逆滲透/飲水設備/原廠/基本安裝)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=6180109",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機+《NS2密特羅德 究極4 穿越未知》+《9H鋼化貼》",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14736742",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 Pokemon Pokopia主機組+《NS2 斯普拉遁 塗擊隊》+《9H鋼化貼》",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15502901",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機+《NS2 超級瑪利歐派對 空前盛會＋空前盛會TV》+《9H鋼化貼》",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14237373",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【華碩】C+M組合★TUF GAMING B850-PLUS WIFI7 DDR5 AMD主機板+AMD Ryzen R7-9800X3D CPU處理器",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15147630",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【技嘉】C+M組合★B850M FORCE WF6E V2 AMD主機板+AMD Ryzen R7-9800X3D CPU處理器",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15333452",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Nintendo 任天堂】Switch 2 主機+《Joy-con 2》+《NS2便攜包》+《9H鋼化貼》",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15389664",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【Philips 飛利浦】2.2L免安裝瞬熱濾淨飲水機 ADD5910M(主機內含濾芯)+超濾多重過濾濾芯3入組",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15360404",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【ASUS 華碩】TUF GAMING B850M-PLUS WIFI7 主機板",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14906462",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "主機",
+      "title": "【LEGO 樂高】高雄阿育 ∣ 樂高 LEGO 72306 PlayStation 主機 復古 PS1 可搭配 40899 宇宙機器人",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00091110000290",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "酷碼SNEAKER X 球鞋造型電腦主機/I9-14900K/Z790/32G(16G*2)/RTX4070/4TB Gen4 SSD/850W/一年保固",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/196696",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "酷碼SNEAKER X 球鞋造型電腦主機/I5-14600K/Z790/32G(16G*2)/RTX4070/4TB Gen4 SSD/850W/一年保固",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/196695",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "【小圓二手拍賣】ZOTAC RTX 4070 12GB Twin Edge/ZT-D40700H-10M顯示卡/非礦卡",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22630202903234",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "【MJ 3C】華碩 DUAL-RTX4070-O12GD6 EVO 搭機更優惠",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22509805192036",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "聯嘉資訊 索泰ZOTAC RTX 3080 Trinity 10GB GDR6X 二手 保三年 效能同等RTX 4070",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22120497994896",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI微星 RTX 4070 GAMING X SLIM WHITE 12G 顯示卡   含稅價",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22408823713617",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "筆記型電腦 電競筆電 高效能筆電 14代i9處理器 RTX4070獨顯 18吋大螢幕 遊戲玩家首選 輕薄便攜",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22631281544671",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "雷索 RTX4070 Super 12G光追黑悟空遊戲Ai計算跑圖設計渲染顯卡",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22524789489976",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "【臺灣發貨 可開發統編發票】Bykski嗯-RTX4070S-SR顯示卡水冷頭全斤屬結構嗯VIDIARTX4070S",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22640778556451",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "【臺灣發貨 可開發統編發票】Bykski嗯-IG4070ZF-X-V2顯示卡水冷頭七彩虹戰斧RTX4070豪華版",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22640778272737",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "BykskiN-IG4070F-X-V2顯示卡誰稜頭七彩虹戰斧RTX4070豪華版",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637635078571",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "BykskiN-RTX4070S-SR顯示卡誰稜頭全斤屬結構NVIDIARTX4070S",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22637634863156",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "【可開票】全新未拆封華碩DUAL-RTX4070-O12GD6-EVO",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22634453039102",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "盈通RTX4070Ti 櫻瞳顯示卡 花嫁水著 電競遊戲 顯卡 現貨 保固",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22632325457708",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel 14代I5十核心RTX5060TI{童話雪糕}AI電競機(I5-14400F/B760/RTX5060TI/16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILEP4",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel 14代I5十核心RTX5060TI{童話雪糕 W}AI電競機(I5-14400F/B760/RTX5060TI/16G/1TB SSD/WIN11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILEVM",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel 14代I5十核心RTX5060TI{童話雪糕III}AI電競機(I5-14400F/B760/RTX5060TI/32G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILERJ",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel 14代I7二十核心RTX5060TI{小熊樂園II}AI電競機(I7-14700F/B760/RTX5060TI/16G/2TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILF2F",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel 14代I7二十核心RTX5060TI{小熊樂園}AI電競機(I7-14700F/B760/RTX5060TI/16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILF0T",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel14代I5十核心RTX5070{夢境雲朵}AI電競主機(I5-14400F/B760/RTX5070/16G/1TB)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IUW26",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R7八核心RTX5060TI{罪惡之島III}AI電競機(R7-7700/B650/RTX5060TI/32G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURH-A900IP278",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel 14代I5十核心RTX5060TI{童話雪糕II W}AI電競機(I5-14400F/B760/RTX5060TI/16G/2TB SSD/WIN11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILEYF",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "Intel 14代I7二十核心RTX5060TI{小熊樂園 W}AI電競機(I7-14700F/B760/RTX5060TI/16G/1TB SSD/WIN11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILF8R",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R5六核心RTX5060TI{蛋蛋槍戰II}AI電競機(R5-7500F/B650/RTX5060TI/16G/2TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IOYZ1",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R5六核心RTX5060TI{蛋蛋槍戰}AI電競機(R5-7500F/B650/RTX5060TI/16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IOYLG",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R5六核心RTX5060TI{蛋蛋槍戰III}AI電競機(R5-7500F/B650/RTX5060TI/32G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IOZ4V",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R7八核心RTX5060TI{罪惡之島}AI電競機(R7-7700/B650/RTX5060TI/16G/1TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IP0YG",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R5六核心RTX5060TI{蛋蛋槍戰III W}AI電競機(R5-7500F/B650/RTX5060TI/32G/1TB SSD/WIN11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IP0O3",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R5六核心RTX5060TI{蛋蛋槍戰V}AI電競機(R5-7500F/B650/RTX5060TI/32G/2TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IOZD0",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R7八核心RTX5060TI{罪惡之島II}AI電競機(R7-7700/B650/RTX5060TI/16G/2TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURH-A900IP1YP",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R5六核心RTX5060TI{蛋蛋槍戰II W}AI電競機(R5-7500F/B650/RTX5060TI/16G/2TB SSD/WIN11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IOZIP",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R5六核心RTX5060TI{蛋蛋槍戰 W}AI電競機(R5-7500F/B650/RTX5060TI/16G/1TB SSD/WIN11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900IOZEP",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "lntel 14代I5十核心RTX5060TI{童話雪糕II}AI電競機(I5-14400F/B760/RTX5060TI/16G/2TB SSD)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURE-A900ILEQP",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "AMD R7八核心RTX5060TI{罪惡之島II W}AI電競機(R7-7700/B650/RTX5060TI/16G/2TB SSD/WIN11)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DSAURH-A900IP2GZ",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "華碩平台 R5六核GeForce RTX 4070 Win11{創作靈魂W}創作者專用主機(R5-5600/32G/1TB_M.2)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=11807023",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "【Acer 宏碁】全新拆封★18吋i7 RTX4070電競筆電-黑神話悟空(Predator/PH18-71-77ZF/i7-13700HX/32G/1T/W11",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=12871603",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "華碩平台 I7十六核{創作遠圖W}RTX4070Ti-12G獨顯Win10/11電玩機(i7-13700F/32G/1TB_M.2)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=11807028",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Ventus GeForce RTX 5070 Ti 16GB GDDR7 PCI Express 5.0 ATX Graphics Card RTX 5070 TI 16G VENTUS 3X OC",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-5070-ti-16g-ventus-3x-oc-geforce-rtx-5070-ti-16gb-graphics-card-triple-fans/p/N82E16814137933",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "GIGABYTE GeForce RTX 4070 SUPER WINDFORCE OC 12G Graphics Card, 3x WINDFORCE Fans, 12GB 192-bit GDDR6X, GV-N407SWF3OC-12GD  Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-windforce-gv-n407swf3oc-12gd-geforce-rtx-4070-super-12gb-graphics-card/p/N82E16814932683",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "GIGABYTE WINDFORCE GeForce RTX 4070 12GB GDDR6X PCI Express 4.0 x16 ATX Graphics Card GV-N4070WF3OC-12GD",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-windforce-gv-n4070wf3oc-12gd-geforce-rtx-4070-12gb-graphics-card-triple-fans/p/N82E16814932611",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS TUF Gaming NVIDIA GeForce RTX 4070 Ti OC Edition Gaming Graphics Card (PCIe 4.0, 12GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) TUF-RTX4070TI-O12G-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-tuf-gaming-tuf-rtx4070ti-o12g-gaming-geforce-rtx-4070-ti-12gb-graphics-card-triple-fans/p/N82E16814126606",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS TUF Gaming NVIDIA GeForce RTX 4070 Ti SUPER OC Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) TUF-RTX4070TIS-O16G-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-tuf-gaming-tuf-rtx4070tis-o16g-gaming-geforce-rtx-4070-ti-super-16gb-graphics-card-triple-fans/p/N82E16814126685",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Ventus GeForce RTX 4070 SUPER 12GB GDDR6X PCI Express 4.0 ATX Graphics Card RTX 4070 SUPER 12G VENTUS 2X OC",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-super-12g-ventus-2x-oc-geforce-rtx-4070-super-12gb-graphics-card-double-fans/p/N82E16814137861",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS Dual GeForce RTX 4070 12GB GDDR6 PCI Express 4.0 ATX Graphics Card DUAL-RTX4070-O12GD6-EVO 12GB GDDR6",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-dual-rtx4070-o12gd6-evo-geforce-rtx-4070-12gb-graphics-card-air-cooler/p/N82E16814126737",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "GIGABYTE GeForce RTX 4070 Ti EAGLE OC 12G (rev. 2.0) Graphics Card, 3x WINDFORCE Fans, 12GB 192-bit GDDR6X, GV-N407TEAGLE OC-12GD Rev2.0 Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-gv-n407teagle-oc-12gd-rev-2-0-geforce-rtx-4070-ti-12gb-graphics-card-triple-fans/p/N82E16814932632",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "GIGABYTE GeForce RTX 4070 Ti SUPER WINDFORCE OC 16G Graphics Card, 3x WINDFORCE Fans, 16GB 256-bit GDDR6X, GV-N407TSWF3OC-16GD Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-windforce-gv-n407tswf3oc-16gd-geforce-rtx-4070-ti-super-16gb-graphics-card-triple-fans/p/N82E16814932678",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Ventus GeForce RTX 4070 SUPER 12GB GDDR6X PCI Express 4.0 ATX Graphics Card RTX 4070 SUPER 12G VENTUS 2X",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-super-12g-ventus-2x-geforce-rtx-4070-super-12gb-video-cards-double-fans/p/1FT-0009-00E48",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "GIGABYTE GeForce RTX 4070 Ti WINDFORCE OC 12G Graphics Card, 3x WINDFORCE Fans, 12GB 192-bit GDDR6X, GV-N407TWF3OC-12GD Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-windforce-gv-n407twf3oc-12gd-geforce-rtx-4070-ti-12gb-graphics-card-triple-fans/p/N82E16814932623",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS Dual GeForce RTX 4070 Ti SUPER OC Edition (PCIe 4.0, 16GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, 2.56-slot design, Axial-tech fan design, 0dB technology) DUAL-RTX4070TIS-O16G",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-dual-rtx4070tis-o16g-geforce-rtx-4070-ti-super-16gb-graphics-card-triple-fans/p/N82E16814126728",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS TUF Gaming NVIDIA GeForce RTX 4070 Ti SUPER White Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) TUF-RTX4070TIS-16G-WHITE-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-tuf-gaming-tuf-rtx4070tis-16g-white-gaming-geforce-rtx-4070-ti-super-16gb-video-cards-triple-fans/p/1FT-000Y-00C57",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS ProArt GeForce RTX 4070 Ti SUPER OC Edition Graphics Card (PCIe 4.0, 16GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a) PROART-RTX4070TIS-O16G",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-proart-rtx4070tis-o16g-geforce-rtx-4070-ti-super-16gb-graphics-card-triple-fans/p/1FT-000Y-00BU1",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS Dual GeForce RTX 4070 SUPER EVO OC Edition 12GB GDDR6X (PCIe 4.0, 12GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, 2.5-slot design, Axial-tech fan design, 0dB technology) DUAL-RTX4070S-O12G-EVO",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-dual-rtx4070s-o12g-evo-geforce-rtx-4070-super-12gb-graphics-card-double-fans/p/N82E16814126711",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Gaming GeForce RTX 4070 Ti SUPER 16GB GDDR6X PCI Express 4.0 ATX Graphics Card RTX 4070 Ti SUPER 16G GAMING X SLIM",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-ti-super-16g-gaming-x-slim-geforce-rtx-4070-ti-super-16gb-graphics-card-triple-fans/p/N82E16814137855",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Gaming GeForce RTX 4070 Ti 12GB GDDR6X PCI Express 4.0 ATX Graphics Card,  RTX 4070 Ti GAMING X SLIM 12G Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-ti-gaming-x-slim-12g-geforce-rtx-4070-ti-12gb-video-cards-triple-fans/p/1FT-0009-00DZ1",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "NVIDIA GeForce RTX 4070 SUPER Founders Edition Graphics Card 12GB GDDR6X - Titanium and Black",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/nvidia-founders-edition-900-1g141-2534-000-geforce-rtx-4070-super-12gb-graphics-card/p/1FT-0004-008P2",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Gaming GeForce RTX 4070 12GB GDDR6X PCI Express 4.0 ATX Graphics Card RTX 4070 GAMING X TRIO 12G",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-gaming-x-trio-12g-geforce-rtx-4070-12gb-graphics-card-triple-fans/p/N82E16814137791",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ZOTAC GAMING GeForce RTX 4070 Ti SUPER Trinity OC White Edition DLSS 3 16GB GDDR6X 256-bit 21 Gbps PCIE 4.0 Gaming Graphics Card, IceStorm 2.0 Advanced Cooling, SPECTRA RGB Lighting, ZT-D40730Q-10P",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/zotac-trinity-zt-d40730q-10p-geforce-rtx-4070-ti-super-16gb-graphics-card-triple-fans/p/N82E16814500577",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Suprim GeForce RTX 4070 Ti 12GB GDDR6X PCI Express 4.0 Graphics Card, RTX 4070 Ti SUPRIM X 12G Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-ti-suprim-x-12g-geforce-rtx-4070-ti-12gb-video-cards-triple-fans/p/1FT-0009-00DY9",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "GIGABYTE AERO GeForce RTX 4070 Ti 12GB GDDR6X PCI Express 4.0 x16 ATX Graphics Card GV-N407TAEROV2-12GD",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-gv-n407taerov2-12gd-geforce-rtx-4070-ti-12gb-video-cards-triple-fans/p/1FT-000A-00976",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS ProArt GeForce RTX 4070 SUPER OC Edition Graphics Card (PCIe 4.0, 12GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a) PROART-RTX4070S-O12G",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-nvidia-rtx-4070-super-nvidia-geforce-rtx-40-series-12gb-graphics-card/p/1FT-000Y-00BK1",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "GIGABYTE AORUS GeForce RTX 4070 Ti MASTER 12G Graphics Card, 3x WINDFORCE Fans, 12GB 192-bit GDDR6X, GV-N407TAORUS M-12GD Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/p/1FT-000A-00980",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Ventus GeForce RTX 4070 12GB GDDR6 PCI Express 4.0 ATX Graphics Card RTX 4070 VENTUS 2X E1 12G",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-ventus-2x-e1-12g-geforce-rtx-4070-12gb-video-cards-double-fans/p/1FT-0009-00E46",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Gaming GeForce RTX 4070 Ti SUPER 16GB GDDR6X PCI Express 4.0 ATX Graphics Card,  RTX 4070 Ti SUPER 16G GAMING X SLIM Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-ti-super-16g-gaming-x-slim-geforce-rtx-4070-ti-super-16gb-video-cards-triple-fans/p/1FT-0009-00DY0",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MSI Ventus GeForce RTX 4070 12GB GDDR6X PCI Express 4.0 ATX Graphics Card RTX 4070 VENTUS 2X E 12G OC",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4070-ventus-2x-e-12g-oc-geforce-rtx-4070-12gb-video-cards-double-fans/p/1FT-0009-00E38",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS TUF Gaming NVIDIA GeForce RTX 4070 Ti OC Edition Gaming Graphics Card (PCIe 4.0, 12GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) TUF-RTX4070TI-O12G-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-tuf-gaming-tuf-rtx4070ti-o12g-gaming-geforce-rtx-4070-ti-12gb-graphics-card-triple-fans/p/1FT-000Y-00BT8",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "ASUS TUF Gaming NVIDIA GeForce RTX 4070 Ti SUPER White OC Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) TUF-RTX4070TIS-O16G-WHITE-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-tuf-gaming-tuf-rtx4070tis-o16g-white-gaming-geforce-rtx-4070-ti-super-16gb-graphics-card-triple-fans/p/1FT-000Y-00BW5",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "NVIDIA GeForce RTX 4070 Founders Edition Graphics Card 12GB GDDR6X - Titanium and Black",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/nvidia-founders-edition-900-1g141-2544-000-geforce-rtx-4070-12gb-graphics-card/p/1FT-0004-00858",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MXZ  High Performance Gaming PC ,AMD Ryzen 7 7700 , GeForce RTX 4070 SUPER ,16GB DDR5 , NVME M2 1 T, 6RGB Fans,Windows 11 Pro Ready to use, Gamer Desktop Computer(R7 7700| RTX 4070 SUPER)",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/mxz-gaming-desktop-geforce-rtx-4070-super-amd-ryzen-7-7700-32gb-ddr5-1tb-ssd-black/p/3D5-002D-000E7",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MXZ Gaming PC AMD Ryzen 5 5600X , GeForce RTX4070,16GB DDR4,  KC3000 M.2 SSD 1T, B450, 6RGB Fans,Windows 11 Pro , Gamer Desktop Computer(R5 5600X| RTX4070)",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/mxz-gaming-desktop-geforce-rtx-4070-amd-ryzen-5-5600x-16gb-ddr4-1tb-ssd-black/p/3D5-002D-000D5",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MXZ High Performance Gaming PC, AMD Ryzen 5 9600X,GeForce RTX 4070 Super, B650,16GB DDR5,1TB NVME, 5 RGB Fans, Windows 11 Pro Ready to",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/p/3D5-002D-000K6",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MXZ Intel Core i5 14400F 4.7GHz,GeForce RTX 4070, Gaming PC ,16GB DDR4, M.2 SSD 1T, B760, 6RGB Fans,Windows 11 Pro , Gamer Desktop Computer(I5 14400F| RTX 4070)",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/mxz-gaming-desktop-pcs-geforce-rtx-4070-intel-core-i5-14400f-16gb-ddr5-1tb-ssd/p/3D5-002D-000M3",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "MXZ Gaming Desktop PC, Intel Core i7 14700KF, GeForce RTX 4070 Super,B760 ,16GB DDR5,1TB NVME, 5 RGB Fans, Windows 11 Pro Ready to(I7 14700KF| RTX 4070 Super)",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/p/3D5-002D-000M9",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "rtx4070",
+      "title": "CLX SET Gaming Desktop - Liquid Cooled Intel i9 13900KF 3.0GHz 24-Core Processor, 64GB DDR5-5600 Memory, GeForce RTX 4070 12GB GDDR6X Graphics, 2TB NVMe M.2 SSD, 6TB HDD, WiFi, Windows 11 Home",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/clx-gaming-desktop-geforce-rtx-4070-intel-core-i9-13900kf-64gb-ddr5-2tb-ssd-6tb-hdd-tgmsetrtu3402bm-black/p/3D5-000B-002S5",
+      "general": true,
+      "precise": false
+    }
+  ]
+}

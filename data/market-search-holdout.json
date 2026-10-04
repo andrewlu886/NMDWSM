@@ -1,0 +1,822 @@
+{
+  "purpose": "Final external-title holdout. Labels fixed before first prediction. Excludes normalized source/development titles and duplicate URLs. Cached historical titles, not current availability. GPU query only; does not establish CPU or live-market performance.",
+  "cacheKey": "[6,\"4080\",[\"sinya\",\"ruten\",\"pchome\",\"momo\",\"newegg\",\"yahoo\"]]",
+  "cacheUpdatedAt": 1791060142712,
+  "pipelineFingerprints": {
+    "src/services/computer-product.js": "9bfd642ce2e7324f8df9e9d73372d370277b5a940a40c5703aff045bbfc595d0",
+    "src/services/classifier-core.js": "a469d9bffb5886fe97c36614f210102382623fbc778482bc5718c04ed60317ee",
+    "src/services/product-classifier.js": "9ca775fa9016e5c9f55d6f5e7cff51f62c64f78d7399faeff76b15750ac09965",
+    "public/market-search-policy.js": "0d63b8e2ab74efe881dd08365d4863fb64dd7f14dc06c079d2ac832514e45701",
+    "models/market-classifier.json.gz": "5424bb19a7844d77758aba6c23f0e57694811f1bcca14654699e488b6f5430d7"
+  },
+  "cases": [
+    {
+      "keyword": "4080",
+      "title": "微星 MPG X870E EDGE TI WIFI (ATX/1H2P/Realtek ALC4080/WiFi 7+BT 5.4/註冊五年保) 14+2+1相供電",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/209235",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "微星 MPG X870E CARBON WIFI (ATX/1H2P/Realtek ALC4080/WiFi 7+BT 5.4/註冊五年保) 18+2+1相供電",
+      "platform": "欣亞",
+      "url": "https://www.sinya.com.tw/prod/203746",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "@電子街3C特賣會@全新 微星 MSI RTX4080 16GB VENTUS 3X OC RTX 4080",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22308075259250",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "@電子街3C特賣會@全新 ZOTAC RTX4080 16GB Trinity RTX 4080",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22246690110441",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "@電子街3C特賣會@全新 ZOTAC RTX4080 16GB Trinity OC RTX 4080",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22246690086128",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "[台南面交] ACER 宏碁 ALTOS RTX 4080 16GB GDDR6X 顯示卡@ 工業包 @ 保二年!!",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22544317564777",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "【麥蔻嚴選】華碩顯卡RTX4080-O16G-GAMING，顯卡摔了壹下，外觀都有損，目前點不亮，當壞件處理，請知曉，售",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22550685739811",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "三星UA32EH4000R UA32EH4080R線路板 背光電源板 BN44-00492A",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22633392260042",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【晶館數位】(4080吋) 可垂直旋轉 電視架電視壁掛架 大型電視架 手臂電視壁掛 (CXU80)",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22526956483721",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "北京精雕40系統控制卡 JDPCI4080卡 數控機台專用 高精度穩定版 工業級PCI介面 雕刻機配件",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22636550376128",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "固特GOLD單相固態繼電器 80A工業級 直流控制交流 散熱快穩定耐用 SAM4080D 台灣現貨",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22633392161154",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "現貨 固態繼電器 JGX-3014-4080Z 交流控制 單相 散熱器安裝 工業設備",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22632330954571",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "HIP4080AIB HIP4080AIBZ SOP貼片封裝 全新原裝 即拍即發",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?21404268406478",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "快速出貨CJMCU-4080 MAX4080SASA 電流模塊 高邊 電流檢測放大器 高精度.",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22626971822197",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "請詢價 研華亞當ADAM-4080-E計數/頻率模塊2個獨立32位計數器頻率測量",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22619671105842",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "佳能（Canon）GI-86原裝墨水適GX3080/GX4080/GX5080/GX6080",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22612298351832",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "十二二上新上新4080連接件 45度角件 45°內接斜角 80角度角碼 支架 鋁型材配件隨貨附帶收據",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22543242981035",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": ".NSK 電機 YS4080FN001 測試好 拍前詢價  號25918",
+      "platform": "露天",
+      "url": "https://www.ruten.com.tw/item/show?22538968027170",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "BL4080F 40V 8.0A 191X69-0",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DQBE9F-A900H1TG9",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【法國ERARD】Will1400XL 極簡直立式活動推車電視架 40-80吋",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DPAD1E-A900GRJYO",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【ERARD】法國原裝 Will1400XL 活動推車含置物架電視架 40-80吋",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DPAD1E-A900GR41D",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "40V BL4080F電池組 191Y93-9 BL4080F*2",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DQBE2M-A900K8Y8N",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【銳達】電視機支架 翻門款黑色洞洞板款 適配40-80寸電視 收納儲物櫃架 小戶型帶輪支架 可移動電視支架",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAGQ5-A900KH56X",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【銳達】電視機支架 玻璃門款黑色框架 適配40-80寸電視 收納儲物櫃架 小戶型帶輪支架 可移動電視支架",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAGQ5-A900KH578",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【銳達】電視機支架 翻門款黑色框架 適配40-80寸電視 收納儲物櫃架 小戶型帶輪支架 可移動電視支架",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAGQ5-A900KH576",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【銳達】電視機支架 玻璃門款黑色洞洞板款 適配40-80寸電視 收納儲物櫃架  帶輪支架 可移動電視支架",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAGQ5-A900KH577",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "BL4080H 40V,8.0Ah高輸出鋰電池 原廠公司貨",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DQBE7C-A900K2OSF",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "YOUJIA 優家 旋轉電視架  橫直屏 白色 40-80吋可調 高低升降 會議室適用",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAG2Y-A900KH974",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【銳達】電視移動支架 手搖款【40-80英寸】橫屏豎屏自由旋轉 可升降旋轉支架 落地推車 帶輪電視支架",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAGQ5-A900KG685",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "FANGE 方格 支架 電視支架 電視移動支架 可升降旋轉電視支架 家用落地推車 帶輪電視支架 40-80英寸通用",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DQBBFN-A900K0YJE",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "啞鈴凳 臥推椅 健身椅 下斜臥推椅 重訓椅 多功能健身椅 可調式健身椅 家用健身器材",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DEBYGL-A900JWPDZ",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "YOUJIA 優家 手搖升降架 推車 大屏款 萬向輪 曜石黑40-80手搖 升降旋轉 大螢幕適用",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAG2Y-A900KHFD2",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "40-80英吋 超薄旋轉款 雙臂實心軸 180°旋轉拉伸 電視機架 超薄電視架 伸縮電視機架",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DPADY2-A900K3VOP",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "可移動電視機支架 40-80寸 帶輪推車(電視支架 螢幕支架 電視架 移動電視機支架 移動推車)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DQCD0Z-A900ICKH5",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "可移動電視機支架 40--80寸 帶輪推車(電視支架 螢幕支架 電視架 移動電視機支架 移動推車)",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DQAW00-A900H2E9U",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【匠俱】 可移動電視機支架（40-80寸）帶輪推車 落地式 電視支架 螢幕支架 電視架 移動推車",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DQAW00-A900H2EAG",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "330W 19.5V 16.92A 變壓器適用 OMEN 6PRO 7PLUS 4080 4090 VGA CARD TPC-DA60 TPN-Q266 ADP-330BB BF",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DCAGZI-A900K19U6",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "可移動電視機支架 55/65/75/86/98寸會議教育壹體機落地式帶輪推車",
+      "platform": "PChome",
+      "url": "https://24h.pchome.com.tw/prod/DMAAP3-A900I1TDJ",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【KALOC】40-80吋手臂式液晶電視壁掛架(H8)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=14556903",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【KALOC 卡洛奇】40-80吋雙臂式電視壁掛架(KLC-H8)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=12319006",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【MAKITA 牧田】40V DC40RA DC40RB BL4025 BL4040F BL4050F BL4080F 中崙五金",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00011250000916",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【Secaii 設彩】電視架 壁掛電視架 承重220斤 40-80吋(壁掛電視 超薄電視機架 六臂電視機架 可調節伸縮)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=13691273",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【RENZA】適用PHILIPS 飛利浦 AC4080 AC4081/80 AC4080/80 空氣清淨機(HEPA濾網+活性碳濾網 濾芯)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=7883309",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "智能恆溫加熱杯墊 木紋保溫杯墊 40℃-80℃暖杯墊 氛圍燈靜音恆溫杯墊  禮物",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=13215364",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】ㄇ型助步器 4080 推推GO5.5 +5吋輪+剎車輪 (有輪助行器)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00013930001380",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "視壯Strong 40-80吋懸臂式電視壁掛架 SM4080 電視壁掛架 懸臂式壁掛架",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15550695",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【MAKITA 牧田】景鴻 40V充電器 DC40RA DC40RB BL4020 BL4025 BL4040 BL4050F BL4080F",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00094610000248",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】推推GO 3 助行器 附輪助行器 (前輪:3吋直向輪 / 後腳:下壓式止滑套管) 4080WP",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=6375776",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】推推輪管型 ㄇ型助行器+3吋輪+止滑套管  4080 咖啡色手推車 行走輔助四腳助行器 老人助行 GO3",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00037090000292",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "（寵居社）落地可移動電視機架 40-80英吋 橫豎屏自由旋轉 手搖升降（落地電視架 電視固定架）",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15456408",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "（寵居社）落地可移動電視架 40-80英吋通用 橫豎屛旋轉 手搖升降（電視支架 電視立架 行動電視架）",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15473340",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】迷你款助行器 4080MG (適用身高140~160cm) 迷你助行器",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00048850000788",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "(星何居)電視架 伸縮壁掛架 壁掛電視架 家用電視支架 40-80英吋(六臂電視架 承重120斤)預購12天",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15482730",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】ㄇ型助步器 4080 推推GO3 +3吋輪+剎車 (有輪助行器)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00013930000059",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】ㄇ型助行器 推推GO5 +5吋輪+剎車 (有輪助步器 4080)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00013930000060",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "ㄇ型助步器 4080 推推GO3.5 +3吋輪+剎車輪 (有輪助行器)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00013930000644",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】ㄇ型助行器 咖/紅/綠 155-175適用 (助步器 4080)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00013930001161",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】ㄇ型助行器 4080 推推GO5.5 +5吋輪+剎車輪 (有輪助步器)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00013930001849",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【TAMZU 潭祖】電視機支架 移動支架 可升降旋轉支架 直播會議室架子 電視機落地推車 帶輪推架 40-80英寸",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15707895",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "[厝景之隅]電視機支架 可移動壁掛架 客廳電視機架 40-80吋(移動支架 伸縮支架 橫豎屏旋轉)預購12天",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15451448",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "(星何居)電視架 伸縮壁掛架 壁掛電視架 家用電視支架 40-80英吋((六臂電視架 承重170斤)預購12天",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15482731",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】助行器 推推輪管型 ㄇ型助行器+5吋輪+止滑套管 4080推推GO5  NOVA 光星 鋁合金助行器",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00037090000293",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【NOVA 光星】迷你款助行器140~160公分適用  4080 兒童助行器 助行器 助步 走路 NOVA 光星 鋁合金助行器",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00037090000415",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【蟎著媽】複合式濾網2入優惠組(適用 PHILIPS 飛利浦 AC4080 AC4081/80 AC4080/80 空氣清淨機)",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=12089990",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "歐林居家Orin 懸臂電視架 40-80英寸通用 壁掛電視機架 伸縮掛架（八臂款 承重110kg 預售12天）",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=15521326",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【adidas 愛迪達】ID4080 adidas originals Courtic 織物皮革絨面革 麵包鞋 板鞋 潮流 防滑耐磨輕便 低幫 生活休閒鞋 男女同款 灰綠白",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00101310023890",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "【adidas 愛迪達】FY4080 adidas Adizero Boston 10 舒適時尚 織物合成革TPU減震防滑耐磨透氣輕便 低幫 碳板 訓練跑步鞋 女款 白橘紅",
+      "platform": "Momo",
+      "url": "https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=TP00101310026697",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "GIGABYTE GeForce RTX 4080 SUPER WINDFORCE V2 16G Graphics Card, 3x WINDFORCE Fans, 16GB 256-bit GDDR6X, GV-N408SWF3V2-16GD Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-windforce-gv-n408swf3v2-16gd-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/N82E16814932672",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS ROG Strix GeForce RTX 4080 SUPER White OC Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, Vapor Chamber) ROG-STRIX-RTX4080S-O16G-WHITE",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-rog-strix-rtx4080s-o16g-white-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/N82E16814126703",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "Refurbished Zotac Gaming GeForce RTX 4080 Super 16GB GDDR6X Graphics Card ZT-D40820M-10B",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/zotac-zt-d40820m-10b-geforce-rtx-4080-super-16gb-video-cards/p/1FT-000M-004A7",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS ROG Strix GeForce RTX 4080 SUPER OC Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, Vapor chamber, Aura Sync) ROG-STRIX-RTX4080S-O16G-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-rog-strix-rtx4080s-o16g-gaming-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/1FT-000Y-00BV4",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Suprim GeForce RTX 4080 SUPER 16GB GDDR6X PCI Express 4.0 Graphics Card RTX 4080 SUPER 16G SUPRIM X",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-suprim-x-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/N82E16814137853?Item=9SIBP4YKSN5219&cm_sp=SP-_-3843009-_-0-_-2-_-9SIBP4YKSN5219-_-4080-_-4080-_-5",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "NVIDIA GeForce RTX 4080 SUPER Founders Edition Graphics Card 16GB GDDR6X - Titanium and Black",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/nvidia-founders-edition-900-1g136-2555-000-geforce-rtx-4080-super-16gb-graphics-card/p/1FT-0004-008P3",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS ROG Strix GeForce RTX 4080 OC Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) ROG-STRIX-RTX4080-O16G-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/p/1FT-000Y-00960",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI GeForce RTX 4080 SUPER 16GB GDDR6X PCI Express 4.0 Graphics Card RTX 4080 SUPER 16G GAMING X SLIM",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-gaming-x-slim-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/N82E16814137854",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "GIGABYTE Gaming GeForce RTX 4080 16GB GDDR6X PCI Express 4.0 x16 ATX Graphics Card GV-N4080GAMING OC-16GD",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/gigabyte-gv-n4080gaming-oc-16gd-geforce-rtx-4080-16gb-graphics-card-triple-fans/p/N82E16814932561",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS TUF Gaming GeForce RTX 4080 Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) TUF-RTX4080-16G-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-tuf-gaming-tuf-rtx4080-16g-gaming-geforce-rtx-4080-16gb-graphics-card-triple-fans/p/N82E16814126599",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "ZOTAC GAMING GeForce RTX 4080 SUPER Trinity OC White Edition DLSS 3 16GB GDDR6X 256-bit 23 Gbps PCIE 4.0 Gaming Graphics Card, IceStorm 2.0 Advanced Cooling, SPECTRA RGB Lighting, ZT-D40820Q-10P",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/zotac-trinity-zt-d40820q-10p-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/N82E16814500581",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Suprim GeForce RTX 4080 16GB GDDR6X PCI Express 4.0 Graphics Card RTX 4080 16GB SUPRIM",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-16gb-suprim-geforce-rtx-4080-graphics-card-triple-fans/p/N82E16814137780",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS ROG Strix GeForce RTX 4080 SUPER White Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, Vapor Chamber, Aura Sync) ROG-STRIX-RTX4080S-16G-WHITE",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-rog-strix-rtx4080s-16g-white-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/1FT-000Y-00BH7",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MAXSUN GeForce RTX 4080 OC 16GB iCraft Anime GPU Graphics Card GDDR6X, PCI Express 4.0 X16, 256-bit, 3x DisplayPort 1.4a, HDMI 2.1a Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/maxsun-icraft-anime-geforce-rtx-4080-16gb-graphics-card-triple-fans/p/1FT-009J-000D3",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS ROG Strix GeForce RTX 4080 White Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) ROG-STRIX-RTX4080-16G-WHITE",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-rog-strix-rtx4080-16g-white-geforce-rtx-4080-16gb-graphics-card/p/1FT-000Y-00BV0",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Ventus GeForce RTX 4080 SUPER 16GB GDDR6X PCI Express 4.0 Graphics Card,  RTX 4080 SUPER 16G VENTUS 3X OC Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-ventus-3x-oc-geforce-rtx-4080-super-16gb-video-cards-triple-fans/p/1FT-0009-00DX1",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Suprim GeForce RTX 4080 SUPER 16GB Graphics Card, GDDR6X PCI Express 4.0 ,  RTX 4080 SUPER 16G SUPRIM X Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-suprim-x-geforce-rtx-4080-super-16gb-video-cards-triple-fans/p/1FT-0009-00DW9",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Ventus GeForce RTX 4080 SUPER 16GB GDDR6X PCI Express 4.0 Graphics Card RTX 4080 SUPER 16G VENTUS 3X OC",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-ventus-3x-oc-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/N82E16814137852",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Suprim  GeForce RTX 4080 16GB GDDR6X PCI Express 4.0 Graphics Card, RTX 4080 16GB SUPRIM  Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-16gb-suprim-x-geforce-rtx-4080-video-cards-triple-fans/p/1FT-0009-00DX7",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI GeForce RTX 4080 SUPER 16GB GDDR6X PCI Express 4.0 Graphics Card, RTX 4080 SUPER 16G GAMING SLIM Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-gaming-x-slim-geforce-rtx-4080-super-16gb-video-cards-triple-fans/p/1FT-0009-00DX4",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI GeForce RTX 4080 SUPER 16GB GDDR6X PCI Express 4.0 Graphics Card,  RTX 4080 SUPER 16G GAMING X SLIM Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-gaming-x-slim-geforce-rtx-4080-super-16gb-video-cards-triple-fans/p/1FT-0009-00DX3",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Ventus GeForce RTX 4080 16GB GDDR6X PCI Express 4.0 Graphics Card,  RTX 4080 16GB VENTUS 3X Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-16gb-ventus-3x-geforce-rtx-4080-video-cards-triple-fans/p/1FT-0009-00DX9",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Suprim X GeForce RTX 4080 16GB GDDR6X PCI Express 4.0 Graphics Card,  RTX 4080 16GB SUPRIM X Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-16gb-suprim-x-geforce-rtx-4080-video-cards-triple-fans/p/1FT-0009-00DX6",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS ROG Strix GeForce RTX 4080 SUPER Black Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, DLSS 3, HDMI 2.1a, DisplayPort 1.4a, Vapor Chamber, Aura Sync) ROG-STRIX-RTX4080S-16G-Black",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-rog-strix-rtx4080s-16g-white-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/1FT-000Y-00BJ0",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Suprim GeForce RTX 4080 SUPER 16GB Graphics Card, GDDR6X PCI Express 4.0 , RTX 4080 SUPER 16G SUPRIM Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-suprim-x-geforce-rtx-4080-super-16gb-video-cards-triple-fans/p/1FT-0009-00DX0",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI EXPERT GeForce RTX 4080 SUPER 16GB GDDR6X PCI Express 4.0 Graphics Card,  RTX 4080 SUPER 16G EXPERT Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-super-16g-expert-geforce-rtx-4080-super-16gb-video-cards-single-fan/p/1FT-0009-00DX5",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS ROG Strix GeForce RTX 4080 OC WHITE Edition Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) ROG-STRIX-RTX4080-O16G-WHITE Video Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-gaming-4080-rog-strix-geforce-rtx-4080-16gb-graphics-card/p/1FT-000Y-00BJ3",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS TUF Gaming NVIDIA GeForce RTX 4080 SUPER Gaming Graphics Card (PCIe 4.0, 16GB GDDR6X, HDMI 2.1a, DisplayPort 1.4a) TUF-RTX4080S-16G-GAMING",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-tuf-gaming-tuf-rtx4080s-16g-gaming-geforce-rtx-4080-super-16gb-graphics-card-triple-fans/p/1FT-000Y-00BV3",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MSI Ventus GeForce RTX 4080 16GB GDDR6X PCI Express 4.0 Graphics Card,  RTX 4080 16GB VENTUS 3X OC Video card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/msi-rtx-4080-16gb-ventus-3x-oc-geforce-rtx-4080-video-cards-triple-fans/p/1FT-0009-00DX8",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "ASUS TUF RTX 4080 Super OC 16GB GDDR6X TUF-RTX4080S-O16G-GAMING Video Graphics Card",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/asus-nvidia-rtx-4080-super-16gb-gddr6x-graphics-card/p/1FT-000Y-00BJ1",
+      "general": true,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "GIGABYTE EAGLE OC GeForce RTX 4080 16GB GDDR6X PCI Express 4.0 x16 ATX Video Card GV-N4080EAGLE OC-16GD",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/p/1FT-000A-00690",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "Gigabyte GAMING GeForce RTX 4080 NVIDIA 16 GB GDDR6X",
+      "platform": "Newegg (US)",
+      "url": "https://www.newegg.com/p/1FT-000A-006X3",
+      "general": true,
+      "precise": true
+    },
+    {
+      "keyword": "4080",
+      "title": "MAKITA牧田 BL4080H 40V,8.0Ah高輸出鋰電池 原廠公司貨",
+      "platform": "Yahoo購物",
+      "url": "https://tw.buy.yahoo.com/gdsale/MAKITA牧田-BL4080H-40V-8-0Ah高輸出鋰電池-原廠公司貨-12121358.html",
+      "general": false,
+      "precise": false
+    },
+    {
+      "keyword": "4080",
+      "title": "MAKITA牧田 40V BL4080F電池組 191Y93-9 BL4080F*2",
+      "platform": "Yahoo購物",
+      "url": "https://tw.buy.yahoo.com/gdsale/MAKITA牧田-40V-BL4080F電池組-191Y93-9-BL4080F-2-12183871.html",
+      "general": false,
+      "precise": false
+    }
+  ]
+}

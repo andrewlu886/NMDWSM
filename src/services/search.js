@@ -12,13 +12,6 @@ const SYNONYM_GROUPS = Object.freeze([
   ['主機', '桌機', '桌上型電腦', '套裝機', 'desktop', 'pc']
 ]);
 
-const GPU_AUTO_EXCLUDES = Object.freeze([
-  'Kg', '架', '折疊', '會議', '眼鏡', '碗', '無線', 'GHz', '不鏽鋼', '鞋', '題', '衣', '包',
-  '墊', '筆', '袋', '壺', '轉接線', '散熱', '水冷', '支架', '貼紙', '貼膜', '延長線', '空機殼',
-  ' 金牌', ' 銀牌', ' 銅牌', '顯卡風扇', 'Fan', 'Cooler', 'Liquid', 'Heatsink', 'Cable',
-  'Adapter', 'Extension', 'Bracket', 'Case', 'Chassis', 'Enclosure', 'Sticker', 'Skin', 'Decal'
-]);
-
 function splitWords(value, pattern = /[\s,]+/) {
   return String(value || '').split(pattern).filter(Boolean);
 }
@@ -69,40 +62,23 @@ function matchesGpuFamily(name, family) {
 
 function filterSearchResults(products, options) {
   const includeWords = splitWords(options.include);
-  let excludeWords = expandExcludeWords(splitWords(options.exclude));
+  const excludeWords = expandExcludeWords(splitWords(options.exclude, /[\s,，]+/));
   const categoryWords = splitWords(options.categories, ',');
-  const gpuFamily = extractGpuFamily(options.keyword);
-  let minimumPrice = 0;
-
-  if (/\d[06]\d0/.test(options.keyword)) {
-    minimumPrice = 1000;
-    const existing = new Set(excludeWords);
-    GPU_AUTO_EXCLUDES.forEach((word) => {
-      if (!existing.has(word)) {
-        excludeWords.push(word, word.toLowerCase());
-        existing.add(word);
-        existing.add(word.toLowerCase());
-      }
-    });
-  }
 
   const filtered = products.filter((item) => {
     const name = String(item?.name || '').toLowerCase();
-    if (!matchesComputerSearch(item, options.keyword) || !hasPlausibleYahooMiniPcPrice(item)) return false;
+    if (!matchesComputerSearch(item, options.keyword, { precise: Boolean(options.precise) }) || !hasPlausibleYahooMiniPcPrice(item)) return false;
     const amount = String(item.price ?? '').normalize('NFKC');
     if (/\d[\d,]*\s*(?:元)?\s*[-~～至/]\s*(?:NT\$?|\$)?\s*\d/.test(amount)
       || /面議|議價|起標|價格浮動/.test(amount) || !Number.isFinite(parsePrice(item.price))) return false;
     if (/已售出|售完|已成交|已下架/.test(name)) return false;
-    if (options.precise && !name.replace(/[\s_-]+/g, '').includes(String(options.keyword).toLowerCase().replace(/[\s_-]+/g, ''))) return false;
     const includeMatch = includeWords.length === 0
       || includeWords.every((word) => name.includes(word.toLowerCase()));
     const excludeMatch = excludeWords.length === 0
       || !excludeWords.some((word) => name.includes(word.toLowerCase()));
     const categoryMatch = categoryWords.length === 0
       || categoryWords.some((word) => name.includes(word.toLowerCase()));
-    const gpuFamilyMatch = gpuFamily ? matchesGpuFamily(item?.name || '', gpuFamily) : true;
-    if (!includeMatch || !excludeMatch || !categoryMatch || !gpuFamilyMatch) return false;
-    return minimumPrice === 0 || parsePrice(item.price) >= minimumPrice;
+    return includeMatch && excludeMatch && categoryMatch;
   });
 
   return filtered.sort((left, right) => parsePrice(left.price) - parsePrice(right.price));

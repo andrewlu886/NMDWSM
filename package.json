@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node public/server.js",
     "test": "node --test test/smoke.test.js",
-    "test:unit": "node --test test/hardware.test.js test/services.test.js test/valuation.test.js test/computer-product.test.js",
+    "test:unit": "node --test test/hardware.test.js test/services.test.js test/valuation.test.js test/computer-product.test.js test/market-classifier.test.js test/used-search.test.js",
+    "model:train": "node train.js",
+    "model:evaluate": "node scripts/evaluate-market-classifier.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

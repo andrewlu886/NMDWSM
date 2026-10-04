@@ -339,17 +339,19 @@ test('商品名稱與關鍵字的本地比對會忽略空白', () => {
   assert.equal(matchesSearchKeyword('RTX 4070 顯示卡', 'RTX4060'), false);
 });
 
-test('同義詞擴充與顯卡搜尋防呆會排除周邊及低價商品', () => {
+test('精確顯卡搜尋排除周邊，普通搜尋保留其他配件但排除顯卡風扇', () => {
   const expanded = expandExcludeWords(['w11', '筆電']);
   assert.ok(expanded.includes('windows 11'));
   assert.ok(expanded.includes('laptop'));
 
-  const results = filterSearchResults([
+  const products = [
     product('RTX 4060 顯示卡', '9,000'),
     product('RTX 4060 顯卡風扇', '1,500'),
     product('RTX 4060 轉接線', '500')
-  ], { keyword: 'RTX4060', include: '', exclude: '', categories: '' });
+  ];
+  const results = filterSearchResults(products, { keyword: 'RTX4060', precise: true });
   assert.deepEqual(results.map((item) => item.name), ['RTX 4060 顯示卡']);
+  assert.deepEqual(filterSearchResults(products, { keyword: 'RTX4060' }).map(item => item.price), ['500', '9,000']);
 });
 
 test('市價查詢會排除 Yahoo 迷你桌機舊快取中的明顯錯價', () => {

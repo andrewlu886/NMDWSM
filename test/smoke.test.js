@@ -311,7 +311,8 @@ test('市價頁可由網址預填關鍵字並自動查詢', () => {
   assert.match(scrapePage, /id="precision-toggle" type="checkbox" aria-label="開啟精確搜尋"/);
   assert.doesNotMatch(scrapePage, /id="precision-range"|type="range"/);
   assert.match(scrapePage, /precisionToggle\.addEventListener\('change', updatePrecisionExcludeKeywords\)/);
-  assert.match(scrapePage, /excludeInput\.value = precisionToggle\.checked \? preciseExcludeKeywords : ''/);
+  assert.match(scrapePage, /MarketSearchPolicy\.updateExcludes\(excludeInput\.value, autoExcludeWords/);
+  assert.match(scrapePage, /market-search-policy\.js/);
 });
 
 test('零件推薦 API 要求明確的 CPU 或 GPU 類別', async () => {

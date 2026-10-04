@@ -592,6 +592,7 @@
     </main>
 
     <script src="./history-store.js"></script>
+    <script src="./market-search-policy.js"></script>
     <script>
         const marketHistoryList = document.getElementById('market-history-list');
         const marketHistoryStatus = document.getElementById('market-history-status');
@@ -605,6 +606,9 @@
         function restoreMarketCriteria(criteria) {
             document.getElementById('keyword-input').value = criteria.keyword;
             document.getElementById('exclude-input').value = criteria.exclude || '';
+            document.getElementById('precision-toggle').checked = Boolean(criteria.precise);
+            autoExcludeWords = Array.isArray(criteria.autoExcludeWords) ? criteria.autoExcludeWords : [];
+            updatePrecisionExcludeKeywords();
             document.querySelectorAll('#platform-checkboxes input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = criteria.platforms.includes(checkbox.value);
             });
@@ -735,20 +739,22 @@
 
 const precisionToggle = document.getElementById('precision-toggle');
         const excludeInput = document.getElementById('exclude-input');
-        const preciseExcludeKeywords = '筆電 整機 電腦主機 組裝套餐 散熱器 水冷 風扇 支架 配件';
-        const managedExcludeKeywords = new Set(['', preciseExcludeKeywords]);
+        let autoExcludeWords = [];
         function updatePrecisionExcludeKeywords() {
-            if (managedExcludeKeywords.has(excludeInput.value.trim())) {
-                excludeInput.value = precisionToggle.checked ? preciseExcludeKeywords : '';
-            }
+            const updated = MarketSearchPolicy.updateExcludes(excludeInput.value, autoExcludeWords,
+                document.getElementById('keyword-input').value, precisionToggle.checked);
+            excludeInput.value = updated.value;
+            autoExcludeWords = updated.autoWords;
         }
         precisionToggle.addEventListener('change', updatePrecisionExcludeKeywords);
+        document.getElementById('keyword-input').addEventListener('input', updatePrecisionExcludeKeywords);
         updatePrecisionExcludeKeywords();
         function handleKeyPressSearch(event) {
             if (event.key === 'Enter') fetchPrices();
         }
 
         async function fetchPrices() {
+            updatePrecisionExcludeKeywords();
             const keyword = document.getElementById('keyword-input').value.trim();
             const exclude = document.getElementById('exclude-input').value.trim();
             const container = document.getElementById('results-container');
@@ -847,7 +853,7 @@ const precisionToggle = document.getElementById('precision-toggle');
                     });
                     try {
                         await window.NMDHistory.add('marketSearches', {
-                            criteria: { keyword, exclude, platforms, mode: 'unified' },
+                            criteria: { keyword, exclude, platforms, precise: precisionToggle.checked, autoExcludeWords: [...autoExcludeWords], mode: 'unified' },
                             results: result.data.filter(item => item.condition !== 'used')
                         });
                         await refreshMarketHistory();

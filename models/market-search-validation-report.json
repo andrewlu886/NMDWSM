@@ -1,0 +1,245 @@
+{
+  "sourceHash": "e7ef279b5c011174f2fa2ad5b49e96fad686d7b3362bd48f807030b3bddd751e",
+  "split": "validation",
+  "datasetRows": 857,
+  "general": {
+    "samples": 857,
+    "tp": 793,
+    "fp": 0,
+    "tn": 47,
+    "fn": 17,
+    "precision": 1,
+    "recall": 0.9790123456790123,
+    "specificity": 1,
+    "accuracy": 0.9801633605600933,
+    "balancedAccuracy": 0.9895061728395061,
+    "failures": [
+      {
+        "line": 687,
+        "title": "精粵X99主機板",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 688,
+        "title": "華南金牌x99",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 1876,
+        "title": "銀欣 ST30SF 300W 銅牌/直出線/5年保 (ST30SF.V2.0)【SFX規格】",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 1877,
+        "title": "銀欣 ST45SF 450W 銅牌/直出線/5年保 (ST45SF.V3.0)【SFX規格】",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 1930,
+        "title": "華碩 VS207DF 〈1A/TN〉Splendid 影像智慧技術",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 2526,
+        "title": "LG gram+view 16MR70 〈16吋/2C/IPS〉抗反光面板",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 2531,
+        "title": "華碩 ZenScreen MB14AC 〈14吋/1C/IPS〉",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 2543,
+        "title": "華碩 ROG Strix XG129C 〈12.3吋/2C/IPS/75Hz/24:9長寬比/10 點觸控〉可調式支架",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 2603,
+        "title": "TP-LINK TL-MR100-Outdoor 300M/4G LTE 行動WIFI分享/IP65防水/戶外型",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 2880,
+        "title": "聯達12代全鋁迷妳小主機酷",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3638,
+        "title": "BenQ ScreenBar Halo 2 〈非對稱光型/入席偵測自動開關燈/三區控光/無線控制旋鈕〉",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3641,
+        "title": "銀欣 MR03 螢幕增高架(可拆式手機架、耳機架、收納托盤/承重 20 公斤/黑色)",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3680,
+        "title": "XP-PEN Deco 02 頂級專業超薄繪圖板 10X5.63吋 / 8192階 / 左右手可切換設定",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3717,
+        "title": "羅技 Ue Miniroll 藍芽喇叭(潮玩黑)/最高12小時使用/最多2台裝置/防塵-防水",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 4081,
+        "title": "變壓器電源線 3孔AC線 梅花型 / 1.2M",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 4093,
+        "title": "登昌恆 SHI401 SFF8643 to 4SAS 1米",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 4105,
+        "title": "APC 艾比希 BV800-TW 在線互動式不斷電系統",
+        "expected": true,
+        "actual": false
+      }
+    ]
+  },
+  "exact": {
+    "samples": 1714,
+    "tp": 70,
+    "fp": 0,
+    "tn": 1644,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1,
+    "specificity": 1,
+    "accuracy": 1,
+    "balancedAccuracy": 1,
+    "failures": []
+  },
+  "perCategory": {
+    "CPU": {
+      "samples": 857,
+      "tp": 25,
+      "fp": 0,
+      "tn": 832,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    },
+    "顯示卡": {
+      "samples": 857,
+      "tp": 45,
+      "fp": 0,
+      "tn": 812,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    }
+  },
+  "passed": true,
+  "limits": "Titles excluded from model-weight training. Filtering rules were iterated using diagnostic failures, so this is an offline development backtest, not a blind test of the complete pipeline. General=PC scope; exact=CPU/GPU standalone category. No live-market guarantee. The frozen marketplace holdout is now a regression check because the search policy changed after labels were frozen.",
+  "marketplaceDevelopmentValidation": {
+    "general": {
+      "samples": 179,
+      "tp": 89,
+      "fp": 0,
+      "tn": 90,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    },
+    "precise": {
+      "samples": 179,
+      "tp": 48,
+      "fp": 0,
+      "tn": 131,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    }
+  },
+  "externalHoldout": {
+    "pipelineUnchangedSinceLabelsFrozen": false,
+    "evaluationStatus": "regression check after pipeline update",
+    "scope": "Final external-title holdout. Labels fixed before first prediction. Excludes normalized source/development titles and duplicate URLs. Cached historical titles, not current availability. GPU query only; does not establish CPU or live-market performance.",
+    "general": {
+      "samples": 101,
+      "tp": 37,
+      "fp": 0,
+      "tn": 63,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.9736842105263158,
+      "specificity": 1,
+      "accuracy": 0.9900990099009901,
+      "balancedAccuracy": 0.986842105263158,
+      "failures": [
+        {
+          "keyword": "4080",
+          "title": "330W 19.5V 16.92A 變壓器適用 OMEN 6PRO 7PLUS 4080 4090 VGA CARD TPC-DA60 TPN-Q266 ADP-330BB BF",
+          "platform": "PChome",
+          "url": "https://24h.pchome.com.tw/prod/DCAGZI-A900K19U6",
+          "general": true,
+          "precise": false,
+          "expected": true,
+          "actual": false
+        }
+      ]
+    },
+    "precise": {
+      "samples": 101,
+      "tp": 17,
+      "fp": 0,
+      "tn": 83,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.9444444444444444,
+      "specificity": 1,
+      "accuracy": 0.9900990099009901,
+      "balancedAccuracy": 0.9722222222222222,
+      "failures": [
+        {
+          "keyword": "4080",
+          "title": "MAXSUN GeForce RTX 4080 OC 16GB iCraft Anime GPU Graphics Card GDDR6X, PCI Express 4.0 X16, 256-bit, 3x DisplayPort 1.4a, HDMI 2.1a Video Card",
+          "platform": "Newegg (US)",
+          "url": "https://www.newegg.com/maxsun-icraft-anime-geforce-rtx-4080-16gb-graphics-card-triple-fans/p/1FT-009J-000D3",
+          "general": true,
+          "precise": true,
+          "expected": true,
+          "actual": false
+        }
+      ]
+    }
+  }
+}

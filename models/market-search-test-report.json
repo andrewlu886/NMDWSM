@@ -1,0 +1,209 @@
+{
+  "sourceHash": "e7ef279b5c011174f2fa2ad5b49e96fad686d7b3362bd48f807030b3bddd751e",
+  "split": "test",
+  "datasetRows": 847,
+  "general": {
+    "samples": 847,
+    "tp": 790,
+    "fp": 0,
+    "tn": 46,
+    "fn": 11,
+    "precision": 1,
+    "recall": 0.9862671660424469,
+    "specificity": 1,
+    "accuracy": 0.987012987012987,
+    "balancedAccuracy": 0.9931335830212235,
+    "failures": [
+      {
+        "line": 345,
+        "title": "華碩 PRO WS W680M-ACE SE M-ATX/雙2.5G+LAN 1G *支援BMC遠端管理",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 346,
+        "title": "華碩 PRO WS W680-ACE ATX/1A1H1P/雙2.5G/註四年 穩定.可靠性高",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 347,
+        "title": "華碩 PRO WS W680-ACE IPMI ATX/1A1H1P/雙2.5G/註四年附華碩IPMI擴展卡",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 1906,
+        "title": "Antec CSK550DC(550W) 雙8/銅牌/直出線/靜音風扇/DC-DC/5年保",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 1907,
+        "title": "Antec CSK650DC(650W) 雙8/銅牌/直出線/靜音風扇/DC-DC/5年保",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3492,
+        "title": "羅技 G923 模擬賽車方向盤/Trueforce功能/支援PC.PS4/扭力2.2Nm",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3498,
+        "title": "EPSON L121 超值入門輕巧款 單功能(列印)連續供墨",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3644,
+        "title": "Raymii LGR-8 夾桌式旋轉洞洞板 (收納架/耳機＆遊戲手把掛架/杯架)【紅黑色】",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3697,
+        "title": "Synology DX525 【5Bay】擴充櫃 (適用25系列)",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3704,
+        "title": "圓剛 BA311L 輕巧多角度創作者支架/360°旋轉功能和三個可調節關節",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "line": 3745,
+        "title": "華碩 ROG Gjallar Soundbar 喇叭/USB-C/光纖/AUX/藍牙杜比全景聲",
+        "expected": true,
+        "actual": false
+      }
+    ]
+  },
+  "exact": {
+    "samples": 1694,
+    "tp": 65,
+    "fp": 0,
+    "tn": 1629,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1,
+    "specificity": 1,
+    "accuracy": 1,
+    "balancedAccuracy": 1,
+    "failures": []
+  },
+  "perCategory": {
+    "CPU": {
+      "samples": 847,
+      "tp": 22,
+      "fp": 0,
+      "tn": 825,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    },
+    "顯示卡": {
+      "samples": 847,
+      "tp": 43,
+      "fp": 0,
+      "tn": 804,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    }
+  },
+  "passed": true,
+  "limits": "Titles excluded from model-weight training. Filtering rules were iterated using diagnostic failures, so this is an offline development backtest, not a blind test of the complete pipeline. General=PC scope; exact=CPU/GPU standalone category. No live-market guarantee. The frozen marketplace holdout is now a regression check because the search policy changed after labels were frozen.",
+  "marketplaceDevelopmentValidation": {
+    "general": {
+      "samples": 179,
+      "tp": 89,
+      "fp": 0,
+      "tn": 90,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    },
+    "precise": {
+      "samples": 179,
+      "tp": 48,
+      "fp": 0,
+      "tn": 131,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "specificity": 1,
+      "accuracy": 1,
+      "balancedAccuracy": 1,
+      "failures": []
+    }
+  },
+  "externalHoldout": {
+    "pipelineUnchangedSinceLabelsFrozen": false,
+    "evaluationStatus": "regression check after pipeline update",
+    "scope": "Final external-title holdout. Labels fixed before first prediction. Excludes normalized source/development titles and duplicate URLs. Cached historical titles, not current availability. GPU query only; does not establish CPU or live-market performance.",
+    "general": {
+      "samples": 101,
+      "tp": 37,
+      "fp": 0,
+      "tn": 63,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.9736842105263158,
+      "specificity": 1,
+      "accuracy": 0.9900990099009901,
+      "balancedAccuracy": 0.986842105263158,
+      "failures": [
+        {
+          "keyword": "4080",
+          "title": "330W 19.5V 16.92A 變壓器適用 OMEN 6PRO 7PLUS 4080 4090 VGA CARD TPC-DA60 TPN-Q266 ADP-330BB BF",
+          "platform": "PChome",
+          "url": "https://24h.pchome.com.tw/prod/DCAGZI-A900K19U6",
+          "general": true,
+          "precise": false,
+          "expected": true,
+          "actual": false
+        }
+      ]
+    },
+    "precise": {
+      "samples": 101,
+      "tp": 17,
+      "fp": 0,
+      "tn": 83,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.9444444444444444,
+      "specificity": 1,
+      "accuracy": 0.9900990099009901,
+      "balancedAccuracy": 0.9722222222222222,
+      "failures": [
+        {
+          "keyword": "4080",
+          "title": "MAXSUN GeForce RTX 4080 OC 16GB iCraft Anime GPU Graphics Card GDDR6X, PCI Express 4.0 X16, 256-bit, 3x DisplayPort 1.4a, HDMI 2.1a Video Card",
+          "platform": "Newegg (US)",
+          "url": "https://www.newegg.com/maxsun-icraft-anime-geforce-rtx-4080-16gb-graphics-card-triple-fans/p/1FT-009J-000D3",
+          "general": true,
+          "precise": true,
+          "expected": true,
+          "actual": false
+        }
+      ]
+    }
+  }
+}
