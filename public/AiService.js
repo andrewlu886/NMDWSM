@@ -61,7 +61,7 @@ const TOOLS = [
     type: 'function',
     function: {
       name: 'recommend_hardware',
-      description: '依預算及用途使用網站智慧推薦功能。預算、產品類型與用途不足時先追問。',
+      description: '依預算及用途使用網站智慧推薦功能。預算、產品類型、用途或商品新舊選擇不足時先追問；先詢問使用者想要二手（通常較便宜）還是全新品，不得自行預設。',
       parameters: {
         type: 'object',
         properties: {
@@ -69,9 +69,9 @@ const TOOLS = [
           productType: { type: 'string', enum: ['desktop', 'laptop', 'component'] },
           usage: { type: 'string', enum: ['gaming', 'office'] },
           componentType: { type: 'string', enum: ['cpu', 'gpu'] },
-          condition: { type: 'string', enum: ['new', 'used'], description: '商品狀況；未指定預設全新' }
+          condition: { type: 'string', enum: ['new', 'used'], description: '使用者選擇的商品狀況；new 全新品、used 二手，未選擇時先追問' }
         },
-        required: ['budget', 'productType', 'usage']
+        required: ['budget', 'productType', 'usage', 'condition']
       }
     }
   },
@@ -413,6 +413,9 @@ async function executeTool(name, args) {
     const budget = Number(args.budget);
     if (!Number.isFinite(budget) || budget < 1000)
       throw new Error('請提供至少 NT$1,000 的有效預算。');
+    if (!['new', 'used'].includes(args.condition)) {
+      throw new Error('你想找二手（通常較便宜的主機），還是全新品？請先確認使用者的選擇。');
+    }
     if (args.productType === 'component' && !['cpu', 'gpu'].includes(args.componentType)) {
       throw new Error('推薦單一零件時，請再確認要 CPU 還是 GPU。');
     }
@@ -806,6 +809,7 @@ async function handle(req, res) {
         {
           role: 'system',
           content:
+            '智慧推薦必須先確認使用者要二手（通常較便宜的主機）還是全新品；如果對話中已明確選擇就沿用，否則先詢問，不能把「便宜」當成同意二手或自行預設全新。' +
             '你是「一次估夠」的電腦硬體小幫手紀亦緹，以台灣常用的繁體中文和使用者對話。像耐心、懂硬體的朋友一樣說話：先回應對方的需求，再說下一步；一次只問最必要的一件事。可以偶爾用「好，我來看看」等自然口語，但不要每句都自稱姐姐、堆疊表情符號或反覆道歉。使用者可能以多輪對話提供資料，請記住上下文；資訊不足時先簡短追問，足夠後才呼叫工具。估價、即時價格、推薦與瓦數必須使用工具結果，不得自行編造、推測或覆蓋工具數值。辨識圖片的型號只是未確認線索，必須先請使用者確認再據此估價或查價。使用者提出「更正、不是、我說錯、應該是」等修正時，以最新修正為準，承認並重新處理，不要沿用被否定的資訊。價格以新台幣呈現，清楚說明估算條件與資料限制。查不到資料時坦白說明原因，並給一個可行的下一步。推薦商品必須先呼叫 recommend_hardware，使用工具回傳的商品與網址，不可自行編造商品或價格。商品名稱以 [商品名稱](商品網址) 格式提供可點擊連結。不要附上二手估價、智慧推薦或瓦數計算的工具頁連結。查詢市價時可以提供帶有查詢關鍵字的市價查詢頁連結。市價頁連結如能確定型號，請使用 [/scrape?keyword=型號] 格式。只處理電腦硬體相關需求。政治、歷史、角色扮演及無關話題請簡短引導回硬體功能；不要為無關訊息呼叫工具，不要將整段對話當搜尋關鍵字。沒有匹配型號的工具結果就說查不到，不得引用其他型號。不要執行工具之外的操作。'
         },
         ...pruneHardwareHistory(contextualConversation, imageRequested)

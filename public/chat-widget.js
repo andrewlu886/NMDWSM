@@ -1037,6 +1037,16 @@
         return /顯示卡|顯卡|\bGPU\b/i.test(text) ? 'gpu' : 'cpu';
     }
 
+    function getRecommendationCondition(text) {
+        const normalized = text.normalize('NFKC');
+        if (/(?:二手|中古).*(?:全新|新品).*(?:都可以|都可|都行|皆可)|(?:全新|新品).*(?:二手|中古).*(?:都可以|都可|都行|皆可)/.test(normalized)) return null;
+        const choices = [...normalized.matchAll(/(?:不要|不想(?:要|買)?|不接受|不考慮|不需要|不買|不是|拒絕|排除)\s*(二手|中古|全新品?|新品|新機)|二手|中古|全新品?|新品|新機/g)];
+        const latest = choices.at(-1);
+        if (!latest) return null;
+        const used = /二手|中古/.test(latest[1] || latest[0]);
+        return latest[1] ? (used ? 'new' : 'used') : (used ? 'used' : 'new');
+    }
+
     function getRecommendationProductUrl(item) {
         try {
             const url = new URL(item.url, window.location.origin);
@@ -1076,8 +1086,12 @@
             return;
         }
 
+        const condition = getRecommendationCondition(text) || getRecommendationCondition(requestText);
+        if (!condition) {
+            appendRecommendationReply('你想找二手（通常較便宜的主機），還是全新品？回覆「二手」或「全新品」，我就依你的選擇找商品。');
+            return;
+        }
         const productType = getRecommendationProductType(requestText);
-        const condition = /二手|中古/.test(requestText) ? 'used' : 'new';
         const componentType = productType === 'component' ? getRecommendationComponentType(requestText) : '';
         const productTypes = !productType && usage === 'office' ? ['desktop', 'laptop'] : [productType || 'desktop'];
         const payloads = productTypes.map((type) => type === 'component'
@@ -1105,16 +1119,17 @@
             }));
 
             const usageLabel = usage === 'gaming' ? '遊戲' : '文書／影音';
+            const conditionLabel = condition === 'used' ? '二手' : '全新品';
             const products = results.flatMap((result) => Array.isArray(result.recommendations) ? result.recommendations : [])
                 .filter((item, index, all) => all.findIndex((candidate) => candidate.url === item.url && candidate.title === item.title) === index)
                 .sort((left, right) => (right.matchScore || 0) - (left.matchScore || 0) || left.price - right.price)
                 .slice(0, 3);
-            const lines = [`依照預算 NT$ ${budget.toLocaleString('zh-TW')}、${usageLabel}用途${productTypes.length > 1 ? '（已同時搜尋桌機與筆電）' : ''}，為你找到以下推薦：`];
+            const lines = [`依照預算 NT$ ${budget.toLocaleString('zh-TW')}、${usageLabel}用途、商品狀況「${conditionLabel}」${productTypes.length > 1 ? '（已同時搜尋桌機與筆電）' : ''}，為你找到以下推薦：`];
             if (!products.length) {
                 lines.push('目前沒有找到符合條件的商品。可以放寬預算，或調整用途後再試一次。');
             } else {
                 products.slice(0, 3).forEach((item, index) => {
-                    const title = String(item.title || '查看推薦商品').replace(/[\[\]]/g, '').trim();
+                    const title = String(item.title || '查看推薦商品').replace(/[[\]]/g, '').trim();
                     const url = getRecommendationProductUrl({ ...item, title });
                     const price = Number(item.price) || 0;
                     lines.push(`${index + 1}. [${title}](${url})\n   NT$ ${price.toLocaleString('zh-TW')} · ${String(item.platform || '通路資訊')}`);
