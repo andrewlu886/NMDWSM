@@ -3,6 +3,7 @@ const { PLATFORM_IDS } = require('../scrapers');
 const { getDailyMarketData } = require('./market-cache');
 const { getUsdNtdRate } = require('./exchange-rate');
 const { searchUsedProducts, SOURCES: USED_SOURCES } = require('./used-search');
+const { matchesComputerSearch } = require('./computer-product');
 
 const SYNONYM_GROUPS = Object.freeze([
   ['w11', 'win11', 'windows11', 'windows 11'],
@@ -87,7 +88,7 @@ function filterSearchResults(products, options) {
 
   const filtered = products.filter((item) => {
     const name = String(item?.name || '').toLowerCase();
-    if (!item || !hasPlausibleYahooMiniPcPrice(item)) return false;
+    if (!matchesComputerSearch(item, options.keyword) || !hasPlausibleYahooMiniPcPrice(item)) return false;
     const amount = String(item.price ?? '').normalize('NFKC');
     if (/\d[\d,]*\s*(?:元)?\s*[-~～至/]\s*(?:NT\$?|\$)?\s*\d/.test(amount)
       || /面議|議價|起標|價格浮動/.test(amount) || !Number.isFinite(parsePrice(item.price))) return false;

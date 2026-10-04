@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { isComputerProduct } = require('./computer-product');
 
 const SOURCES = Object.freeze({
   ptt: 'PTT 硬體版',
@@ -14,7 +15,6 @@ const NEW = /全新|新品|未拆封|未使用|新貨|全新品|\bbrand\s*new\b/
 const USED = /二手|中古|拆機|自用|使用過|使用中|正常使用|過保|非全新|良品|有使用痕跡|換下|拆下|拆封使用|已拆封|狀況良好|\bused\b|\bpre.?owned\b/i;
 const VARIABLE_PRICE = /議價|面議|可優惠|可小議|價格另議|價格可議|價格浮動|私訊報價|私訊詢價|一元起標|競標|出價|依規格|選規格|多款價格|價格區間|\bstarting\s+at\b/i;
 const NOT_A_SALE = /回收|囘收|收購|置換|換購|求購|徵求|徵收/;
-const HARDWARE = /電腦|筆電|筆記型|主機|顯示卡|顯卡|處理器|主機板|記憶體|硬碟|固態|電源|機殼|散熱|水冷|風扇|螢幕|顯示器|鍵盤|滑鼠|網卡|路由器|交換器|工作站|伺服器|\b(?:cpu|gpu|ssd|hdd|ram|ddr[3-6]|psu|nvme|rtx\s*\d{3,4}(?:\s*(?:ti|super))?|gtx\s*\d{3,4}(?:\s*ti)?|rx\s*\d{3,4}(?:\s*xt)?|ryzen|xeon|threadripper|core\s*(?:ultra|i[3579])|i[3579][-\s]?\d{4,5}|macbook|imac|mac\s*mini|thinkpad|zenbook|vivobook|ideapad|laptop|desktop|notebook|motherboard|monitor|nas)\b/i;
 const HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36',
   'Accept-Language': 'zh-TW,zh;q=0.9'
@@ -56,7 +56,7 @@ function safeUrl(source, value) {
 function eligible(item, keyword, exclude = '', precise = false) {
   if (!item || !matchesKeyword(item.name, keyword, precise)) return false;
   const title = plain(item.name), context = `${title} ${plain(item.evidence)}`;
-  if (!HARDWARE.test(title) || sold(context) || VARIABLE_PRICE.test(context) || NOT_A_SALE.test(title)) return false;
+  if (!isComputerProduct(item) || sold(context) || VARIABLE_PRICE.test(context) || NOT_A_SALE.test(title)) return false;
   if (!/筆電|筆記型|主機|電腦|laptop|desktop|notebook/i.test(title) && /rtx|gtx|rx/i.test(title)) {
     const models = [...title.matchAll(/(?<!\d)([3-9]\d{3})(?!\d)/g)].map(match => match[1]);
     if (new Set(models).size > 1) return false;

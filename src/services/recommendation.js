@@ -2,6 +2,7 @@ const { RECOMMENDATION_PLATFORM_IDS } = require('../scrapers');
 const { getDailyMarketData } = require('./market-cache');
 const { searchUsedProducts, fixedPrice } = require('./used-search');
 const { matchesProductCondition } = require('./product-condition');
+const { isComputerListing, isUnrelatedProduct } = require('./computer-product');
 const {
   extractCPU,
   extractGPU,
@@ -17,16 +18,6 @@ function getSearchKeyword(productType, usage, componentType) {
   if (productType === 'component') return componentType === 'cpu' ? '處理器' : '顯示卡';
   if (productType === 'laptop') return usage === 'gaming' ? '筆電' : '筆記型電腦';
   return usage === 'gaming' ? '主機' : '套裝機';
-}
-
-function isComputerListing(name, productType, cpu, gpu) {
-  const text = String(name || '');
-  if (/電鑽|鏈鋸|電鋸|電剪|電動工具|手持工具|起子|砂輪機|修剪機|吹葉機|割草機/i.test(text)) return false;
-  if (productType === 'laptop') {
-    return /筆電|筆記型|laptop|notebook|macbook|chromebook|電競本/i.test(text);
-  }
-  return /桌機|桌上型電腦|桌上型主機|套裝主機|電競主機|文書主機|桌電|桌上電腦|電腦主機|主機電腦|套裝電腦|電腦套裝|迷你電腦|mini\s*pc|desktop(?:\s*pc)?|個人電腦|all[- ]?in[- ]?one|一體成型電腦/i.test(text)
-    || (cpu !== 'UNKNOWN' && gpu !== 'UNKNOWN');
 }
 
 function hasProductDetailUrl(item) {
@@ -88,6 +79,7 @@ function rankRecommendations(options, products) {
 
   products.forEach((item) => {
     if (!item || !item.price) return;
+    if (isUnrelatedProduct(item.name)) return;
     if (!hasProductDetailUrl(item) || item.available === false) return;
     if (!matchesProductCondition(item, options.condition || 'new')) return;
     if (options.condition === 'used' && /零件機|故障|不知好壞|無法開機|不能開機|報廢|僅供拆件/.test(item.name)) return;
