@@ -28,7 +28,7 @@ const {
   matchesGpuFamily,
   searchProducts,
   convertUsdProducts
-} = require('../src/services/search');
+} = require('./helpers/market-search');
 const { matchesSearchKeyword } = require('../src/utils/search-keyword');
 const {
   getSearchKeyword,

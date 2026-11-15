@@ -40,7 +40,7 @@ test('market page button, Enter, URL keyword, results, history and failures work
       } else if (url.pathname === '/scrape') {
         contentType = 'text/html';
         body = html;
-      } else if (url.hostname === 'localhost' && /^\/(?:history-store\.js|style\.css|site-theme\.css|history\.css|market-page\.css)$/.test(url.pathname)) {
+      } else if (url.hostname === 'localhost' && /^\/(?:history-store\.js|market-search-policy\.js|style\.css|site-theme\.css|history\.css|market-page\.css)$/.test(url.pathname)) {
         contentType = url.pathname.endsWith('.js') ? 'application/javascript' : 'text/css';
         body = fs.readFileSync(path.join(publicDir, url.pathname.slice(1)), 'utf8');
       }
@@ -59,13 +59,16 @@ test('market page button, Enter, URL keyword, results, history and failures work
     assert.equal(requests[0].searchParams.get('platform').split(',').length, 9);
     assert.match(await page.$eval('.result-card', node => node.textContent), /RTX 5080.*NT\$ 40,000/);
     await page.waitForSelector('.history-entry');
+    await page.$$eval('.history-actions button', buttons => buttons.find(button => button.textContent === '查看結果').click());
+    assert.equal(await page.$('#results-container a'), null);
+    assert.match(await page.$eval('#results-container', node => node.textContent), /40,000/);
     // Enter also submits, with precision exclusions carried to the backend.
     await page.click('#precision-toggle');
     await page.focus('#keyword-input');
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => document.querySelector('.market-data-freshness'));
     assert.equal(requests.length, 2);
-    assert.match(requests[1].searchParams.get('exclude'), /筆電/);
+    assert.match(requests[1].searchParams.get('exclude'), /筆電|筆記型電腦/);
     // Agent links automatically fill the keyword and initiate a search.
     await page.goto('http://localhost:3999/scrape?keyword=RTX%205080');
     await page.waitForSelector('.result-card');

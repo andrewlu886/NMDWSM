@@ -4,7 +4,7 @@ const { scrapePlatforms, PLATFORM_IDS } = require('../scrapers');
 const { normalizeSearchKeyword } = require('../utils/search-keyword');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const CACHE_SCHEMA_VERSION = 7;
+const CACHE_SCHEMA_VERSION = 8;
 const DEFAULT_CACHE_PATH = path.join(__dirname, '../../.cache/market-search-cache.json');
 
 function createMarketCache({
@@ -91,7 +91,13 @@ function createMarketCache({
     return request;
   }
 
-  return { get, entries };
+  function removeProducts(urls) {
+    const removed = new Set(urls);
+    if (!removed.size) return;
+    for (const entry of entries.values()) entry.products = entry.products.filter(item => !removed.has(item.url));
+    persist();
+  }
+  return { get, entries, removeProducts };
 }
 
 const marketCache = createMarketCache();
@@ -100,4 +106,4 @@ async function getDailyMarketData(keyword, platforms = 'all', options = {}) {
   return marketCache.get(keyword, platforms, options);
 }
 
-module.exports = { DAY_MS, createMarketCache, getDailyMarketData };
+module.exports = { DAY_MS, createMarketCache, getDailyMarketData, removeMarketProducts: urls => marketCache.removeProducts(urls) };

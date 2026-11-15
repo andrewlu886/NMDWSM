@@ -90,6 +90,8 @@ async function checkedMap(values, task, concurrency = 3) {
 function parsePttArticle(html, title, url) {
   const $ = cheerio.load(html), content = $('#main-content').clone();
   if (!content.length) throw new Error('文章內容無法讀取');
+  const currentTitle = $('.article-metaline').filter((_, node) => $(node).find('.article-meta-tag').text() === '標題').find('.article-meta-value').text();
+  if (currentTitle && sold(currentTitle)) return null;
   content.find('.push, .article-metaline, .article-metaline-right, .f2').remove();
   // Board template warnings mention sold prices, new goods and penalty numbers.
   // They are instructions, not the seller's product or transaction status.

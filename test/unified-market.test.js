@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const axios = require('axios');
-const { searchProductsWithMeta } = require('../src/services/search');
+const { searchProductsWithMeta } = require('./helpers/market-search');
 const { scrape } = require('../src/scrapers/ruten');
 
 test('merged search routes Ruten once and combines, deduplicates and filters fixed prices', async () => {

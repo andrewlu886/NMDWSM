@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { isComputerProduct } = require('../src/services/computer-product');
-const { filterSearchResults, searchProductsWithMeta } = require('../src/services/search');
+const { filterSearchResults, searchProductsWithMeta } = require('./helpers/market-search');
 const { rankRecommendations } = require('../src/services/recommendation');
 const { searchUsedProducts } = require('../src/services/used-search');
 

@@ -537,6 +537,8 @@ const server = http.createServer(async(req, res) => {
 //安裝 npm install dotenv
 //GitHub\NMDWSM\public> node server.js
 server.listen(PORT, () => {
+    const stopMarketMaintenance = require('../src/services/market-lifecycle').getMarketLifecycle().start(searchProductsWithMeta);
+    server.once('close', stopMarketMaintenance);
     databaseReady.then(() => {
         let updatingExchangeRate = false;
         const updateExchangeRate = async () => {

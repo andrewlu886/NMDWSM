@@ -614,7 +614,7 @@
             });
         }
 
-        function renderMarketResults(items) {
+        function renderMarketResults(items, historical = false) {
             const container = document.getElementById('results-container');
             container.replaceChildren();
             if (!items.length) {
@@ -644,7 +644,7 @@
 
                 try {
                     const url = new URL(item.url);
-                    if (url.protocol === 'http:' || url.protocol === 'https:') {
+                    if (!historical && (url.protocol === 'http:' || url.protocol === 'https:')) {
                         const link = document.createElement('a');
                         link.href = url.href;
                         link.className = 'btn-link';
@@ -687,9 +687,9 @@
                             marketRequestId += 1;
                             restoreMarketCriteria(record.criteria);
                             document.getElementById('loading').style.display = 'none';
-                            marketSnapshot.textContent = `查詢當時的市價（${marketDate(record.createdAt)}），不會自動重新查詢。商品價格與連結可能已變動。`;
+                            marketSnapshot.textContent = `查詢當時的市價（${marketDate(record.createdAt)}）。請按「重新查詢」核對目前販售狀態並取得商品連結。`;
                             marketSnapshot.hidden = false;
-                            renderMarketResults(record.results);
+                            renderMarketResults(record.results, true);
                         }],
                         ['重新查詢', () => {
                             restoreMarketCriteria(record.criteria);

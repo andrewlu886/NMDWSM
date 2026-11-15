@@ -156,12 +156,24 @@ async function searchProductsWithMeta(options, dependencies = {}) {
   if (usedResult.status === 'rejected' && !platforms.length) throw usedResult.reason;
   const marketData = retailResult.status === 'fulfilled' ? retailResult.value : { products: [], meta: null };
   const usedData = usedResult.status === 'fulfilled' ? usedResult.value : { data: [], meta: { sourceStatus: {} } };
-  const products = await convertUsdProducts(marketData.products, dependencies.getUsdNtdRate || getUsdNtdRate);
+  const lifecycle = dependencies.lifecycle || require('./market-lifecycle').getMarketLifecycle();
+  const lifecycleOptions = { ...options, keyword: normalizedOptions.keyword };
+  lifecycle.observeUsed?.(lifecycleOptions, usedData.data, usedData.meta?.sourceStatus || {});
+  const candidates = [...new Map([...lifecycle.retained(lifecycleOptions), ...marketData.products, ...usedData.data].map(item => [item.url, item])).values()];
+  const relevant = filterSearchResults(candidates, normalizedOptions);
+  lifecycle.trackQuery(lifecycleOptions, relevant);
+  const checked = await lifecycle.filter(relevant, { touch: !options.maintenance });
+  if (!dependencies.lifecycle) require('./market-cache').removeMarketProducts(checked.hidden);
+  const products = await convertUsdProducts(checked.products, dependencies.getUsdNtdRate || getUsdNtdRate);
   const sourceStatus = { ...(usedData.meta?.sourceStatus || {}) };
+  for (const [source, count] of Object.entries(checked.failures)) {
+    sourceStatus[source] = { ...sourceStatus[source], name: sourceStatus[source]?.name || source, status: 'partial', verificationFailed: count,
+      message: `${count} 筆商品狀態無法確認，已暫時隱藏` };
+  }
   if (retailResult.status === 'rejected') sourceStatus.retail = { name: '購物通路', status: 'unavailable', count: 0, message: '購物通路暫時無法讀取' };
   if (usedResult.status === 'rejected') sourceStatus.used = { name: '二手刊登', status: 'unavailable', count: 0, message: '二手刊登暫時無法讀取' };
   const seen = new Set();
-  const data = filterSearchResults([...products, ...usedData.data], normalizedOptions).filter(item => {
+  const data = filterSearchResults(products, normalizedOptions).filter(item => {
     const key = item.url || `${item.platform}:${item.name}:${item.price}`;
     if (seen.has(key)) return false;
     seen.add(key); return true;

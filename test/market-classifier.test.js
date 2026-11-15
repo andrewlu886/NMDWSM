@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const { readRows } = require('../train');
 const { classifyProduct } = require('../src/services/product-classifier');
 const { matchesComputerSearch } = require('../src/services/computer-product');
-const { filterSearchResults, searchProductsWithMeta } = require('../src/services/search');
+const { filterSearchResults, searchProductsWithMeta } = require('./helpers/market-search');
 const policy = require('../public/market-search-policy');
 
 function item(name, i = 0) { return { name, price: '10000', platform: '測試', url: `https://example.com/product/${i}` }; }
