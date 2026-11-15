@@ -5,6 +5,29 @@ const {
 } = require('../src/services/used-search');
 
 const pttUrl = 'https://www.ptt.cc/bbs/HardwareSale/M.1.A.001.html';
+test('PTT stops article checks at the batch deadline and never returns unchecked listings', async () => {
+  const axios = require('axios');
+  const original = axios.get;
+  let started = 0;
+  axios.get = async (url, options) => {
+    if (url.includes('/search?')) return { data: `<div class="btn-group-paging"></div>${Array.from({ length: 12 }, (_, i) => `<div class="r-ent"><div class="title"><a href="/bbs/HardwareSale/M.${i}.A.001.html">[賣/台北] RTX 4060</a></div></div>`).join('')}` };
+    started++;
+    return new Promise((resolve, reject) => {
+      if (options.signal.aborted) return reject(Error('aborted'));
+      options.signal.addEventListener('abort', () => reject(Error('aborted')), { once: true });
+    });
+  };
+  // AbortSignal.timeout alone does not keep Node's event loop alive in this mock.
+  const keepAlive = setInterval(() => {}, 1000);
+  try {
+    const { searchPttDirect } = require('../src/services/used-search');
+    const result = await searchPttDirect('RTX 4060', { timeoutMs: 30 });
+    assert.equal(result.items.length, 0);
+    assert.equal(result.verificationFailed, 12);
+    assert.equal(started, 3);
+    assert.match(result.failureMessage, /逾時/);
+  } finally { clearInterval(keepAlive); axios.get = original; }
+});
 test('PTT reports gateway failures separately from source failures and empty results', async () => {
   const cases = [
     [{ searchStage: 'gateway', code: 'ENOTFOUND' }, /通道網址無法解析/],

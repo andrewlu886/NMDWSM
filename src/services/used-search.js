@@ -72,15 +72,16 @@ function listing(source, name, price, url, extra = {}) {
 function verified(source, name, price, url, extra = {}) {
   return listing(source, name, price, url, { verified: true, verifiedAt: Date.now(), ...extra });
 }
-async function get(url, timeout = 10000) {
-  return (await axios.get(url, { headers: HEADERS, timeout, maxRedirects: 3, responseType: 'text', maxContentLength: 12 * 1024 * 1024 })).data;
+async function get(url, timeout = 10000, signal) {
+  return (await axios.get(url, { headers: HEADERS, timeout, signal, maxRedirects: 3, responseType: 'text', maxContentLength: 12 * 1024 * 1024 })).data;
 }
-async function checkedMap(values, task, concurrency = 3) {
+async function checkedMap(values, task, concurrency = 3, signal) {
   let cursor = 0, failures = 0;
   const items = [];
   await Promise.all(Array.from({ length: Math.min(concurrency, values.length) }, async () => {
     while (cursor < values.length) {
       const value = values[cursor++];
+      if (signal?.aborted) { failures += 1; continue; }
       try { const result = await task(value); if (result) items.push(result); } catch (_) { failures += 1; }
     }
   }));
@@ -113,11 +114,12 @@ function parsePttArticle(html, title, url) {
     specificationText: `${section('硬體型號|商品名稱|產品名稱')} ${condition}`
   });
 }
-async function searchPttDirect(keyword) {
+async function searchPttDirect(keyword, { timeoutMs = 25000 } = {}) {
+  const signal = AbortSignal.timeout(timeoutMs);
   const posts = new Map();
   let url = `https://www.ptt.cc/bbs/HardwareSale/search?q=${encodeURIComponent(keyword)}`;
   for (let page = 0; page < 3 && url; page += 1) {
-    const $ = cheerio.load(await get(url));
+    const $ = cheerio.load(await get(url, 10000, signal));
     if (!$('.r-ent').length && !$('.btn-group-paging').length) throw new Error('PTT 公開搜尋頁無法讀取');
     $('.r-ent .title a').each((_, node) => {
       const title = plain($(node).text()), href = safeUrl('ptt', $(node).attr('href'));
@@ -128,7 +130,9 @@ async function searchPttDirect(keyword) {
     url = nextUrl?.hostname === 'www.ptt.cc' && nextUrl.pathname === '/bbs/HardwareSale/search' ? nextUrl.href : null;
     if (posts.size >= 30) break;
   }
-  return checkedMap([...posts.values()].slice(0, 30), async post => parsePttArticle(await get(post.url, 8000), post.title, post.url));
+  const result = await checkedMap([...posts.values()].slice(0, 30), async post => parsePttArticle(await get(post.url, 8000, signal), post.title, post.url), 3, signal);
+  if (signal.aborted) result.failureMessage = 'PTT 文章核對逾時，未確認的刊登已略過，請稍後再試';
+  return result;
 }
 async function searchPtt(keyword) {
   return searchViaGateway('ptt', keyword, searchPttDirect);

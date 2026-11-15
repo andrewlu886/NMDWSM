@@ -66,14 +66,18 @@ async function checkPchome(url, signal, request) {
   if (!Array.isArray(r.data)) return outcome('unknown', 'source_unavailable');
   const rows = r.data.filter(row => String(row?.Id || '').startsWith(`${id}-`));
   if (!rows.length) return outcome('unknown', 'product_missing');
-  const forSale = rows.filter(row => row.ButtonType === 'ForSale' && Number(row.SaleStatus) === 1);
+  const active = rows.filter(row => row.ButtonType === 'ForSale' && Number(row.SaleStatus) === 1);
+  const quantity = row => row.Qty !== null && row.Qty !== undefined && String(row.Qty).trim() !== '' ? Number(row.Qty) : NaN;
+  const forSale = active.filter(row => Number.isFinite(quantity(row)) && quantity(row) > 0);
   // NotReady is also what PChome returns for a product id that no longer exists.
-  if (!forSale.length) return rows.every(row => ['SoldOut', 'OrderRefill', 'NotReady'].includes(row.ButtonType))
+  if (!forSale.length) return rows.every(row => ['SoldOut', 'OrderRefill', 'NotReady'].includes(row.ButtonType)
+      || active.includes(row) && Number.isFinite(quantity(row)) && quantity(row) <= 0)
     ? outcome('unavailable', 'out_of_stock') : outcome('unknown', 'stock_unconfirmed');
+  if (active.some(row => !Number.isFinite(quantity(row)))) return outcome('unknown', 'stock_unconfirmed');
   const prices = new Set(forSale.map(row => Number(row.Price?.P)));
   const [price] = prices;
   return prices.size === 1 && Number.isFinite(price) && price > 0
-    ? outcome('available', 'product_api', { price, currency: 'TWD' }) : outcome('available', 'product_api');
+    ? outcome('available', 'product_api', { price, currency: 'TWD' }) : outcome('unknown', 'variant_unconfirmed', { priceAmbiguous: true });
 }
 
 async function checkProduct(item, { signal, request = axios.get } = {}) {

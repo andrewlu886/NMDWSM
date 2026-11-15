@@ -32,10 +32,13 @@ test('HTTP removal, temporary failures and unsafe redirects remain distinct', as
 
 test('PChome uses the product button states for every variant', async () => {
   const pchome = { ...item, url: 'https://24h.pchome.com.tw/prod/DRAD1Q-A900I1OSV' };
-  const row = (ButtonType, P = 8900, suffix = '000') => ({ Id: `DRAD1Q-A900I1OSV-${suffix}`, Price: { P }, ButtonType, SaleStatus: ButtonType === 'ForSale' ? 1 : 0 });
+  const row = (ButtonType, P = 8900, suffix = '000') => ({ Id: `DRAD1Q-A900I1OSV-${suffix}`, Qty: 1, Price: { P }, ButtonType, SaleStatus: ButtonType === 'ForSale' ? 1 : 0 });
   const check = data => checkProduct(pchome, { request: async () => ({ data }) });
   assert.deepEqual(await check([row('ForSale')]), { availability: 'available', reason: 'product_api', price: 8900, currency: 'TWD' });
-  assert.equal((await check([row('ForSale'), row('ForSale', 9900, '001')])).price, undefined);
+  assert.equal((await check([row('ForSale'), row('ForSale', 9900, '001')])).availability, 'unknown');
+  assert.equal((await check([{ ...row('ForSale'), Qty: 0 }])).availability, 'unavailable');
+  for (const Qty of [undefined, null, '', 'invalid']) assert.equal((await check([{ ...row('ForSale'), Qty }])).availability, 'unknown');
+  assert.equal((await check([{ ...row('ForSale'), Qty: 0 }, row('ForSale', 9900, '001')])).price, 9900);
   for (const state of ['OrderRefill', 'NotReady', 'SoldOut']) assert.equal((await check([row(state)])).availability, 'unavailable');
   assert.equal((await check([row('Coming')])).availability, 'unknown');
   assert.equal((await check([{ ...row('ForSale'), Id: 'OTHER-1-000' }])).availability, 'unknown');
@@ -105,6 +108,45 @@ test('scheduled jobs do not overlap and limit rediscovery to fifty active query 
   assert.equal(await lifecycle.runDue(async () => {}), false);
   release(); await work; assert.equal(calls, 50);
   await lifecycle.runDue(async () => calls++); assert.equal(calls, 50);
+});
+
+test('cleanup rotates beyond ten used queries and persists scheduling through search updates', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'market-rotation-'));
+  try {
+    let time = 1_000_000_000;
+    const file = path.join(dir, 'state.json');
+    const lifecycle = createMarketLifecycle({ file, now: () => time });
+    for (let i = 0; i < 12; i++) {
+      const options = { keyword: `RTX ${i}`, platforms: 'ptt' };
+      const used = { ...item, condition: 'used', source: 'ptt', verifiedAt: time, url: `https://www.ptt.cc/bbs/HardwareSale/M.${i}.A.001.html` };
+      lifecycle.trackQuery(options, [used]);
+      await lifecycle.filter([used]);
+    }
+    lifecycle.state.discoveryAt = time;
+    const originalPopularity = Object.values(lifecycle.state.queries).map(q => [q.count, q.lastSeen]);
+    const seen = [];
+    const search = async options => { seen.push(options.keyword); lifecycle.trackQuery(options); };
+    time += 31 * 60000;
+    await lifecycle.runDue(search);
+    const scheduled = Object.values(lifecycle.state.queries).filter(q => q.nextCheckAt > time);
+    assert.equal(scheduled.length, 10);
+    assert.equal(createMarketLifecycle({ file }).state.queries[JSON.stringify(['rtx 0', ['ptt']])].nextCheckAt, time + 30 * 60000);
+    time += 31 * 60000;
+    await lifecycle.runDue(search);
+    assert.deepEqual(seen.slice(10, 12), ['RTX 10', 'RTX 11']);
+    assert.equal(new Set(seen).size, 12);
+    assert.deepEqual(Object.values(lifecycle.state.queries).map(q => [q.count, q.lastSeen]), originalPopularity);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('PChome price conflicts are hidden while ordinary unconfirmed stock stays visible', async () => {
+  const lifecycle = createMarketLifecycle({ file: null, check: async product => product.url.endsWith('CONFLICT')
+    ? { availability: 'unknown', reason: 'variant_unconfirmed', priceAmbiguous: true }
+    : { availability: 'unknown', reason: 'stock_unconfirmed' } });
+  const result = await lifecycle.filter([item, { ...item, url: item.url + 'CONFLICT' }]);
+  assert.deepEqual(result.products.map(row => row.url), [item.url]);
+  assert.equal(result.products[0].availability, 'unknown');
+  assert.deepEqual(result.hidden, [item.url + 'CONFLICT']);
 });
 
 test('search removes stale rows, marks unconfirmed listings, and recovers retained rows', async () => {

@@ -52,8 +52,10 @@ function createMarketLifecycle({ file = process.env.MARKET_STATE_PATH || path.jo
     const platforms = [...new Set(Array.isArray(options.platforms) ? options.platforms : String(options.platforms || 'all').split(','))].sort();
     const key = JSON.stringify([options.keyword.toLowerCase().trim(), platforms]);
     const previous = state.queries[key];
-    state.queries[key] = { options: { keyword: options.keyword, platforms }, count: (previous?.count || 0) + (options.maintenance ? 0 : 1), lastSeen: options.maintenance ? previous?.lastSeen || now() : now(), nextCheckAt: previous?.nextCheckAt || 0,
-      urls: [...new Set([...(previous?.urls || []), ...items.map(i => i.url)])].slice(-500) };
+    // Maintenance keeps references to these rows while a search updates its URLs.
+    // Preserve the row so the next scheduled time is saved on the current record.
+    state.queries[key] = Object.assign(previous || {}, { options: { keyword: options.keyword, platforms }, count: (previous?.count || 0) + (options.maintenance ? 0 : 1), lastSeen: options.maintenance ? previous?.lastSeen || now() : now(), nextCheckAt: previous?.nextCheckAt || 0,
+      urls: [...new Set([...(previous?.urls || []), ...items.map(i => i.url)])].slice(-500) });
   }
   async function verify(item, signal, touch = true) {
     const key = keyOf(item);
@@ -101,7 +103,7 @@ function createMarketLifecycle({ file = process.env.MARKET_STATE_PATH || path.jo
               else fresh.price = String(row.price);
             }
             result.push(fresh);
-          } else if (row.availability === 'unknown' && item.condition !== 'used') {
+          } else if (row.availability === 'unknown' && item.condition !== 'used' && row.priceAmbiguous !== true) {
             // Retail pages often omit stock data; keep the listing visible but marked rather than hiding it.
             result.push({ ...item, availability: 'unknown', availabilityReason: row.reason || 'unconfirmed', availabilityCheckedAt: row.availabilityCheckedAt });
           } else {
@@ -127,7 +129,7 @@ function createMarketLifecycle({ file = process.env.MARKET_STATE_PATH || path.jo
         const sources = new Set(due.filter(r => r.item.condition === 'used').map(r => r.item.source));
         const recent = Object.values(state.queries).filter(q => now() - q.lastSeen < RETENTION)
           .sort((a, b) => a.nextCheckAt - b.nextCheckAt);
-        for (const q of recent.filter(q => q.options.platforms.includes('all') || q.options.platforms.some(s => sources.has(s))).slice(0, 10)) {
+        for (const q of recent.filter(q => q.nextCheckAt <= now() && (q.options.platforms.includes('all') || q.options.platforms.some(s => sources.has(s)))).slice(0, 10)) {
           try { await search({ ...q.options, forceRefresh: true, maintenance: true }); } catch {}
           q.nextCheckAt = now() + 30 * MINUTE;
         }
