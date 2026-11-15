@@ -905,8 +905,7 @@
             savedConditions: conditions };
         await loadValuationCatalogs(valuationFlow);
         if (!record.requiresConfirmation && record.model) {
-            appendValuationReply(`好，接著估算剛才的 ${record.model}。`);
-            await confirmValuationPhotoModel(record.model, true);
+            await confirmValuationPhotoModel(record.model, true, `好，接著估算剛才的 ${record.model}。`);
         } else showPhotoConfirmation();
     }
 
@@ -1352,7 +1351,7 @@
         await requestWarrantyOrUsage();
     }
 
-    async function confirmValuationPhotoModel(model, automatically = false) {
+    async function confirmValuationPhotoModel(model, automatically = false, continuation = '') {
         const flow = valuationFlow;
         if (!flow || flow.stage !== 'photo-confirm' || !flow.photoCandidates.includes(model)) return;
         flow.model = model;
@@ -1372,6 +1371,7 @@
             if (saved.purchasePrice > 0) { flow.purchasePrice = saved.purchasePrice; flow.originalPrice = saved.purchasePrice; }
         }
         appendValuationReply(`已${automatically ? '辨識' : '確認'}型號「${flow.model}」，接著填寫估價條件。若型號不對，可直接輸入正確型號修正。`);
+        if (continuation) appendValuationReply(continuation);
         await requestWarrantyOrUsage();
     }
 
