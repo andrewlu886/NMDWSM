@@ -5,6 +5,24 @@ const {
 } = require('../src/services/used-search');
 
 const pttUrl = 'https://www.ptt.cc/bbs/HardwareSale/M.1.A.001.html';
+test('PTT reports gateway failures separately from source failures and empty results', async () => {
+  const cases = [
+    [{ searchStage: 'gateway', code: 'ENOTFOUND' }, /通道網址無法解析/],
+    [{ searchStage: 'gateway', code: 'ECONNREFUSED' }, /gateway 與通道/],
+    [{ searchStage: 'gateway', response: { status: 401 } }, /驗證失敗/],
+    [{ searchStage: 'gateway', response: { status: 502, data: { error: '本機無法讀取PTT，請稍後再試。' } } }, /已連線，但無法讀取商品來源/],
+    [{ searchStage: 'gateway', response: { status: 530 } }, /gateway 與通道/],
+    [{ code: 'ECONNRESET' }, /PTT 來源連線失敗/]
+  ];
+  for (const [error, expected] of cases) {
+    const result = await searchUsedProducts({ keyword: '14700', platforms: 'ptt' }, { searchers: { ptt: async () => { throw error; } } });
+    assert.equal(result.meta.sourceStatus.ptt.status, 'unavailable');
+    assert.match(result.meta.sourceStatus.ptt.message, expected);
+    assert.doesNotMatch(result.meta.sourceStatus.ptt.message, /瀏覽器/);
+  }
+  const empty = await searchUsedProducts({ keyword: '14700', platforms: 'ptt' }, { searchers: { ptt: async () => ({ items: [], scanned: 0 }) } });
+  assert.equal(empty.meta.sourceStatus.ptt.status, 'empty');
+});
 function article(price, condition = '正常使用兩年') {
   return `<div id="main-content"><div class="article-metaline">作者</div>◎硬體型號：RTX 4060
     ◎欲售價格：${price}

@@ -145,7 +145,13 @@ async function searchViaGateway(source, keyword, directSearch) {
     headers['CF-Access-Client-Id'] = process.env.OLLAMA_CF_ACCESS_CLIENT_ID;
     headers['CF-Access-Client-Secret'] = process.env.OLLAMA_CF_ACCESS_CLIENT_SECRET;
   }
-  const response = await axios.post(base.replace(/\/+$/, '') + `/api/${source}/search`, { keyword }, { headers, timeout: source === 'carousell' ? 120000 : 60000, maxRedirects: 0, maxContentLength: 2 * 1024 * 1024 });
+  let response;
+  try {
+    response = await axios.post(base.replace(/\/+$/, '') + `/api/${source}/search`, { keyword }, { headers, timeout: source === 'carousell' ? 120000 : 60000, maxRedirects: 0, maxContentLength: 2 * 1024 * 1024 });
+  } catch (error) {
+    error.searchStage = 'gateway';
+    throw error;
+  }
   if (!Array.isArray(response.data?.items)) throw new Error(`${label} gateway 回傳格式不正確`);
   return response.data;
 }
@@ -244,12 +250,22 @@ async function searchCarousell(keyword) {
 }
 
 const SEARCHERS = { ptt: searchPtt, carousell: searchCarousell, 'yahoo-auction': searchYahoo };
-function sourceError(error) {
+function sourceError(error, source) {
   const status = error?.response?.status;
+  if (error?.searchStage === 'gateway') {
+    if (error.code === 'ENOTFOUND') return '通道網址無法解析，請更新 Render 的轉接服務網址';
+    if (error.code === 'EAI_AGAIN') return '通道 DNS 暫時無法解析，請稍後再試';
+    if (status === 401 || status === 403) return '轉接服務驗證失敗，請檢查金鑰與存取設定';
+    if (status === 404) return '轉接服務不支援商品查詢，請確認網址並更新 gateway';
+    if (status === 502 && /^本機無法讀取/.test(error.response?.data?.error || '')) return '轉接服務已連線，但無法讀取商品來源，請稍後再試';
+    if ([502, 503, 504, 530].includes(status) || ['ECONNREFUSED', 'ECONNRESET'].includes(error.code)) return '轉接服務暫時無法使用，請確認本機 gateway 與通道正在運行';
+    if (error.code === 'ECONNABORTED' || /timeout|timed out/i.test(error.message || '')) return '轉接服務連線逾時，請稍後再試';
+    return status ? `轉接服務回應 HTTP ${status}` : '轉接服務連線失敗，請檢查通道與網路設定';
+  }
   if (status === 403 || status === 429) return `來源拒絕讀取（HTTP ${status}），請稍後再試`;
   if (status) return `來源回應 HTTP ${status}`;
   if (error?.code === 'ECONNABORTED' || /timeout|timed out/i.test(error?.message || '')) return '來源連線逾時，請稍後再試';
-  if (error?.code || /net::|Could not find Chrome|Failed to launch/i.test(error?.message || '')) return '來源連線或瀏覽器暫時無法使用';
+  if (error?.code || /net::|Could not find Chrome|Failed to launch/i.test(error?.message || '')) return source === 'ptt' ? 'PTT 來源連線失敗，請稍後再試' : '來源連線或瀏覽器暫時無法使用';
   return error?.message || '來源無法讀取';
 }
 async function searchUsedProducts({ keyword, platforms = 'all', exclude = '', precise = false }, dependencies = {}) {
@@ -264,7 +280,7 @@ async function searchUsedProducts({ keyword, platforms = 'all', exclude = '', pr
   settled.forEach((result, index) => {
     const id = selected[index];
     if (result.status === 'rejected') {
-      sourceStatus[id] = { name: SOURCES[id], status: 'unavailable', count: 0, message: sourceError(result.reason) };
+      sourceStatus[id] = { name: SOURCES[id], status: 'unavailable', count: 0, message: sourceError(result.reason, id) };
       return;
     }
     const collection = Array.isArray(result.value) ? { items: result.value } : result.value;
