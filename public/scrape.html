@@ -525,7 +525,7 @@
     </style>
 <link rel="stylesheet" href="./site-theme.css?v=20261003-png">
     <link rel="stylesheet" href="./history.css">
-    <link rel="stylesheet" href="./market-page.css?v=20261004-tabs">
+    <link rel="stylesheet" href="./market-page.css?v=20261115-unconfirmed">
 </head>
 <body>
 
@@ -839,6 +839,14 @@ const precisionToggle = document.getElementById('precision-toggle');
                                 ? formatNtd(item.price)
                                 : '請至通路確認價格';
                             priceSummary.appendChild(localPrice);
+                        }
+
+                        if (item.availability === 'unknown') {
+                            const unconfirmed = document.createElement('small');
+                            unconfirmed.className = 'availability-unconfirmed';
+                            unconfirmed.textContent = '庫存未確認';
+                            unconfirmed.title = '無法從商品頁確認庫存與價格，請至商場確認';
+                            priceSummary.appendChild(unconfirmed);
                         }
 
                         info.append(platform, title, priceSummary);

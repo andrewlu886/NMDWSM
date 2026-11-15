@@ -29,7 +29,7 @@ test('HTTP removal, temporary failures and unsafe redirects remain distinct', as
   assert.equal(calls, 1);
 });
 
-test('expired status hides sold or unknown products, and the same URL can recover', async () => {
+test('expired status hides sold products, marks unknown ones, and the same URL can recover', async () => {
   let time = 100000, stock = 'available', calls = 0;
   const lifecycle = createMarketLifecycle({ file: null, now: () => time, check: async () => { calls++; return { availability: stock, reason: stock }; } });
   assert.equal((await lifecycle.filter([item])).products.length, 1);
@@ -40,7 +40,10 @@ test('expired status hides sold or unknown products, and the same URL can recove
   assert.equal((await lifecycle.filter([item])).products.length, 0);
   assert.equal(lifecycle.state.products[item.url].availability, 'unavailable');
   time += 60001; stock = 'unknown';
-  assert.equal((await lifecycle.filter([item])).failures.PChome, 1);
+  const unknown = await lifecycle.filter([item]);
+  assert.equal(unknown.products[0].availability, 'unknown');
+  assert.deepEqual(unknown.hidden, []);
+  assert.deepEqual(unknown.failures, {});
   time += 60001; stock = 'available';
   assert.equal((await lifecycle.filter([item])).products.length, 1);
 });
@@ -70,15 +73,19 @@ test('scheduled jobs do not overlap and limit rediscovery to fifty active query 
   await lifecycle.runDue(async () => calls++); assert.equal(calls, 50);
 });
 
-test('search removes stale rows, reports unknown separately, and recovers retained rows', async () => {
+test('search removes stale rows, marks unconfirmed listings, and recovers retained rows', async () => {
   let time = 100000, status = 'unavailable';
   const lifecycle = createMarketLifecycle({ file: null, now: () => time, check: async () => ({ availability: status }) });
   let products = [item];
   const deps = { lifecycle, getMarketData: async () => ({ products, meta: {} }) };
   const options = { keyword: 'RTX 4060', platforms: 'pchome' };
   assert.equal((await searchProductsWithMeta(options, deps)).data.length, 0);
-  time += 60001; status = 'unknown'; products = [];
-  assert.equal((await searchProductsWithMeta(options, deps)).meta.sourceStatus.PChome.status, 'partial');
+  time += 60001; status = 'unknown';
+  const marked = await searchProductsWithMeta(options, deps);
+  assert.equal(marked.data[0].availability, 'unknown');
+  assert.equal(marked.meta.sourceStatus.PChome, undefined);
+  time += 60001; products = [];
+  assert.equal((await searchProductsWithMeta(options, deps)).data.length, 0);
   time += 60001; status = 'available';
   assert.equal((await searchProductsWithMeta(options, deps)).data.length, 1);
 });
@@ -106,7 +113,7 @@ test('gateway cache hits do not extend the original sixty-second evidence lifeti
   assert.equal((await lifecycle.filter([used])).products.length, 0);
 });
 
-test('verification budgets hide unchecked rows and retries recover; rate limiting backs off', async () => {
+test('verification budgets mark unchecked rows and retries recover; rate limiting backs off', async () => {
   let time = 100000, fail = true, calls = 0;
   const lifecycle = createMarketLifecycle({ file: null, now: () => time, check: async () => { calls++; return fail ? { availability: 'unknown', reason: 'rate_limited' } : { availability: 'available' }; } });
   await lifecycle.filter([item]);
@@ -116,6 +123,7 @@ test('verification budgets hide unchecked rows and retries recover; rate limitin
   assert.equal((await lifecycle.filter([item])).products.length, 1);
   const slow = createMarketLifecycle({ file: null, budgetMs: 5, check: async (_, { signal }) => new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(Error('timeout')), { once: true })) });
   const result = await slow.filter(Array.from({ length: 8 }, (_, i) => ({ ...item, url: item.url + i })));
-  assert.equal(result.products.length, 0);
-  assert.equal(result.hidden.length, 8);
+  assert.equal(result.products.length, 8);
+  assert.ok(result.products.every(row => row.availability === 'unknown'));
+  assert.equal(result.hidden.length, 0);
 });

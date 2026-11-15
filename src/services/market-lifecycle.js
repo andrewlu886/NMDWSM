@@ -101,6 +101,9 @@ function createMarketLifecycle({ file = process.env.MARKET_STATE_PATH || path.jo
               else fresh.price = String(row.price);
             }
             result.push(fresh);
+          } else if (row.availability === 'unknown' && item.condition !== 'used') {
+            // Retail pages often omit stock data; keep the listing visible but marked rather than hiding it.
+            result.push({ ...item, availability: 'unknown', availabilityReason: row.reason || 'unconfirmed', availabilityCheckedAt: row.availabilityCheckedAt });
           } else {
             hidden.push(item.url);
             if (row.availability === 'unknown') failures[item.source || item.platform] = (failures[item.source || item.platform] || 0) + 1;

@@ -164,7 +164,10 @@ async function searchProductsWithMeta(options, dependencies = {}) {
   lifecycle.trackQuery(lifecycleOptions, relevant);
   const checked = await lifecycle.filter(relevant, { touch: !options.maintenance });
   if (!dependencies.lifecycle) require('./market-cache').removeMarketProducts(checked.hidden);
-  const products = await convertUsdProducts(checked.products, dependencies.getUsdNtdRate || getUsdNtdRate);
+  // An unconfirmed row is only shown while a source still lists it; retained-only rows need a confirmed check.
+  const listed = new Set([...marketData.products, ...usedData.data].map(item => item.url));
+  const shown = checked.products.filter(item => item.availability !== 'unknown' || listed.has(item.url));
+  const products = await convertUsdProducts(shown, dependencies.getUsdNtdRate || getUsdNtdRate);
   const sourceStatus = { ...(usedData.meta?.sourceStatus || {}) };
   for (const [source, count] of Object.entries(checked.failures)) {
     sourceStatus[source] = { ...sourceStatus[source], name: sourceStatus[source]?.name || source, status: 'partial', verificationFailed: count,
