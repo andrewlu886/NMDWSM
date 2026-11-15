@@ -11,7 +11,7 @@ const { createRequire } = require('node:module');
 
 test('CPU evidence retains Gemma candidates and both conflicting suffixes', () => {
   const original = 'Category: CPU\nModel: unknown\nConfidence: low';
-  const accepted = { accepted: true, model: 'i5-12400F', evidence: ['intel CORE i5-12400F'] };
+  const accepted = { accepted: true, textVerified: true, model: 'i5-12400F', evidence: ['intel CORE i5-12400F'] };
   assert.match(mergeCpuAnalysis(original, accepted), /Model: i5-12400F/);
   assert.match(mergeCpuAnalysis(original, accepted), /Confidence: medium/);
   assert.match(mergeCpuAnalysis('Category: CPU\nModel: Intel® Core™ i5-12400F', accepted), /Model: i5-12400F/);
@@ -26,7 +26,7 @@ test('CPU evidence retains Gemma candidates and both conflicting suffixes', () =
 test('CPU model cannot replace GPU observations', () => {
   const gpu = 'Category: graphics card\nModel: RTX 4060';
   assert.equal(isCpuAnalysis(gpu), false);
-  assert.equal(mergeCpuAnalysis(gpu, { accepted: true, model: 'i5-12400', evidence: ['i5-12400'] }), gpu);
+  assert.equal(mergeCpuAnalysis(gpu, { accepted: true, textVerified: true, model: 'i5-12400', evidence: ['i5-12400'] }), gpu);
 });
 
 test('remote CPU recognition uses the authenticated Ollama client and tolerates an older gateway', async () => {
@@ -51,9 +51,9 @@ test('Gemma updated reading is fed back into CPU and physical evidence reaches t
       return { ok: true, json: async () => ({ message: { content: ++calls === 1
         ? '{"choice":"unreadable","question":"model_label"}' : calls === 2
           ? 'Category: CPU\nModel: i5-14400\nEvidence: I5-14400' : '{"choice":"agreement","question":"none"}' } }) };
-    }, { image: 'aGVsbG8=', recheckCpu: async observation => {
+    }, { deepReview: true, image: 'aGVsbG8=', recheckCpu: async observation => {
       assert.match(observation, /Model: i5-14400/);
-      return { accepted: true, model: 'i5-14400', evidence: ['Intel Core i5-14400'], guided: { focusedOcr: true } };
+      return { accepted: true, textVerified: true, model: 'i5-14400', evidence: ['Intel Core i5-14400'], guided: { focusedOcr: true } };
     } });
   const finalEvidence = JSON.parse(observations[2].messages[1].content);
   assert.equal(finalEvidence.cpu.guided.focusedOcr, true);
@@ -90,17 +90,17 @@ test('gateway CPU route requires authentication, bounds images and rejects arbit
   }
 });
 
-function imageService(vision, result, checked = false) {
+function imageService(vision, result, checked = false, cpuRecognition = undefined) {
   const calls = { cpu: 0, searches: [], reviews: 0 };
   const requireAi = createRequire(path.resolve('public/AiService.js'));
   const context = {
     require: name => name === '../src/services/cpu-vision'
-      ? { isCpuAnalysis, collaborateCpuAnalysis, cpuConfirmationReply, createCpuVisionClient: () => ({ recognize: async () => { calls.cpu++; return result; } }) }
+      ? { ...require('../src/services/cpu-vision'), createCpuVisionClient: () => ({ recognize: async () => { calls.cpu++; return result; } }) }
       : name === '../src/services/ollama-client'
         ? { createOllamaClient: () => ({ serviceMode: 'local', request: async (route, options) => {
           const review = options?.body && Boolean(JSON.parse(options.body).format);
           if (review) calls.reviews++;
-          return { ok: true, json: async () => route === '/api/tags' ? { models: [{ name: 'gemma3:4b' }] } : { message: { content: review ? '{"choice":"cpu"}' : vision }, cpuVisionChecked: checked } };
+          return { ok: true, json: async () => route === '/api/tags' ? { models: [{ name: 'gemma3:4b' }] } : { message: { content: review ? '{"choice":"cpu"}' : vision }, cpuVisionChecked: checked, cpuRecognition } };
         } }) }
         : name === '../src/services/search'
           ? { searchProductsWithMeta: async options => { calls.searches.push(options.keyword); return { data: [], meta: null }; } }
@@ -120,13 +120,14 @@ async function askPhoto(service, content = '請查詢照片中產品的資訊與
   return result;
 }
 
-test('chat photo asks confirmation before tools for corroborated and unverified CPU candidates', async () => {
-  const positive = imageService('Category: CPU\nModel: unknown\nConfidence: low', { accepted: true, model: 'i5-12400F', evidence: ['i5-12400F'] });
+test('chat photo directly uses clearly verified text and still confirms unverified CPU candidates', async () => {
+  const positive = imageService('Category: CPU\nModel: unknown\nConfidence: low', { accepted: true, textVerified: true, model: 'i5-12400F', evidence: ['i5-12400F'] });
   const answer = await askPhoto(positive);
   assert.match(answer.imageAnalysis, /Model: i5-12400F/);
-  assert.match(answer.answer, /請確認/);
-  assert.equal(positive.calls.reviews, 1);
-  assert.deepEqual(positive.calls.searches, []);
+  assert.match(answer.answer, /這是「i5-12400F」/);
+  assert.equal(answer.cpuRecognition.requiresConfirmation, false);
+  assert.equal(positive.calls.reviews, 0);
+  assert.deepEqual(positive.calls.searches, ['i5-12400F']);
   const unreadable = imageService('Category: CPU\nModel: i5-12400\nConfidence: high', { accepted: false, evidence: [] });
   assert.match((await askPhoto(unreadable)).imageAnalysis, /Model: unknown/);
   assert.deepEqual(unreadable.calls.searches, []);
@@ -150,7 +151,32 @@ test('a gateway-corroborated photo is not sent to the CPU model twice', async ()
   const checked = imageService('Category: CPU\nModel: i5-12400F\nConfidence: medium', null, true);
   await askPhoto(checked);
   assert.equal(checked.calls.cpu, 0);
-  assert.deepEqual(checked.calls.searches, ['i5-12400F']);
+  assert.deepEqual(checked.calls.searches, []);
+});
+
+test('legacy gateway confirmation flag is reconciled with actual clear OCR before pricing', async () => {
+  const legacy={schemaVersion:1,status:'verified',model:'i5-14400F',candidates:['i5-14400F'],requiresConfirmation:true,
+    evidence:{text:['i5-14400F'],readings:[{text:'i5-14400F',confidence:.95}]}};
+  const clear=imageService('Category: CPU\nModel: i5-14400F',null,true,legacy);
+  const answer=await askPhoto(clear);
+  assert.match(answer.answer,/這是「i5-14400F」/);assert.doesNotMatch(answer.answer,/請確認|仍需你確認/);
+  assert.equal(answer.cpuRecognition.requiresConfirmation,false);assert.equal(clear.calls.cpu,0);
+  assert.deepEqual(clear.calls.searches,['i5-14400F']);
+  const weak=imageService('Category: CPU\nModel: i5-14400F',null,true,
+    {...legacy,evidence:{text:['i5-14400F'],readings:[{text:'i5-14400F',confidence:.4}]}});
+  const pending=await askPhoto(weak);
+  assert.equal(pending.cpuRecognition.status,'candidate');assert.equal(pending.cpuRecognition.requiresConfirmation,true);
+  assert.doesNotMatch(pending.answer,/已通過核對|這是「/);assert.deepEqual(weak.calls.searches,[]);
+});
+
+test('legacy gateway missing-digit disagreement uses its recorded verified upload text', async () => {
+  const legacy={schemaVersion:1,status:'conflict',model:null,candidates:['i5-1440F','i5-14400F'],requiresConfirmation:true,
+    evidence:{source:'uploaded_image',text:['i5-14400F'],readings:[{text:'i5-14400F',confidence:.95}]}};
+  const service=imageService('Category: CPU\nModel: unknown\nCPU model observation: {"model":"i5-14400F","textVerified":true}',null,true,legacy);
+  const answer=await askPhoto(service);
+  assert.equal(answer.cpuRecognition.model,'i5-14400F');assert.equal(answer.cpuRecognition.requiresConfirmation,false);
+  assert.deepEqual(service.calls.searches,['i5-14400F']);assert.equal(service.calls.cpu,0);
+  assert.doesNotMatch(answer.answer,/分歧|i5-1440F/);
 });
 
 test('gateway corroborates CPU vision for existing Render clients without changing receipt processing', async () => {
@@ -158,7 +184,7 @@ test('gateway corroborates CPU vision for existing Render clients without changi
   let calls = 0;
   const server = createAiGateway({ token,
     fetchImpl: async (_url, options) => ({ ok: true, json: async () => ({ message: { content: JSON.parse(options.body).format ? '{"choice":"cpu"}' : 'Category: CPU\nModel: unknown\nConfidence: low' } }) }),
-    cpuRecognize: async () => { calls++; return { accepted: true, model: 'i5-12400F', evidence: ['i5-12400F'], version: 'test' }; }
+    cpuRecognize: async () => { calls++; return { accepted: true, textVerified: true, model: 'i5-12400F', evidence: ['i5-12400F'], version: 'test' }; }
   });
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
@@ -171,9 +197,33 @@ test('gateway corroborates CPU vision for existing Render clients without changi
       assert.equal(response.status, 200);
       const data = await response.json();
       if (receipt) assert.equal(data.cpuVisionChecked, undefined);
-      else { assert.equal(data.cpuVisionChecked, true); assert.match(data.message.content, /Model: i5-12400F/); assert.match(data.message.content, /Llama review: cpu/); }
+      else { assert.equal(data.cpuVisionChecked, true); assert.match(data.message.content, /Model: i5-12400F/); assert.equal(data.cpuRecognition.requiresConfirmation, false); assert.match(data.message.content, /Llama review: unavailable/); }
     }
     assert.equal(calls, 1);
+  } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+});
+
+test('gateway gives OCR a fresh deadline after the vision response', async () => {
+  const token = 'a'.repeat(64);
+  const server = createAiGateway({ token, timeoutMs: 200,
+    fetchImpl: async () => ({ ok: true, json: async () => ({ message: { content: 'Category: CPU\nModel: i7-14700\nEvidence: i7-14700' } }) }),
+    cpuRecognize: async (_image, { signal }) => {
+      await new Promise(resolve => setTimeout(resolve, 250));
+      signal.throwIfAborted();
+      return { accepted: true, textVerified: true, model: 'i7-14700', evidence: ['i7-14700'] };
+    }
+  });
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  try {
+    const response = await fetch(`http://127.0.0.1:${server.address().port}/api/chat`, {
+      method: 'POST', headers: { authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gemma3:4b', messages: [{ role: 'user', content: 'Inspect hardware', images: ['aGVsbG8='] }] })
+    });
+    const result = await response.json();
+    assert.equal(result.cpuCheckDiagnostics.status, 'completed');
+    assert.equal(result.cpuRecognition.status, 'verified');
+    assert.equal(result.cpuRecognition.model, 'i7-14700');
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });
 
@@ -185,7 +235,7 @@ test('Llama receives both evidence sources, cannot invent a SKU, and reviewer fa
     assert.equal(route, '/api/chat'); payload = JSON.parse(options.body);
     return { ok: true, json: async () => ({ message: { content: '{"choice":"gemma","model":"i9-14900K"}' } }) };
   };
-  const analysis = await collaborateCpuAnalysis(gemma, cpu, request);
+  const analysis = await collaborateCpuAnalysis(gemma, cpu, request, { deepReview: true });
   const observations = JSON.parse(payload.messages[1].content);
   assert.equal(observations.gemma.model, 'i5-14400');
   assert.equal(observations.cpu.textVerified, false);
@@ -199,7 +249,7 @@ test('Llama receives both evidence sources, cannot invent a SKU, and reviewer fa
   const hallucinated = await collaborateCpuAnalysis(gemma, cpu, async () => ({ ok: true, json: async () => ({ message: { content: '{"choice":"agreement"}' } }) }));
   assert.match(hallucinated, /Review: candidate/);
   assert.match(hallucinated, /Llama review: unavailable/);
-  const conflict = await collaborateCpuAnalysis(gemma, { accepted: true, model: 'i5-14400F', evidence: ['i5-14400F'] }, request);
+  const conflict = await collaborateCpuAnalysis(gemma, { accepted: true, textVerified: true, model: 'i5-14400F', evidence: ['i5-14400F'] }, request);
   assert.match(conflict, /Review: conflict/);
   assert.match(conflict, /Candidate: i5-14400 \/ i5-14400F/);
   assert.match(cpuConfirmationReply(conflict), /兩個來源.*分歧/);
@@ -218,7 +268,7 @@ test('bounded dialogue lets Llama question Gemma on the same photo then review i
         : calls.length === 2 ? 'Category: CPU\nModel: Intel Core i5-14400\nEvidence: I5-14400 is printed'
           : '{"choice":"gemma","question":"none"}';
       return { ok: true, json: async () => ({ message: { content } }) };
-    }, { image: 'aGVsbG8=' });
+    }, { deepReview: true, image: 'aGVsbG8=' });
   assert.deepEqual(calls.map(call => call.model), ['llama3.1:8b', 'gemma3:4b', 'llama3.1:8b']);
   assert.deepEqual(calls[1].messages[0].images, ['aGVsbG8=']);
   assert.match(calls[1].messages[0].content, /complete model printed/);
@@ -236,7 +286,7 @@ test('Gemma recheck cannot erase its previous candidate or hide a suffix conflic
     async () => ({ ok: true, json: async () => ({ message: { content: ++calls === 1
       ? '{"choice":"gemma","question":"suffix"}' : calls === 2
         ? 'Category: CPU\nModel: i5-14400F\nEvidence: I5-14400F' : '{"choice":"conflict","question":"none"}' } }) }),
-    { image: 'aGVsbG8=' });
+    { deepReview: true, image: 'aGVsbG8=' });
   assert.equal(calls, 3);
   assert.match(analysis, /Candidate: i5-14400 \/ i5-14400F\nReview: conflict/);
   assert.match(analysis, /Model: unknown/);

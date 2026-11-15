@@ -154,4 +154,5 @@ tools/cloudflared.exe
 models/cpu-vision/model.pt
 models/cpu-vision/model.pt.tmp
 models/cpu-vision/ocr/
+/data/cpu-library/
 __pycache__/

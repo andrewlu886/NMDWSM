@@ -3,6 +3,7 @@ const { getDailyMarketData } = require('./market-cache');
 const { searchUsedProducts, fixedPrice } = require('./used-search');
 const { matchesProductCondition } = require('./product-condition');
 const { isComputerListing, isUnrelatedProduct } = require('./computer-product');
+const { modelKey } = require('../../public/hardware-context');
 const {
   extractCPU,
   extractGPU,
@@ -89,6 +90,14 @@ function rankRecommendations(options, products) {
     if (options.usage === 'gaming' && item.name.includes('文書')) return;
 
     const specifications = options.condition === 'used' ? `${item.name} ${item.specificationText || ''}` : item.name;
+    // Required hardware is literal user/confirmed-photo input. Missing or near
+    // specifications cannot be advertised as meeting that requirement.
+    if ((options.requiredHardware || []).some(product => {
+      let model = product.model;
+      if (product.category === 'cpu') model = model.replace(/^intel\s*/i, '').replace(/^core\s*(?=i[3579])/i, '').replace(/^amd\s*/i, '');
+      const pattern = model.split(/[\s-]+/).filter(Boolean).map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[\\s-]*');
+      return !pattern || !new RegExp(`(?:^|[^a-z0-9])${pattern}(?![a-z0-9])`, 'i').test(specifications);
+    })) return;
     const cpu = extractCPU(specifications);
     const gpu = extractGPU(specifications);
     const ram = extractRAM(specifications);
@@ -143,6 +152,9 @@ function rankRecommendations(options, products) {
 }
 
 async function getRecommendationsWithMeta(options, dependencies = {}) {
+  if (options.requiredHardware !== undefined && (!Array.isArray(options.requiredHardware) || options.requiredHardware.length > 8 || options.requiredHardware.some(product => !product || !['cpu', 'gpu', 'motherboard', 'ram'].includes(product.category) || typeof product.model !== 'string' || !modelKey(product.model, product.category) || product.model.length > 160))) {
+    throw new Error('指定硬體資料格式不正確');
+  }
   const condition = options.condition === undefined ? 'new' : options.condition;
   if (!['new', 'used'].includes(condition)) throw new Error('商品狀況僅支援全新或二手');
   const normalized = { ...options, condition };

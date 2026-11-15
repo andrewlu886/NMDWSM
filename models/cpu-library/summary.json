@@ -1,0 +1,1262 @@
+{
+  "version": "df38f4b998522b4f",
+  "sourceImages": 1402,
+  "models": 104,
+  "selectedImages": 104,
+  "pendingImageReviews": 1156,
+  "modelReviews": [
+    {
+      "model": "Ryzen 3 3200G",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 3 4100",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 3 4350G PRO",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 3400G",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 3600",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 4500",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 4600G",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5500",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5500GT",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5500X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5600",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5600G",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5600GT",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5600X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 5600XT",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 7500F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 7600",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 7600X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 8400F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 8500G",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "Ryzen 5 8600G",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 9500F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 9600",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 5 9600X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 4750G PRO",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 5700",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 5700G",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 5700X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 5700X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 5800X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 5800X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 5800XT",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 7700",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 7700X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 7800X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 8700F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 9700X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 9800X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 7 9850X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 5900X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 7900",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 7900X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 7900X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 7950X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 7950X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 9900X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 9900X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 9950X",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ryzen 9 9950X3D",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 5 225",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "Ultra 5 225F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 5 235",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 5 245K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 5 245KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "Ultra 5 250K Plus",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 5 250KF Plus",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 7 265K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 7 265KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "Ultra 7 270K Plus",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "Ultra 9 285K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i3-12100",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i3-13100",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i3-13100F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i3-14100",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-12400",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-12400F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "i5-12500",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-12600K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "i5-12600KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-13400",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "i5-13400F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-13500",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-13600K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "i5-13600KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-14400",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-14400F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-14500",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-14600K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i5-14600KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-12700",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-12700F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-12700K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-12700KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-13700",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-13700F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-13700K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-13700KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-14700",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-14700F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-14700K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i7-14700KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-12900",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-12900F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "i9-12900K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-12900KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-12900KS",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-13900",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "i9-13900F",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-13900K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-13900KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "bare"
+      ]
+    },
+    {
+      "model": "i9-13900KS",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-14900K",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-14900KF",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    },
+    {
+      "model": "i9-14900KS",
+      "selected": 1,
+      "review": {
+        "status": "reviewed",
+        "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+        "independentEvaluation": false
+      },
+      "missing": [
+        "boxed"
+      ]
+    }
+  ],
+  "excludedEvaluationImages": 104,
+  "catalogImages": 1402,
+  "externalEvaluation": "not_available",
+  "automaticAdoptionEnabled": true,
+  "policy": "text-first-v2; strict OCR or complete Gemma quotation + region OCR, with visual corroboration"
+}

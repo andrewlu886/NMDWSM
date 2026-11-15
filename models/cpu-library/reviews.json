@@ -1,0 +1,3198 @@
+{
+  "reviewer": "Codex visual review, 2026-10-14/15",
+  "scope": "All 104 model candidate sets reviewed for reference selection. All 1,402 scenes scanned in contact sheets; suspect crowded scenes checked at native detail. Scene usability does not certify every pending label.",
+  "images": {
+    "R3-3200G\\散片\\R3-3200G_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "2f96179474ad2b2b054d66619c543f0b8f6072b2d37f7e1da18f6596f9c35187",
+      "visibleText": "Ryzen 3 3200G",
+      "labelBox": [
+        0.05,
+        0.22,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R3-4100\\散片\\R3-4100_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "ad437966e0bef3abcb517fb6bdd2ef7393cfa6865c7ceafe5d1dabd4a58bd909",
+      "visibleText": "Ryzen 3 4100",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.46
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R3-4350G-PRO\\散片\\R3-4350G-PRO_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "f4dc68a891d122b6299c956f35c7ec356e3c35e75803da54f1327c9eb85eca13",
+      "visibleText": "Ryzen 3 4350G PRO",
+      "labelBox": [
+        0.05,
+        0.16,
+        0.9,
+        0.46
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-3400G\\散片\\R5-3400G_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "2c2333784b8849e6f3983c9645568d529ca0d5421afd9b2f823d018b023c2dc7",
+      "visibleText": "Ryzen 5 3400G",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.44
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-3600\\散片\\R5-3600_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "6c872e11f78293c39f470275b75aecc856f2688d7eb3c5d915f0a32dc0dfcbe7",
+      "visibleText": "Ryzen 5 3600",
+      "labelBox": [
+        0.05,
+        0.11,
+        0.9,
+        0.48
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-4500\\散片\\R5-4500_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "88233bc276aa9fd347361d545846715661d414834452baab324eea178d40222f",
+      "visibleText": "Ryzen 5 4500",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.42
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-4600G\\散片\\R5-4600G_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "87b5e514c7370122ed326165d088b5c148e658dc426ce61caa54ff26c034cbc1",
+      "visibleText": "Ryzen 5 4600G",
+      "labelBox": [
+        0.05,
+        0.3,
+        0.9,
+        0.45
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5500\\盒裝\\R5-5500_盒裝_006.jpg": {
+      "status": "approved",
+      "sha256": "689de014f67ad3228297fdb9471c31e524b5258ac1ebfd73e632568406da38b1",
+      "visibleText": "Ryzen 5 5500",
+      "labelBox": [
+        0.05,
+        0.4,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5500GT\\散片\\R5-5500GT_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "3e30ec6f9b2c5f03e827b36b0bfa917b30df6d8eaebfe83bfe4ba2e84eb6a246",
+      "visibleText": "Ryzen 5 5500GT",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.44
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5600\\散片\\R5-5600_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "56a97ea6c92e6b2ec90a23bcb59343c4665f64ec4893d91cd7a00b9cd076a85d",
+      "visibleText": "Ryzen 5 5600",
+      "labelBox": [
+        0.05,
+        0.34,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5600G\\散片\\R5-5600G_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "096bea671b1c4635a1b9b134bb3696625f46cc25b484ea7f7c9bd83fcb9426c4",
+      "visibleText": "Ryzen 5 5600G",
+      "labelBox": [
+        0.05,
+        0.08,
+        0.9,
+        0.48
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5600GT\\散片\\R5-5600GT_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "a46ab2d4a01946e4d9367624a6960aea3513e8506b0015d7ca3167006477868b",
+      "visibleText": "Ryzen 5 5600GT",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.45
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5600X\\散片\\R5-5600X_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "143626052e1cd9262636039395388524024d34a4d555674c980d425aabdcfb01",
+      "visibleText": "Ryzen 5 5600X",
+      "labelBox": [
+        0.05,
+        0.36,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5600XT\\散片\\R5-5600XT_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "eb15ae918cfe3d0debe9dcaea38a75e2997cc5b9fcb1d080c31a5c08570c9af8",
+      "visibleText": "Ryzen 5 5600XT",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.42
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-7500F\\散片\\R5-7500F_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "e156f234206cd02139560cf573980a1c574921c7f3e05221aa7c8bf1e550b8ff",
+      "visibleText": "Ryzen 5 7500F",
+      "labelBox": [
+        0.05,
+        0.37,
+        0.9,
+        0.47
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-7600\\散片\\R5-7600_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "dca791c831421ff620fb3bb1f2eed11a296eaab1e05ed2e490d609c7c403154f",
+      "visibleText": "Ryzen 5 7600",
+      "labelBox": [
+        0.05,
+        0.28,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-7600X\\散片\\R5-7600X_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "114cc0543a6e6d31951e386fdd97680981de4e30b41b94396ca96c6ec635555a",
+      "visibleText": "Ryzen 5 7600X",
+      "labelBox": [
+        0.05,
+        0.07,
+        0.9,
+        0.66
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-8500G\\盒裝\\R5-8500G_盒裝_001.jpg": {
+      "status": "approved",
+      "sha256": "57467f86e87234a556b3050cf1509e1605b14ddf4d408d8cf70eae51d43c8168",
+      "visibleText": "Ryzen 5 8500G",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.34
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-8600G\\散片\\R5-8600G_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "56b9d9bea1a2bdbf617a491f8b7cee892f8afe2842cc596c307966d75330b05b",
+      "visibleText": "Ryzen 5 8600G",
+      "labelBox": [
+        0.05,
+        0.26,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-9500F\\散片\\R5-9500F_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "e5f50538bcf81c1df26da24fc2d11039f9d72a5bba53d57f3472ad29c8e56640",
+      "visibleText": "Ryzen 5 9500F",
+      "labelBox": [
+        0.05,
+        0.27,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-9600\\散片\\R5-9600_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "5dc7e437e53763d2ebe0a9ae4162efdb27a80057052b2022b42423682ed0c91b",
+      "visibleText": "Ryzen 5 9600",
+      "labelBox": [
+        0.05,
+        0.34,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-9600X\\散片\\R5-9600X_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "cf790c49522e25f58b789ffc6e7efe90cfdfd2df988b70a2cad67d530b303ef2",
+      "visibleText": "Ryzen 5 9600X",
+      "labelBox": [
+        0.05,
+        0.16,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-4750G-PRO\\散片\\R7-4750G-PRO_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "a60b7365e9c0f573ee56dc2115d95c9e6c213cdc46ba8b55b53e0c07808de16f",
+      "visibleText": "Ryzen 7 4750G PRO",
+      "labelBox": [
+        0.05,
+        0.24,
+        0.9,
+        0.46
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-5700\\散片\\R7-5700_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "d5c7a6433c5b3416400f25a6dec9b3a3289acfc8f12402558865e27004023c69",
+      "visibleText": "Ryzen 7 5700",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.43
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-5700X\\散片\\R7-5700X_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "59e6789fec6eebfab2b66e8ad838078aa58db5ff739b4d894144a394e89db036",
+      "visibleText": "Ryzen 7 5700X",
+      "labelBox": [
+        0.05,
+        0.17,
+        0.9,
+        0.46
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-5700X3D\\散片\\R7-5700X3D_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "7ca0c29686243b49c95959ca3226f7599fc3834c431240f22b8b9bfa395f70c7",
+      "visibleText": "Ryzen 7 5700X3D",
+      "labelBox": [
+        0.05,
+        0.03,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-5800X\\散片\\R7-5800X_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "b945f1c830b69c2acb88489c871d88d9e879f067d6c2c4b4f06d8baa0460e5e3",
+      "visibleText": "Ryzen 7 5800X",
+      "labelBox": [
+        0.05,
+        0.15,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-5800X3D\\散片\\R7-5800X3D_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "5e18f68dfaac38797656cefdbe02983a98492ece2e49de2e89379b6bad9dd9db",
+      "visibleText": "Ryzen 7 5800X3D",
+      "labelBox": [
+        0.05,
+        0.01,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-5800XT\\散片\\R7-5800XT_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "fc02451a799225bf94230c9c2fe13ba4144237c48951bbd88254e647ca6afebe",
+      "visibleText": "Ryzen 7 5800XT",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.44
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-7700\\散片\\R7-7700_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "fcdc6fd031c2f14fbc0090989c6b5ac8ffa583a359e388cafb4c5788b0138ac9",
+      "visibleText": "Ryzen 7 7700",
+      "labelBox": [
+        0.05,
+        0.29,
+        0.9,
+        0.48
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-7700X\\散片\\R7-7700X_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "eaf98b911884a2ba058382487076ae8cea6f5a554e5fedca4f997d5de3146a7f",
+      "visibleText": "Ryzen 7 7700X",
+      "labelBox": [
+        0.05,
+        0.12,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-7800X3D\\散片\\R7-7800X3D_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "72247c486cbe7bbfd24a47ec575e7a9068b5cbdd3aa96624b9382711e1955123",
+      "visibleText": "Ryzen 7 7800X3D",
+      "labelBox": [
+        0.05,
+        0.22,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-8700F\\散片\\R7-8700F_散片_006.jpg": {
+      "status": "approved",
+      "sha256": "0b384215f760cb07a9a7e5d45baa77c16718aa03808debe623b3168a85e151ae",
+      "visibleText": "Ryzen 7 8700F",
+      "labelBox": [
+        0.05,
+        0.19,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-9700X\\散片\\R7-9700X_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "ad4df256b7c3d2f7ef84b7ba134d875f9c7742eab51d1a86e32fd45baf559617",
+      "visibleText": "Ryzen 7 9700X",
+      "labelBox": [
+        0.05,
+        0.26,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-9800X3D\\散片\\R7-9800X3D_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "ba17dc32f1129636fb3c682aac2a9b9ae68e69c4dffb56714b562be0896bf3ff",
+      "visibleText": "Ryzen 7 9800X3D",
+      "labelBox": [
+        0.05,
+        0.22,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-5900X\\散片\\R9-5900X_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "334dc3cd2374c6f9b69b3c844465ba1a6d4da2ac78381e814bb461748f1e39fd",
+      "visibleText": "Ryzen 9 5900X",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.46
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-7900\\散片\\R9-7900_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "6f0010487589ac2a1a8ea19da910ea941adf7b15a163347ad3f9c8dc40123366",
+      "visibleText": "Ryzen 9 7900",
+      "labelBox": [
+        0.05,
+        0.12,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-7900X\\散片\\R9-7900X_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "3521d05d804748106d70577b0de49c72d0a29bbc425b3b1b15e5d6a1b53e5021",
+      "visibleText": "Ryzen 9 7900X",
+      "labelBox": [
+        0.05,
+        0.32,
+        0.9,
+        0.46
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-7900X3D\\散片\\R9-7900X3D_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "74e9705d5b56c733df8029db16c78c983db3d83295ad14ddf9d52ea50ec7dca6",
+      "visibleText": "Ryzen 9 7900X3D",
+      "labelBox": [
+        0.05,
+        0.19,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-7950X\\散片\\R9-7950X_散片_008.jpg": {
+      "status": "approved",
+      "sha256": "aa87cce9193fe35287a0824b423bd1b41126f98caeda2b5672f1d4665869517d",
+      "visibleText": "Ryzen 9 7950X",
+      "labelBox": [
+        0.05,
+        0.17,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-7950X3D\\散片\\R9-7950X3D_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "fc6d85dc29b092ddf917cad0f57931a602f7edfd9a2ff33a22929f5234068ec0",
+      "visibleText": "Ryzen 9 7950X3D",
+      "labelBox": [
+        0.05,
+        0.32,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-9900X\\散片\\R9-9900X_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "662b71b5d5b6a2b8ebbb55878a508a2519a7850f744bba8c949c411538e324b4",
+      "visibleText": "Ryzen 9 9900X",
+      "labelBox": [
+        0.05,
+        0.17,
+        0.9,
+        0.55
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-9900X3D\\散片\\R9-9900X3D_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "ff2e679128365b4d611e267812ccffa6958ce84acd2cde433338be818e76da89",
+      "visibleText": "Ryzen 9 9900X3D",
+      "labelBox": [
+        0.05,
+        0.32,
+        0.9,
+        0.48
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-9950X\\散片\\R9-9950X_散片_006.jpg": {
+      "status": "approved",
+      "sha256": "e6478df5183c64d5a68604b2244cd461b4844963e8702bea944557802316d30d",
+      "visibleText": "Ryzen 9 9950X",
+      "labelBox": [
+        0.05,
+        0.11,
+        0.9,
+        0.63
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R9-9950X3D\\散片\\R9-9950X3D_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "1364a3809b780cc0902c519e44967c01caf542a80650df2d1c71450a62cf6ce0",
+      "visibleText": "Ryzen 9 9950X3D",
+      "labelBox": [
+        0.05,
+        0.19,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 225F\\散片\\Ultra 5 225F_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "dfd42503c6bcd62c68721f10dc8901486172d3d04efd2cc293a33d7ff03d155e",
+      "visibleText": "Ultra 5 225F",
+      "labelBox": [
+        0.05,
+        0.2,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 235\\散片\\Ultra 5 235_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "bce758265b637e2841b98e236081a99ff285e03cc4309ebb85bb569c17480487",
+      "visibleText": "Ultra 5 235",
+      "labelBox": [
+        0.05,
+        0.12,
+        0.9,
+        0.59
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 245K\\散片\\Ultra 5 245K_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "74074456ae32ad30568097f0cc13903350f4b8689e83a9320222090d82f5c729",
+      "visibleText": "Ultra 5 245K",
+      "labelBox": [
+        0.05,
+        0.1,
+        0.9,
+        0.57
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 245KF\\盒裝\\Ultra 5 245KF_盒裝_001.jpg": {
+      "status": "approved",
+      "sha256": "bf33051fc91ecf2b80fe4f0c4a919a498e03bd0a43f57570499ae7d374b4ea86",
+      "visibleText": "Ultra 5 245KF",
+      "labelBox": [
+        0.05,
+        0.37,
+        0.9,
+        0.53
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 250K Plus\\散片\\Ultra 5 250K Plus_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "10a2fb36b957cdd8cb51a131742ecebcb761cba405075ed534ee621c8f68dd7a",
+      "visibleText": "Ultra 5 250K Plus",
+      "labelBox": [
+        0.05,
+        0.12,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 250KF Plus\\散片\\Ultra 5 250KF Plus_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "81c0ef1f0b409539635491d40b5199635ec6c411a43ad3ddee63168a5468bb42",
+      "visibleText": "Ultra 5 250KF Plus",
+      "labelBox": [
+        0.05,
+        0.08,
+        0.9,
+        0.68
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 7 265K\\散片\\Ultra 7 265K_散片_006.jpg": {
+      "status": "approved",
+      "sha256": "2bcf49656f1fe8014545bcab3776529f9985e232e19766a947d1a4ef87e4d1db",
+      "visibleText": "Ultra 7 265K",
+      "labelBox": [
+        0.05,
+        0.16,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 7 265KF\\散片\\Ultra 7 265KF_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "496a8724a78c7da22713b27278eb1622b5ee7056348aebd8425a4dba67983945",
+      "visibleText": "Ultra 7 265KF",
+      "labelBox": [
+        0.05,
+        0.14,
+        0.9,
+        0.53
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 7 270K Plus\\盒裝\\Ultra 7 270K Plus_盒裝_001.jpg": {
+      "status": "approved",
+      "sha256": "0c01ac8ee166aaebde433c4dce6dad3a1fcfa6a7c388d33bab0e54c55a0cb83a",
+      "visibleText": "Ultra 7 270K Plus",
+      "labelBox": [
+        0.05,
+        0.45,
+        0.9,
+        0.46
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 9 285K\\散片\\Ultra 9 285K_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "6a60e18efabb3ba2be9beb04acb75dc3df3aa17aa6f8916b9063471ffc713486",
+      "visibleText": "Ultra 9 285K",
+      "labelBox": [
+        0.05,
+        0.18,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i3-12100\\散片\\i3-12100_散片_038.jpg": {
+      "status": "approved",
+      "sha256": "76fa37f6dce02cf6f39ab0cefed72acfc8661d4b43c05e828ce27c686ab08289",
+      "visibleText": "i3-12100",
+      "labelBox": [
+        0.05,
+        0.15,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i3-13100\\散片\\i3-13100_散片_053.jpg": {
+      "status": "approved",
+      "sha256": "c7ab38ce8bb8cedc92d5872b72fd0b1143e063fe80b70cdc73a23869e1540cdd",
+      "visibleText": "i3-13100",
+      "labelBox": [
+        0.05,
+        0.21,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i3-13100F\\散片\\i3-13100F_散片_006.jpg": {
+      "status": "approved",
+      "sha256": "8f3a01cd0f214490e2ddd783e93c7e468a636e7c2e46b76e0e45d661be3c7f37",
+      "visibleText": "i3-13100F",
+      "labelBox": [
+        0.05,
+        0.24,
+        0.9,
+        0.47
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i3-14100\\散片\\i3-14100_散片_024.jpg": {
+      "status": "approved",
+      "sha256": "e59b69ab2560435f35360946ed5d67a26f58d2dd620df6a8b3ab3f17c886650b",
+      "visibleText": "i3-14100",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.48
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-12400\\散片\\i5-12400_散片_022.png": {
+      "status": "approved",
+      "sha256": "016d591927d66667cd667b70ea92fb558aba10429dc1bd16b06b780f6a536f48",
+      "visibleText": "i5-12400",
+      "labelBox": [
+        0.05,
+        0.15,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-12400F\\盒裝\\i5-12400F_盒裝_031.jpg": {
+      "status": "approved",
+      "sha256": "e7dfb4c14f2dfe5c1c5c258e0c7db23179ba6a7f042f4db89d6a1f29e41446ee",
+      "visibleText": "i5-12400F",
+      "labelBox": [
+        0.05,
+        0.61,
+        0.9,
+        0.39
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-12500\\散片\\i5-12500_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "82345dbd05b3fb42cd2094ef55a46df348b52b3ec100e80f5950ba3761f8f0dc",
+      "visibleText": "i5-12500",
+      "labelBox": [
+        0.05,
+        0.13,
+        0.9,
+        0.53
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-12600K\\盒裝\\i5-12600K_盒裝_018.jpg": {
+      "status": "approved",
+      "sha256": "d4e7fa9b4f3b5659fb597ef21e65c28802771b2b717f6964d5803ac973867781",
+      "visibleText": "i5-12600K",
+      "labelBox": [
+        0.05,
+        0.56,
+        0.9,
+        0.44
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-12600KF\\散片\\i5-12600KF_散片_007.jpg": {
+      "status": "approved",
+      "sha256": "ae0035365aeaf825836acf8fc749373c2eb6edbef6bf51b5b727e5041f2b4933",
+      "visibleText": "i5-12600KF",
+      "labelBox": [
+        0.05,
+        0.24,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-13400\\盒裝\\i5-13400_盒裝_005.jpg": {
+      "status": "approved",
+      "sha256": "e31f2f3ee26c8576574e99d5b94d0cdab1ba5a44697773e0c118a9342aea8236",
+      "visibleText": "i5-13400",
+      "labelBox": [
+        0.05,
+        0.59,
+        0.9,
+        0.41
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-13400F\\散片\\i5-13400F_散片_008.jpg": {
+      "status": "approved",
+      "sha256": "27f45916c3780d93a315c842b74abdf95c2a61d0462757b0cdf2b1183ee07726",
+      "visibleText": "i5-13400F",
+      "labelBox": [
+        0.05,
+        0.05,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-13500\\散片\\i5-13500_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "e6807e7c5f69cd78bd5bbb7983153710b7bd0b97d2aabee971d622d9ef57ec6a",
+      "visibleText": "i5-13500",
+      "labelBox": [
+        0.05,
+        0.21,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-13600K\\盒裝\\i5-13600K_盒裝_008.jpg": {
+      "status": "approved",
+      "sha256": "fc594ee812f6571c538249aafb520095689e9913e4fbb57a9b1675c5a3ef23f1",
+      "visibleText": "i5-13600K",
+      "labelBox": [
+        0.05,
+        0.6,
+        0.9,
+        0.4
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-13600KF\\散片\\i5-13600KF_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "a6326df8fc5382815a4ee97e26aabcfcd4fe1a87014b725432f8838db3ffa29f",
+      "visibleText": "i5-13600KF",
+      "labelBox": [
+        0.05,
+        0.28,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-14400\\散片\\i5-14400_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "aaf992b9e29e40e400c7586ebdc5547f29f5bf71ef32c2a5b83b2571a54c1061",
+      "visibleText": "i5-14400",
+      "labelBox": [
+        0.05,
+        0.21,
+        0.9,
+        0.53
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-14400F\\散片\\i5-14400F_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "014dc7ad7d3a5299dc01e593596ba2a8d75740cb83d66a8e3cc4f6038682aa68",
+      "visibleText": "i5-14400F",
+      "labelBox": [
+        0.05,
+        0.07,
+        0.9,
+        0.55
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-14500\\散片\\i5-14500_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "fa334ce1899d2c050d28d0a89b70b9552f3576c196a6eaaa450c4b95396e2272",
+      "visibleText": "i5-14500",
+      "labelBox": [
+        0.05,
+        0.06,
+        0.9,
+        0.53
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-14600K\\散片\\i5-14600K_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "92d03ea9abc80d3171a838863a23dae0bc8e8ebbe7b517c08c0c4a23054fb2e4",
+      "visibleText": "i5-14600K",
+      "labelBox": [
+        0.05,
+        0.13,
+        0.9,
+        0.49
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-14600KF\\散片\\i5-14600KF_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "0a923c9121bdcdf49451984591caf34506c6de1cf728f3200a366b4b76ae921a",
+      "visibleText": "i5-14600KF",
+      "labelBox": [
+        0.05,
+        0.24,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-12700\\散片\\i7-12700_散片_006.jpg": {
+      "status": "approved",
+      "sha256": "0102c8cd873e377156cb90a0a28781878d56d72aaf3bba351df19d0a30bf1292",
+      "visibleText": "i7-12700",
+      "labelBox": [
+        0.05,
+        0.25,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-12700F\\散片\\i7-12700F_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "787136f76053da12dea101faed437360e4bb28ce0f0edbfefd6fcc133471f814",
+      "visibleText": "i7-12700F",
+      "labelBox": [
+        0.05,
+        0.13,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-12700K\\散片\\i7-12700K_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "e6e20e69ed11d5575d6a107cc6516cc8735269f7beb38337aaaf4303c3550bc2",
+      "visibleText": "i7-12700K",
+      "labelBox": [
+        0.05,
+        0.05,
+        0.9,
+        0.53
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-12700KF\\散片\\i7-12700KF_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "27d7967cc9b4e98626b27111bc3f11ab98d27d96b72ea0c7ba49688901378698",
+      "visibleText": "i7-12700KF",
+      "labelBox": [
+        0.05,
+        0.24,
+        0.9,
+        0.48
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-13700\\散片\\i7-13700_散片_006.jpg": {
+      "status": "approved",
+      "sha256": "68a107079131a9e707568de338828a118252cf6a13ee41514475a9e294aeb5c2",
+      "visibleText": "i7-13700",
+      "labelBox": [
+        0.05,
+        0.08,
+        0.9,
+        0.61
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-13700F\\散片\\i7-13700F_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "c65f03950caf03c9f6947ffe2865b42b0b0b4ad4c47a537e6f01d0187e8d7ee4",
+      "visibleText": "i7-13700F",
+      "labelBox": [
+        0.05,
+        0.07,
+        0.9,
+        0.55
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-13700K\\散片\\i7-13700K_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "4c01c6da2f455d4fe0fbde3288e8e0187c5405d4fb6b229099ba42fd1314c470",
+      "visibleText": "i7-13700K",
+      "labelBox": [
+        0.05,
+        0.1,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-13700KF\\散片\\i7-13700KF_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "82301de34a0be1a5614cb97f2b652723c168879e81c290563e6846e1be75053f",
+      "visibleText": "i7-13700KF",
+      "labelBox": [
+        0.05,
+        0.05,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-14700\\散片\\i7-14700_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "4f7a241d7f8659841282fb0b54c065d7565614b7487dc3c13ca9b6bb5f27e66f",
+      "visibleText": "i7-14700",
+      "labelBox": [
+        0.05,
+        0.05,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-14700F\\散片\\i7-14700F_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "ac26c6893ac922d54852fcf49bad9c8e1b436c3bad011fd08f2ea1918b9bfb4e",
+      "visibleText": "i7-14700F",
+      "labelBox": [
+        0.05,
+        0.21,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-14700K\\散片\\i7-14700K_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "9c2fc221ed3febbfe349013c3f406d41726dd74e9d30d0a8bdb197a27d7fb0ef",
+      "visibleText": "i7-14700K",
+      "labelBox": [
+        0.05,
+        0.05,
+        0.9,
+        0.55
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i7-14700KF\\散片\\i7-14700KF_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "52c973f057644ebf724cc2639e07140266fddd5d5c86515576fb605f677592fb",
+      "visibleText": "i7-14700KF",
+      "labelBox": [
+        0.05,
+        0.13,
+        0.9,
+        0.53
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900\\散片\\i9-12900_散片_006.jpg": {
+      "status": "approved",
+      "sha256": "f31e234e239f9957d1dd4f57b29ea87fd39c54d147a4c35f4195d7627496cf65",
+      "visibleText": "i9-12900",
+      "labelBox": [
+        0.05,
+        0.23,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900F\\盒裝\\i9-12900F_盒裝_001.jpg": {
+      "status": "approved",
+      "sha256": "33ff7b0b2fa2e26fe9f5fe68d7b18b34efa6d83c7f63066adba629f512858857",
+      "visibleText": "i9-12900F",
+      "labelBox": [
+        0.05,
+        0.56,
+        0.9,
+        0.44
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900K\\散片\\i9-12900K_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "5458a1c9833b53aa7893d46cf47877f6bfbc1c14737d6b76ebc3d63ab44c24bc",
+      "visibleText": "i9-12900K",
+      "labelBox": [
+        0.05,
+        0.02,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900KF\\散片\\i9-12900KF_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "745677377eb050c665b7ba7164e19fdcd1856c1b2bb9342b24e02b27a5e133de",
+      "visibleText": "i9-12900KF",
+      "labelBox": [
+        0.05,
+        0.18,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900KS\\散片\\i9-12900KS_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "10a4da9f76ef962c930b949908c4efce4fb8187f77719ac11588fbf59ac5cde7",
+      "visibleText": "i9-12900KS",
+      "labelBox": [
+        0.05,
+        0.2,
+        0.9,
+        0.51
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-13900\\盒裝\\i9-13900_盒裝_001.jpg": {
+      "status": "approved",
+      "sha256": "84bb2177417b691e93ac2ad45d29758258b1f78ac68b355f47193c0441794062",
+      "visibleText": "i9-13900",
+      "labelBox": [
+        0.05,
+        0.62,
+        0.9,
+        0.38
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-13900F\\散片\\i9-13900F_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "c60a28057bc5968656afba0946c3208461dd81f50ad5cbf90cb0c0b8e76c066e",
+      "visibleText": "i9-13900F",
+      "labelBox": [
+        0.05,
+        0.19,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-13900K\\散片\\i9-13900K_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "1c4fe30c179fed7e0936acf76f8f240e87bd657909feb6dd393b1b853cead6c7",
+      "visibleText": "i9-13900K",
+      "labelBox": [
+        0.05,
+        0.26,
+        0.9,
+        0.44
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-13900KS\\散片\\i9-13900KS_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "9426dcb0373ddfb56f6ac12c85ee7836782a227ba24072dbd44db91c25c2b5fc",
+      "visibleText": "i9-13900KS",
+      "labelBox": [
+        0.05,
+        0,
+        0.9,
+        0.52
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-14900K\\散片\\i9-14900K_散片_004.jpg": {
+      "status": "approved",
+      "sha256": "5f0d0fbddad8b393284569240daf86855ca0d22a89ed38ee770e660d1acd3424",
+      "visibleText": "i9-14900K",
+      "labelBox": [
+        0.05,
+        0.23,
+        0.9,
+        0.5
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-14900KF\\散片\\i9-14900KF_散片_008.jpg": {
+      "status": "approved",
+      "sha256": "3cbfe43baba6a28a6bf7029ae52a957828791d6042e120a920f82e3fc692e9a2",
+      "visibleText": "i9-14900KF",
+      "labelBox": [
+        0.05,
+        0.33,
+        0.9,
+        0.47
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-14900KS\\散片\\i9-14900KS_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "59601050716c3311aabb395a49ea285c08ae5686866649a5352c9f8f24bde708",
+      "visibleText": "i9-14900KS",
+      "labelBox": [
+        0.05,
+        0.16,
+        0.9,
+        0.54
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-13900KF\\盒裝\\i9-13900KF_盒裝_006.jpg": {
+      "status": "approved",
+      "sha256": "720d15a2880b51db073cc13d7285539c7573a024eb6655def9f39f96f88d33d9",
+      "visibleText": "i9-13900KF",
+      "labelBox": [
+        0.53,
+        0.75,
+        0.36,
+        0.15
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5500X3D\\散片\\R5-5500X3D_散片_001.jpg": {
+      "status": "approved",
+      "sha256": "90697857f8d75b7fd17ba525ad2f8c1c8a9420ca084fc1d76691179719186066",
+      "visibleText": "Ryzen 5 5500X3D",
+      "labelBox": [
+        0.3,
+        0.09,
+        0.34,
+        0.1
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-8400F\\散片\\R5-8400F_散片_005.jpg": {
+      "status": "approved",
+      "sha256": "2a7e049e7c46093b30c123b999924d3e842e872b108285432415ca2bdfbf37e6",
+      "visibleText": "Ryzen 5 8400F",
+      "labelBox": [
+        0.3,
+        0.42,
+        0.36,
+        0.1
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-5700G\\散片\\R7-5700G_散片_002.jpg": {
+      "status": "approved",
+      "sha256": "31e4b623a3cfa7136d1444a59e351b1c032c8cd1728c119fe0506375b96de28d",
+      "visibleText": "Ryzen 7 5700G",
+      "labelBox": [
+        0.21,
+        0.27,
+        0.44,
+        0.06
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "R7-9850X3D\\散片\\R7-9850X3D_散片_003.jpg": {
+      "status": "approved",
+      "sha256": "051c79596ffb171a868083687ff60a50b03c67c9b7e90ae3d09f8982c84ee7ac",
+      "visibleText": "Ryzen 7 9850X3D",
+      "labelBox": [
+        0.24,
+        0.44,
+        0.53,
+        0.09
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 225\\盒裝\\Ultra 5 225_盒裝_001.jpg": {
+      "status": "approved",
+      "sha256": "9ad0b16b085d9a1f9886372ff88bbfa1f8f41bfd4c22212a9626651154104671",
+      "visibleText": "Ultra 5 225",
+      "labelBox": [
+        0.16,
+        0.28,
+        0.75,
+        0.35
+      ],
+      "purposes": [
+        "display",
+        "label_reference"
+      ],
+      "method": "visual_original_label_review",
+      "sourceLicense": "unknown; private only"
+    },
+    "i3-12100\\散片\\i3-12100_散片_005.png": {
+      "status": "quarantined",
+      "sha256": "47289255fd8dd9f25442a97eb3d12650bca9ad33e1ee3c9f9393558f4b4305d6",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-12100\\散片\\i3-12100_散片_011.png": {
+      "status": "quarantined",
+      "sha256": "fa919a438d62fae4cde3ab119a43cc4d1b7511a46c9cd89a680a2cf44b5bd4cd",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-12100\\散片\\i3-12100_散片_012.jpg": {
+      "status": "quarantined",
+      "sha256": "bc20a41cc202d94dd49dd61bf1df38f89f97845ee7af8dea21d4b960b2bf4ee9",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-12100\\散片\\i3-12100_散片_018.jpg": {
+      "status": "quarantined",
+      "sha256": "a191149abdfaf4ee5abd4261f98752c8379eb2f18aab40e45744473c27350cca",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-12100\\散片\\i3-12100_散片_029.jpg": {
+      "status": "quarantined",
+      "sha256": "1f278cc27c5971c4f4fe3b3e0026fbc26f190c077ae2080b5088984deab6fbe4",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100\\散片\\i3-13100_散片_012.jpg": {
+      "status": "quarantined",
+      "sha256": "4089fbd09092c9dfb1a728e565b6dc0f5871e622f7f81e7f5090bc3f1abfe9a8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100\\散片\\i3-13100_散片_013.jpg": {
+      "status": "quarantined",
+      "sha256": "a183c480bb7876ccacf8fac360f1c78bedc0337c29f75ff7f133bb4744d87fd5",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100\\散片\\i3-13100_散片_019.jpg": {
+      "status": "quarantined",
+      "sha256": "f932127ab8fa857267bd2d49453a84d8d845d00b55baf7120445fd1322cb02f8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100\\散片\\i3-13100_散片_024.jpg": {
+      "status": "quarantined",
+      "sha256": "7efcb4924a71f7d235568776e35c4f8e31c9452e6257f133914b25989b483932",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100\\散片\\i3-13100_散片_030.jpg": {
+      "status": "quarantined",
+      "sha256": "6951b608594d9ae2d71c19c7bd2601c81794d03b0f0a717c9299d228f515cb5e",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100F\\散片\\i3-13100F_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "d7f570f67911124c745281aee8333808b45ff5c8a68ca65c55248fd015853da1",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100F\\散片\\i3-13100F_散片_009.jpg": {
+      "status": "quarantined",
+      "sha256": "55cba2db0bc67f30857fbacbf63035682da35d8c5a688307eaff81438cbf7464",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100F\\散片\\i3-13100F_散片_018.jpg": {
+      "status": "quarantined",
+      "sha256": "5a35b9c16f44811562858fe4fea549c83ad8e8d3ae5d60b0abd076a48af401ed",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100F\\散片\\i3-13100F_散片_036.jpg": {
+      "status": "quarantined",
+      "sha256": "7efcb4924a71f7d235568776e35c4f8e31c9452e6257f133914b25989b483932",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-13100F\\盒裝\\i3-13100F_盒裝_019.jpg": {
+      "status": "quarantined",
+      "sha256": "554e96e86f88f2a5b79893689de5eacc4c9099909577dcd5cf1843347c5b41a1",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-14100\\散片\\i3-14100_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "6700e0b7c8f965d1c9895225647dbe34654936915acd5b29302a921d38cd5ed9",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-14100\\散片\\i3-14100_散片_006.jpg": {
+      "status": "quarantined",
+      "sha256": "311420c6deed458fbb6c70690d9190cc778b83da629345011f8ad3ff65b53f8a",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i3-14100\\散片\\i3-14100_盒裝_031.jpg": {
+      "status": "quarantined",
+      "sha256": "0bc8719ca27c63d8314dd53b7d526b1f4e95541d93661304902b60d2b28dd559",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12400\\散片\\i5-12400_散片_007.png": {
+      "status": "quarantined",
+      "sha256": "0212294004af3eb259afba2072943be52b8ca0f55716dea57f1e795fdd251682",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12400\\散片\\i5-12400_散片_029.jpg": {
+      "status": "quarantined",
+      "sha256": "acbf65b78e0368da1e32ca180d811fb151ed5615c0d10ed278bc015de7b4dbe1",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12400\\散片\\i5-12400_散片_040.jpg": {
+      "status": "quarantined",
+      "sha256": "b2663ace5c5200b84eddc025c28088ad51a72c6dd8fe32dd5b15e5e154c87fd8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12400F\\散片\\i5-12400F_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "e7ac937834f8db087656068b57b19845791cbbbf6e7e0153dae14e8a41364dd3",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12400F\\散片\\i5-12400F_散片_044.jpg": {
+      "status": "quarantined",
+      "sha256": "7c02eed369ec7cb5caf4661bada41f13ae63379f86bfb108e04a72993e92f312",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12500\\散片\\i5-12500_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "3440ab704c3eac4a91d06edfd552cfcfb4e45b1ec989d5e0a129e3e4d1481696",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12500\\散片\\i5-12500_散片_013.jpg": {
+      "status": "quarantined",
+      "sha256": "a1422fd3b127d65a1d1841d1d1114809eee6dc5b153c8fd51d01d6382096a21b",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12600K\\散片\\i5-12600K_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "7fc33fa825a817aa1fe4c41cb807c5b95685cb828e7f6baddd374e1d967833c0",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12600K\\散片\\i5-12600K_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "26e2ff07684725547dc3a455cc11f7f872738e58814caf9705e4e5e7f31b9520",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12600K\\散片\\i5-12600K_散片_008.jpg": {
+      "status": "quarantined",
+      "sha256": "d1f2b833aeeddf452d68224983132ee1091f7bf69337b81a1d7f9196f097f8b8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12600K\\散片\\i5-12600K_散片_010.jpg": {
+      "status": "quarantined",
+      "sha256": "ab18be7fb289fa690399dfe3660957424787f67703522dfe723f637a5c6c7c08",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12600K\\散片\\i5-12600K_散片_021.jpg": {
+      "status": "quarantined",
+      "sha256": "ea1854ebbf09a835c4f31084a36a41ccc9d41018c44f5d8f53bb8387e4e5358a",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12600KF\\散片\\i5-12600KF_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "354612eafbe485777b8d5a7de745b7e8781e6140a128b7b7f4580f7a3445c342",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-12600KF\\散片\\i5-12600KF_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "ec04bcc1e4951b8815c6b320874f1822432785f971a2adcfdae9b52d2f2f20aa",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13400\\散片\\i5-13400_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "fa4456bdd9943cead799e00d7d57c204b054f08e7d25db38439bb0ea20791697",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13400\\散片\\i5-13400_散片_006.jpg": {
+      "status": "quarantined",
+      "sha256": "a156c03ada823481283daf1f2c9b89ee3b76ce47d747c58befc63d7fe5496bee",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13400\\散片\\i5-13400_散片_008.jpg": {
+      "status": "quarantined",
+      "sha256": "b839a5af12c917804bc666fee83af9c5be07ab6b1a6ea19c0a4ab26eda53f76d",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13400F\\散片\\i5-13400F_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "fdcb29e937bf9e6c1639acb7c6644bc51db87cab0f51f27cb146eac1208fe3ce",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13400F\\散片\\i5-13400F_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "f28f955c1e2f0df60eca6622b78532bc5c5625f64064697678b819022fbbe6eb",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13400F\\散片\\i5-13400F_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "bc6661f39d75dcbc434dfeb55df3cd5412172d39f418ff2fdb5f31a151d0f4d5",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13500\\散片\\i5-13500_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "5cf3a1e44ba3c1348c3c4ade75ce35bf3048f0e753256c5b1bc41b9886ca76dd",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13500\\散片\\i5-13500_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "abd2afb4b1edda42f50a95adb1514f7e97434e85f74ea16e05c05035cde0e373",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13500\\散片\\i5-13500_散片_007.jpg": {
+      "status": "quarantined",
+      "sha256": "4d7a6bb078d8d7555c6c46294bc946c25f3e979c1320069241c89506497db954",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13600KF\\散片\\i5-13600KF_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "11dc52ea04d2c3badcc671d24df9fde651aa59b9b6b267ae95bbec26da9265bb",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13600KF\\散片\\i5-13600KF_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "adc411c1c945f7adf658885265840dc74c7485225e7135506cf2be4db04a8589",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-13600KF\\盒裝\\i5-13600KF_盒裝_001.jpg": {
+      "status": "quarantined",
+      "sha256": "4720f910235e62392ae45b9b8b130e21f72725864c6fe6f0eb3d785b8f023207",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-14400\\散片\\i5-14400_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "a2e7774ce31a2b71e4c981bbb4172129e8d3885704264daf04550d98268daf13",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-14400F\\散片\\i5-14400F_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "56e4b885831fbbdd62b64d78bec5199695d9d176a2a0576d6bd0c909580cba92",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-14600K\\散片\\i5-14600K_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "91dddda33bfce6dc3658eb2cb0da4546615c796a00ddd3fff9688844f28a1081",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-14600K\\散片\\i5-14600K_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "a10493fd253ec310d0aa85422ddc7cdc7b829dd9ca4db3a0481b26bc63b5e286",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-14600KF\\散片\\i5-14600KF_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "adf19c9f1c6398fb9d06e7d73c468af2cb72fec8d2f0bcb19f5b742f673acaa9",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-14600KF\\散片\\i5-14600KF_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "0a36ae3483556f354aa497b07b479e9ac5e54a08ccc3738b0f684b7d27cb03a8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i5-14600KF\\散片\\i5-14600KF_散片_006.jpg": {
+      "status": "quarantined",
+      "sha256": "e1301fde1f66c2dde52893d0646e48a8286fa35bbf0e441d268b8e7208e3e518",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-12700\\散片\\i7-12700_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "6192450066c20500fba900035bf628a5f61ecd5e5487bc63169d849340948fb3",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-12700\\散片\\i7-12700_散片_008.jpg": {
+      "status": "quarantined",
+      "sha256": "7dd448862efdf7ed648dd17ad99dc3028143bae408742d786b89bc1aee402c92",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-12700F\\散片\\i7-12700F_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "9bc72170adbcb0627dd6bdb08c78cb7d2cbd8e4a3935987f0739de7000bc716b",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-12700F\\散片\\i7-12700F_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "a4b825a59c8ad62d53aec75a345621caa9f9e7c024e5401d40ae38f21d833752",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-12700K\\散片\\i7-12700K_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "1674bd99ba2ecdfb18ad6f3c0709ce42e2f7d82be5164aceb6a2194c2e02a29e",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-12700K\\散片\\i7-12700K_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "a6d5840e7f2af895e2739442b6a399147f9e949b9d596c204f5b488232e1d7d8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-12700KF\\散片\\i7-12700KF_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "d32d3dc6563d39d1c967ee939853709c36f74492faf75c2b6c83d47177ec5913",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-13700K\\散片\\i7-13700K_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "139f6087bdfaf1d81732ab2eba87a4cd7c2147ae29b44588022d949958be7643",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-13700K\\散片\\i7-13700K_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "e8b718a19e74170d3e6eb133ed6dd7186f0a5db2bedbda315f3743ee240b608d",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-13700K\\散片\\i7-13700K_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "6ffe85b5d8d411f51c36d00acc15f53bbce6c1eae87d0a0e6740566a7accf340",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-13700KF\\散片\\i7-13700KF_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "7e08c63bf00b18dd542bd5db7b7020d2c429b785468502dd382db61408a3d62a",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-13700KF\\散片\\i7-13700KF_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "169f6fcb0367671c34f88f82ae0a359849956da0e8f9a8eed04c9d2c0762f7bc",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-13700KF\\散片\\i7-13700KF_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "485599d9384de5cf9e41ffec2da31d3504b0fde8de788613cf9f921d07acfc7b",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700\\散片\\i7-14700_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "f50e14d92401a8762c605e2bd549e68d2e601653efd85363a93023bee868f38b",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700\\散片\\i7-14700_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "4a0d344c96b5297580f4668c9c450efcd5f6d2ab1e1525537677e85b2b5de64a",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700F\\散片\\i7-14700F_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "90658c6f9f13868b5fa71ab2c69d9571ae724dcf0634b920258c3cce8a3938e3",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700F\\散片\\i7-14700F_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "1fc4d4038dd1673e456952e482a53c52d52ee4e2231356d7ea673d0431b901c8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700K\\散片\\i7-14700K_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "52215fba47c1b5e04426dde25af13a30879a03dc0ee0d92c9680f023610ec221",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700K\\散片\\i7-14700K_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "c4908ba400a9afcf51dfb23aac70f7d5b8a5cbbac84885801a435cddabb930c7",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700KF\\散片\\i7-14700KF_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "6ab260efff1bc6a822d0e1afae513d204798397f181d59cc625e8146d75b05e9",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i7-14700KF\\散片\\i7-14700KF_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "f71cef8e16aa806b621ddb640bb2e96a515894b4c2cd6d07de5832a50b695ad0",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-12900\\散片\\i9-12900_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "47697d66f328303480080096faef03f899bbc6aae78e0a94384e5dc969cab714",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-12900K\\散片\\i9-12900K_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "7168a001668e85f2f9c1dbd7376815c52421db166d8ce3255bf2d8be9eb1b681",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-12900K\\散片\\i9-12900K_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "fd66ae1ed1fffeca50f14a645a975083a6169c8539e791b3298c7d19b87aebaf",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-12900KF\\散片\\i9-12900KF_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "33bd2aecf44402105d0d2f4a9a78e887292fad59295de00010f749d5e11d488c",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-12900KS\\散片\\i9-12900KS_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "0dd1262cbf71e0609f7a057d9c9fa9f6dd23fa67ef41eed133e0a41a5a64aa7f",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-13900KF\\散片\\i9-13900KF_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "d1b541ee2fa57c8080e883e085629144544a9eeedc696a1f6344918b15c17779",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-13900KF\\散片\\i9-13900KF_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "9465f61a116619be03f018dafb380dbee94a68d7df9d5daf264a3abf4cc91db5",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-13900KF\\散片\\i9-13900KF_散片_007.jpg": {
+      "status": "quarantined",
+      "sha256": "679cad105ac1c6d1e1a9aa13a5c323bdba5145b57e9ee104435997af421c0329",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-13900KF\\盒裝\\i9-13900KF_盒裝_007.jpg": {
+      "status": "quarantined",
+      "sha256": "c0cb3c935a332c3e09aabb5e79d45124c6399cf19598a54c27301c6dc31fb1e6",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-13900KS\\散片\\i9-13900KS_散片_008.jpg": {
+      "status": "quarantined",
+      "sha256": "3b266511a090a23cf01cc4b0ada5342dfe2277941a0bbc39754662cca1dfd707",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-14900K\\散片\\i9-14900K_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "1b1fd7bfcf503f5d5fa84c90121127941a0587652852deeb66faff420f427d42",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-14900K\\散片\\i9-14900K_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "65fab2247caf1de604c2be8242d0eb2bd9adda796a7866ac6fcb8710fdbc5ca8",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-14900K\\散片\\i9-14900K_散片_006.jpg": {
+      "status": "quarantined",
+      "sha256": "4b3f5a77a7e4f0520fa04483e88e9002afc4032ab41bedc9a6ee959022dc2e88",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-14900KF\\散片\\i9-14900KF_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "8c1f9d58a8878703d9d6d3aada24a3cdcf37ecd6a1999b0d8f3f2e299c142780",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-14900KF\\散片\\i9-14900KF_散片_006.jpg": {
+      "status": "quarantined",
+      "sha256": "802e107240bf6a7a638e3de0918c38041f15fec9eee6677687e89a2ab4e84c62",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-14900KF\\散片\\i9-14900KF_散片_007.jpg": {
+      "status": "quarantined",
+      "sha256": "6ae5433764fe7ad4b190443fdc7f30bd2e5a0680354be54e98d3bf4ac9924614",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "i9-14900KS\\散片\\i9-14900KS_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "ac69e1c4593c65836a8eb2122657ee43d4f9433acd62810e118d8568a15994ea",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R3-3200G\\散片\\R3-3200G_散片_006.jpg": {
+      "status": "quarantined",
+      "sha256": "44e2f56e88c616a5d72ed46bcea6a5a240495b00ab8995b376d935ff900c3ed5",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-3400G\\散片\\R5-3400G_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "1fde7d86eecf63105abece60356a5e6bfa03806e9fec6ffb89d977d92bdb7dc2",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-4500\\散片\\R5-4500_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "bd366a22d7b4a5e8764df78996563947a9bc453b5a76bfa4b2c01e755fd6bb40",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-5500\\散片\\R5-5500_散片_006.jpg": {
+      "status": "quarantined",
+      "sha256": "8e81e219998a8f593429547f0482fc0b031a459c659ff554ebcb7ffab47f6e01",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-5500\\散片\\R5-5500_散片_007.jpg": {
+      "status": "quarantined",
+      "sha256": "58ad349efd1c06cba57461dded0ad7eb9d7404593c82465e8e45f900808d50d9",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-5600\\散片\\R5-5600_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "1f2b45007934b707b73beaee22040738a35479c98da63162bab23f1eb012931f",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-7600X\\散片\\R5-7600X_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "f9224c21b87caf47ffb29df8e5813762d3b90894e0d6ae5d738f80684c7ba86c",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-7600X\\散片\\R5-7600X_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "611b61f2d09888af7498dd92a6afbafbf01b7c78f78ad14c7a2895126843339d",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-7600X\\散片\\R5-7600X_散片_008.jpg": {
+      "status": "quarantined",
+      "sha256": "c948efd2417b65419c9ad1a49c788f3aeec1429d6c708e034f3da1efd5d6a34b",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-8600G\\散片\\R5-8600G_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "b32cba32f26c2ef2cd4747c1664a0972a1fd96d3805966f3be58a9dec3f4e815",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-8600G\\散片\\R5-8600G_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "512b9924072d23b3bc8c8a5844b83d0d1688bf6eb7e111ce6013660a91479bb6",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-9600\\散片\\R5-9600_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "508d33472e19f03ff46d675ce9dc3d8d94bc767af7613072c740462fdf28d91d",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-4750G-PRO\\散片\\R7-4750G-PRO_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "0829ecfd98593edd0e2c656e9697920d39b8c7e121b7bb229ef8fe73a13d4020",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-5700\\散片\\R7-5700_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "b3247a664ec737522c793d5cbe6714323290aa7834d1b67bba4dbf493eb8b824",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-7700\\散片\\R7-7700_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "904526eb64342da977630aee9ed1d0eb0c8c0492ff830e9b479e509b6d4f1bf1",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-7700X\\散片\\R7-7700X_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "c1a817025ce36ad957c1aac3e90ec2faac6386392104aec3fc5b2aafbc29e139",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-7700X\\散片\\R7-7700X_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "476740d401974cb0fd2458c6cbd463e63da5060efc9ee88fea5b05a8e3043f85",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-8700F\\散片\\R7-8700F_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "3bf869dba2c90f160660147a258e29c3da9ed0a3670c66544954f41d86bf75d3",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-9700X\\散片\\R7-9700X_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "a0b2fcdcd9d10dc2914e49f8a352b8d757934a57d823588376411801066de418",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-9850X3D\\散片\\R7-9850X3D_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "d138b65cb03b0148823aa1c55c7f9b9db47ca1eb819434370ceff310298ce987",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R7-9850X3D\\散片\\R7-9850X3D_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "19898b1470e6947f9f95942a1e1744a9ad26240ba03bea5e6e8da23959e08da2",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-7900X\\散片\\R9-7900X_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "3bee1a2f39650519acdcdc4c934938981d0c4a2e7741189183e9a64f578abce4",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-7900X3D\\散片\\R9-7900X3D_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "d358f36254d47e83bcc2ed99df3c0bf23e02e1be4a798aab769c36ee8cf244c9",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-7950X\\散片\\R9-7950X_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "8a86061f14167187d70acb3fbf6ed0e3ed04cf02995fb847c9d02d8f258c4ade",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-7950X\\散片\\R9-7950X_散片_007.jpg": {
+      "status": "quarantined",
+      "sha256": "bdcb4216d972657f0b51e25f0ecd416b4dbaabc0fa2c3960f36d0599beb5a7db",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-7950X3D\\散片\\R9-7950X3D_散片_008.jpg": {
+      "status": "quarantined",
+      "sha256": "dc8f4fa4d82a7ff2d62f0305e22517930b9c52811ca54dbfa7f41a1467c55b67",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-9900X\\散片\\R9-9900X_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "fe0e82a6ad317826d30ac2699efd424fe2ad1d17fa76c1b3f22f03e58f367813",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-9900X3D\\散片\\R9-9900X3D_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "7c074fc3aa7930558061c9fa99699f5911d40491d849b586a1943a0f9fd6e314",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-9900X3D\\散片\\R9-9900X3D_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "6a447e7189c03b5324e62afaafd737006aee53eb6fcaeb98157a2dddfc50f48d",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-9900X3D\\散片\\R9-9900X3D_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "0317e43a342de0528905ba7cbda2447cf5593493ee8bc81a073b6710f6a20ca4",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-9950X3D\\散片\\R9-9950X3D_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "d0c6fc818006e01175097ab86727c2b466731685888ef088e4dcb2c97f233b79",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R9-9950X3D\\散片\\R9-9950X3D_散片_004.jpg": {
+      "status": "quarantined",
+      "sha256": "f55c99bc51a8dbc6e6f28e8c2726c954c1130178cff4ce2cd6d9743dc48021e4",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 5 235\\散片\\Ultra 5 235_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "06ab385be8ab52f791a3a14cb13ce531c7d0df5c7e0ffc6e8a8e6d8c8a00bf3c",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 5 245K\\散片\\Ultra 5 245K_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "f20dea5037d759171d29d90c126894f0ffeec176b6fa72982af01b1e04c83e0e",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 5 250K Plus\\散片\\Ultra 5 250K Plus_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "00b2ff75c9cfecaf621774fb6fac65417aae5c2e63f85c2ab5c7f9d39698ceae",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 5 250K Plus\\散片\\Ultra 5 250K Plus_散片_005.jpg": {
+      "status": "quarantined",
+      "sha256": "f6eeb18d03fcc01206138b233b9e2aab81e17d7e13c598fa4474367faeb99701",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 5 250KF Plus\\散片\\Ultra 5 250KF Plus_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "be786b82d894b468e206cda5211994d64b329c46c3109142b08412c9712ee9bc",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 7 265K\\散片\\Ultra 7 265K_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "657046bdc9baf9bc0cfe287293629cd89eaa8f4385d078a84fbde808a17d1c07",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 7 265K\\散片\\Ultra 7 265K_散片_002.jpg": {
+      "status": "quarantined",
+      "sha256": "056a8882764abd56f8abda81feb0d88e9fc72875c49194f338a03c1be16aa130",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 7 270K Plus\\散片\\Ultra 7 270K Plus_散片_003.jpg": {
+      "status": "quarantined",
+      "sha256": "f9e3064b105f59cc0a2d5bfd727915cc709c22c873bc6db1b008966c50509cff",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "Ultra 9 285K\\散片\\Ultra 9 285K_散片_001.jpg": {
+      "status": "quarantined",
+      "sha256": "14cc002e5f5719beaa1907a6bd3c261691a227b3a355c05caccee9698b4dca71",
+      "reason": "Cross-model similarity or label uncertainty; no automatic relabelling. Contact-sheet review is insufficient for admission."
+    },
+    "R5-8400F\\散片\\R5-8400F_散片_003.jpg": {
+      "status": "excluded",
+      "sha256": "1ff54d42fa3d6c3c9cad643423ae723047dd726c6bde7f5fccb6fc04f3d92aaf",
+      "reason": "Watermark across image"
+    },
+    "R7-9850X3D\\散片\\R7-9850X3D_散片_004.jpg": {
+      "status": "excluded",
+      "sha256": "1c3964384eb3aa7d87a3a33bd8e687880b5f23f72aadaa00ced611175a4207c7",
+      "reason": "Visible label 9800X3D conflicts with folder 9850X3D"
+    },
+    "i9-13900KF\\散片\\i9-13900KF_散片_003.jpg": {
+      "status": "excluded",
+      "sha256": "d21ec56ba8c4d30b94763865106f3d0151cf1e302e174e838a004b51d946432b",
+      "reason": "Digitally obscured text"
+    },
+    "i7-13700K\\盒裝\\i7-13700K_盒裝_007.jpg": {
+      "status": "excluded",
+      "sha256": "0ee11bdbe7b9d505a6ed3b3a9337e675a90d35c7e99142f915bdd0711586b99a",
+      "reason": "說明書遮住盒裝型號；照片未顯示可讀的 CPU 型號。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900KS\\盒裝\\i9-12900KS_盒裝_006.jpg": {
+      "status": "excluded",
+      "sha256": "bb2a41b194c34a6640ce09aa7d22b44f360615cc2e7c3195bae5248350850781",
+      "reason": "多個盒裝同框且原圖僅 313×400；無法讀出任何完整型號與尾碼。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900KS\\盒裝\\i9-12900KS_盒裝_007.jpg": {
+      "status": "excluded",
+      "sha256": "4638690a6f8403cd5ed70fc2e72d71bbdd13cedcc267c39762306f11d55d5d00",
+      "reason": "兩個盒裝只顯示系列／Special Edition，沒有完整 SKU。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-12900KS\\盒裝\\i9-12900KS_盒裝_008.jpg": {
+      "status": "excluded",
+      "sha256": "81555238d26b43852da60fca5d1e5f9f3a432be143fdcf22b14e8a8dd4f84696",
+      "reason": "兩個盒裝只顯示系列／Special Edition，沒有完整 SKU。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-13900K\\盒裝\\i9-13900K_盒裝_006.jpg": {
+      "status": "excluded",
+      "sha256": "ab22aa56bd2e2b7d8266f96955f94a4c62137c7778128c49a63686a2b646f023",
+      "reason": "外盒與配件內襯同框，型號標籤朝向未入鏡；無可讀完整 SKU。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "i9-14900KS\\盒裝\\i9-14900KS_盒裝_005.jpg": {
+      "status": "excluded",
+      "sha256": "cddeee237ffd7094190a6c844ea31fab48e26afacc3909de7a8b2cdb683035d0",
+      "reason": "六盒同框但只有系列與 Special Edition；完整 SKU 未入鏡。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5600G\\盒裝\\R5-5600G_盒裝_003.jpg": {
+      "status": "excluded",
+      "sha256": "95e03a47da47a1d85c07748c8db52c17ea5668b4db2671c05274f3042bd992b7",
+      "reason": "盒子與配件佔畫面，CPU 型號過淡且反光，盒面沒有完整 SKU。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "R5-5600X\\盒裝\\R5-5600X_盒裝_001.jpg": {
+      "status": "excluded",
+      "sha256": "bd8b388981aaaf80c638f0e09000c42cc2d8f48d3bc6f3e381351bf8b1bcdfe7",
+      "reason": "CPU 與盒上標籤均過曝，配件同框但無可讀完整 SKU。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "Ultra 5 225\\盒裝\\Ultra 5 225_盒裝_002.jpg": {
+      "status": "excluded",
+      "sha256": "cd01227943bc0484e700a0e665f77f6fd57807616d6ad6b0468d67c66777bd0f",
+      "reason": "CPU 與配件同框，CPU 標籤反光，盒子只顯示 Ultra 5 系列，沒有完整 SKU。",
+      "exclusionCode": "scene_sku_unreadable",
+      "method": "visual_native_scene_review",
+      "reviewedAt": "2026-10-15",
+      "sourceLicense": "unknown; private only"
+    },
+    "i5-13500\\盒裝\\i5-13500_盒裝_003.jpg": {
+      "status": "pending",
+      "sha256": "ac03680e89ae88be731e19202c7c27ae457a5e06d1fef9d8a2c16900792c16d6",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "i5-13500",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "i5-13600KF\\盒裝\\i5-13600KF_盒裝_007.jpg": {
+      "status": "pending",
+      "sha256": "a16a093019984a0b3a3e5eb316e1075a430aca935ebc4e8de41ee72e8d51347b",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "i5-13600KF",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "i5-14500\\盒裝\\i5-14500_盒裝_006.jpg": {
+      "status": "pending",
+      "sha256": "1686d30708de7cacb5edfe0fe5525ad556dc9bb39a468a8380c659d5b697920f",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "i5-14500",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "i7-13700K\\盒裝\\i7-13700K_盒裝_009.jpg": {
+      "status": "pending",
+      "sha256": "b8011e87f07263011bcc10400963be37098dfd53fd6fd99eb8e6f9b28a4e6dee",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "i7-13700K",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "i9-13900\\盒裝\\i9-13900_盒裝_003.jpg": {
+      "status": "pending",
+      "sha256": "827102363b3fef929a42ce6bd9f4b034d38ae4baf7c82d12c735686233f05d71",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "i9-13900",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "i9-13900\\盒裝\\i9-13900_盒裝_004.jpg": {
+      "status": "pending",
+      "sha256": "d8f7c2a5f2baabfcbc7ad1c3fea8447e620f5e26b37ee908fd1701c04db96412",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "i9-13900",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "R3-3200G\\盒裝\\R3-3200G_盒裝_001.jpg": {
+      "status": "pending",
+      "sha256": "0b578ae0ad5c36a87721546fb84a49166311a11cca91fb17747addfdb479e07b",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "AMD Ryzen 3 3200G",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "R5-3400G\\盒裝\\R5-3400G_盒裝_008.jpg": {
+      "status": "pending",
+      "sha256": "347596500c40dbd35d802a6fb16c9736ee7566fe1600480ab6795e2ecf76fc04",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "cpu",
+        "visibleText": "AMD Ryzen 5 3400G",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "R5-4500\\盒裝\\R5-4500_盒裝_003.jpg": {
+      "status": "pending",
+      "sha256": "b7a94fa1e16ff75335715f636c936ab2b97cbb1442674227c7e754c8721e9316",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "AMD Ryzen 5 4500",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "R5-5500GT\\盒裝\\R5-5500GT_盒裝_004.jpg": {
+      "status": "pending",
+      "sha256": "d63f33ae94dd35ebe171dce9769e4b9642d5624c11cf55b489fc855d1c95af6a",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box_and_cpu",
+        "visibleText": "AMD Ryzen 5 5500GT",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "R5-7600\\盒裝\\R5-7600_盒裝_007.jpg": {
+      "status": "pending",
+      "sha256": "19ca7c8fe3129f85ff619dd7c20959c29932be4b7668e3d75c23c1b5a452ce8e",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "AMD Ryzen 5 7600",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "R9-7900X\\盒裝\\R9-7900X_盒裝_002.jpg": {
+      "status": "pending",
+      "sha256": "77a70b819771adca70a95ee8889c0c7872eb3d4da095530ea1bcdfdf04e92ed4",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "cpu",
+        "visibleText": "AMD Ryzen 9 7900X",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    },
+    "Ultra 7 265K\\盒裝\\Ultra 7 265K_盒裝_001.jpg": {
+      "status": "pending",
+      "sha256": "5bd561dd942a3793151414f5cbbef3c30b59c8e779b87fb35def91293a14023c",
+      "sceneReview": {
+        "usable": true,
+        "readablePart": "box",
+        "visibleText": "265K",
+        "method": "visual_native_scene_review",
+        "reviewedAt": "2026-10-15",
+        "note": "Readable scene; only approved reference entries establish library identity. Use the readable CPU or box label, not the accessories."
+      }
+    }
+  },
+  "models": {
+    "Ryzen 3 3200G": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 3 4100": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 3 4350G PRO": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 3400G": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 3600": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 4500": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 4600G": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5500": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5500GT": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5600": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5600G": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5600GT": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5600X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5600XT": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 7500F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 7600": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 7600X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 8500G": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 8600G": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 9500F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 9600": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 9600X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 4750G PRO": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 5700": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 5700X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 5700X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 5800X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 5800X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 5800XT": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 7700": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 7700X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 7800X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 8700F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 9700X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 9800X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 5900X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 7900": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 7900X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 7900X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 7950X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 7950X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 9900X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 9900X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 9950X": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 9 9950X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 5 225F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 5 235": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 5 245K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 5 245KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 5 250K Plus": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 5 250KF Plus": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 7 265K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 7 265KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 7 270K Plus": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 9 285K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i3-12100": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i3-13100": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i3-13100F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i3-14100": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-12400": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-12400F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-12500": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-12600K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-12600KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-13400": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-13400F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-13500": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-13600K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-13600KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-14400": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-14400F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-14500": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-14600K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i5-14600KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-12700": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-12700F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-12700K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-12700KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-13700": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-13700F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-13700K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-13700KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-14700": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-14700F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-14700K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i7-14700KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-12900": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-12900F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-12900K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-12900KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-12900KS": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-13900": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-13900F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-13900K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-13900KS": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-14900K": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-14900KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-14900KS": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "i9-13900KF": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 5500X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 5 8400F": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 5700G": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ryzen 7 9850X3D": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    },
+    "Ultra 5 225": {
+      "status": "reviewed",
+      "missingReason": "First release selects one readable full-SKU reference; other kind not approved.",
+      "independentEvaluation": false
+    }
+  }
+}

@@ -1,0 +1,949 @@
+{
+  "date": "2026-10-15",
+  "type": "recorded_uploaded_evidence_replay",
+  "independentEvaluation": false,
+  "note": "Replays previously captured OCR readings and ranking order with the box-brand-context fix; no new pixels or model observation. Not a new end-to-end browser performance measurement.",
+  "samples": 104,
+  "adopted": 69,
+  "correct": 69,
+  "wrong": 0,
+  "coverage": 0.6634615384615384,
+  "retainedPreviouslyVerified": true,
+  "results": [
+    {
+      "truth": "i3-12100",
+      "status": "verified",
+      "model": "i3-12100",
+      "candidates": [
+        "i3-12100"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i3-13100",
+      "status": "verified",
+      "model": "i3-13100",
+      "candidates": [
+        "i3-13100"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i3-13100F",
+      "status": "verified",
+      "model": "i3-13100F",
+      "candidates": [
+        "i3-13100F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i3-14100",
+      "status": "verified",
+      "model": "i3-14100",
+      "candidates": [
+        "i3-14100"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i5-12400",
+      "status": "verified",
+      "model": "i5-12400",
+      "candidates": [
+        "i5-12400"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i5-12400F",
+      "status": "verified",
+      "model": "i5-12400F",
+      "candidates": [
+        "i5-12400F"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i5-12500",
+      "status": "verified",
+      "model": "i5-12500",
+      "candidates": [
+        "i5-12500"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i5-12600K",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-12600K"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i5-12600KF",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-12600KF"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i5-13400",
+      "status": "verified",
+      "model": "i5-13400",
+      "candidates": [
+        "i5-13400"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i5-13400F",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-13400F"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i5-13500",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-13500"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i5-13600K",
+      "status": "verified",
+      "model": "i5-13600K",
+      "candidates": [
+        "i5-13600K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i5-13600KF",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-13600KF"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i5-14400",
+      "status": "verified",
+      "model": "i5-14400",
+      "candidates": [
+        "i5-14400"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i5-14400F",
+      "status": "verified",
+      "model": "i5-14400F",
+      "candidates": [
+        "i5-14400F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i5-14500",
+      "status": "verified",
+      "model": "i5-14500",
+      "candidates": [
+        "i5-14500"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i5-14600K",
+      "status": "verified",
+      "model": "i5-14600K",
+      "candidates": [
+        "i5-14600K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i5-14600KF",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-14600KF"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i7-12700",
+      "status": "verified",
+      "model": "i7-12700",
+      "candidates": [
+        "i7-12700"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i7-12700F",
+      "status": "verified",
+      "model": "i7-12700F",
+      "candidates": [
+        "i7-12700F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i7-12700K",
+      "status": "verified",
+      "model": "i7-12700K",
+      "candidates": [
+        "i7-12700K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i7-12700KF",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i7-12700KF"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i7-13700",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i7-13700"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i7-13700F",
+      "status": "verified",
+      "model": "i7-13700F",
+      "candidates": [
+        "i7-13700F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i7-13700K",
+      "status": "verified",
+      "model": "i7-13700K",
+      "candidates": [
+        "i7-13700K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i7-13700KF",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i7-13700KF"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i7-14700",
+      "status": "verified",
+      "model": "i7-14700",
+      "candidates": [
+        "i7-14700"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i7-14700F",
+      "status": "verified",
+      "model": "i7-14700F",
+      "candidates": [
+        "i7-14700F"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i7-14700K",
+      "status": "verified",
+      "model": "i7-14700K",
+      "candidates": [
+        "i7-14700K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i7-14700KF",
+      "status": "conflict",
+      "model": null,
+      "candidates": [
+        "i7-14700KF",
+        "i7-1470KF"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i9-12900",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i9-12900"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i9-12900F",
+      "status": "verified",
+      "model": "i9-12900F",
+      "candidates": [
+        "i9-12900F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i9-12900K",
+      "status": "verified",
+      "model": "i9-12900K",
+      "candidates": [
+        "i9-12900K"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i9-12900KF",
+      "status": "verified",
+      "model": "i9-12900KF",
+      "candidates": [
+        "i9-12900KF"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i9-12900KS",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i9-12900KS"
+      ],
+      "method": null
+    },
+    {
+      "truth": "i9-13900",
+      "status": "verified",
+      "model": "i9-13900",
+      "candidates": [
+        "i9-13900"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i9-13900F",
+      "status": "verified",
+      "model": "i9-13900F",
+      "candidates": [
+        "i9-13900F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "i9-13900K",
+      "status": "verified",
+      "model": "i9-13900K",
+      "candidates": [
+        "i9-13900K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i9-13900KF",
+      "status": "verified",
+      "model": "i9-13900KF",
+      "candidates": [
+        "i9-13900KF"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i9-13900KS",
+      "status": "verified",
+      "model": "i9-13900KS",
+      "candidates": [
+        "i9-13900KS"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i9-14900K",
+      "status": "verified",
+      "model": "i9-14900K",
+      "candidates": [
+        "i9-14900K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i9-14900KF",
+      "status": "verified",
+      "model": "i9-14900KF",
+      "candidates": [
+        "i9-14900KF"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "i9-14900KS",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i9-14900KS"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 3 3200G",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 3 3200G"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 3 4100",
+      "status": "verified",
+      "model": "Ryzen 3 4100",
+      "candidates": [
+        "Ryzen 3 4100"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 3 4350G PRO",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 3 4350G PRO"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 5 3400G",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 3400G"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 5 3600",
+      "status": "verified",
+      "model": "Ryzen 5 3600",
+      "candidates": [
+        "Ryzen 5 3600"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 5 4500",
+      "status": "verified",
+      "model": "Ryzen 5 4500",
+      "candidates": [
+        "Ryzen 5 4500"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 4600G",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 4600G"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 5 5500",
+      "status": "conflict",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 5600",
+        "Ryzen 5 5500"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 5500GT",
+      "status": "verified",
+      "model": "Ryzen 5 5500GT",
+      "candidates": [
+        "Ryzen 5 5500GT"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 5 5500X3D",
+      "status": "verified",
+      "model": "Ryzen 5 5500X3D",
+      "candidates": [
+        "Ryzen 5 5500X3D"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 5600",
+      "status": "conflict",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 6600",
+        "Ryzen 5 5600"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 5600G",
+      "status": "verified",
+      "model": "Ryzen 5 5600G",
+      "candidates": [
+        "Ryzen 5 5600G"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 5 5600GT",
+      "status": "conflict",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 5600G",
+        "Ryzen 5 5600GT"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 5 5600X",
+      "status": "verified",
+      "model": "Ryzen 5 5600X",
+      "candidates": [
+        "Ryzen 5 5600X"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 5 5600XT",
+      "status": "verified",
+      "model": "Ryzen 5 5600XT",
+      "candidates": [
+        "Ryzen 5 5600XT"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 7500F",
+      "status": "verified",
+      "model": "Ryzen 5 7500F",
+      "candidates": [
+        "Ryzen 5 7500F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 7600",
+      "status": "verified",
+      "model": "Ryzen 5 7600",
+      "candidates": [
+        "Ryzen 5 7600"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 7600X",
+      "status": "verified",
+      "model": "Ryzen 5 7600X",
+      "candidates": [
+        "Ryzen 5 7600X"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 5 8400F",
+      "status": "verified",
+      "model": "Ryzen 5 8400F",
+      "candidates": [
+        "Ryzen 5 8400F"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 5 8500G",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 8600G"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 5 8600G",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 8600G"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 5 9500F",
+      "status": "conflict",
+      "model": null,
+      "candidates": [
+        "Ryzen 5 5600F",
+        "Ryzen 5 9500F"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 5 9600",
+      "status": "verified",
+      "model": "Ryzen 5 9600",
+      "candidates": [
+        "Ryzen 5 9600"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 5 9600X",
+      "status": "verified",
+      "model": "Ryzen 5 9600X",
+      "candidates": [
+        "Ryzen 5 9600X"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 4750G PRO",
+      "status": "verified",
+      "model": "Ryzen 7 4750G PRO",
+      "candidates": [
+        "Ryzen 7 4750G PRO"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 5700",
+      "status": "verified",
+      "model": "Ryzen 7 5700",
+      "candidates": [
+        "Ryzen 7 5700"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 5700G",
+      "status": "verified",
+      "model": "Ryzen 7 5700G",
+      "candidates": [
+        "Ryzen 7 5700G"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 7 5700X",
+      "status": "verified",
+      "model": "Ryzen 7 5700X",
+      "candidates": [
+        "Ryzen 7 5700X"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 7 5700X3D",
+      "status": "verified",
+      "model": "Ryzen 7 5700X3D",
+      "candidates": [
+        "Ryzen 7 5700X3D"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 7 5800X",
+      "status": "verified",
+      "model": "Ryzen 7 5800X",
+      "candidates": [
+        "Ryzen 7 5800X"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 5800X3D",
+      "status": "verified",
+      "model": "Ryzen 7 5800X3D",
+      "candidates": [
+        "Ryzen 7 5800X3D"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 7 5800XT",
+      "status": "verified",
+      "model": "Ryzen 7 5800XT",
+      "candidates": [
+        "Ryzen 7 5800XT"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 7 7700",
+      "status": "verified",
+      "model": "Ryzen 7 7700",
+      "candidates": [
+        "Ryzen 7 7700"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 7700X",
+      "status": "verified",
+      "model": "Ryzen 7 7700X",
+      "candidates": [
+        "Ryzen 7 7700X"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 7800X3D",
+      "status": "verified",
+      "model": "Ryzen 7 7800X3D",
+      "candidates": [
+        "Ryzen 7 7800X3D"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 8700F",
+      "status": "verified",
+      "model": "Ryzen 7 8700F",
+      "candidates": [
+        "Ryzen 7 8700F"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 7 9700X",
+      "status": "verified",
+      "model": "Ryzen 7 9700X",
+      "candidates": [
+        "Ryzen 7 9700X"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 7 9800X3D",
+      "status": "verified",
+      "model": "Ryzen 7 9800X3D",
+      "candidates": [
+        "Ryzen 7 9800X3D"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 7 9850X3D",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 7 9850X3D"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 9 5900X",
+      "status": "verified",
+      "model": "Ryzen 9 5900X",
+      "candidates": [
+        "Ryzen 9 5900X"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 9 7900",
+      "status": "verified",
+      "model": "Ryzen 9 7900",
+      "candidates": [
+        "Ryzen 9 7900"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 9 7900X",
+      "status": "verified",
+      "model": "Ryzen 9 7900X",
+      "candidates": [
+        "Ryzen 9 7900X"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 9 7900X3D",
+      "status": "verified",
+      "model": "Ryzen 9 7900X3D",
+      "candidates": [
+        "Ryzen 9 7900X3D"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 9 7950X",
+      "status": "verified",
+      "model": "Ryzen 9 7950X",
+      "candidates": [
+        "Ryzen 9 7950X"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 9 7950X3D",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ryzen 9 7950X3D"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ryzen 9 9900X",
+      "status": "verified",
+      "model": "Ryzen 9 9900X",
+      "candidates": [
+        "Ryzen 9 9900X"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ryzen 9 9900X3D",
+      "status": "verified",
+      "model": "Ryzen 9 9900X3D",
+      "candidates": [
+        "Ryzen 9 9900X3D"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 9 9950X",
+      "status": "verified",
+      "model": "Ryzen 9 9950X",
+      "candidates": [
+        "Ryzen 9 9950X"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ryzen 9 9950X3D",
+      "status": "verified",
+      "model": "Ryzen 9 9950X3D",
+      "candidates": [
+        "Ryzen 9 9950X3D"
+      ],
+      "method": "strict_ocr_and_visual_policy"
+    },
+    {
+      "truth": "Ultra 5 225",
+      "status": "unreadable",
+      "model": null,
+      "candidates": [],
+      "method": null
+    },
+    {
+      "truth": "Ultra 5 225F",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ultra 5 225F"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ultra 5 235",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ultra 5 235"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ultra 5 245K",
+      "status": "verified",
+      "model": "Ultra 5 245K",
+      "candidates": [
+        "Ultra 5 245K"
+      ],
+      "method": "gemma_quote_and_region_ocr"
+    },
+    {
+      "truth": "Ultra 5 245KF",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-6600K"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ultra 5 250K Plus",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ultra 5 250K Plus"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ultra 5 250KF Plus",
+      "status": "unreadable",
+      "model": null,
+      "candidates": [],
+      "method": null
+    },
+    {
+      "truth": "Ultra 7 265K",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ultra 7 265K"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ultra 7 265KF",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ultra 7 265KF"
+      ],
+      "method": null
+    },
+    {
+      "truth": "Ultra 7 270K Plus",
+      "status": "unreadable",
+      "model": null,
+      "candidates": [],
+      "method": null
+    },
+    {
+      "truth": "Ultra 9 285K",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "Ultra 9 285K"
+      ],
+      "method": null
+    }
+  ]
+}

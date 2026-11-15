@@ -90,7 +90,11 @@
 
         .ai-chat-preview.is-visible { display: flex; }
         .ai-chat-preview img { width: 42px; height: 42px; border-radius: 7px; object-fit: cover; }
-        .ai-chat-preview button { margin-left: auto; border: 0; background: transparent; color: #64748b; cursor: pointer; }
+        .ai-chat-preview-info { flex: 1; min-width: 0; }
+        .ai-chat-preview-info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ai-chat-preview button { flex-shrink: 0; padding: 5px; border: 0; border-radius: 5px; background: #f1f5f9; color: #475569; cursor: pointer; font: inherit; }
+        .ai-chat-camera { display: none; }
+        @media (pointer: coarse) { .ai-chat-camera { display: inline-block; } }
         .ai-chat-edit { margin: 0 0 4px 35px; padding: 3px 7px; border: 0; background: transparent; color: #64748b; cursor: pointer; font-size: 11px; }
         .ai-chat-message-editor { display: grid; gap: 8px; width: 100%; max-width: 100%; box-sizing: border-box; }
         .ai-chat-message-editor textarea { width: 100%; min-height: 90px; box-sizing: border-box; resize: vertical; padding: 10px 12px; border: 1px solid #94a3b8; border-radius: 10px; background: #fff; color: #314052; font: inherit; }
@@ -152,6 +156,11 @@
                     </div>
                 </div>
                 <div class="ai-chat-header-actions">
+                    <button class="ai-chat-clear" type="button" aria-label="清除對話" title="清除對話">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5 6l1 14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1l1-14M10 10v7M14 10v7"/>
+                        </svg>
+                    </button>
                     <button class="ai-chat-close" type="button" aria-label="關閉 AI 對話框">&times;</button>
                 </div>
             </header>
@@ -171,7 +180,9 @@
                 <label class="sr-only" for="ai-chat-input">輸入訊息</label>
                 <textarea id="ai-chat-input" rows="1" maxlength="500" placeholder="輸入您的問題……"></textarea>
                 <input id="ai-chat-image" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+                <input id="ai-chat-camera" type="file" accept="image/*" capture="environment" hidden>
                 <button class="ai-chat-attach" type="button" aria-label="圖片查詢">圖片查詢</button>
+                <button class="ai-chat-attach ai-chat-camera" type="button" aria-label="拍攝型號標籤">拍照</button>
                 <button type="submit" aria-label="傳送訊息">傳送</button>
             </form>
         </section>
@@ -195,6 +206,7 @@
     const submitBtn = form.querySelector('button[type="submit"]');
     const statusLabel = widget.querySelector('.ai-chat-status');
     const imageInput = widget.querySelector('#ai-chat-image');
+    const cameraInput = widget.querySelector('#ai-chat-camera');
     const attachButton = widget.querySelector('.ai-chat-attach');
     const imagePreview = widget.querySelector('.ai-chat-preview');
     let pendingImage = null;
@@ -205,8 +217,12 @@
     // Attach a handler immediately; a failed load is also reported when the flow is used.
     powerApiReady.catch(() => {});
     let valuationFlow = null;
+    const hardwareContextReady = import('/hardware-context.js?v=20261104').then(() => window.HardwareContext);
+    hardwareContextReady.catch(() => {});
     let recommendationFlow = null;
+    let lastRecommendation = null;
     let marketQueryActive = false;
+    let featureFlow = null;
     let cancelActiveMessageEdit = null;
     const idlePrompt = widget.querySelector('.ai-chat-idle-prompt');
     let idlePromptTimer;
@@ -259,14 +275,6 @@
     let removedStaleRecommendation = false;
     let savedInterfaceState = { isOpen: false, recommendationText: '' };
     try {
-        const navigation = window.performance?.getEntriesByType?.('navigation')?.[0];
-        const isReload = navigation
-            ? navigation.type === 'reload'
-            : window.performance?.navigation?.type === 1;
-        if (isReload) {
-            sessionStorage.removeItem(historyStorageKey);
-            sessionStorage.removeItem(interfaceStorageKey);
-        }
         const storedHistory = JSON.parse(sessionStorage.getItem(historyStorageKey) || '[]');
         if (Array.isArray(storedHistory)) {
             chatHistory = storedHistory
@@ -284,6 +292,9 @@
             isOpen: Boolean(storedInterfaceState.isOpen),
             isExpanded: Boolean(storedInterfaceState.isExpanded),
             powerFlow: storedInterfaceState.powerFlow || null,
+            valuationFlow: storedInterfaceState.valuationFlow || null,
+            featureFlow: storedInterfaceState.featureFlow || null,
+            lastRecommendation: storedInterfaceState.lastRecommendation || null,
             marketQueryActive: Boolean(storedInterfaceState.marketQueryActive),
             recommendationText: typeof storedInterfaceState.recommendationText === 'string'
                 ? storedInterfaceState.recommendationText
@@ -293,6 +304,9 @@
         chatHistory = [];
     }
     powerFlow = savedInterfaceState.powerFlow;
+    valuationFlow = savedInterfaceState.valuationFlow;
+    featureFlow = savedInterfaceState.featureFlow;
+    lastRecommendation = savedInterfaceState.lastRecommendation;
     marketQueryActive = Boolean(savedInterfaceState.marketQueryActive);
     if (savedInterfaceState.recommendationText) {
         recommendationFlow = { text: savedInterfaceState.recommendationText };
@@ -300,20 +314,48 @@
 
     function persistChatHistory() {
         try {
-            const savedHistory = chatHistory.slice(-40).map(({ role, content, displayContent, imageName, imageAnalysis, thumbnailUrl }) => ({
+            for (const item of chatHistory) if (!item.id) item.id = crypto.randomUUID();
+            const savedHistory = chatHistory.slice(-40).map(({ id, role, content, displayContent, imageName, imageAnalysis, thumbnailUrl, cpuRecognition, hardwareRecognition, hardwareConfirmation, hardwareInputs, contextInvalidated, valuationConditions, photoNumber }) => ({
+                id, hardwareRecognition, hardwareConfirmation, hardwareInputs, contextInvalidated, valuationConditions, photoNumber,
                 role,
                 content,
                 displayContent,
                 thumbnailUrl: thumbnailUrl || '',
                 imageName: imageName || '',
-                imageAnalysis: imageAnalysis || ''
+                imageAnalysis: imageAnalysis || '',
+                cpuRecognition: cpuRecognition || null
             }));
             sessionStorage.setItem(historyStorageKey, JSON.stringify(savedHistory));
+            saveInterfaceState({ valuationFlow });
         } catch {
             statusLabel.title = '瀏覽器無法保留聊天紀錄';
         }
     }
     if (removedStaleRecommendation) persistChatHistory();
+    for (const item of chatHistory) if (!item.id) item.id = crypto.randomUUID();
+    let restoredPhotoNumber = 0;
+    for (const item of chatHistory) {
+        if (item.role === 'user' && (item.imageName || item.imageAnalysis || item.hardwareRecognition)) {
+            item.photoNumber = item.photoNumber || restoredPhotoNumber + 1;
+            restoredPhotoNumber = Math.max(restoredPhotoNumber, item.photoNumber);
+        }
+    }
+    widget.querySelector('.ai-chat-clear').addEventListener('click', () => {
+        if (input.disabled) return;
+        chatHistory = [];
+        lastRecommendation = null;
+        valuationFlow = null;
+        recommendationFlow = null;
+        marketQueryActive = false;
+        featureFlow = null;
+        resetPowerFlow();
+        clearPendingImage();
+        input.value = '';
+        messages.replaceChildren();
+        saveInterfaceState({ valuationFlow: null, featureFlow: null, recommendationText: '', marketQueryActive: false });
+        persistChatHistory();
+        showQuickActions();
+    });
 
     function latestProductKeyword(currentAnswer = '') {
         const patterns = [
@@ -425,13 +467,15 @@
         thumbnail.src = pendingImage.previewUrl || `data:image/jpeg;base64,${data}`;
         thumbnail.alt = '待上傳硬體圖片預覽';
         enableImageZoom(thumbnail, thumbnail.src);
+        const info = document.createElement('div'); info.className = 'ai-chat-preview-info';
         const name = document.createElement('span');
         name.textContent = file.name;
+        info.append(name);
         const remove = document.createElement('button');
         remove.type = 'button';
         remove.textContent = '移除';
         remove.addEventListener('click', clearPendingImage);
-        imagePreview.replaceChildren(thumbnail, name, remove);
+        imagePreview.replaceChildren(thumbnail, info, remove);
         imagePreview.classList.add('is-visible');
     }
 
@@ -439,8 +483,8 @@
         const userMessage = document.createElement('div');
         userMessage.className = 'ai-chat-message user';
         const userText = document.createElement('p');
-        userText.textContent = historyItem.displayContent || historyItem.content;
-        userMessage.appendChild(userText);
+        userText.textContent = historyItem.displayContent ?? historyItem.content;
+        if (userText.textContent) userMessage.appendChild(userText);
 
         if (historyItem.thumbnailUrl || historyItem.previewUrl) {
             const thumbnail = document.createElement('img');
@@ -469,7 +513,7 @@
             const editor = document.createElement('div');
             editor.className = 'ai-chat-message-editor';
             const textarea = document.createElement('textarea');
-            textarea.value = item.displayContent || item.content;
+            textarea.value = item.displayContent ?? item.content;
             textarea.maxLength = 500;
             textarea.setAttribute('aria-label', '編輯訊息內容');
             const actions = document.createElement('div');
@@ -498,6 +542,23 @@
                 }
                 if (input.disabled || chatHistory[historyIndex] !== item) return;
                 item.displayContent = updatedText;
+                item.contextInvalidated = true;
+                // A revised message may change budget, usage or hardware.
+                lastRecommendation = null;
+                delete item.hardwareConfirmation;
+                delete item.valuationConditions;
+                if (featureFlow?.sourceIds?.includes(item.id)) {
+                    featureFlow = null;
+                    resetPowerFlow();
+                    recommendationFlow = null;
+                    marketQueryActive = false;
+                    saveInterfaceState({ featureFlow: null, recommendationText: '', marketQueryActive: false });
+                    appendValuationReply('來源訊息已修改，請重新確認產品與要使用的功能。');
+                }
+                if (valuationFlow?.sourceIds?.includes(item.id)) {
+                    valuationFlow = null;
+                    appendValuationReply('來源訊息已修改，請重新確認圖片型號後再估價。');
+                }
                 item.content = item.imageAnalysis
                     ? `${updatedText}\n\n[圖片辨識結果：${item.imageAnalysis}]`
                     : updatedText;
@@ -529,10 +590,11 @@
         messages.appendChild(messageGroup);
     }
 
-    function appendImageActionButtons(container, analysis) {
+    function appendImageActionButtons(container, analysis, sourceId) {
         const isGpu = /\b(?:gpu|graphics card|video card|display card)\b|顯示卡|顯卡/i.test(analysis);
         const isCpu = /\b(?:cpu|processor|central processing unit)\b|處理器/i.test(analysis);
         if (!isGpu && !isCpu) return;
+        if (isCpu) return; // CPU actions are available only after an explicit confirmation turn.
 
         const identifiedModel = analysis.match(/(?:^|\n)\s*(?:Model|型號)\s*[：:]\s*([^\n]+)/i)?.[1]?.trim();
         if (identifiedModel && /^(?:unknown|unclear|unreadable|不明|未知|無法辨識)/i.test(identifiedModel)) return;
@@ -545,20 +607,19 @@
         const marketLink = document.createElement('a');
         marketLink.href = `/scrape?keyword=${encodeURIComponent(model)}`;
         marketLink.textContent = '市價查詢';
+        const runImageFeature = name => runFeatureAction(() => beginFeatureRequest({ features: [name], targetText: '', products: [] }, { sourceId, photoId: sourceId }));
+        marketLink.addEventListener('click', event => { event.preventDefault(); runImageFeature('market'); });
         actions.appendChild(marketLink);
 
         const wattageButton = document.createElement('button');
         wattageButton.type = 'button';
         wattageButton.textContent = '瓦數計算';
-        wattageButton.addEventListener('click', () => {
-            startPowerWizard();
-            appendPowerReply(`照片初步辨識為「${model}」；請在對話框輸入並確認 CPU 型號，再繼續提供 GPU。`);
-        });
+        wattageButton.addEventListener('click', () => runImageFeature('power'));
         actions.appendChild(wattageButton);
         container.appendChild(actions);
     }
 
-    function renderAssistantMessage(answer, imageAnalysis = '') {
+    function renderAssistantMessage(answer, imageAnalysis = '', sourceId) {
         const aiMessage = document.createElement('div');
         aiMessage.className = 'ai-chat-message assistant';
         aiMessage.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
@@ -568,19 +629,20 @@
         aiText.style.whiteSpace = 'pre-wrap';
         aiText.innerHTML = renderAssistantAnswer(answer, Boolean(imageAnalysis));
         responseContent.appendChild(aiText);
-        if (imageAnalysis) appendImageActionButtons(responseContent, imageAnalysis);
+        if (imageAnalysis) appendImageActionButtons(responseContent, imageAnalysis, sourceId);
         aiMessage.appendChild(responseContent);
         messages.appendChild(aiMessage);
     }
 
     let pendingImageAnalysis = '';
+    let pendingImageSourceId;
     chatHistory.forEach((message, index) => {
         if (message.role === 'user') renderUserMessage(message, index);
         else {
-            renderAssistantMessage(message.content, pendingImageAnalysis);
+            renderAssistantMessage(message.content, pendingImageAnalysis, pendingImageSourceId);
             pendingImageAnalysis = '';
         }
-        if (message.role === 'user' && message.imageAnalysis) pendingImageAnalysis = message.imageAnalysis;
+        if (message.role === 'user' && message.imageAnalysis) { pendingImageAnalysis = message.imageAnalysis; pendingImageSourceId = message.id; }
     });
     if (chatHistory.length) messages.scrollTop = messages.scrollHeight;
 
@@ -597,14 +659,14 @@
         messages.querySelectorAll('.ai-power-options button').forEach(button => { button.disabled = true; });
     }
 
-    function startPowerWizard() {
+    function startPowerWizard(askCpu = true) {
         resetPowerFlow();
         valuationFlow = null;
         recommendationFlow = null;
         marketQueryActive = false;
         powerFlow = { stage: 'cpu', cpuModel: '', gpuModel: '' };
         saveInterfaceState({ powerFlow, marketQueryActive: false, recommendationText: '' });
-        appendPowerReply('可以先告訴我你使用的CPU嗎？例如 i5-14600K 或 Ryzen 5 7600。');
+        if (askCpu) appendPowerReply('可以先告訴我你使用的CPU嗎？例如 i5-14600K 或 Ryzen 5 7600。');
         input.focus();
     }
 
@@ -617,7 +679,7 @@
         return api.resolveModel(rows, category, model);
     }
 
-    async function handlePowerText(text) {
+    async function handlePowerText(text, modelVerified = false) {
         const flow = powerFlow;
         if (!flow) return;
         if (/^(?:取消|結束|重新開始)$/.test(text)) {
@@ -631,6 +693,14 @@
             return;
         }
         const category = flow.stage;
+        if (category === 'cpu' && flow.cpuRecognition) {
+            const candidates = flow.cpuRecognition.candidates || [];
+            if (/^(?:是|對|沒錯|確認)$/.test(text)) {
+                if (candidates.length !== 1) { appendPowerReply('照片有多個候選，請輸入要計算的完整 CPU 型號。'); return; }
+                text = candidates[0];
+            }
+            flow.confirmationSource = modelVerified ? 'model' : 'user';
+        }
         flow[category + 'Model'] = text;
         saveInterfaceState({ powerFlow: flow });
         const match = await requestPowerModel(category, text);
@@ -640,19 +710,30 @@
             return;
         }
         if (match.status !== 'matched') {
-            const api = await powerApiReady;
-            const url = api.calculatorUrl(flow);
-            resetPowerFlow();
-            appendPowerReply(`這個型號姐姐貌似不知道唷~，要不我們去頁面看看
-[前往瓦數計算](${url})`);
+            appendPowerReply(`目前${match.status === 'missing-power' ? '缺少這個型號的功耗資料' : '功耗資料庫找不到這個完整型號'}，進度已保留。請在對話框確認或更正${category === 'cpu' ? 'CPU' : '顯卡'}型號${category === 'gpu' ? '；沒有獨立顯卡可輸入「內顯」' : ''}。`);
             return;
+        }
+        if (flow.pendingPhotoId) {
+            const photo = chatHistory.find(item => item.id === flow.pendingPhotoId);
+            if (photo && !modelVerified) photo.hardwareConfirmation = { model: match.model, source: 'user', at: new Date().toISOString() };
+            delete flow.pendingPhotoId;
+            persistChatHistory();
         }
         flow[category + 'Model'] = match.model;
         flow[category + 'Watts'] = match.watts;
         if (category === 'gpu') flow.gpuRecommendedPsu = match.recommendedPsu;
+        if (currentFeature() === 'power') {
+            const existing = featureFlow.products.find(product => product.category === category);
+            if (existing) existing.model = match.model;
+            else featureFlow.products.push({ category, model: match.model });
+        }
         flow.stage = category === 'cpu' ? 'gpu' : 'components';
         saveInterfaceState({ powerFlow: flow });
-        if (category === 'cpu') appendPowerReply('好極了，那可以再告訴我你的GPU型號嗎？如果沒有獨立顯卡，說「內顯」就好。');
+        if (category === 'cpu') {
+            const knownGpu = flow.knownProducts?.find(product => product.category === 'gpu');
+            if (knownGpu) return handlePowerText(knownGpu.model, true);
+            appendPowerReply('好極了，那可以再告訴我你的GPU型號嗎？如果沒有獨立顯卡，說「內顯」就好。');
+        }
         else await showPowerOptions();
     }
 
@@ -725,6 +806,7 @@
 整機滿載預估約 ${result.totalWatts}W，建議選擇至少 ${result.recommendedWatts}W 的電源供應器。
 建議已加入 30% 餘裕，進位至 50W、最低 300W，並採納較高的顯卡原廠建議。
 [瓦數計算](${calculatorUrl})`);
+                await finishFeature('power');
             } catch (error) {
                 errorText.textContent = error.message || '計算暫時無法完成，請再試一次。';
                 if (powerFlow === flow) calculate.disabled = false;
@@ -738,9 +820,181 @@
         showPowerOptions(false).catch(() => appendPowerReply('選單暫時無法載入，請重新開始瓦數計算。'));
     }
 
+    async function hardwareRecords() {
+        const api = await hardwareContextReady;
+        return api.records(chatHistory);
+    }
+
+    function conditionsFromText(text) {
+        const value = String(text || '').normalize('NFKC');
+        const duration = '(\\d+(?:\\.\\d+)?\\s*(?:年|個?月)(?:\\s*\\d+(?:\\.\\d+)?\\s*個?月)?)';
+        const warranty = value.match(new RegExp(`(?:總保固|保固總(?:共)?|保固)(?:期間|期限)?[為是有:：\\s]*${duration}`));
+        const usage = value.match(new RegExp(`(?:已使用|使用了?|已用了?|用了)[約共:：\\s]*${duration}`));
+        const price = value.match(/(?:購入價|購買價格|當初買(?:了|的價格)?|入手價|實付|原價)[約為是:：\s]*(?:NT\$|新台幣|台幣)?\s*([\d,]{2,9})\s*(?:元)?/i);
+        const result = {};
+        if (warranty) {
+            const months = parseDurationMonths(warranty[1]);
+            if (months !== null && months <= 600) result.totalWarrantyMonths = months;
+        }
+        if (usage) {
+            const months = parseDurationMonths(usage[1]);
+            if (months !== null && months <= 1200) result.elapsedMonths = months;
+        }
+        if (price) result.purchasePrice = parseMoney(price[1]);
+        return result;
+    }
+
+    function rememberValuationConditions() {
+        const flow = valuationFlow;
+        if (!flow?.sourceIds) return;
+        for (const item of chatHistory.filter(item => flow.sourceIds.includes(item.id))) {
+            item.valuationConditions = {
+                model: flow.model, elapsedMonths: flow.elapsedMonths,
+                totalWarrantyMonths: flow.totalWarrantyMonths,
+                purchasePrice: flow.purchasePrice || 0
+            };
+        }
+    }
+
+    async function loadValuationCatalogs(flow) {
+        try {
+            const response = await fetch(`/api/valuation/model-options?category=${encodeURIComponent(flow.category)}`);
+            const result = await response.json();
+            flow.catalogs = response.ok && result.success ? result.data : [];
+        } catch { flow.catalogs = []; }
+    }
+
+    function showHardwareChoices(records) {
+        const flow = valuationFlow;
+        flow.stage = 'select-hardware';
+        flow.choiceIds = records.map(record => record.id);
+        appendValuationReply('想估哪一個零件？請點選，或輸入種類、完整型號或第幾張圖片。', records.map(record => [
+            `${record.photoNumbers.length ? `第 ${record.photoNumbers[0]} 張` : '文字指定'}・${valuationCategoryLabels[record.category]} ${record.model || record.candidates.join('／')}`,
+            () => runValuationAction(async () => {
+                if (valuationFlow !== flow || flow.stage !== 'select-hardware') return;
+                const current = (await hardwareRecords()).find(item => item.id === record.id);
+                if (current) await useHardwareRecord(current);
+            })
+        ]));
+    }
+
+    function showPhotoConfirmation() {
+        const flow = valuationFlow;
+        const candidates = flow.photoCandidates || [];
+        appendValuationReply(`照片初步辨識為${valuationCategoryLabels[flow.category]}「${candidates.join('」或「')}」。${candidates.length === 1 ? '若正確可回覆「是」或點確認；' : '判讀有分歧，請選擇正確型號；'}也可以直接輸入正確型號，確認後繼續估價。`, [
+            ...candidates.map(candidate => [`確認 ${candidate}`, () => runValuationAction(() => {
+                if (valuationFlow === flow) return confirmValuationPhotoModel(candidate);
+            })]),
+            ['重新輸入型號', () => {
+                if (valuationFlow !== flow || flow.stage !== 'photo-confirm') return;
+                flow.stage = 'model';
+                appendValuationReply('請輸入正確的完整型號。');
+            }]
+        ]);
+    }
+
+    async function useHardwareRecord(record, requestText = '') {
+        const conditions = { ...record.conditions };
+        for (const item of chatHistory.filter(item => record.sourceIds.includes(item.id) && !item.contextInvalidated && !item.hardwareConfirmation?.correction)) {
+            if (!item.hardwareInputs || item.hardwareInputs.length <= 1) Object.assign(conditions, conditionsFromText(item.displayContent));
+        }
+        if (window.HardwareContext.extractProducts(requestText).length <= 1) Object.assign(conditions, conditionsFromText(requestText));
+        if (!conditions.model) conditions.model = record.model || '';
+        valuationFlow = { stage: 'photo-confirm', category: record.category, catalogs: [],
+            sourceIds: record.sourceIds, recordId: record.id, photoCandidates: record.candidates,
+            savedConditions: conditions };
+        await loadValuationCatalogs(valuationFlow);
+        if (!record.requiresConfirmation && record.model) {
+            appendValuationReply(`好，接著估算剛才的 ${record.model}。`);
+            await confirmValuationPhotoModel(record.model, true);
+        } else showPhotoConfirmation();
+    }
+
+    function resumeValuation() {
+        const flow = valuationFlow;
+        if (flow.stage !== 'done' && Number.isFinite(flow.totalWarrantyMonths) && Number.isFinite(flow.elapsedMonths)) return submitValuationEstimate();
+        if (flow.stage === 'photo-confirm') return showPhotoConfirmation();
+        if (flow.stage === 'warranty') return requestWarrantyOrUsage();
+        const prompts = {
+            category: '請先選擇 CPU、記憶體、顯卡或主機板。',
+            model: '請輸入正確的完整型號。',
+            usage: `正在估算 ${flow.model}，請問已使用多久？可輸入「18個月」或購買日期。`,
+            price: `正在估算 ${flow.model}，請輸入當初購買價格，或上傳發票。`,
+            done: '已完成這個零件的估價。可輸入新的使用時間重新估算，或指定其他零件。'
+        };
+        appendValuationReply(prompts[flow.stage] || '請繼續提供估價條件。');
+    }
+
+    async function beginContextValuation(text = '') {
+        const api = await hardwareContextReady;
+        const records = await hardwareRecords();
+        const matches = api.select(records, text);
+        const targeted = api.categoryOf(text) || /第.+(?:張|個|顆|條|件)|剛才|剛剛|最後|最新/.test(text)
+            || records.some(record => [record.model, ...record.candidates].filter(Boolean).some(model => api.key(text).includes(api.key(model))));
+        if (valuationFlow && !targeted && valuationFlow.stage !== 'done') {
+            if (valuationFlow.stage === 'select-hardware') showHardwareChoices(matches);
+            else return resumeValuation();
+            return;
+        }
+        resetPowerFlow();
+        recommendationFlow = null;
+        marketQueryActive = false;
+        valuationFlow = null;
+        saveInterfaceState({ marketQueryActive: false, recommendationText: '', valuationFlow: null });
+        if (matches.length === 1) return useHardwareRecord(matches[0], text);
+        if (matches.length > 1) {
+            valuationFlow = { catalogs: [] };
+            return showHardwareChoices(matches);
+        }
+        startValuationWizard();
+    }
+
+    async function runValuationAction(action) {
+        if (input.disabled) return;
+        input.disabled = true;
+        submitBtn.disabled = true;
+        try { return await action(); }
+        catch (error) { appendValuationReply(error.message || '估價暫時無法完成，請再試一次。'); }
+        finally { persistChatHistory(); input.disabled = false; submitBtn.disabled = false; input.focus(); }
+    }
+
+    async function handleObservationText(text) {
+        if (valuationFlow || marketQueryActive || powerFlow || recommendationFlow) return false;
+        const record = (await hardwareRecords()).at(-1);
+        if (!record) return false;
+        const value = text.normalize('NFKC').trim().replace(/[。!！?？]+$/g, '');
+        const correction = value.match(/^(?:更正|修正|不是|不對|我說錯了?|應該是|改成)[，,:：\s]*(?:是|應該是|改成)?[，,:：\s]*(.+)$/);
+        const exactCandidate = record.candidates.find(candidate => window.HardwareContext.key(candidate) === window.HardwareContext.key(value));
+        const yes = /^(?:是|對|正確|沒錯|確認|是的|就是這個)$/.test(value);
+        const conditions = conditionsFromText(text);
+        if (!correction && !exactCandidate && !yes && Object.keys(conditions).length) {
+            const records = await hardwareRecords();
+            const matches = window.HardwareContext.select(records, text);
+            if (matches.length !== 1 || !matches[0].model) return false;
+            for (const item of chatHistory.filter(item => matches[0].sourceIds.includes(item.id))) {
+                item.valuationConditions = { ...item.valuationConditions, ...conditions, model: matches[0].model };
+            }
+            appendValuationReply(`已記下 ${matches[0].model} 的估價條件。需要估價時直接告訴我即可。`);
+            return true;
+        }
+        if (!(correction || exactCandidate || (yes && record.requiresConfirmation))) return false;
+        if (yes && record.candidates.length > 1) {
+            appendValuationReply(`有多個候選型號，請輸入完整型號：${record.candidates.join('、')}。`);
+            return true;
+        }
+        const model = correction?.[1] || exactCandidate || record.candidates[0];
+        for (const item of chatHistory.filter(item => record.sourceIds.includes(item.id))) {
+            item.hardwareConfirmation = { model, source: 'user', at: new Date().toISOString(), correction: Boolean(correction) };
+            item.contextInvalidated = false;
+            if (correction) delete item.valuationConditions;
+        }
+        appendValuationReply(`已確認${valuationCategoryLabels[record.category]}「${model}」。可以接著告訴我想估價或查詢什麼。`);
+        return true;
+    }
+
     function startValuationWizard() {
         resetPowerFlow();
-        valuationFlow = { stage: 'category', catalogs: [] };
+        valuationFlow = { stage: 'category', catalogs: [], suggestedModel: latestProductKeyword() };
         const message = document.createElement('div');
         message.className = 'ai-chat-message assistant';
         message.innerHTML = '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
@@ -778,11 +1032,11 @@
 
     async function resolveValuationModel(text) {
         const flow = valuationFlow;
-        const normalize = value => String(value || '').normalize('NFKC').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const normalize = value => window.HardwareContext.modelKey(value, flow.category);
         const query = normalize(text);
         const catalogMatch = flow.catalogs.find(item => {
             const model = normalize(item.canonicalModel);
-            return query === model || query.includes(model) || model.includes(query);
+            return query === model;
         });
         let match = catalogMatch;
         if (!match || !catalogReferencePrice(match)) {
@@ -793,7 +1047,7 @@
                 if (response.ok && result.success) {
                     const candidates = result.data.filter(item => {
                         const model = normalize(item.canonicalModel);
-                        return query === model || query.includes(model) || model.includes(query);
+                        return query === model;
                     });
                     candidates.sort((left, right) => {
                         const leftExact = normalize(left.canonicalModel) === query ? 1 : 0;
@@ -816,18 +1070,27 @@
         return match;
     }
 
-    function selectValuationWarranty(months, label) {
+    async function selectValuationWarranty(months, label) {
         const flow = valuationFlow;
+        if (!flow || flow.stage !== 'warranty') return;
         renderUserMessage({ role: 'user', content: label }, chatHistory.length);
         chatHistory.push({ role: 'user', content: label });
         persistChatHistory();
         flow.totalWarrantyMonths = months;
+        rememberValuationConditions();
+        if (Number.isFinite(flow.elapsedMonths)) return submitValuationEstimate();
         flow.stage = 'usage';
         appendValuationReply(`已採用${label}。請問已使用多久？可輸入「18個月」、「2年」，或輸入購買日期（例如「2024年3月」），我會換算成使用月數。`);
     }
 
     function requestWarrantyOrUsage() {
         const flow = valuationFlow;
+        if (Number.isFinite(flow.totalWarrantyMonths)) {
+            if (Number.isFinite(flow.elapsedMonths)) return submitValuationEstimate();
+            flow.stage = 'usage';
+            appendValuationReply(`沿用 ${flow.model} 已提供的保固 ${flow.totalWarrantyMonths} 個月。請問已使用多久？`);
+            return;
+        }
         const model = String(flow.model || '');
         const brand = String(flow.brand || '').toLowerCase();
         const intelCpu = /intel/.test(brand) || /\bcore\s*(?:i[3579]|ultra)|\bi[3579]\s*[-\d]/i.test(model);
@@ -840,8 +1103,8 @@
             if (generation === 13 || generation === 14) {
                 flow.stage = 'warranty';
                 appendValuationReply(`Intel 第 ${generation} 代 CPU 可選擇保固期間：一般保固 3 年，或含延長保固 5 年。`, [
-                    ['3 年（一般保固）', () => selectValuationWarranty(36, '3 年一般保固')],
-                    ['5 年（含延長保固）', () => selectValuationWarranty(60, '5 年延長保固')]
+                    ['3 年（一般保固）', () => runValuationAction(() => selectValuationWarranty(36, '3 年一般保固'))],
+                    ['5 年（含延長保固）', () => runValuationAction(() => selectValuationWarranty(60, '5 年延長保固'))]
                 ]);
                 return;
             }
@@ -849,6 +1112,7 @@
 
         if (flow.category === 'cpu' && (intelCpu || amdCpu)) {
             flow.totalWarrantyMonths = 36;
+            if (Number.isFinite(flow.elapsedMonths)) return submitValuationEstimate();
             flow.stage = 'usage';
             appendValuationReply(`${intelCpu ? '此 Intel CPU' : '此 AMD CPU'}依一般保固先採 3 年（36 個月）。請問已使用多久？可輸入「18個月」、「2年」，或輸入購買日期（例如「2024年3月」），我會換算成使用月數。`);
             return;
@@ -904,7 +1168,10 @@
             valuationFlow.catalogs = [];
         }
         const knownCount = valuationFlow.catalogs.length;
-        appendValuationReply(`請在聊天框輸入${label}型號${knownCount ? `（資料庫有 ${knownCount} 個型號，輸入時會自動比對）` : ''}。也可以上傳清楚的產品標籤照片。`);
+        const suggested = category === 'cpu' && /^(?:core\s*)?i[3579][\s-]*\d{4,5}[a-z]{0,3}$/i.test(valuationFlow.suggestedModel || '')
+            ? valuationFlow.suggestedModel : '';
+        appendValuationReply(`請在聊天框輸入${label}型號${knownCount ? `（資料庫有 ${knownCount} 個型號，輸入時會自動比對）` : ''}。也可以上傳清楚的產品標籤照片。${suggested ? `我已帶入剛才的「${suggested}」，可直接送出或修改。` : ''}`);
+        if (suggested) input.value = suggested;
         input.focus();
     }
 
@@ -937,6 +1204,8 @@
 
     async function submitValuationEstimate() {
         const flow = valuationFlow;
+        rememberValuationConditions();
+        persistChatHistory();
         const payload = {
             category: flow.category,
             model: flow.model,
@@ -945,6 +1214,7 @@
             elapsedMonths: flow.elapsedMonths,
             totalWarrantyMonths: flow.totalWarrantyMonths,
             originalPrice: flow.originalPrice || 0,
+            strictModelMatch: true,
             condition: 'good'
         };
         const response = await fetch('/api/valuation', {
@@ -976,11 +1246,33 @@
         appendValuationReply(`${estimate}\n${result.warning || result.fallbackReason || '此為估算結果，實際價格會依商品狀況與市場行情變動。'}`, [
             ['前往二手估價頁', () => { window.location.href = `/valuation.html?${params.toString()}`; }]
         ]);
+        await finishFeature('valuation');
     }
 
     async function handleValuationText(text) {
         const flow = valuationFlow;
         if (!flow) return;
+        const api = await hardwareContextReady;
+        if (api.blockedIntent(text) && /估價|估值/.test(text)) {
+            if (/不要|不用|不想|不需要|取消|停止/.test(text)) {
+                rememberValuationConditions();
+                valuationFlow = null;
+                if (currentFeature() === 'valuation') featureFlow = null;
+                appendValuationReply('已停止這次估價。');
+            } else appendValuationReply('二手估價會依完整型號、保固及使用時間，使用網站公式計算參考價格。你的估價進度已保留。');
+            return;
+        }
+        if (flow.stage === 'select-hardware') {
+            const records = (await hardwareRecords()).filter(record => flow.choiceIds.includes(record.id));
+            const matches = api.select(records, text);
+            if (matches.length === 1) return useHardwareRecord(matches[0]);
+            showHardwareChoices(matches.length ? matches : records);
+            return;
+        }
+        const correction = text.match(/^(?:更正|修正|不是|不對|我說錯了?|應該是|改成)[，,:：\s]*(?:是|應該是|改成)?[，,:：\s]*(.+)$/);
+        if (correction && !['category', 'select-hardware'].includes(flow.stage)) {
+            return correctValuationModel(correction[1]);
+        }
         if (flow.stage === 'photo-confirm') {
             const value = text.normalize('NFKC').trim().replace(/[。!！?？]+$/g, '');
             if (/^(?:是|對|正確|沒錯|好|可以|確認|是的|就是這個)$/.test(value)) {
@@ -1008,22 +1300,16 @@
             }
             await chooseValuationCategory(matches[0][0], matches[0][1], false);
         } else if (flow.stage === 'model') {
-            flow.model = text.trim();
-            await resolveValuationModel(flow.model);
-            requestWarrantyOrUsage();
+            await correctValuationModel(text.trim());
         } else if (flow.stage === 'warranty') {
             const months = parseDurationMonths(text);
             if (months === null && /[a-z\d\u3400-\u9fff]/i.test(text)) {
-                flow.model = text.trim();
-                flow.modelId = null;
-                flow.brand = '';
-                flow.originalPrice = 0;
-                await resolveValuationModel(flow.model);
-                requestWarrantyOrUsage();
-                return;
+                return correctValuationModel(text.trim());
             }
             if (months === null || months > 600) return appendValuationReply('我沒有辨識到保固期間，請輸入例如「3年」或「36個月」。');
             flow.totalWarrantyMonths = months;
+            rememberValuationConditions();
+            if (Number.isFinite(flow.elapsedMonths)) return submitValuationEstimate();
             flow.stage = 'usage';
             appendValuationReply('請問已使用多久？可輸入「18個月」、「2年」，或輸入購買日期（例如「2024年3月」），我會換算成使用月數。');
         } else if (flow.stage === 'usage') {
@@ -1035,23 +1321,68 @@
             const price = parseMoney(text);
             if (!price) return appendValuationReply('請輸入發票上的實付金額或當初購買價格，例如「12000元」；也可上傳發票圖片。');
             flow.originalPrice = price;
+            flow.purchasePrice = price;
+            await submitValuationEstimate();
+        } else if (flow.stage === 'done') {
+            const elapsed = parsePurchaseDateMonths(text) ?? parseDurationMonths(text);
+            if (elapsed === null) return resumeValuation();
+            flow.elapsedMonths = elapsed;
             await submitValuationEstimate();
         }
+    }
+
+    async function correctValuationModel(model) {
+        const flow = valuationFlow;
+        flow.model = model;
+        flow.modelId = null;
+        flow.brand = '';
+        flow.originalPrice = 0;
+        flow.purchasePrice = 0;
+        delete flow.totalWarrantyMonths;
+        delete flow.elapsedMonths;
+        flow.savedConditions = null;
+        flow.photoCandidates = [model];
+        for (const item of chatHistory.filter(item => flow.sourceIds?.includes(item.id))) {
+            item.contextInvalidated = false;
+            item.hardwareConfirmation = { model, source: 'user', at: new Date().toISOString(), correction: true };
+            delete item.valuationConditions;
+        }
+        await resolveValuationModel(model);
+        appendValuationReply(`已採用型號「${flow.model}」，請重新確認這個零件的估價條件。`);
+        await requestWarrantyOrUsage();
     }
 
     async function confirmValuationPhotoModel(model, automatically = false) {
         const flow = valuationFlow;
         if (!flow || flow.stage !== 'photo-confirm' || !flow.photoCandidates.includes(model)) return;
         flow.model = model;
+        flow.photoConfirmation = { model, source: automatically ? 'model' : 'user', at: new Date().toISOString() };
+        for (const photo of chatHistory.filter(item => flow.sourceIds?.includes(item.id))) {
+            photo.contextInvalidated = false;
+            if (!automatically) photo.hardwareConfirmation = flow.photoConfirmation;
+        }
         flow.modelId = null;
         flow.brand = '';
         flow.originalPrice = 0;
         await resolveValuationModel(model);
+        const saved = flow.savedConditions;
+        if (saved && (!saved.model || window.HardwareContext.modelKey(saved.model, flow.category) === window.HardwareContext.modelKey(flow.model, flow.category))) {
+            if (Number.isFinite(saved.totalWarrantyMonths)) flow.totalWarrantyMonths = saved.totalWarrantyMonths;
+            if (Number.isFinite(saved.elapsedMonths)) flow.elapsedMonths = saved.elapsedMonths;
+            if (saved.purchasePrice > 0) { flow.purchasePrice = saved.purchasePrice; flow.originalPrice = saved.purchasePrice; }
+        }
         appendValuationReply(`已${automatically ? '辨識' : '確認'}型號「${flow.model}」，接著填寫估價條件。若型號不對，可直接輸入正確型號修正。`);
-        requestWarrantyOrUsage();
+        await requestWarrantyOrUsage();
     }
 
     function parseRecommendationBudget(text) {
+        const chinese = text.match(/(?:預算)?\s*([一二兩三四五六七八九十]+)\s*(萬|千)/);
+        if (chinese) {
+            const digits = { 一: 1, 二: 2, 兩: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+            const parts = chinese[1].split('十');
+            const number = parts.length === 2 ? (digits[parts[0]] || 1) * 10 + (digits[parts[1]] || 0) : digits[chinese[1]];
+            if (number) return number * (chinese[2] === '萬' ? 10000 : 1000);
+        }
         const patterns = [
             /(?:預算|budget)[^\d]{0,16}([\d,.]+)\s*(萬|千)?/i,
             /(?:NTD?|新台幣|台幣)\s*\$?\s*([\d,.]+)\s*(萬|千)?/i,
@@ -1141,7 +1472,7 @@
         const usage = getRecommendationUsage(requestText);
 
         if (!budget && !usage) {
-            appendRecommendationReply('請告訴我預算上限和主要用途，例如「4萬元，主要玩 3A 遊戲，想組桌機」。');
+            appendRecommendationReply('請告訴我預算和用途，例如「4萬元，主要玩 3A 遊戲，想組桌機」。');
             return;
         }
         if (!budget) {
@@ -1158,12 +1489,13 @@
             appendRecommendationReply('你想找二手（通常較便宜的主機），還是全新品？回覆「二手」或「全新品」，我就依你的選擇找商品。');
             return;
         }
-        const productType = getRecommendationProductType(requestText);
+        const requiredHardware = recommendationFlow.requiredHardware || (currentFeature() === 'recommendation' ? featureFlow.products : []);
+        const productType = requiredHardware.length && !/單買|單一零件/.test(requestText) ? 'desktop' : getRecommendationProductType(requestText);
         const componentType = productType === 'component' ? getRecommendationComponentType(requestText) : '';
         const productTypes = !productType && usage === 'office' ? ['desktop', 'laptop'] : [productType || 'desktop'];
         const payloads = productTypes.map((type) => type === 'component'
             ? { budget, usage, productType: type, componentType, condition }
-            : { budget, usage, productType: type, condition });
+            : { budget, usage, productType: type, condition, requiredHardware });
         recommendationFlow = null;
         saveInterfaceState({ recommendationText: '' });
 
@@ -1207,13 +1539,255 @@
                 lines.push(`市場資料更新於 ${new Date(updatedAt).toLocaleString('zh-TW')}。`);
             }
             appendRecommendationReply(lines.join('\n\n'));
+            lastRecommendation = { text: requestText, requiredHardware };
+            saveInterfaceState({});
+            await finishFeature('recommendation');
         } catch (error) {
             appendRecommendationReply(`剛才查推薦時遇到問題：${error.message || '請稍後再試。'} 再傳一次預算和用途，我會重新查。`);
-            recommendationFlow = { text: requestText };
+            recommendationFlow = { text: requestText, requiredHardware };
             saveInterfaceState({ recommendationText: requestText });
         } finally {
             loading.remove();
         }
+    }
+
+    function currentFeature() { return featureFlow?.features[featureFlow.index || 0]; }
+
+    function suspendFeatureFlows() {
+        lastRecommendation = null;
+        rememberValuationConditions();
+        resetPowerFlow();
+        valuationFlow = null;
+        recommendationFlow = null;
+        marketQueryActive = false;
+        saveInterfaceState({ valuationFlow: null, recommendationText: '', marketQueryActive: false });
+    }
+
+    async function runFeatureAction(action) {
+        if (input.disabled) return;
+        input.disabled = submitBtn.disabled = true;
+        try { return await action(); }
+        catch (error) {
+            if (featureFlow) featureFlow.stage = 'retry';
+            const failedFlow = featureFlow;
+            appendValuationReply(error.message || '這次請求未完成，進度已保留。', [
+                ['重試', () => { if (featureFlow === failedFlow) return runFeatureAction(() => executeFeature()); }]
+            ]);
+        } finally {
+            persistChatHistory();
+            input.disabled = submitBtn.disabled = false;
+            input.focus();
+        }
+    }
+
+    async function finishFeature(name) {
+        if (currentFeature() !== name) return;
+        const flow = featureFlow;
+        if (name === 'valuation' && valuationFlow?.model) {
+            flow.products = [{ category: valuationFlow.category, model: valuationFlow.model,
+                ...(valuationFlow.recordId ? { recordId: valuationFlow.recordId, sourceIds: valuationFlow.sourceIds } : {}) }];
+        }
+        flow.index += 1;
+        flow.stage = 'ready';
+        if (flow.index >= flow.features.length) { featureFlow = null; saveInterfaceState({}); return; }
+        appendValuationReply(`接著進行${window.HardwareContext.features[currentFeature()]}。`);
+        await executeFeature();
+    }
+
+    function showFeatureSelection(records) {
+        featureFlow.stage = 'select';
+        featureFlow.choiceIds = records.map(record => record.id);
+        const flow = featureFlow;
+        appendValuationReply(`${currentFeature() === 'valuation' ? '想估哪一個零件' : `要用哪個產品進行${window.HardwareContext.features[currentFeature()]}`}？請點選或輸入完整型號／第幾張圖片。`, records.map(record => [
+            `${record.photoNumbers?.length ? `第 ${record.photoNumbers[0]} 張` : '文字指定'}・${valuationCategoryLabels[record.category]} ${record.model || record.candidates.join('／')}`,
+            () => runFeatureAction(async () => {
+                if (featureFlow !== flow) return;
+                await selectFeatureRecords([record]);
+            })
+        ]));
+    }
+
+    function showFeatureConfirmation(record) {
+        const flow = featureFlow;
+        flow.stage = 'confirm';
+        flow.pendingRecordId = record.id;
+        flow.pendingCandidates = record.candidates;
+        flow.pendingCategory = record.category;
+        const name = currentFeature() === 'valuation' ? '估價' : window.HardwareContext.features[currentFeature()];
+        appendValuationReply(`照片初步辨識為${valuationCategoryLabels[record.category]}「${record.candidates.join('」或「')}」。${record.candidates.length > 1 ? '判讀有分歧，' : '若正確可回覆「是」；'}請選擇或輸入完整型號，確認後繼續${name}。`, [
+            ...record.candidates.map(model => [`確認 ${model}`, () => runFeatureAction(() => {
+                if (featureFlow === flow) return confirmFeatureRecord(model);
+            })]),
+            ['重新輸入型號', () => { if (featureFlow === flow) appendValuationReply('請輸入正確的完整型號。'); }]
+        ]);
+    }
+
+    async function confirmFeatureRecord(model) {
+        const flow = featureFlow;
+        if (!flow || flow.stage !== 'confirm') return;
+        const record = (await hardwareRecords()).find(item => item.id === flow.pendingRecordId);
+        if (!record) throw new Error('來源已變更，請重新選擇產品。');
+        const corrected = !record.candidates.some(candidate => window.HardwareContext.modelKey(candidate, record.category) === window.HardwareContext.modelKey(model, record.category));
+        for (const item of chatHistory.filter(item => record.sourceIds.includes(item.id))) {
+            item.hardwareConfirmation = { model, source: 'user', at: new Date().toISOString(), correction: corrected };
+            item.contextInvalidated = false;
+            if (corrected) delete item.valuationConditions;
+        }
+        flow.products = flow.products.map(product => product.recordId === record.id ? { category: record.category, model, recordId: record.id, sourceIds: record.sourceIds } : product);
+        flow.stage = 'ready';
+        persistChatHistory();
+        await executeFeature();
+    }
+
+    async function selectFeatureRecords(records) {
+        const flow = featureFlow;
+        flow.products = records.map(record => ({ category: record.category, model: record.model, ...(record.sourceIds.length ? { recordId: record.id, sourceIds: record.sourceIds } : {}) }));
+        flow.sourceIds = [...new Set([...(flow.sourceIds || []), ...records.flatMap(record => record.sourceIds)])];
+        const uncertain = records.find(record => record.requiresConfirmation);
+        if (uncertain) { showFeatureConfirmation(uncertain); return; }
+        flow.stage = 'ready';
+        await executeFeature();
+    }
+
+    async function beginFeatureRequest(request, { sourceId, photoId } = {}) {
+        const api = await hardwareContextReady;
+        const name = request.features[0];
+        const products = request.products || api.extractProducts(request.targetText);
+        const referenced = api.select(await hardwareRecords(), request.targetText);
+        const hasReference = api.categoryOf(request.targetText) || /第.+(?:張|顆|個|件)|剛才|剛剛|最後|最新/.test(request.targetText);
+        const sameProduct = products.length ? products.every(product => featureFlow?.products?.some(other => other.category === product.category && api.modelKey(other.model, other.category) === api.modelKey(product.model, product.category)))
+            : !hasReference || referenced.length === 1 && featureFlow?.products?.some(product => product.recordId === referenced[0].id);
+        if (!photoId && featureFlow && currentFeature() === name && request.features.length === 1 && sameProduct && !/第.+(?:張|顆|個|件)|另一|換成|改成/.test(request.targetText)) {
+            if (name === 'valuation' && valuationFlow) {
+                Object.assign(valuationFlow, conditionsFromText(request.targetText));
+                return resumeValuation();
+            }
+            if (featureFlow.stage === 'confirm') {
+                const record = (await hardwareRecords()).find(item => item.id === featureFlow.pendingRecordId);
+                if (record) return showFeatureConfirmation(record);
+            }
+            if (name === 'power' && powerFlow) return appendPowerReply(powerFlow.stage === 'components' ? '請選擇主機板與散熱系統，再計算建議瓦數。' : `請提供${powerFlow.stage === 'cpu' ? 'CPU' : 'GPU'}型號。`);
+            if (name === 'recommendation' && recommendationFlow) return continueRecommendationFlow(request.targetText);
+            return executeFeature();
+        }
+        // A legacy valuation in progress also resumes on a repeated generic command.
+        if (name === 'valuation' && valuationFlow && !photoId && !products.length && request.features.length === 1) {
+            const matches = api.select(await hardwareRecords(), request.targetText);
+            if (!matches.length || matches.some(record => record.sourceIds.some(id => valuationFlow.sourceIds?.includes(id)))) return beginContextValuation(request.targetText);
+        }
+        suspendFeatureFlows();
+        featureFlow = { ...request, index: 0, stage: 'ready', products, sourceIds: sourceId ? [sourceId] : [] };
+        const records = await hardwareRecords();
+        if (photoId) {
+            const record = records.find(item => item.sourceIds.includes(photoId));
+            if (record) return selectFeatureRecords([record]);
+            featureFlow.stage = 'product';
+            appendValuationReply('無法從圖片確認可用型號，請輸入完整型號，或重新上傳照片。');
+            return;
+        }
+        if (products.length) {
+            // Explicitly named products may reuse their own confirmed photo context.
+            for (const product of products) {
+                const match = records.find(record => record.category === product.category && api.modelKey(record.model, record.category) === api.modelKey(product.model, product.category));
+                if (match) { product.recordId = match.id; featureFlow.sourceIds.push(...match.sourceIds); }
+            }
+            return executeFeature();
+        }
+        const matches = api.select(records, request.targetText);
+        if (matches.length === 1) return selectFeatureRecords(matches);
+        if (matches.length > 1) return showFeatureSelection(matches);
+        return executeFeature();
+    }
+
+    async function executeFeature() {
+        const flow = featureFlow;
+        if (!flow) return;
+        const api = await hardwareContextReady;
+        const records = await hardwareRecords();
+        for (const product of flow.products) {
+            if (!product.recordId) continue;
+            const record = records.find(record => record.id === product.recordId || product.sourceIds?.some(id => record.sourceIds.includes(id)));
+            if (!record) throw new Error('來源已變更，請重新選擇產品。');
+            if (record.requiresConfirmation) return showFeatureConfirmation(record);
+            product.recordId = record.id;
+            product.model = record.model;
+        }
+        flow.stage = 'running';
+        const name = currentFeature();
+        if (name === 'valuation') {
+            if (flow.products.length > 1) return showFeatureSelection(flow.products.map(product => records.find(record => record.id === product.recordId) || { id: `text:${product.model}`, sourceIds: [], photoNumbers: [], candidates: [product.model], ...product }));
+            const product = flow.products[0];
+            if (!product) return beginContextValuation(flow.targetText);
+            const record = records.find(record => record.id === product.recordId);
+            if (record) {
+                const sourceIds = product.sourceIds || record.sourceIds;
+                const conditions = chatHistory.filter(item => sourceIds.includes(item.id)).reduce((saved, item) => ({ ...saved, ...item.valuationConditions }), {});
+                return useHardwareRecord({ ...record, sourceIds, conditions }, flow.targetText);
+            }
+            // A user's literal full model is an explicit input, not an AI verification.
+            valuationFlow = { stage: 'photo-confirm', category: product.category, catalogs: [], photoCandidates: [product.model], savedConditions: { ...conditionsFromText(flow.targetText), model: product.model } };
+            await loadValuationCatalogs(valuationFlow);
+            return confirmValuationPhotoModel(product.model, true);
+        }
+        valuationFlow = null;
+        if (name === 'market') {
+            if (flow.products.length > 1) return showFeatureSelection(flow.products.map(product => records.find(record => record.id === product.recordId) || { id: `text:${product.model}`, sourceIds: [], photoNumbers: [], candidates: [product.model], ...product }));
+            marketQueryActive = true;
+            if (!flow.products.length) { flow.stage = 'product'; startMarketQuery(); return; }
+            const product = flow.products[0];
+            const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: [{ role: 'user', content: product.model }], intent: 'market', executeFeature: true,
+                    featureRequest: { features: ['market'], targetText: product.model, products: [product] } }) });
+            const result = await response.json();
+            if (!response.ok || !result.success || result.retryable) throw new Error(result.message || result.answer || '市價查詢未完成，請重試。');
+            appendRecommendationReply(result.answer);
+            await finishFeature('market');
+        } else if (name === 'power') {
+            startPowerWizard(!flow.products.some(product => product.category === 'cpu'));
+            powerFlow.knownProducts = flow.products;
+            powerFlow.sourceIds = flow.sourceIds;
+            const cpu = flow.products.find(product => product.category === 'cpu');
+            const gpu = flow.products.find(product => product.category === 'gpu');
+            if (cpu) await handlePowerText(cpu.model, true);
+            if (gpu && powerFlow?.stage === 'gpu') await handlePowerText(gpu.model, true);
+        } else if (name === 'recommendation') {
+            resetPowerFlow(); marketQueryActive = false;
+            recommendationFlow = { text: '', requiredHardware: flow.products, sourceIds: flow.sourceIds };
+            await continueRecommendationFlow(flow.targetText);
+        }
+        saveInterfaceState({});
+    }
+
+    async function handleFeatureText(text) {
+        const flow = featureFlow;
+        if (!flow) return false;
+        if (/^(?:取消|先不要|不用了|停止)$/.test(text)) {
+            suspendFeatureFlows(); featureFlow = null;
+            appendValuationReply('已取消這次需求。'); return true;
+        }
+        if (flow.stage === 'retry' && /重試|再試|再一次/.test(text)) { await executeFeature(); return true; }
+        if (flow.stage === 'select') {
+            const records = (await hardwareRecords()).filter(record => flow.choiceIds.includes(record.id));
+            const literal = flow.products.filter(product => flow.choiceIds.includes(`text:${product.model}`)).map(product => ({ ...product, id: `text:${product.model}`, model: product.model, candidates: [product.model], photoNumbers: [], sourceIds: [] }));
+            const matches = window.HardwareContext.select([...records, ...literal], text);
+            if (matches.length === 1) await selectFeatureRecords(matches);
+            else showFeatureSelection(matches.length ? matches : [...records, ...literal]);
+            return true;
+        }
+        if (flow.stage === 'confirm') {
+            const products = window.HardwareContext.extractProducts(text);
+            const yes = /^(?:是|對|確認|沒錯|正確|好|是的)[。！!\s]*$/.test(text);
+            const candidate = flow.pendingCandidates.find(model => window.HardwareContext.key(model) === window.HardwareContext.key(text));
+            const model = candidate || products.find(product => product.category === flow.pendingCategory)?.model || (yes && flow.pendingCandidates.length === 1 ? flow.pendingCandidates[0] : '');
+            if (model) await confirmFeatureRecord(model);
+            else appendValuationReply(flow.pendingCandidates.length > 1 ? '有多個候選，請選擇或輸入正確的完整型號，才能繼續。' : '請選擇或輸入正確的完整型號，才能繼續。');
+            return true;
+        }
+        if (flow.stage === 'product') {
+            const products = window.HardwareContext.extractProducts(text);
+            if (products.length) { flow.products = products; await executeFeature(); return true; }
+        }
+        return false;
     }
 
     function startMarketQuery(model = '') {
@@ -1227,41 +1801,16 @@
         input.focus();
     }
 
-    function featureCommand(text) {
-        const command = String(text).normalize('NFKC').trim()
-            .replace(/^(?:你好|您好|嗨)[，,\s]*/, '')
-            .replace(/[\s，,。.!！?？～~]+/g, '');
-        const prefix = '(?:(?:請幫我|幫我|請|我想要|我想|我要|我需要|想要|想))?(?:使用|開啟|進行|做)?';
-        const suffix = '(?:功能|工具|一下|看看)?';
-        const features = [
-            ['二手估價', '二手估價|二手估值|估二手價|估二手價格|估價'],
-            ['市價查詢', '市價查詢|市場價格查詢|查市價|查價|市價'],
-            ['智慧推薦', '智慧推薦|硬體推薦|配置推薦|裝機推薦|配電腦|組電腦'],
-            ['瓦數計算', '瓦數計算|功耗計算|計算瓦數|算瓦數|算整機瓦數|計算電源瓦數']
-        ];
-        return features.find(([, aliases]) => new RegExp(`^${prefix}(?:${aliases})${suffix}$`).test(command))?.[0] || null;
-    }
-
-    function activateChatFeature(label, recordAction = false) {
+    async function activateChatFeature(label, recordAction = false, target = '') {
         if (recordAction && ['二手估價', '瓦數計算'].includes(label)) {
             const action = { role: 'user', content: `我要進行${label}` };
             renderUserMessage(action, chatHistory.length);
             chatHistory.push(action);
             persistChatHistory();
         }
-        resetPowerFlow();
-        valuationFlow = null;
-        recommendationFlow = null;
-        marketQueryActive = false;
-        saveInterfaceState({ marketQueryActive: false, recommendationText: '' });
-        if (label === '二手估價') startValuationWizard();
-        else if (label === '市價查詢') startMarketQuery();
-        else if (label === '瓦數計算') startPowerWizard();
-        else if (label === '智慧推薦') {
-            recommendationFlow = { text: '' };
-            appendRecommendationReply('我們先從預算和用途開始吧，例如「4萬元，主要玩 3A 遊戲，想組桌機」。只知道預算也沒關係，先告訴我就好。');
-            input.focus();
-        }
+        const api = await hardwareContextReady;
+        const name = Object.keys(api.features).find(name => api.features[name] === label);
+        if (name) return runFeatureAction(() => beginFeatureRequest({ schemaVersion: 1, features: [name], targetText: target, products: api.extractProducts(target) }, { sourceId: chatHistory.at(-1)?.id }));
     }
 
     function showQuickActions() {
@@ -1297,8 +1846,9 @@
     }
 
     attachButton.addEventListener('click', () => imageInput.click());
-    imageInput.addEventListener('change', async () => {
-        const file = imageInput.files?.[0];
+    widget.querySelector('.ai-chat-camera').addEventListener('click', () => cameraInput.click());
+    cameraInput.addEventListener('change', () => { const file = cameraInput.files?.[0]; cameraInput.value = ''; prepareUpload(file); });
+    async function prepareUpload(file) {
         if (!file) return;
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 12 * 1024 * 1024) {
             window.alert('請選擇 12 MB 以內的 JPG、PNG 或 WebP 圖片。');
@@ -1308,7 +1858,8 @@
 
         try {
             const bitmap = await createImageBitmap(file);
-            let scale = Math.min(1, 4096 / Math.max(bitmap.width, bitmap.height));
+            let scale = Math.min(1, 4096 / Math.max(bitmap.width, bitmap.height),
+                Math.sqrt(15_990_000 / (bitmap.width * bitmap.height)));
             const canvas = document.createElement('canvas');
             canvas.width = Math.max(1, Math.round(bitmap.width * scale));
             canvas.height = Math.max(1, Math.round(bitmap.height * scale));
@@ -1348,7 +1899,20 @@
             window.alert(error.message || '圖片讀取失敗，請重新選擇。');
             imageInput.value = '';
         }
+    }
+    imageInput.addEventListener('change', () => prepareUpload(imageInput.files?.[0]));
+    panel.addEventListener('paste', async event => {
+        if (!widget.classList.contains('is-open') || input.disabled || cancelActiveMessageEdit) return;
+        const clipboard = event.clipboardData;
+        const file = [...(clipboard?.items || [])]
+            .find(item => item.kind === 'file' && item.type.startsWith('image/'))?.getAsFile()
+            || [...(clipboard?.files || [])].find(item => item.type.startsWith('image/'));
+        if (!file) return; // Keep native text paste behaviour.
+        event.preventDefault();
+        await prepareUpload(file); // Preview only; the submit handler owns uploading.
+        input.focus();
     });
+
 
     function setOpen(isOpen, focusInput = true) {
         widget.classList.toggle('is-open', isOpen);
@@ -1367,7 +1931,7 @@
     }
 
     function saveInterfaceState(update) {
-        savedInterfaceState = { ...savedInterfaceState, ...update };
+        savedInterfaceState = { ...savedInterfaceState, ...update, featureFlow, lastRecommendation };
         try {
             sessionStorage.setItem(interfaceStorageKey, JSON.stringify(savedInterfaceState));
         } catch {
@@ -1423,9 +1987,11 @@
 
         // 顯示使用者的訊息
         const userHistory = {
+            id: crypto.randomUUID(),
+            photoNumber: pendingImage ? Math.max(0, ...chatHistory.map(item => item.photoNumber || 0)) + 1 : undefined,
             role: 'user',
-            content: text || (marketQueryActive ? '請查詢照片中產品的資訊與市價' : valuationFlow?.stage === 'price' ? '請辨識這張發票收據，擷取購買日期、品名與實付金額。' : '請辨識這張硬體圖片'),
-            displayContent: text || (marketQueryActive ? '請查詢照片中產品的資訊與市價' : valuationFlow?.stage === 'price' ? '請辨識這張發票收據' : '請辨識這張硬體圖片'),
+            content: text || (valuationFlow?.stage === 'price' ? '請辨識這張發票收據，擷取購買日期、品名與實付金額。' : ''),
+            displayContent: text,
             thumbnailUrl: pendingImage?.thumbnailUrl || '',
             imageData: pendingImage?.data || null,
             imageName: pendingImage?.name || '',
@@ -1445,11 +2011,51 @@
         input.style.height = 'auto';
         messages.scrollTop = messages.scrollHeight;
 
-        const requestedFeature = !imageToSend && featureCommand(text);
-        if (requestedFeature) {
-            activateChatFeature(requestedFeature);
+        const contextApi = await hardwareContextReady;
+        let requestedFeature = contextApi.parseFeatureRequest(text);
+        if (!requestedFeature && (featureFlow || imageToSend) && contextApi.mayRequestFeature(text)) {
+            input.disabled = submitBtn.disabled = true;
+            try {
+                const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resolveFeatureOnly: true, routeFeatures: true, messages: [{ role: 'user', content: text }] }) });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error('需求判讀未完成');
+                requestedFeature = contextApi.validateFeatureRequest(result.featureAction, text);
+            } catch {
+                appendValuationReply('暫時無法判讀這次需求，原有進度已保留。', [['重試這次需求', () => {
+                    if (input.disabled) return;
+                    pendingImage = imageToSend; input.value = text; form.requestSubmit();
+                }]]);
+                return;
+            } finally { input.disabled = submitBtn.disabled = false; }
+        }
+        if (!imageToSend && requestedFeature?.products.length) {
+            userHistory.hardwareInputs = requestedFeature.products;
+            persistChatHistory();
+        }
+        if (requestedFeature && !imageToSend) {
+            await runFeatureAction(() => beginFeatureRequest(requestedFeature, { sourceId: userHistory.id }));
             return;
         }
+        if (requestedFeature && imageToSend) {
+            suspendFeatureFlows();
+            featureFlow = { ...requestedFeature, products: [], index: 0, stage: 'image', sourceIds: [userHistory.id] };
+            saveInterfaceState({});
+        }
+        if (!imageToSend && featureFlow && /是什麼|如何|怎麼|介紹|解釋|說明/.test(text) && /估價|市價|瓦數|推薦/.test(text)) {
+            appendValuationReply('市價查詢會搜尋通路報價；二手估價會補齊型號、保固與使用時間後計算；瓦數計算依零件功耗與配置推算；智慧推薦依預算、用途及指定硬體篩選商品。目前進度已保留。');
+            return;
+        }
+        if (!imageToSend && featureFlow && await runFeatureAction(() => handleFeatureText(text))) return;
+        // A completed recommendation remains available for a narrowly scoped
+        // condition comparison, without making unrelated chat restart a search.
+        const conditionComparison = /^(?:(?:那|如果|若|假如|改成|換成|改為|我想要|我要|我選|要|是)\s*)*(?:全新品?|新品|新機|二手|中古)(?:的)?(?:呢|嗎|如何|怎麼樣|就好)?[？?。!！\s]*$/.test(text.normalize('NFKC').trim());
+        if (!imageToSend && !featureFlow && !valuationFlow && !marketQueryActive && !powerFlow && !recommendationFlow && lastRecommendation && conditionComparison) {
+            recommendationFlow = { ...lastRecommendation };
+            await runFeatureAction(() => continueRecommendationFlow(text));
+            return;
+        }
+        if (!imageToSend && await handleObservationText(text)) return;
 
         // Let standalone social turns reach the server without consuming an
         // in-progress CPU, valuation, recommendation or market answer.
@@ -1490,11 +2096,7 @@
         }
 
         if (valuationFlow && !imageToSend && !standaloneSocialTurn) {
-            try {
-                await handleValuationText(text);
-            } catch (error) {
-                appendValuationReply(error.message || '估價暫時無法完成，請稍後再試。');
-            }
+            await runValuationAction(() => handleValuationText(text));
             input.focus();
             return;
         }
@@ -1527,7 +2129,13 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ messages: payloadMessages, ...(marketQueryActive && !standaloneSocialTurn ? { intent: 'market' } : {}) })
+                body: JSON.stringify({ messages: payloadMessages,
+                    routeFeatures: true,
+                    ...(featureFlow ? { featureRequest: { features: featureFlow.features.slice(featureFlow.index), targetText: text } } : {}),
+                    ...(imageToSend && valuationFlow?.stage !== 'price' ? { recognitionOnly: true } : {}),
+                    valuationContext: (await hardwareRecords()).length > 0,
+                    ...(imageToSend && ((valuationFlow?.category === 'cpu' && valuationFlow.stage !== 'price') || powerFlow?.stage === 'cpu' || currentFeature() === 'power') ? { imageIntent: 'cpu' } : {}),
+                    ...(marketQueryActive && !standaloneSocialTurn ? { intent: 'market' } : {}) })
             });
 
             let data;
@@ -1537,12 +2145,76 @@
                 const rawText = await response.text().catch(() => '無法讀取回應');
                 throw new Error(`伺服器回應非 JSON (status ${response.status}): ${rawText}`);
             }
+            if (!response.ok || data.success !== true) throw new Error(data.message || data.answer || '請求未完成，請重試。');
 
             // 移除思考中訊息
             if (loadingMessage.parentNode) {
                 messages.removeChild(loadingMessage);
             }
 
+            if (data.success && data.cpuRecognition) {
+                userHistory.cpuRecognition = data.cpuRecognition;
+            }
+            if (data.success && imageToSend) {
+                userHistory.hardwareRecognition = data.hardwareRecognition || contextApi.observation(data.imageAnalysis, data.cpuRecognition);
+                if (data.imageAnalysis) userHistory.imageAnalysis = data.imageAnalysis;
+                persistChatHistory();
+                // Keep the selected CPU when the next upload answers the GPU
+                // question. Recognition is evidence, not a new power request.
+                if (powerFlow && ['cpu', 'gpu'].includes(powerFlow.stage)) {
+                    const expected = powerFlow.stage;
+                    const observed = userHistory.hardwareRecognition;
+                    const label = expected === 'cpu' ? 'CPU' : '顯卡';
+                    if (observed?.category && observed.category !== expected) {
+                        appendPowerReply(`目前正在詢問${label}，這張圖片是其他種類。請上傳${label}圖片，或直接輸入完整型號。`);
+                        return;
+                    }
+                    powerFlow.pendingPhotoId = userHistory.id;
+                    saveInterfaceState({ powerFlow });
+                    if (observed?.status === 'verified' && !observed.requiresConfirmation && observed.model) {
+                        appendPowerReply(`已辨識為 ${observed.model}，正在帶入瓦數計算。`);
+                        await handlePowerText(observed.model, true);
+                    } else {
+                        const candidates = observed?.candidates || [];
+                        appendPowerReply(`${candidates.length ? `圖片候選為 ${candidates.join('／')}，尚未確認完整型號。` : '圖片目前無法辨識完整型號。'}請直接在對話框輸入${label}完整型號${expected === 'gpu' ? '；沒有獨立顯卡可輸入「內顯」' : ''}。`);
+                    }
+                    return;
+                }
+                if (featureFlow && valuationFlow?.stage !== 'price') {
+                    const request = { features: featureFlow.features.slice(featureFlow.index), targetText: featureFlow.targetText, products: [] };
+                    await beginFeatureRequest(request, { sourceId: userHistory.id, photoId: userHistory.id });
+                    return;
+                }
+                if ((contextApi.valuationIntent(text) || data.chatAction?.type === 'valuation') && !contextApi.blockedIntent(text) && valuationFlow?.stage !== 'price') {
+                    const record = (await hardwareRecords()).find(item => item.sourceIds.includes(userHistory.id));
+                    resetPowerFlow();
+                    recommendationFlow = null;
+                    marketQueryActive = false;
+                    saveInterfaceState({ marketQueryActive: false, recommendationText: '' });
+                    if (record) await useHardwareRecord(record);
+                    else { startValuationWizard(); appendValuationReply('這張圖片還沒有可用型號，請輸入完整型號或重新上傳照片。'); }
+                    return;
+                }
+            }
+            if (data.success && !imageToSend && data.featureAction) {
+                const action = contextApi.validateFeatureRequest(data.featureAction, text);
+                if (action) { await beginFeatureRequest(action, { sourceId: userHistory.id }); return; }
+            }
+            if (data.success && !imageToSend && data.chatAction?.type === 'valuation' && !contextApi.blockedIntent(text)) {
+                await beginFeatureRequest({ features: ['valuation'], targetText: text, products: contextApi.extractProducts(text) }, { sourceId: userHistory.id });
+                return;
+            }
+            if (data.success && imageToSend && powerFlow?.stage === 'cpu' && data.cpuRecognition) {
+                powerFlow.cpuRecognition = data.cpuRecognition;
+                saveInterfaceState({powerFlow});
+                if (data.cpuRecognition.status === 'verified' && data.cpuRecognition.requiresConfirmation === false && data.cpuRecognition.model) {
+                    if (data.imageAnalysis) { userHistory.imageAnalysis=data.imageAnalysis; userHistory.content+=`\n\n[圖片辨識結果：${data.imageAnalysis}]`; }
+                    renderAssistantMessage(data.answer);
+                    chatHistory.push({role:'assistant',content:data.answer}); persistChatHistory();
+                    await handlePowerText(data.cpuRecognition.model, true);
+                    return;
+                }
+            }
             if (data.success && valuationFlow && imageToSend) {
                 if (data.imageAnalysis) {
                     userHistory.content += `\n\n[圖片辨識結果：${data.imageAnalysis}]`;
@@ -1561,6 +2233,7 @@
                     const amount = Number(invoice.total_paid_ntd || invoice.amount || invoice.price || 0);
                     if (Number.isFinite(amount) && amount > 0) {
                         valuationFlow.originalPrice = amount;
+                        valuationFlow.purchasePrice = amount;
                         const purchaseDate = invoice.purchase_date || invoice.date;
                         if (purchaseDate) {
                             const months = parsePurchaseDateMonths(String(purchaseDate));
@@ -1576,66 +2249,9 @@
                         appendValuationReply('我無法從這張圖片確認發票金額，請拍清楚「品名、日期、金額」欄位，或直接在聊天框輸入當初購買價格。');
                     }
                 } else {
-                    const analysis = String(data.imageAnalysis || '');
-                    const categoryText = analysis.match(/^(?:Category|種類)\s*[:：]\s*([^\n]+)/im)?.[1] || analysis;
-                    const category = /主機板|motherboard/i.test(categoryText) ? 'motherboard'
-                        : /記憶體|memory|ram/i.test(categoryText) ? 'ram'
-                            : /顯示卡|顯卡|graphics card|video card|gpu/i.test(categoryText) ? 'gpu'
-                                : /處理器|processor|\bcpu\b/i.test(categoryText) ? 'cpu' : '';
-                    const modelMatch = analysis.match(/^(?:model|型號)\s*[:：]\s*["「]?([^\n,.;」"]{3,80})/im);
-                    const model = modelMatch?.[1]?.trim();
-                    const isKnown = value => value && !/^(?:unknown|unreadable|unclear|uncertain|不明|未知|無法辨識)$/i.test(value);
-                    const candidateText = analysis.match(/^Candidate\s*:\s*([^\n]+)/im)?.[1] || '';
-                    const candidates = [...new Set([...(isKnown(model) ? [model] : []),
-                        ...candidateText.split(' / ').map(value => value.trim()).filter(isKnown)])].filter(value => value.length <= 80);
-                    if (category && ['category', 'model', 'photo-confirm'].includes(valuationFlow.stage)) {
-                        valuationFlow.category = category;
-                        try {
-                            const optionsResponse = await fetch(`/api/valuation/model-options?category=${encodeURIComponent(category)}`);
-                            const options = await optionsResponse.json();
-                            valuationFlow.catalogs = optionsResponse.ok && options.success ? options.data : [];
-                        } catch {
-                            valuationFlow.catalogs = [];
-                        }
-                    }
-                    if (category && candidates.length && ['category', 'model', 'photo-confirm'].includes(valuationFlow.stage)) {
-                        valuationFlow.stage = 'photo-confirm';
-                        valuationFlow.photoCandidates = candidates;
-                        let gemma = null, recheck = null;
-                        try { gemma = JSON.parse(analysis.match(/^Gemma observation:\s*(.+)$/im)?.[1] || 'null'); } catch {}
-                        try { recheck = JSON.parse(analysis.match(/^Gemma recheck:\s*(.+)$/im)?.[1] || 'null'); } catch {}
-                        const normalizedSku = value => String(value || '').normalize('NFKC').replace(/intel|core|amd|ryzen|[®™]/gi, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-                        const readableObservation = observation => {
-                            if (!observation) return false;
-                            const raw = observation.observation || '';
-                            // Gemma sometimes returns all fields on one line. A parser failure
-                            // must not turn clearly printed model text into an unreadable photo.
-                            const reported = observation.model || raw.match(/(?:^|[\n,])\s*Model:\s*([^\n,]+)/i)?.[1]?.trim();
-                            if (!isKnown(reported) || normalizedSku(reported) !== normalizedSku(candidates[0])) return false;
-                            if (/(?:unknown|unreadable|illegible|not legible|cannot read|無法看清|不清楚|模糊)/i.test(raw)) return false;
-                            const visibleText = raw.match(/(?:^|[\n,])\s*Evidence:\s*([^\n]+)/i)?.[1] || '';
-                            const hasPrintedModel = normalizedSku(visibleText).includes(normalizedSku(candidates[0]));
-                            return hasPrintedModel || !/Confidence:\s*(?:low|uncertain|低|不確定)/i.test(raw);
-                        };
-                        const readableGemma = readableObservation(gemma) && (!recheck || readableObservation(recheck));
-                        const readableModel = isKnown(model) && !/^Confidence:\s*(?:low|uncertain|低)/im.test(analysis);
-                        if (candidates.length === 1 && !/^Review:\s*conflict/im.test(analysis) && (readableModel || readableGemma)) {
-                            await confirmValuationPhotoModel(candidates[0], true);
-                            return;
-                        }
-                        appendValuationReply(`照片初步辨識為${valuationCategoryLabels[category]}「${candidates.join('」或「')}」。${candidates.length === 1 ? '若正確可回覆「是」或點確認；' : '判讀有分歧，請選擇正確型號；'}也可以直接輸入正確型號，確認後繼續估價。`, [
-                            ...candidates.map(candidate => [`確認 ${candidate}`, () => confirmValuationPhotoModel(candidate).catch(error => appendValuationReply(error.message || '型號確認暫時失敗，請再試一次。'))]),
-                            ['重新輸入型號', () => {
-                                if (valuationFlow?.stage !== 'photo-confirm' || valuationFlow.photoCandidates !== candidates) return;
-                                valuationFlow.stage = 'model'; appendValuationReply('請輸入正確的完整型號。');
-                            }]
-                        ]);
-                    } else if (category && valuationFlow.stage === 'category') {
-                        valuationFlow.stage = 'model';
-                        chooseValuationCategory(category, valuationCategoryLabels[category]);
-                    } else {
-                        appendValuationReply('我無法從圖片可靠辨識零件種類或型號，請上傳標籤清楚的照片，或在聊天框直接輸入型號。');
-                    }
+                    const record = (await hardwareRecords()).find(item => item.sourceIds.includes(userHistory.id));
+                    if (record) await useHardwareRecord(record);
+                    else appendValuationReply('我無法從圖片可靠辨識零件種類或型號，請上傳標籤清楚的照片，或在聊天框直接輸入型號。');
                 }
                 return;
             }
@@ -1669,7 +2285,7 @@
                 }
 
                 aiText.textContent = `⚠️ 發生錯誤：${errText}`;
-                chatHistory.pop();
+                if (featureFlow) featureFlow.stage = 'retry';
                 persistChatHistory();
             }
             aiMessage.innerHTML =
@@ -1677,7 +2293,7 @@
             const responseContent = document.createElement('div');
             responseContent.className = 'ai-chat-response';
             responseContent.appendChild(aiText);
-            if (imageAnalysisForActions) appendImageActionButtons(responseContent, imageAnalysisForActions);
+            if (imageAnalysisForActions) appendImageActionButtons(responseContent, imageAnalysisForActions, userHistory.id);
             aiMessage.appendChild(responseContent);
             messages.appendChild(aiMessage);
         } catch (error) {
@@ -1685,7 +2301,8 @@
             if (loadingMessage.parentNode) {
                 messages.removeChild(loadingMessage);
             }
-            chatHistory.pop();
+            const needsImage = imageToSend && !userHistory.hardwareRecognition;
+            if (featureFlow) featureFlow.stage = needsImage ? 'image-retry' : 'retry';
             persistChatHistory();
 
             const errorMessage = document.createElement('div');
@@ -1698,6 +2315,19 @@
             errorMessage.innerHTML =
                 '<span class="ai-chat-message-avatar" aria-hidden="true"><img src="/assets/ji-yiti-headshot.png" alt=""></span>';
             errorMessage.appendChild(errText);
+            if (needsImage) {
+                const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = '重試上傳';
+                retry.addEventListener('click', () => {
+                    if (input.disabled) return;
+                    pendingImage = imageToSend; input.value = text; form.requestSubmit();
+                });
+                errorMessage.appendChild(retry);
+            } else if (featureFlow) {
+                const failedFlow = featureFlow;
+                const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = '重試';
+                retry.addEventListener('click', () => { if (featureFlow === failedFlow) runFeatureAction(() => executeFeature()); });
+                errorMessage.appendChild(retry);
+            }
             messages.appendChild(errorMessage);
         } finally {
             input.disabled = false;
@@ -1706,4 +2336,33 @@
             messages.scrollTop = messages.scrollHeight;
         }
     });
+    hardwareContextReady.then(async () => {
+        if (featureFlow && featureFlow.sourceIds?.some(id => !chatHistory.some(item => item.id === id && !item.contextInvalidated))) {
+            featureFlow = null;
+            valuationFlow = null;
+            persistChatHistory();
+            return;
+        }
+        if (featureFlow?.stage === 'confirm') {
+            const record = (await hardwareRecords()).find(item => item.id === featureFlow.pendingRecordId);
+            if (record) showFeatureConfirmation(record);
+            return;
+        }
+        if (featureFlow?.stage === 'select') {
+            showFeatureSelection((await hardwareRecords()).filter(record => featureFlow.choiceIds.includes(record.id)));
+            return;
+        }
+        if (featureFlow && !valuationFlow && !powerFlow && !recommendationFlow) {
+            appendValuationReply('上次的需求已保留。', [['繼續', () => runFeatureAction(() => executeFeature())]]);
+        }
+        if (!valuationFlow) return;
+        // Rebuild interactive controls from saved state, rather than stale DOM callbacks.
+        if (valuationFlow.sourceIds && !(await hardwareRecords()).some(record => record.sourceIds.some(id => valuationFlow.sourceIds.includes(id)))) {
+            valuationFlow = null;
+            persistChatHistory();
+            return;
+        }
+        if (valuationFlow.stage === 'select-hardware') showHardwareChoices(await hardwareRecords());
+        else if (valuationFlow.stage !== 'done') await resumeValuation();
+    }).catch(() => {});
 })();

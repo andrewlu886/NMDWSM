@@ -1,6 +1,15 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { resolveModel, estimate, calculatorUrl } = require('../public/psu-flow');
+test('official i7-14700 supplement is exact and never overwrites K/F variants or existing rows', () => {
+  const { supplementCpuPower } = require('../src/data/cpu-power-supplements');
+  const base = [{ 'CPU 型號': 'Core i7-14700K', '最大銳頻功耗': '253 W' }];
+  const rows = supplementCpuPower(base);
+  assert.equal(resolveModel(rows, 'cpu', 'i7-14700').watts, 219);
+  assert.equal(resolveModel(rows, 'cpu', 'i7-14700K').watts, 253);
+  assert.equal(resolveModel(rows, 'cpu', 'i7-14700F').status, 'unknown');
+  assert.equal(supplementCpuPower(rows).length, rows.length);
+});
 const cpu = [
   { CPU型號: 'Intel Core i5-14600', 最大銳頻功耗: '154W' },
   { CPU型號: 'Intel Core i5-14600K', 最大銳頻功耗: '181W' },

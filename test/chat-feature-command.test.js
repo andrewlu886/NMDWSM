@@ -17,7 +17,7 @@ test('typed features and valuation categories use the same wizard as buttons', {
       const url = new URL(request.url());
       let contentType = 'text/plain', body = '';
       if (url.pathname === '/chat') { contentType = 'text/html'; body = '<html><head><meta charset="UTF-8"></head><body><script src="/chat-widget.js"></script></body></html>'; }
-      else if (['/chat-widget.js', '/psu-flow.js'].includes(url.pathname)) {
+      else if (['/chat-widget.js', '/psu-flow.js', '/hardware-context.js'].includes(url.pathname)) {
         contentType = 'application/javascript'; body = fs.readFileSync(path.join(__dirname, '../public', url.pathname.slice(1)), 'utf8');
       } else if (url.pathname.startsWith('/api/')) {
         if (url.pathname === '/api/chat' && request.postData()) photoBodies.push(JSON.parse(request.postData()));
@@ -52,9 +52,52 @@ test('typed features and valuation categories use the same wizard as buttons', {
         assert.deepEqual(b.errors, []);
       } finally { await a.context.close(); await b.context.close(); }
     }
+    const switching = await open();
+    try {
+      await send(switching.page, '我要市價查詢');
+      await send(switching.page, 'rtx4080');
+      await switching.page.waitForFunction(() => !document.querySelector('#ai-chat-input').disabled);
+      const count = switching.photoBodies.length;
+      for (const command of ['那接下來是二手估價', '那接著是二手估價', '接著二手估價功能', '那接下來換二手估價', '接著改二手估價', '我想接著體驗一下二手估價', '那我想試試二手估價', '那麼我想嘗試二手估價功能', '好，那接下來幫我切換到二手估價吧', '我可以試試看二手估價嗎']) {
+        await send(switching.page, command);
+        assert.match(await reply(switching.page), /您想估哪一種零件/);
+        assert.equal(switching.photoBodies.length, count, 'a feature change must never search for the command');
+        await send(switching.page, '那我想試試市價查詢');
+        assert.match(await reply(switching.page), /資訊與市價/);
+      }
+      for (const [command, expected] of [['接著換智慧推薦功能', /預算和用途/], ['接下來換瓦數計算功能', /CPU|處理器|瓦數/], ['接著是市價查詢功能', /資訊與市價/]]) {
+        await send(switching.page, command);
+        assert.match(await reply(switching.page), expected);
+        assert.equal(switching.photoBodies.length, count);
+      }
+      for (const text of ['不要二手估價', '我不想換二手估價', '我想了解二手估價', '二手估價是什麼']) {
+        await send(switching.page, text);
+        await switching.page.waitForFunction(() => !document.querySelector('#ai-chat-input').disabled);
+        assert.doesNotMatch(await reply(switching.page), /您想估哪一種零件/);
+      }
+      assert.deepEqual(switching.errors, []);
+    } finally { await switching.context.close(); }
     const app = await open();
     try {
+      await send(app.page, '我要市價查詢');
+      await send(app.page, '那麼接下進行二手估價');
+      assert.match(await reply(app.page), /哪一種零件|CPU|估價/);
+      assert.ok(!app.requests.includes('/api/chat'));
+      await send(app.page, '接下來我想試試智慧推薦');
+      assert.match(await reply(app.page), /預算和用途/);
+      await send(app.page, '那改用瓦數計算功能');
+      assert.match(await reply(app.page), /CPU|處理器|瓦數/);
+      await send(app.page, '換到市價查詢');
+      assert.match(await reply(app.page), /資訊與市價/);
+      await send(app.page, 'i5 12400');
+      await app.page.waitForFunction(() => !document.querySelector('#ai-chat-input').disabled);
+      await send(app.page, '那麼接下進行二手估價');
+      await send(app.page, 'cpu');
+      await app.page.waitForFunction(() => document.querySelector('.ai-chat-message.assistant:last-child')?.textContent.includes('輸入CPU型號'));
+      assert.match(await reply(app.page), /已帶入剛才的/);
+      assert.equal(await app.page.$eval('#ai-chat-input', node => node.value), 'i5 12400');
       for (const [text, category, label] of [['cpu', 'cpu', 'CPU'], ['我要估處理器', 'cpu', 'CPU'], ['顯示卡', 'gpu', '顯卡'], ['gpu', 'gpu', '顯卡'], ['記憶體', 'ram', '記憶體'], ['motherboard', 'motherboard', '主機板']]) {
+        await app.page.evaluate(() => document.querySelector('.ai-chat-clear').click());
         await send(app.page, '我要二手估價');
         await send(app.page, text);
         try {
@@ -64,16 +107,18 @@ test('typed features and valuation categories use the same wizard as buttons', {
         }
         assert.ok(app.requests.includes('/api/valuation/model-options?category=' + category));
       }
+      await app.page.evaluate(() => document.querySelector('.ai-chat-clear').click());
       await send(app.page, '我要二手估價'); await send(app.page, 'cpu 和顯卡');
       assert.match(await reply(app.page), /請先選一種/);
       await send(app.page, '手機'); assert.match(await reply(app.page), /CPU.*記憶體.*顯卡.*主機板/);
       await send(app.page, '我要市價查詢'); assert.match(await reply(app.page), /資訊與市價/);
-      assert.ok(!app.requests.includes('/api/chat'));
+      assert.equal(app.requests.filter(url => url === '/api/chat').length, 1, 'only the product lookup should call chat');
       assert.deepEqual(app.errors, []);
     } finally { await app.context.close(); }
     const photo = await open();
     const upload = async analysis => {
       photo.setAnalysis(analysis);
+      await photo.page.evaluate(() => document.querySelector('.ai-chat-clear').click());
       await send(photo.page, '我要二手估價'); await send(photo.page, 'cpu');
       await photo.page.waitForFunction(() => document.querySelector('.ai-chat-message.assistant:last-child')?.textContent.includes('輸入CPU型號'));
       await photo.page.evaluate(async () => {
@@ -106,12 +151,12 @@ test('typed features and valuation categories use the same wizard as buttons', {
       await photo.page.waitForFunction(() => document.querySelector('.ai-chat-message.assistant:last-child')?.textContent.includes('保固'));
       assert.ok(photo.requests.slice(beforeConfirm).some(url => url.includes('/api/valuation/models?')));
       await upload('Category: CPU\nModel: unknown\nCandidate: i7-14700\nReview: candidate\nConfidence: low\nGemma observation: {"model":"i7-14700","observation":"Category: CPU\\nModel: i7-14700\\nEvidence: I7-14700 is visible\\nConfidence: high"}\nGemma recheck: {"model":"i7-14700","observation":"Model: i7-14700\\nConfidence: high"}');
-      assert.match(await reply(photo.page), /保固/);
-      assert.match(await photo.page.$eval('.ai-chat-messages', node => node.textContent), /已辨識型號「i7-14700」/);
+      assert.match(await reply(photo.page), /若正確可回覆/);
+      assert.doesNotMatch(await photo.page.$eval('.ai-chat-messages', node => node.textContent), /已辨識型號「i7-14700」/);
       await upload('Category: CPU\nModel: i7-14700\nCandidate: i7-14700\nReview: corroborated\nConfidence: medium');
-      assert.match(await reply(photo.page), /保固/);
+      assert.match(await reply(photo.page), /若正確可回覆/);
       await upload('Category: CPU\nModel: unknown\nCandidate: i7-14700\nReview: candidate\nConfidence: low\nGemma observation: {"model":"i7-14700","observation":"Model: i7-14700\\nEvidence: I7-14700 is printed\\nConfidence: low"}\nGemma recheck: {"model":null,"observation":"Category: CPU, Model: Intel Core i7-14700, Evidence: I7-14700"}');
-      assert.match(await reply(photo.page), /保固/);
+      assert.match(await reply(photo.page), /若正確可回覆/);
       await upload('Category: CPU\nModel: unknown\nCandidate: i7-14700\nReview: candidate\nConfidence: low\nGemma observation: {"model":"i7-14700","observation":"Model: i7-14700\\nEvidence: I7-14700 is not legible\\nConfidence: low"}');
       assert.match(await reply(photo.page), /若正確可回覆/);
       await upload('Category: CPU\nModel: unknown\nCandidate: i7-14700\nReview: candidate\nConfidence: low\nGemma observation: {"model":"i7-14700","observation":"Model: i7-14700\\nConfidence: low"}');

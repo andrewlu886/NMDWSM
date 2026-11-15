@@ -1,0 +1,2723 @@
+{
+  "date": "2026-11-15",
+  "source": "C:/Users/leo20/Desktop/cpu訓練",
+  "summary": {
+    "uniqueModels": 174,
+    "imageModels": 104,
+    "sourceImages": 1402,
+    "rawPowerRows": 92,
+    "effectivePowerRows": 93,
+    "missing": 81,
+    "missingImageModels": 71,
+    "missingDatabaseOnly": 10,
+    "tdpOnly": 0,
+    "invalidPower": 0
+  },
+  "records": [
+    {
+      "model": "FX-4100",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "FX-4100",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "FX-6100",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "FX-6100",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "FX-6300",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "FX-6300",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "FX-8150",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "FX-8150",
+          "tdp": "125 W",
+          "maximum": "125 W"
+        }
+      ]
+    },
+    {
+      "model": "FX-8350",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "FX-8350",
+          "tdp": "125 W",
+          "maximum": "125 W"
+        }
+      ]
+    },
+    {
+      "model": "FX-9590",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "FX-9590",
+          "tdp": "220 W",
+          "maximum": "220 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-530",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-530",
+          "tdp": "73 W",
+          "maximum": "73 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-2100",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-2100",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-3220",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-3220",
+          "tdp": "55 W",
+          "maximum": "55 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-4130",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-4130",
+          "tdp": "54 W",
+          "maximum": "54 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-6100",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-6100",
+          "tdp": "51 W",
+          "maximum": "51 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-7100",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-7100",
+          "tdp": "51 W",
+          "maximum": "51 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-8100",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-8100",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-9100F",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-9100F",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-10100F",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-10100F",
+          "tdp": "65 W",
+          "maximum": "90 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-12100",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 21,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i3-12100F",
+      "sources": [
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i3-12100F",
+          "tdp": "58 W",
+          "maximum": "89 W"
+        }
+      ]
+    },
+    {
+      "model": "i3-13100",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 20,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i3-13100F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 19,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i3-14100",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 14,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i3-14100F",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-750",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-750",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-2500K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-2500K",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-3570K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-3570K",
+          "tdp": "77 W",
+          "maximum": "77 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-4460",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-4460",
+          "tdp": "84 W",
+          "maximum": "84 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-4590",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-4590",
+          "tdp": "84 W",
+          "maximum": "84 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-4670K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-4670K",
+          "tdp": "84 W",
+          "maximum": "84 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-6500",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-6500",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-6600K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-6600K",
+          "tdp": "91 W",
+          "maximum": "91 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-7500",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-7500",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-8400",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-8400",
+          "tdp": "65 W",
+          "maximum": "90 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-9400F",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-9400F",
+          "tdp": "65 W",
+          "maximum": "90 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-10400F",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-10400F",
+          "tdp": "65 W",
+          "maximum": "134 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-11400",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-11400",
+          "tdp": "65 W",
+          "maximum": "154 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-12400",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 20,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-12400F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 20,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-12400F",
+          "tdp": "65 W",
+          "maximum": "117 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-12500",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 20,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-12600",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-12600K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 20,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-12600KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-13400",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-13400F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 20,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-13400F",
+          "tdp": "65 W",
+          "maximum": "148 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-13500",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 20,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-13600",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-13600K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 19,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-13600K",
+          "tdp": "125 W",
+          "maximum": "181 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-13600KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-14400",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 9,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-14400F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 13,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i5-14400F",
+          "tdp": "65 W",
+          "maximum": "148 W"
+        }
+      ]
+    },
+    {
+      "model": "i5-14500",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 10,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-14600",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-14600K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 9,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i5-14600KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 13,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-870",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-870",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-950",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-950",
+          "tdp": "130 W",
+          "maximum": "130 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-2600K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-2600K",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-3770K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-3770K",
+          "tdp": "77 W",
+          "maximum": "77 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-4770K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-4770K",
+          "tdp": "84 W",
+          "maximum": "84 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-4790K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-4790K",
+          "tdp": "88 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-6700K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-6700K",
+          "tdp": "91 W",
+          "maximum": "91 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-7700K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-7700K",
+          "tdp": "91 W",
+          "maximum": "91 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-8700K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-8700K",
+          "tdp": "95 W",
+          "maximum": "120 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-9700K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-9700K",
+          "tdp": "95 W",
+          "maximum": "180 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-10700K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-10700K",
+          "tdp": "125 W",
+          "maximum": "229 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-11700K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-11700K",
+          "tdp": "125 W",
+          "maximum": "251 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-12700",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-12700F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-12700K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 18,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-12700K",
+          "tdp": "125 W",
+          "maximum": "190 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-12700KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-13700",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 13,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-13700F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 13,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-13700K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 15,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-13700K",
+          "tdp": "125 W",
+          "maximum": "253 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-13700KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 14,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-14700",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 14,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": true,
+      "powerRows": [
+        {
+          "model": "Core i7-14700",
+          "tdp": "65 W",
+          "maximum": "219 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-14700F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 9,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i7-14700K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 13,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i7-14700K",
+          "tdp": "125 W",
+          "maximum": "253 W"
+        }
+      ]
+    },
+    {
+      "model": "i7-14700KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 13,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-9900K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i9-9900K",
+          "tdp": "95 W",
+          "maximum": "210 W"
+        }
+      ]
+    },
+    {
+      "model": "i9-10900K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i9-10900K",
+          "tdp": "125 W",
+          "maximum": "250 W"
+        }
+      ]
+    },
+    {
+      "model": "i9-11900K",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i9-11900K",
+          "tdp": "125 W",
+          "maximum": "251 W"
+        }
+      ]
+    },
+    {
+      "model": "i9-12900",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 10,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-12900F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 13,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-12900K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 16,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i9-12900K",
+          "tdp": "125 W",
+          "maximum": "241 W"
+        }
+      ]
+    },
+    {
+      "model": "i9-12900KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-12900KS",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-13900",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 9,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-13900F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 16,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-13900K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 13,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i9-13900K",
+          "tdp": "125 W",
+          "maximum": "253 W"
+        }
+      ]
+    },
+    {
+      "model": "i9-13900KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 16,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-13900KS",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-14900",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-14900F",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-14900K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 12,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core i9-14900K",
+          "tdp": "125 W",
+          "maximum": "253 W"
+        }
+      ]
+    },
+    {
+      "model": "i9-14900KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 19,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "i9-14900KS",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 13,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Phenom II X4 965",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Phenom II X4 965",
+          "tdp": "125 W",
+          "maximum": "125 W"
+        }
+      ]
+    },
+    {
+      "model": "Phenom II X6 1090T",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Phenom II X6 1090T",
+          "tdp": "125 W",
+          "maximum": "125 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 3 1200",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 3 1200",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 3 2200G",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 3 2200G",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 3 3100",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 3 3100",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 3 3200G",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 3 4100",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 3 4350G PRO",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 8,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 1600",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 5 1600",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 5 2600",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 5 2600",
+          "tdp": "65 W",
+          "maximum": "90 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 5 3400G",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 3600",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "功耗表"
+      ],
+      "imageCount": 18,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 5 3600",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 5 4500",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 4600G",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 8,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 5500",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 13,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 5500GT",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 5500X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 9,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 5600",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 5600G",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 5600GT",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 5600X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 16,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 5 5600X",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 5 5600XT",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 6,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 7500F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表"
+      ],
+      "imageCount": 10,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 7600",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 7600X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 18,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 5 7600X",
+          "tdp": "105 W",
+          "maximum": "142 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 5 8400F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表"
+      ],
+      "imageCount": 10,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 8500G",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表"
+      ],
+      "imageCount": 9,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 8600G",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 15,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 5 8600G",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 5 9500F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 4,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 9600",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 8,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 5 9600X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 16,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 5 9600X",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 1700",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 1700",
+          "tdp": "65 W",
+          "maximum": "65 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 1800X",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 1800X",
+          "tdp": "95 W",
+          "maximum": "95 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 2700X",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 2700X",
+          "tdp": "105 W",
+          "maximum": "140 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 3700X",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 3700X",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 4750G PRO",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 8,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 5700",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 4,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 5700G",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 16,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 5700X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 5700X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 5800X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 18,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 5800X",
+          "tdp": "105 W",
+          "maximum": "142 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 5800X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 16,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 5800X3D",
+          "tdp": "105 W",
+          "maximum": "142 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 5800XT",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 7700",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表"
+      ],
+      "imageCount": 15,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 7700X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 16,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 7700X",
+          "tdp": "105 W",
+          "maximum": "142 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 7800X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 18,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 7800X3D",
+          "tdp": "120 W",
+          "maximum": "162 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 8700F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 6,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 7 8700G",
+      "sources": [
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 8700G",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 9700G",
+      "sources": [
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 9700G",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 9700X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 14,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 9700X",
+          "tdp": "65 W",
+          "maximum": "88 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 9800X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 17,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 7 9800X3D",
+          "tdp": "120 W",
+          "maximum": "162 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 7 9850X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表"
+      ],
+      "imageCount": 10,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 9 3900X",
+      "sources": [
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 3900X",
+          "tdp": "105 W",
+          "maximum": "142 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 5900X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 19,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 5900X",
+          "tdp": "105 W",
+          "maximum": "142 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 5950X",
+      "sources": [
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 5950X",
+          "tdp": "105 W",
+          "maximum": "142 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 7900",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 11,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 9 7900X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 10,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 9 7900X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引"
+      ],
+      "imageCount": 17,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ryzen 9 7950X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 20,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 7950X",
+          "tdp": "170 W",
+          "maximum": "230 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 7950X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 18,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 7950X3D",
+          "tdp": "120 W",
+          "maximum": "162 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 9900X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 15,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 9900X",
+          "tdp": "120 W",
+          "maximum": "162 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 9900X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 15,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 9900X3D",
+          "tdp": "120 W",
+          "maximum": "162 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 9950X",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 17,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 9950X",
+          "tdp": "170 W",
+          "maximum": "230 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 9950X3D",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "參考價格表",
+        "功耗表"
+      ],
+      "imageCount": 18,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Ryzen 9 9950X3D",
+          "tdp": "170 W",
+          "maximum": "230 W"
+        }
+      ]
+    },
+    {
+      "model": "Ryzen 9 9950X3D2",
+      "sources": [
+        "型號主表",
+        "參考價格表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 5 225",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 4,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 5 225F",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 12,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core Ultra 5 225F",
+          "tdp": "65 W",
+          "maximum": "115 W"
+        }
+      ]
+    },
+    {
+      "model": "Ultra 5 235",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 4,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 5 245",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 5 245K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 7,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core Ultra 5 245K",
+          "tdp": "125 W",
+          "maximum": "159 W"
+        }
+      ]
+    },
+    {
+      "model": "Ultra 5 245KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 6,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 5 250K Plus",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 6,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 5 250KF Plus",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 5,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 7 265",
+      "sources": [
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 0,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core Ultra 7 265",
+          "tdp": "65 W",
+          "maximum": "182 W"
+        }
+      ]
+    },
+    {
+      "model": "Ultra 7 265F",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 7 265K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 17,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core Ultra 7 265K",
+          "tdp": "125 W",
+          "maximum": "250 W"
+        }
+      ]
+    },
+    {
+      "model": "Ultra 7 265KF",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 12,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 7 270K Plus",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表"
+      ],
+      "imageCount": 6,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 9 285",
+      "sources": [
+        "型號主表"
+      ],
+      "imageCount": 0,
+      "status": "沒有功耗紀錄",
+      "runtimeStatus": "unknown",
+      "supplement": false,
+      "powerRows": []
+    },
+    {
+      "model": "Ultra 9 285K",
+      "sources": [
+        "圖片原始資料夾",
+        "圖片索引",
+        "型號主表",
+        "功耗表"
+      ],
+      "imageCount": 10,
+      "status": "有最大功耗",
+      "runtimeStatus": "matched",
+      "supplement": false,
+      "powerRows": [
+        {
+          "model": "Core Ultra 9 285K",
+          "tdp": "125 W",
+          "maximum": "250 W"
+        }
+      ]
+    }
+  ]
+}

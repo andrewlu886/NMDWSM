@@ -89,7 +89,7 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
     if (active >= maxConcurrent) return send(res,503,'AI 忙碌中，請稍後重試。');
     active++;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let timer = setTimeout(() => controller.abort(), timeoutMs);
     const onClose = () => { if (!res.writableEnded) controller.abort(); };
     res.on('close',onClose);
     try {
@@ -107,9 +107,15 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
         catch { return send(res,400,'請提供 JSON 訊息。'); }
         if (!data || !['llama3.1:8b','gemma3:4b'].includes(data.model) || !Array.isArray(data.messages)) return send(res,400,'模型或訊息格式不正確。');
         if (data.stream === true) return send(res,400,'此服務使用完整回覆模式。');
+        if (data.model === 'gemma3:4b') {
+          clearTimeout(timer);
+          timer = setTimeout(() => controller.abort(), Math.min(timeoutMs, 45000));
+        }
         const photo = [...data.messages].reverse().find(message => message.role === 'user');
         if (data.model === 'gemma3:4b' && Array.isArray(photo?.images) && photo.images.length === 1 &&
-            typeof photo.images[0] === 'string' && !/invoice|receipt|發票|收據/i.test(String(photo.content || ''))) cpuImage = photo.images[0];
+            typeof photo.images[0] === 'string' && !/invoice|receipt|發票|收據/i.test(String(photo.content || ''))) {
+          cpuImage = photo.images[0];
+        }
         body=JSON.stringify({...data,stream:false});
       }
       const response=await fetchImpl(ollamaUrl.replace(/\/+$/, '') + req.url, {
@@ -118,20 +124,36 @@ function createAiGateway({ token, ollamaUrl = 'http://127.0.0.1:11434', maxConcu
       });
       const data=await response.json();
       if (!response.ok) return send(res,response.status,'本機模型未能完成請求。');
+      // The upstream deadline only covers reading the model response. OCR
+      // below owns a fresh bounded deadline, while disconnect still cancels it.
+      clearTimeout(timer);
+      if (req.url === '/api/tags') data.cpuVision = require('../src/services/image-diagnostics').cpuVersion();
       if (cpuImage) {
-        const { isCpuAnalysis, collaborateCpuAnalysis } = require('../src/services/cpu-vision');
+        const { isCpuAnalysis, collaborateCpuAnalysis, buildCpuRecognition, withCpuBudget } = require('../src/services/cpu-vision');
         if (isCpuAnalysis(data.message?.content || '')) {
+          const cpuStartedAt = Date.now();
+          data.cpuRecognition = buildCpuRecognition(data.message.content);
+          // An attempted optional check is terminal, including failure: the web
+          // server must not repeat the same timeout through another CPU request.
+          data.cpuVisionChecked = true;
           try {
-            const result = await cpuRecognize(cpuImage, { signal: controller.signal, gemmaObservation: String(data.message.content).slice(0, 2000) });
+            const result = await withCpuBudget(
+              signal => cpuRecognize(cpuImage, { signal, gemmaObservation: String(data.message.content).slice(0, 2000) }), controller.signal);
+            data.cpuCheckDiagnostics = { status: result ? 'completed' : 'unavailable', version: result?.version, elapsedMs: Date.now() - cpuStartedAt };
             if (result) {
               data.message.content = await collaborateCpuAnalysis(data.message.content, result,
                 (route, options) => fetchImpl(ollamaUrl.replace(/\/+$/, '') + route, { ...options, redirect: 'error' }),
                 { signal: controller.signal, image: cpuImage,
+                  onRecognition: recognition => { data.cpuRecognition = recognition; },
                   recheckCpu: observation => cpuRecognize(cpuImage, { signal: controller.signal, gemmaObservation: observation }) });
               data.cpuVisionChecked = true;
               data.cpuVisionVersion = result.version;
             }
-          } catch { /* Optional CPU worker failure preserves the original vision answer. */ }
+          } catch (error) {
+            data.cpuCheckDiagnostics = { status: controller.signal.aborted || /timeout|abort|逾時/i.test(error.message) ? 'timeout' : 'failed', elapsedMs: Date.now() - cpuStartedAt };
+            if (data.cpuCheckDiagnostics.status === 'timeout') data.cpuRecognition.degradedReason = 'cpu_timeout';
+          }
+          data.cpuRecognition.timingMs = { cpu: Date.now() - cpuStartedAt };
         }
       }
       res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});

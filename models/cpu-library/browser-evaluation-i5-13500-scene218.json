@@ -1,0 +1,1762 @@
+{
+  "date": "2026-10-15",
+  "knownSource": true,
+  "independentEvaluation": false,
+  "sku": "i5-13500",
+  "sceneIndex": 218,
+  "relative": "i5-13500\\盒裝\\i5-13500_盒裝_001.jpg",
+  "libraryVersion": "df38f4b998522b4f",
+  "results": [
+    {
+      "mode": "original",
+      "elapsedMs": 10418,
+      "success": true,
+      "answer": "這是「i5-13500」。照片上的完整型號與尾碼已通過文字核對。",
+      "status": "verified",
+      "model": "i5-13500",
+      "candidates": [
+        "i5-13500"
+      ],
+      "requiresConfirmation": false,
+      "verificationMethod": "strict_ocr_and_visual_policy",
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [
+          "I5",
+          "INTEL",
+          "CORE",
+          "15-13500",
+          "LGA1ZOO",
+          "C",
+          "INTEL",
+          "PROCESSOR",
+          "INTEL",
+          "ITEL",
+          "INTELE",
+          "CORE"
+        ],
+        "cpuModel": "i5-13500",
+        "textVerified": true,
+        "failureReason": null,
+        "anomalies": [],
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "fusionEvidence": [
+          {
+            "model": "i5-13500",
+            "regionId": "label-0",
+            "nativeTextHeight": 26,
+            "minimumOcrConfidence": 0.6
+          }
+        ],
+        "regions": [
+          {
+            "id": "label-0",
+            "boxInOriginalUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "model": "i5-13500",
+            "ocrModels": [
+              "i5-13500"
+            ],
+            "accepted": true,
+            "fusionEligible": true,
+            "nativeTextHeight": 26,
+            "contextReadingIndexes": [
+              1,
+              2,
+              8,
+              10,
+              12,
+              13
+            ]
+          }
+        ],
+        "selectedRegionId": "label-0",
+        "readings": [
+          {
+            "text": "i5",
+            "confidence": 0.9547942486468067,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                941,
+                45
+              ],
+              [
+                1013,
+                45
+              ],
+              [
+                1013,
+                107
+              ],
+              [
+                941,
+                107
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9999770758025366,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                616,
+                190
+              ],
+              [
+                718,
+                190
+              ],
+              [
+                718,
+                238
+              ],
+              [
+                616,
+                238
+              ]
+            ]
+          },
+          {
+            "text": "CORe",
+            "confidence": 0.9996089339256287,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                615,
+                239
+              ],
+              [
+                989,
+                239
+              ],
+              [
+                989,
+                351
+              ],
+              [
+                615,
+                351
+              ]
+            ]
+          },
+          {
+            "text": "IJth GEN",
+            "confidence": 0.29008818018033494,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                621,
+                411
+              ],
+              [
+                705,
+                411
+              ],
+              [
+                705,
+                431
+              ],
+              [
+                621,
+                431
+              ]
+            ]
+          },
+          {
+            "text": "15-13500",
+            "confidence": 0.6188207603116807,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                890,
+                462
+              ],
+              [
+                986,
+                462
+              ],
+              [
+                986,
+                488
+              ],
+              [
+                890,
+                488
+              ]
+            ],
+            "regionId": "label-0"
+          },
+          {
+            "text": "LGA1ZOO",
+            "confidence": 0.5591649110742968,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                890,
+                486
+              ],
+              [
+                984,
+                486
+              ],
+              [
+                984,
+                512
+              ],
+              [
+                890,
+                512
+              ]
+            ]
+          },
+          {
+            "text": "C",
+            "confidence": 0.739128687553272,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                629,
+                589
+              ],
+              [
+                669,
+                589
+              ],
+              [
+                669,
+                603
+              ],
+              [
+                629,
+                603
+              ]
+            ]
+          },
+          {
+            "text": "ZK",
+            "confidence": 0.02189917047624648,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                685,
+                589
+              ],
+              [
+                717,
+                589
+              ],
+              [
+                717,
+                603
+              ],
+              [
+                685,
+                603
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9999311205966196,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                411,
+                687
+              ],
+              [
+                493,
+                687
+              ],
+              [
+                493,
+                730
+              ],
+              [
+                411,
+                730
+              ]
+            ]
+          },
+          {
+            "text": "Processor",
+            "confidence": 0.9966851744271596,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                295,
+                805
+              ],
+              [
+                442,
+                805
+              ],
+              [
+                442,
+                847
+              ],
+              [
+                295,
+                847
+              ]
+            ]
+          },
+          {
+            "text": "Intel",
+            "confidence": 0.8639312708167589,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                319,
+                929
+              ],
+              [
+                355,
+                929
+              ],
+              [
+                355,
+                947
+              ],
+              [
+                319,
+                947
+              ]
+            ]
+          },
+          {
+            "text": "Itel",
+            "confidence": 0.6728914953322358,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                222.15798332046344,
+                286.2897482934367
+              ],
+              [
+                343.20351858100884,
+                274.0127948886801
+              ],
+              [
+                346.8420166795365,
+                328.7102517065633
+              ],
+              [
+                224.79648141899116,
+                341.9872051113199
+              ]
+            ]
+          },
+          {
+            "text": "Intele",
+            "confidence": 0.8061992275999603,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                222.41000317999047,
+                825.4560050879847
+              ],
+              [
+                297.6513637490412,
+                816.5963368387429
+              ],
+              [
+                300.58999682000956,
+                846.5439949120153
+              ],
+              [
+                224.3486362509588,
+                855.4036631612571
+              ]
+            ]
+          },
+          {
+            "text": "CORE",
+            "confidence": 0.4943082928657532,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                316.3358994113243,
+                951.5038491169864
+              ],
+              [
+                391.7365060883321,
+                944.7705552356769
+              ],
+              [
+                393.6641005886757,
+                971.4961508830136
+              ],
+              [
+                317.2634939116679,
+                978.2294447643231
+              ]
+            ]
+          },
+          {
+            "text": "15-13500",
+            "confidence": 0.9043042025871034,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              360,
+              150
+            ],
+            "box": [
+              [
+                37,
+                33
+              ],
+              [
+                320,
+                33
+              ],
+              [
+                320,
+                112
+              ],
+              [
+                37,
+                112
+              ]
+            ],
+            "cropInResizedUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "cropInOriginalUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-0"
+          },
+          {
+            "text": "Caiann",
+            "confidence": 0.0020635304937722163,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              360,
+              150
+            ],
+            "box": [
+              [
+                77,
+                113
+              ],
+              [
+                313,
+                113
+              ],
+              [
+                313,
+                150
+              ],
+              [
+                77,
+                150
+              ]
+            ],
+            "cropInResizedUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "cropInOriginalUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-0"
+          }
+        ],
+        "gemma": {
+          "model": "i5-13500",
+          "models": [
+            "i5-13500"
+          ],
+          "observation": "Category: CPU\nModel: i5-13500\nEvidence: i5-13500 LGA1700\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "selectedRegion": {
+        "id": "label-0",
+        "boxInOriginalUpload": [
+          878,
+          450,
+          998,
+          500
+        ],
+        "model": "i5-13500",
+        "ocrModels": [
+          "i5-13500"
+        ],
+        "accepted": true,
+        "fusionEligible": true,
+        "nativeTextHeight": 26,
+        "contextReadingIndexes": [
+          1,
+          2,
+          8,
+          10,
+          12,
+          13
+        ]
+      },
+      "timingMs": {
+        "total": 10365
+      }
+    },
+    {
+      "mode": "repeat",
+      "elapsedMs": 22,
+      "success": true,
+      "answer": "這是「i5-13500」。照片上的完整型號與尾碼已通過文字核對。",
+      "status": "verified",
+      "model": "i5-13500",
+      "candidates": [
+        "i5-13500"
+      ],
+      "requiresConfirmation": false,
+      "verificationMethod": "strict_ocr_and_visual_policy",
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [
+          "I5",
+          "INTEL",
+          "CORE",
+          "15-13500",
+          "LGA1ZOO",
+          "C",
+          "INTEL",
+          "PROCESSOR",
+          "INTEL",
+          "ITEL",
+          "INTELE",
+          "CORE"
+        ],
+        "cpuModel": "i5-13500",
+        "textVerified": true,
+        "failureReason": null,
+        "anomalies": [],
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "fusionEvidence": [
+          {
+            "model": "i5-13500",
+            "regionId": "label-0",
+            "nativeTextHeight": 26,
+            "minimumOcrConfidence": 0.6
+          }
+        ],
+        "regions": [
+          {
+            "id": "label-0",
+            "boxInOriginalUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "model": "i5-13500",
+            "ocrModels": [
+              "i5-13500"
+            ],
+            "accepted": true,
+            "fusionEligible": true,
+            "nativeTextHeight": 26,
+            "contextReadingIndexes": [
+              1,
+              2,
+              8,
+              10,
+              12,
+              13
+            ]
+          }
+        ],
+        "selectedRegionId": "label-0",
+        "readings": [
+          {
+            "text": "i5",
+            "confidence": 0.9547942486468067,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                941,
+                45
+              ],
+              [
+                1013,
+                45
+              ],
+              [
+                1013,
+                107
+              ],
+              [
+                941,
+                107
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9999770758025366,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                616,
+                190
+              ],
+              [
+                718,
+                190
+              ],
+              [
+                718,
+                238
+              ],
+              [
+                616,
+                238
+              ]
+            ]
+          },
+          {
+            "text": "CORe",
+            "confidence": 0.9996089339256287,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                615,
+                239
+              ],
+              [
+                989,
+                239
+              ],
+              [
+                989,
+                351
+              ],
+              [
+                615,
+                351
+              ]
+            ]
+          },
+          {
+            "text": "IJth GEN",
+            "confidence": 0.29008818018033494,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                621,
+                411
+              ],
+              [
+                705,
+                411
+              ],
+              [
+                705,
+                431
+              ],
+              [
+                621,
+                431
+              ]
+            ]
+          },
+          {
+            "text": "15-13500",
+            "confidence": 0.6188207603116807,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                890,
+                462
+              ],
+              [
+                986,
+                462
+              ],
+              [
+                986,
+                488
+              ],
+              [
+                890,
+                488
+              ]
+            ],
+            "regionId": "label-0"
+          },
+          {
+            "text": "LGA1ZOO",
+            "confidence": 0.5591649110742968,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                890,
+                486
+              ],
+              [
+                984,
+                486
+              ],
+              [
+                984,
+                512
+              ],
+              [
+                890,
+                512
+              ]
+            ]
+          },
+          {
+            "text": "C",
+            "confidence": 0.739128687553272,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                629,
+                589
+              ],
+              [
+                669,
+                589
+              ],
+              [
+                669,
+                603
+              ],
+              [
+                629,
+                603
+              ]
+            ]
+          },
+          {
+            "text": "ZK",
+            "confidence": 0.02189917047624648,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                685,
+                589
+              ],
+              [
+                717,
+                589
+              ],
+              [
+                717,
+                603
+              ],
+              [
+                685,
+                603
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9999311205966196,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                411,
+                687
+              ],
+              [
+                493,
+                687
+              ],
+              [
+                493,
+                730
+              ],
+              [
+                411,
+                730
+              ]
+            ]
+          },
+          {
+            "text": "Processor",
+            "confidence": 0.9966851744271596,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                295,
+                805
+              ],
+              [
+                442,
+                805
+              ],
+              [
+                442,
+                847
+              ],
+              [
+                295,
+                847
+              ]
+            ]
+          },
+          {
+            "text": "Intel",
+            "confidence": 0.8639312708167589,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                319,
+                929
+              ],
+              [
+                355,
+                929
+              ],
+              [
+                355,
+                947
+              ],
+              [
+                319,
+                947
+              ]
+            ]
+          },
+          {
+            "text": "Itel",
+            "confidence": 0.6728914953322358,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                222.15798332046344,
+                286.2897482934367
+              ],
+              [
+                343.20351858100884,
+                274.0127948886801
+              ],
+              [
+                346.8420166795365,
+                328.7102517065633
+              ],
+              [
+                224.79648141899116,
+                341.9872051113199
+              ]
+            ]
+          },
+          {
+            "text": "Intele",
+            "confidence": 0.8061992275999603,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                222.41000317999047,
+                825.4560050879847
+              ],
+              [
+                297.6513637490412,
+                816.5963368387429
+              ],
+              [
+                300.58999682000956,
+                846.5439949120153
+              ],
+              [
+                224.3486362509588,
+                855.4036631612571
+              ]
+            ]
+          },
+          {
+            "text": "CORE",
+            "confidence": 0.4943082928657532,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1080,
+              1080
+            ],
+            "box": [
+              [
+                316.3358994113243,
+                951.5038491169864
+              ],
+              [
+                391.7365060883321,
+                944.7705552356769
+              ],
+              [
+                393.6641005886757,
+                971.4961508830136
+              ],
+              [
+                317.2634939116679,
+                978.2294447643231
+              ]
+            ]
+          },
+          {
+            "text": "15-13500",
+            "confidence": 0.9043042025871034,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              360,
+              150
+            ],
+            "box": [
+              [
+                37,
+                33
+              ],
+              [
+                320,
+                33
+              ],
+              [
+                320,
+                112
+              ],
+              [
+                37,
+                112
+              ]
+            ],
+            "cropInResizedUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "cropInOriginalUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-0"
+          },
+          {
+            "text": "Caiann",
+            "confidence": 0.0020635304937722163,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              360,
+              150
+            ],
+            "box": [
+              [
+                77,
+                113
+              ],
+              [
+                313,
+                113
+              ],
+              [
+                313,
+                150
+              ],
+              [
+                77,
+                150
+              ]
+            ],
+            "cropInResizedUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "cropInOriginalUpload": [
+              878,
+              450,
+              998,
+              500
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-0"
+          }
+        ],
+        "gemma": {
+          "model": "i5-13500",
+          "models": [
+            "i5-13500"
+          ],
+          "observation": "Category: CPU\nModel: i5-13500\nEvidence: i5-13500 LGA1700\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "selectedRegion": {
+        "id": "label-0",
+        "boxInOriginalUpload": [
+          878,
+          450,
+          998,
+          500
+        ],
+        "model": "i5-13500",
+        "ocrModels": [
+          "i5-13500"
+        ],
+        "accepted": true,
+        "fusionEligible": true,
+        "nativeTextHeight": 26,
+        "contextReadingIndexes": [
+          1,
+          2,
+          8,
+          10,
+          12,
+          13
+        ]
+      },
+      "timingMs": {
+        "total": 0,
+        "cached": true,
+        "originalTotal": 10365
+      }
+    },
+    {
+      "mode": "blurred",
+      "elapsedMs": 1327,
+      "success": true,
+      "answer": "照片初步辨識為「i7-12700K」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i7-12700K"
+      ],
+      "requiresConfirmation": true,
+      "verificationMethod": null,
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [],
+        "cpuModel": null,
+        "textVerified": false,
+        "failureReason": "unreadable_or_conflicting",
+        "anomalies": [],
+        "verificationMethod": null,
+        "fusionEvidence": [],
+        "regions": [],
+        "selectedRegionId": null,
+        "readings": [],
+        "gemma": {
+          "model": "i7-12700K",
+          "models": [
+            "i7-12700K"
+          ],
+          "observation": "Category: CPU\nModel: Intel Core i7-12700K\nEvidence: Intel Core i7-12700K\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "timingMs": {
+        "total": 1304
+      }
+    },
+    {
+      "mode": "conflicting_labels",
+      "elapsedMs": 3510,
+      "success": true,
+      "answer": "照片初步辨識為「i5-14400」或「i5-14400F」。判讀有分歧，請核對數字與尾碼。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "conflict",
+      "model": null,
+      "candidates": [
+        "i5-14400",
+        "i5-14400F"
+      ],
+      "requiresConfirmation": true,
+      "verificationMethod": null,
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [
+          "8",
+          "I5-14400",
+          "SRN46",
+          "L410F052",
+          "I5-14400F",
+          "SRN45",
+          "X336F168",
+          "INTEL(R",
+          "I5-14400F"
+        ],
+        "cpuModel": null,
+        "textVerified": false,
+        "failureReason": "unreadable_or_conflicting",
+        "anomalies": [],
+        "verificationMethod": null,
+        "fusionEvidence": [],
+        "regions": [
+          {
+            "id": "label-0",
+            "boxInOriginalUpload": [
+              204,
+              202,
+              378,
+              271
+            ],
+            "model": "i5-14400",
+            "ocrModels": [
+              "i5-14400"
+            ],
+            "accepted": true,
+            "fusionEligible": true,
+            "nativeTextHeight": 16,
+            "contextReadingIndexes": [
+              1,
+              5
+            ]
+          },
+          {
+            "id": "label-1",
+            "boxInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "model": "i5-14400F",
+            "ocrModels": [
+              "i5-14400F"
+            ],
+            "accepted": true,
+            "fusionEligible": true,
+            "nativeTextHeight": 26,
+            "contextReadingIndexes": [
+              1,
+              5
+            ]
+          }
+        ],
+        "selectedRegionId": null,
+        "readings": [
+          {
+            "text": "8",
+            "confidence": 0.9366033083914296,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                737,
+                193
+              ],
+              [
+                753,
+                193
+              ],
+              [
+                753,
+                223
+              ],
+              [
+                737,
+                223
+              ]
+            ]
+          },
+          {
+            "text": "INTEL@) COREtM i5",
+            "confidence": 0.18706192795455018,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                216,
+                214
+              ],
+              [
+                366,
+                214
+              ],
+              [
+                366,
+                238
+              ],
+              [
+                216,
+                238
+              ]
+            ],
+            "regionId": "label-0"
+          },
+          {
+            "text": "i5-14400",
+            "confidence": 0.9631066144197828,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                219,
+                243
+              ],
+              [
+                293,
+                243
+              ],
+              [
+                293,
+                259
+              ],
+              [
+                219,
+                259
+              ]
+            ],
+            "regionId": "label-0"
+          },
+          {
+            "text": "SRN46",
+            "confidence": 0.9203668921658894,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                217,
+                265
+              ],
+              [
+                271,
+                265
+              ],
+              [
+                271,
+                285
+              ],
+              [
+                217,
+                285
+              ]
+            ]
+          },
+          {
+            "text": "L410F052",
+            "confidence": 0.9885418906775904,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                217,
+                289
+              ],
+              [
+                293,
+                289
+              ],
+              [
+                293,
+                309
+              ],
+              [
+                217,
+                309
+              ]
+            ]
+          },
+          {
+            "text": "INTELR) CORETr i5",
+            "confidence": 0.2325795779027557,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                818,
+                278
+              ],
+              [
+                992,
+                278
+              ],
+              [
+                992,
+                304
+              ],
+              [
+                818,
+                304
+              ]
+            ],
+            "regionId": "label-1"
+          },
+          {
+            "text": "Et",
+            "confidence": 0.07595486975827738,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                216,
+                314
+              ],
+              [
+                278,
+                314
+              ],
+              [
+                278,
+                338
+              ],
+              [
+                216,
+                338
+              ]
+            ]
+          },
+          {
+            "text": "i5-14400F",
+            "confidence": 0.7404932196170669,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                813,
+                305
+              ],
+              [
+                914,
+                305
+              ],
+              [
+                914,
+                331
+              ],
+              [
+                813,
+                331
+              ]
+            ],
+            "regionId": "label-1"
+          },
+          {
+            "text": "SRN45",
+            "confidence": 0.9859494877558194,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                817,
+                337
+              ],
+              [
+                879,
+                337
+              ],
+              [
+                879,
+                357
+              ],
+              [
+                817,
+                357
+              ]
+            ]
+          },
+          {
+            "text": "X336F168",
+            "confidence": 0.9972408806421236,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                818,
+                363
+              ],
+              [
+                906,
+                363
+              ],
+              [
+                906,
+                387
+              ],
+              [
+                818,
+                387
+              ]
+            ]
+          },
+          {
+            "text": "EZ",
+            "confidence": 0.13380907040500797,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                814,
+                394
+              ],
+              [
+                888,
+                394
+              ],
+              [
+                888,
+                418
+              ],
+              [
+                814,
+                418
+              ]
+            ]
+          },
+          {
+            "text": "INTEL(R",
+            "confidence": 0.9260385187103252,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              609,
+              231
+            ],
+            "box": [
+              [
+                51,
+                38
+              ],
+              [
+                271,
+                38
+              ],
+              [
+                271,
+                101
+              ],
+              [
+                51,
+                101
+              ]
+            ],
+            "cropInResizedUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "cropInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-1"
+          },
+          {
+            "text": "CORETR i5",
+            "confidence": 0.2846344729203993,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              609,
+              231
+            ],
+            "box": [
+              [
+                304,
+                48
+              ],
+              [
+                568,
+                48
+              ],
+              [
+                568,
+                104
+              ],
+              [
+                304,
+                104
+              ]
+            ],
+            "cropInResizedUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "cropInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-1"
+          },
+          {
+            "text": "i5-14400F",
+            "confidence": 0.9510006072255203,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              609,
+              231
+            ],
+            "box": [
+              [
+                46,
+                126
+              ],
+              [
+                339,
+                126
+              ],
+              [
+                339,
+                189
+              ],
+              [
+                46,
+                189
+              ]
+            ],
+            "cropInResizedUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "cropInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-1"
+          }
+        ],
+        "gemma": {
+          "model": "i5-14400",
+          "models": [
+            "i5-14400"
+          ],
+          "observation": "Category: CPU\nModel: i5-14400\nEvidence: i5-14400\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "timingMs": {
+        "total": 3487
+      }
+    }
+  ],
+  "baseline": null,
+  "browserErrors": []
+}

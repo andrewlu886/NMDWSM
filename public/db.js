@@ -401,7 +401,7 @@ function formatModel(row) {
   };
 }
 
-async function findHardwareModel({ category, modelId, model }) {
+async function findHardwareModel({ category, modelId, model, strictModelMatch = false }) {
   if (modelId) {
     return formatModel(await runQueryOne(
       'SELECT * FROM hardware_models WHERE id = ? AND category = ?',
@@ -419,6 +419,7 @@ async function findHardwareModel({ category, modelId, model }) {
     [category, normalized, normalized]
   );
   if (row) return formatModel(row);
+  if (strictModelMatch) return null;
 
   const candidates = await runQuery('SELECT * FROM hardware_models WHERE category = ?', [category]);
   row = candidates

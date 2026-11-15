@@ -48,7 +48,7 @@ test('chat PSU wizard and calculator handoff in a browser', { skip: !fs.existsSy
   const base = 'http://127.0.0.1:' + server.address().port;
   let browser;
   try {
-    browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    browser = await puppeteer.launch({ headless: true, pipe: true, timeout: 15000, args: ['--no-sandbox', '--disable-gpu'] });
     const createPage = async () => {
       const context = await browser.createBrowserContext();
       const page = await context.newPage();
@@ -124,14 +124,14 @@ test('chat PSU wizard and calculator handoff in a browser', { skip: !fs.existsSy
         assert.equal(chatRequests.at(-1).intent, 'market');
       } finally { await context.close(); }
     });
-    await t.test('unknown GPU links to tools with the recognized CPU and unknown GPU intact', async () => {
+    await t.test('unknown GPU preserves chat progress and calculator recovery retains both models', async () => {
       const { page, context } = await createPage();
       try {
         await start(page);
         await send(page, 'i5-14600K');
         await send(page, 'RTX 9999');
-        assert.match(await page.$eval('.ai-chat-messages', el => el.textContent), /這個型號人家貌似不太知道餒，要不我們去頁面看看/);
-        const href = await page.$eval('.ai-chat-response a', el => el.href);
+        assert.match(await page.$eval('.ai-chat-messages', el => el.textContent), /進度已保留/);
+        const href = await page.evaluate(() => new URL(window.PsuFlow.calculatorUrl(JSON.parse(sessionStorage.getItem('nmdwsm-ai-chat-interface')).powerFlow), location.origin).href);
         assert.equal(new URL(href).searchParams.get('cpu'), 'Intel Core i5-14600K');
         assert.equal(new URL(href).searchParams.get('gpu'), 'RTX 9999');
         await page.goto(href);
@@ -149,7 +149,7 @@ test('chat PSU wizard and calculator handoff in a browser', { skip: !fs.existsSy
       try {
         await start(page);
         await send(page, 'i9-99999K');
-        const href = await page.$eval('.ai-chat-response a', el => el.href);
+          const href = await page.evaluate(() => new URL(window.PsuFlow.calculatorUrl(JSON.parse(sessionStorage.getItem('nmdwsm-ai-chat-interface')).powerFlow), location.origin).href);
         await page.goto(href);
         await page.waitForFunction(() => document.querySelector('#cpu-power').value === 'i9-99999K');
         assert.equal(await page.evaluate(() => currentCpuTdp), 0);
@@ -194,7 +194,7 @@ test('chat PSU wizard and calculator handoff in a browser', { skip: !fs.existsSy
         assert.match(await page.$eval('.ai-chat-messages', el => el.textContent), /至少 350W/);
       } finally { await context.close(); }
     });
-    await t.test('image wattage action starts with CPU confirmation rather than navigating', async () => {
+    await t.test('image wattage action confirms legacy photo context then asks for CPU', async () => {
       const { page, context } = await createPage();
       try {
         await page.evaluate(() => {
@@ -207,6 +207,9 @@ test('chat PSU wizard and calculator handoff in a browser', { skip: !fs.existsSy
         await page.waitForSelector('.ai-image-actions button');
         await page.evaluate(() => document.querySelector('.ai-image-actions button').click());
         assert.equal(new URL(page.url()).pathname, '/other');
+        await page.waitForFunction(() => [...document.querySelectorAll('button')].some(button => button.textContent === '確認 RTX 4070'));
+        await page.evaluate(() => [...document.querySelectorAll('button')].find(button => button.textContent === '確認 RTX 4070').click());
+        await page.waitForFunction(() => !document.querySelector('#ai-chat-input').disabled);
         assert.match(await page.$eval('.ai-chat-messages', el => el.textContent), /可以先告訴我你使用的CPU嗎/);
         assert.equal(await page.$('.ai-power-options'), null);
       } finally { await context.close(); }

@@ -4,9 +4,11 @@ const { spawn } = require('node:child_process');
 const { createInterface } = require('node:readline');
 const root = path.resolve(__dirname, '../..');
 let worker = null;
+let workerVersion = null;
 let nextId = 0;
 const pending = new Map();
 let idleTimer;
+const recognitionCache = new Map();
 
 function pythonPath() {
   return process.env.CPU_VISION_PYTHON || path.join(root, '.cache/cpu-vision-venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python');
@@ -26,6 +28,11 @@ function recognizeLocalCpu(image, { signal, timeoutMs = 30000, gemmaObservation 
   if (typeof image !== 'string' || image.length > 2500000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(image)) return Promise.reject(new Error('CPU 圖片格式不正確。'));
   if (typeof gemmaObservation !== 'string' || gemmaObservation.length > 2000) return Promise.reject(new Error('Gemma 觀察格式不正確。'));
   if (signal?.aborted) return Promise.reject(new Error('CPU 圖片辨識已取消。'));
+  const version = require('./image-diagnostics').cpuVersion().fingerprint;
+  if (worker && workerVersion !== version) stopWorker();
+  const key = require('node:crypto').createHash('sha256').update(Buffer.from(image, 'base64')).update(gemmaObservation).update(version).digest('hex');
+  const cached = recognitionCache.get(key);
+  if (cached && Date.now() - cached.time < 300000) return Promise.resolve(structuredClone(cached.result));
   if (pending.size >= 2) return Promise.reject(new Error('CPU 圖片辨識忙碌中。'));
   clearTimeout(idleTimer);
   if (!worker) {
@@ -33,6 +40,7 @@ function recognizeLocalCpu(image, { signal, timeoutMs = 30000, gemmaObservation 
       cwd: root, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe']
     });
     worker = child;
+    workerVersion = version;
     child.stderr.resume();
     child.stdin.on('error', () => { if (worker === child) stopWorker(); });
     child.on('error', () => { if (worker === child) stopWorker(); });
@@ -53,10 +61,14 @@ function recognizeLocalCpu(image, { signal, timeoutMs = 30000, gemmaObservation 
       clearTimeout(timer);
       signal?.removeEventListener('abort', cancel);
       if (!pending.size && worker) {
-        idleTimer = setTimeout(stopWorker, 120000);
+        idleTimer = setTimeout(stopWorker, 600000);
         idleTimer.unref();
       }
-      if (error) reject(error); else resolve(result);
+      if (error) reject(error); else {
+        if (recognitionCache.size >= 20) recognitionCache.delete(recognitionCache.keys().next().value);
+        recognitionCache.set(key, { time: Date.now(), result });
+        resolve(result);
+      }
     };
     pending.set(id, { finish });
     signal?.addEventListener('abort', cancel, { once: true });
@@ -67,18 +79,27 @@ function recognizeLocalCpu(image, { signal, timeoutMs = 30000, gemmaObservation 
 function createCpuVisionClient(ollamaClient) {
   return {
     async recognize(image, signal, gemmaObservation = '') {
+      return withCpuBudget(async boundedSignal => {
       // A remote deployment obtains the model through the same authenticated tunnel.
       if (ollamaClient.serviceMode === 'shared') {
         const response = await ollamaClient.request('/api/cpu/recognize', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image, ...(gemmaObservation ? { gemmaObservation } : {}) }), signal
+          body: JSON.stringify({ image, ...(gemmaObservation ? { gemmaObservation } : {}) }), signal: boundedSignal
         });
-        if (!response.ok) return null;
+        if (!response.ok) {
+          if (response.status === 504) throw new Error('CPU 文字核對逾時。');
+          return null; // Older gateways may not expose this optional endpoint.
+        }
         return response.json();
       }
-      return recognizeLocalCpu(image, { signal, gemmaObservation });
+      return recognizeLocalCpu(image, { signal: boundedSignal, gemmaObservation });
+      }, signal);
     }
   };
+}
+
+async function withCpuBudget(work, signal, timeoutMs = 18000) {
+  return require('./stage-budget').withStageBudget(work, signal, timeoutMs, 'CPU 文字核對逾時，請重試。');
 }
 
 function isCpuAnalysis(analysis) {
@@ -86,7 +107,10 @@ function isCpuAnalysis(analysis) {
 }
 
 function cpuModel(value) {
-  const text = String(value || '').normalize('NFKC').replace(/[®™"「」]/g, '').trim();
+  const text = String(value || '').replace(/[®™]/g, '').normalize('NFKC').replace(/["「」]/g, '').trim()
+    .replace(/\((?:R|TM)\)/gi, ' ').replace(/\s+/g, ' ').trim()
+    .replace(/^(?:AMD\s+)?(?:Ryzen\s*|R)([3579])\s+PRO\s+(\d{4,5}[A-Z0-9]*)$/i, 'Ryzen $1 $2 PRO')
+    .replace(/^(?:Intel\s+)?(?:Core\s+)?(i[3579])\s+\1(?=[- ])/i, '$1');
   const intel = text.match(/^(?:Intel\s+)?(?:Core\s+)?(i[3579])\s*[- ]?\s*(\d{4,5})(KF|KS|K|F|T|S)?$/i);
   if (intel) return `${intel[1].toLowerCase()}-${intel[2]}${(intel[3] || '').toUpperCase()}`;
   const amd = text.match(/^(?:AMD\s+)?(?:Ryzen\s*|R)([3579])\s*[- ]?\s*(\d{4,5})(X3D|XT|GT|X|G|F)?(?:\s*[- ]?\s*(PRO))?$/i);
@@ -95,14 +119,33 @@ function cpuModel(value) {
   return ultra ? `Ultra ${ultra[1]} ${ultra[2]}${(ultra[3] || '').toUpperCase()}${ultra[4] ? ' Plus' : ''}` : null;
 }
 
+function quotesCpuModel(analysis, model) {
+  if (!model) return false;
+  const quote=(analysis.match(/(?:^|\n)\s*Evidence\s*:\s*([\s\S]*?)(?=\n\s*(?:Confidence|Category|Model)\s*:|$)/i)?.[1] || '')
+    .replace(/[®™]/g, '').normalize('NFKC').replace(/\((?:R|TM)\)/gi, ' ');
+  const forms=[model, model.replace(/^(Ryzen [3579]) (.+) PRO$/, '$1 PRO $2')];
+  return forms.some(form => {
+    const pattern=(form.match(/[a-z]+|\d+/gi) || []).join('[\\s_-]*');
+    return new RegExp('(?<![A-Z0-9])'+pattern+'(?![A-Z0-9]|\\s*(?:KF|KS|K|F|T|S|GT|XT|X3D|X|G|PRO|PLUS)\\b)','i').test(quote);
+  });
+}
+
 function cpuEvidence(analysis, result) {
-  const gemmaModel = cpuModel(analysis.match(/(?:^|\n)\s*Model\s*:\s*([^\n]+)/i)?.[1]);
+  const field = analysis.match(/(?:^|\n)\s*Model\s*:\s*([^\n]+)/i)?.[1] || '';
+  const gemmaModels = [...new Set(field.split(/\s*(?:\/|,|;|、|或|\band\b|\bor\b)\s*/i).map(cpuModel).filter(Boolean))];
+  const gemmaModel = gemmaModels.length === 1 ? gemmaModels[0] : null;
   const clean = value => String(value).replace(/[\r\n]/g, ' ').slice(0, 80);
   const evidence = (Array.isArray(result?.evidence) ? result.evidence : []).slice(0, 12).map(clean);
-  const verifiedModel = result?.accepted === true && evidence.length ? cpuModel(result.model) : null;
+  const strictModel = result?.accepted === true && result?.textVerified === true && evidence.length ? cpuModel(result.model) : null;
+  const fusedModel = !strictModel && evidence.length && gemmaModel && quotesCpuModel(analysis,gemmaModel) && result?.fusionEligible === true
+    && Array.isArray(result.fusionEvidence) && result.fusionEvidence.some(region => cpuModel(region.model)===gemmaModel && region.nativeTextHeight>=16)
+    ? gemmaModel : null;
+  const verifiedModel = strictModel || fusedModel;
   return {
-    gemma: { model: gemmaModel, observation: String(analysis).slice(0, 1000) },
+    gemma: { model: gemmaModel, models: gemmaModels, observation: String(analysis).slice(0, 1000) },
     cpu: { model: verifiedModel, textVerified: Boolean(verifiedModel), ocr: evidence,
+      verificationMethod: strictModel ? 'strict_ocr_and_visual_policy' : fusedModel ? 'gemma_quote_and_region_ocr' : null,
+      fusionEvidence: result?.fusionEvidence || [],
       // Appearance rankings are retained as supporting evidence, never as exact SKU identities.
       appearanceCandidates: (Array.isArray(result?.candidates) ? result.candidates : []).slice(0, 5)
         .map(item => ({ model: cpuModel(item.model), rankingScore: Number(item.score) || 0 })),
@@ -112,13 +155,50 @@ function cpuEvidence(analysis, result) {
   };
 }
 
+let knownCpuModels;
+function isKnownCpuModel(model) {
+  if (!knownCpuModels) {
+    knownCpuModels = new Set(require('../data/hardware-catalog').hardwareModels
+      .filter(row => row.category === 'cpu').map(row => cpuModel(row.canonicalModel)).filter(Boolean));
+    for (const filename of ['models/cpu-vision/metadata.json', 'models/cpu-library/summary.json']) {
+      try {
+        const data = JSON.parse(fs.readFileSync(path.join(root, filename), 'utf8'));
+        for (const label of [...(data.labels || []), ...(data.modelReviews || []).map(row => row.model)]) {
+          const model = cpuModel(label); if (model) knownCpuModels.add(model);
+        }
+      } catch { /* The shipped hardware catalog remains usable without local models. */ }
+    }
+  }
+  return knownCpuModels.has(model);
+}
+
+function reconcileCpuCandidates(values, verifiedModel, readings = []) {
+  const candidates = [...new Set(values.filter(Boolean))];
+  const anomalies = [];
+  const seen = readings.map(row => ({ model: cpuModel(row.text), confidence: Number(row.confidence) }));
+  const clear = verifiedModel && seen.some(row => row.model === verifiedModel && row.confidence >= .85);
+  const target = clear && isKnownCpuModel(verifiedModel) && verifiedModel.match(/^(i[3579])-(\d{5})(KF|KS|K|F|T|S)?$/);
+  const kept = candidates.filter(candidate => {
+    const partial = candidate.match(/^(i[3579])-(\d{4})(KF|KS|K|F|T|S)?$/);
+    if (!target || !partial || isKnownCpuModel(candidate) || partial[1] !== target[1] || partial[3] !== target[3]
+      || seen.some(row => row.model === candidate && row.confidence >= .85)) return true;
+    const missingDigit = [...target[2]].some((_, i) => target[2].slice(0, i) + target[2].slice(i + 1) === partial[2]);
+    if (!missingDigit) return true;
+    // Do not repair the string. Keep its raw value in diagnostics; identity is
+    // established solely by the separate clear, complete upload-text reading.
+    anomalies.push({ value: candidate, reason: 'unconfirmed_missing_digit', supportedByUploadText: verifiedModel });
+    return false;
+  });
+  return { candidates: kept, anomalies };
+}
+
 function mergeCpuAnalysis(analysis, result, review = null) {
   if (!isCpuAnalysis(analysis) || !result) return analysis;
   const evidence = cpuEvidence(analysis, result);
   const gemma = evidence.gemma.model;
   const cpu = evidence.cpu.model;
   const rechecked = review?.followUp ? cpuEvidence(review.followUp, null).gemma : null;
-  const candidates = [...new Set([gemma, rechecked?.model, cpu].filter(Boolean))];
+  const { candidates } = reconcileCpuCandidates([...evidence.gemma.models, ...(rechecked?.models || []), gemma, rechecked?.model, cpu], cpu, result.readings || []);
   const conflict = candidates.length > 1;
   const corroborated = Boolean(cpu && !conflict);
   const status = conflict ? 'conflict' : corroborated ? 'corroborated' : candidates.length ? 'candidate' : 'unreadable';
@@ -133,8 +213,14 @@ function mergeCpuAnalysis(analysis, result, review = null) {
   return `Category: CPU\nModel: ${corroborated ? cpu : 'unknown'}\nCandidate: ${candidates.join(' / ') || 'unknown'}\nReview: ${status}\nEvidence: ${combined}\nConfidence: ${corroborated ? 'medium' : 'low'}\nNote: ${note}\nGemma observation: ${JSON.stringify(evidence.gemma)}\nCPU model observation: ${JSON.stringify(evidence.cpu)}\nLlama question: ${review?.question || 'none'}\nGemma recheck: ${JSON.stringify(rechecked)}\nLlama review: ${review?.choice || 'unavailable'}`;
 }
 
-async function collaborateCpuAnalysis(analysis, result, request, { signal, model = 'llama3.1:8b', image, visionModel = 'gemma3:4b', recheckCpu } = {}) {
-  if (!isCpuAnalysis(analysis) || !result) return analysis;
+async function collaborateCpuAnalysis(analysis, result, request, { signal, model = 'llama3.1:8b', image, visionModel = 'gemma3:4b', recheckCpu, onRecognition, deepReview = false } = {}) {
+  if (!isCpuAnalysis(analysis)) return analysis;
+  // Normal requests use the deterministic evidence policy. Repeated LLM reviews
+  // add latency but cannot create independent text evidence.
+  if (!result || !deepReview) {
+    onRecognition?.(buildCpuRecognition(analysis, result));
+    return mergeCpuAnalysis(analysis, result);
+  }
   const evidence = cpuEvidence(analysis, result);
   const questions = {
     none: '',
@@ -188,7 +274,12 @@ async function collaborateCpuAnalysis(analysis, result, request, { signal, model
           if (recheckCpu && newerModel && newerModel !== evidence.gemma.model && !result.accepted) {
             try {
               const updated = await recheckCpu(followUp);
-              if (updated) { result = updated; evidence.cpu = cpuEvidence(followUp, updated).cpu; }
+              if (updated) {
+                result = { ...updated,
+                  ocrModels: [...new Set([...(result.ocrModels || []), ...(updated.ocrModels || [])])],
+                  readings: [...(result.readings || []), ...(updated.readings || [])] };
+                evidence.cpu = cpuEvidence(followUp, result).cpu;
+              }
             } catch { /* Keep the previous physical evidence if the focused worker is unavailable. */ }
           }
           const finalReview = await askLlama({ ...evidence, question: questions[review.question], gemmaRecheck: cpuEvidence(followUp, null).gemma }, true);
@@ -197,7 +288,75 @@ async function collaborateCpuAnalysis(analysis, result, request, { signal, model
       }
     } catch { /* The bounded dialogue falls back to the original observations. */ }
   }
+  onRecognition?.(buildCpuRecognition(analysis, result, review));
   return mergeCpuAnalysis(analysis, result, review);
+}
+
+// Called with actual worker evidence, never with fields invented in a vision reply.
+function buildCpuRecognition(analysis, result = null, review = null) {
+  if (!isCpuAnalysis(analysis)) return null;
+  const evidence = cpuEvidence(analysis, result);
+  const reread = review?.followUp ? cpuEvidence(review.followUp, null).gemma.model : null;
+  const { candidates, anomalies } = reconcileCpuCandidates([...evidence.gemma.models, ...(review?.followUp ? cpuEvidence(review.followUp, null).gemma.models : []), evidence.gemma.model, reread, evidence.cpu.model,
+    ...(Array.isArray(result?.ocrModels) ? result.ocrModels.map(cpuModel) : []),
+    ...(Array.isArray(result?.readings) ? result.readings.map(reading=>cpuModel(reading.text)) : [])], evidence.cpu.model, result?.readings || []);
+  const status = candidates.length > 1 ? 'conflict' : evidence.cpu.textVerified ? 'verified' : candidates.length ? 'candidate' : 'unreadable';
+  const { lookupCpuReferences } = require('./cpu-library');
+  const references = candidates.flatMap(model => lookupCpuReferences(model).images);
+  return {
+    schemaVersion: 1, policyVersion: 'text-first-v2', status, model: status === 'verified' ? evidence.cpu.model : null, candidates,
+    evidence: { source: 'uploaded_image', text: evidence.cpu.ocr, cpuModel: evidence.cpu.model,
+      textVerified: evidence.cpu.textVerified, failureReason: evidence.cpu.textVerified ? null : evidence.cpu.reason, anomalies,
+      verificationMethod: evidence.cpu.verificationMethod, fusionEvidence: evidence.cpu.fusionEvidence,
+      regions: result?.regions || [], selectedRegionId: result?.selectedRegionId || (evidence.cpu.verificationMethod==='gemma_quote_and_region_ocr' ? result?.fusionEvidence?.find(region=>cpuModel(region.model)===evidence.cpu.model)?.regionId : null),
+      readings: Array.isArray(result?.readings) ? result.readings.slice(0, 160) : [],
+      gemma: evidence.gemma, recheck: review?.followUp || null },
+    modelVersion: result?.version || null,
+    libraryVersion: lookupCpuReferences('').version,
+    degraded: !result, degradedReason: !result ? 'cpu_unavailable_or_legacy_gateway' : null,
+    references,
+    // User policy: affirm an exact, uniquely corroborated printed SKU.
+    // This is a decision policy, not a claim of externally measured accuracy.
+    requiresConfirmation: status !== 'verified', automaticAdoptionEnabled: true,
+    confirmationSource: null
+  };
+}
+
+function cpuRecognitionReply(recognition) {
+  if (!recognition) return null;
+  if (recognition.status === 'verified' && !recognition.requiresConfirmation && recognition.model) {
+    return `這是「${recognition.model}」。照片上的完整型號與尾碼已通過文字核對。`;
+  }
+  if (!recognition.candidates.length) return '我認出這是 CPU，但目前讀不到完整型號。請靠近拍攝 CPU 表面或盒裝型號標籤，避開反光並保留完整尾碼，也可以直接輸入型號。';
+  const names = recognition.candidates.join('」或「');
+  const smallLabel = recognition.evidence?.regions?.length && recognition.evidence.regions.every(region => region.nativeTextHeight < 16);
+  const detail = recognition.status === 'conflict' ? '判讀有分歧，請核對數字與尾碼。'
+    : recognition.degradedReason === 'cpu_timeout' ? '文字核對逾時，目前保留候選，可重新送出圖片重試。'
+    : recognition.degraded ? '文字核對服務暫時無法使用，目前保留候選。'
+      : smallLabel ? '型號文字太小，請靠近補拍或裁切 CPU／盒裝標籤。' : '完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。';
+  return `照片初步辨識為「${names}」。${detail}請確認完整型號，確認後再繼續查價、估價或計算瓦數。`;
+}
+
+// Older gateways used verified + requiresConfirmation:true for every photo.
+// Reconcile that obsolete flag against the uploaded photo's stored OCR, never
+// against reference-library labels or Gemma's self-reported confidence.
+function normalizeCpuRecognition(value, analysis = '') {
+  let legacyCpu = null;
+  try { legacyCpu = JSON.parse(analysis.match(/^CPU model observation:\s*(\{.+\})$/m)?.[1] || 'null'); } catch { /* Legacy fields are optional. */ }
+  const recordedVerified = value?.evidence?.textVerified === true || value?.status === 'verified' ||
+    (value?.evidence?.source === 'uploaded_image' && legacyCpu?.textVerified === true);
+  const model = cpuModel(value?.model || value?.evidence?.cpuModel || (recordedVerified ? legacyCpu?.model : null));
+  const readings = Array.isArray(value?.evidence?.readings) ? value.evidence.readings : [];
+  const seen = readings.map(reading => ({ model: cpuModel(reading.text), confidence: Number(reading.confidence) }));
+  const { candidates, anomalies } = reconcileCpuCandidates([...(Array.isArray(value?.candidates) ? value.candidates.map(cpuModel) : []), model,
+    ...seen.map(reading => reading.model)], recordedVerified ? model : null, readings);
+  const clear = seen.some(reading => reading.model === model && reading.confidence >= .85);
+  const current = value?.policyVersion === 'text-first-v2' && value.requiresConfirmation === false;
+  const verified = recordedVerified && model && candidates.length === 1 && (current || clear) && !value.degraded;
+  const status = candidates.length > 1 ? 'conflict' : verified ? 'verified' : candidates.length ? 'candidate' : 'unreadable';
+  return { ...value, policyVersion: 'text-first-v2', status, model: verified ? model : null, candidates,
+    evidence: { ...value?.evidence, anomalies: [...(value?.evidence?.anomalies || []), ...anomalies] },
+    requiresConfirmation: status !== 'verified', automaticAdoptionEnabled: true };
 }
 
 function cpuConfirmationReply(analysis) {
@@ -210,4 +369,4 @@ function cpuConfirmationReply(analysis) {
     : `這張照片初步辨識為「${candidates}」。${/^Review: candidate$/m.test(analysis) ? 'CPU 模型的文字辨識尚未讀清，我保留 Gemma 的候選供你確認。' : '圖片與型號文字已完成核對。'}請確認是否為這個完整型號，確認後我再繼續查價、估價或計算瓦數。`;
 }
 
-module.exports = { createCpuVisionClient, recognizeLocalCpu, isCpuAnalysis, mergeCpuAnalysis, collaborateCpuAnalysis, cpuConfirmationReply, stopWorker };
+module.exports = { createCpuVisionClient, recognizeLocalCpu, isCpuAnalysis, mergeCpuAnalysis, collaborateCpuAnalysis, cpuConfirmationReply, stopWorker, cpuModel, buildCpuRecognition, cpuRecognitionReply, normalizeCpuRecognition, withCpuBudget };

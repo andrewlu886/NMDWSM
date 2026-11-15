@@ -463,6 +463,7 @@ header {
     transform: skewY(-38deg);
 }
 
+.ai-chat-clear:focus-visible,
 .ai-chat-close:focus-visible,
 .ai-chat-form textarea:focus-visible,
 .ai-chat-form button:focus-visible {
@@ -585,6 +586,7 @@ body.ai-chat-docked > header .main-nav {
     border-radius: 12px;
 }
 
+.ai-chat-clear,
 .ai-chat-close {
     display: inline-flex;
     align-items: center;
@@ -602,6 +604,7 @@ body.ai-chat-docked > header .main-nav {
     line-height: 1;
 }
 
+.ai-chat-clear:hover,
 .ai-chat-close:hover {
     background: rgba(255, 255, 255, 0.1);
 }

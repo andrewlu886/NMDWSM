@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-15",
+  "knownSource": true,
+  "independentEvaluation": false,
+  "sku": "i7-12700F",
+  "libraryVersion": "6f1f9d00a8fdb5b3",
+  "results": [
+    {
+      "mode": "original",
+      "elapsedMs": 6122,
+      "success": true,
+      "answer": "這是「i7-12700F」。照片上的完整型號與尾碼已通過文字核對。",
+      "status": "verified",
+      "model": "i7-12700F",
+      "candidates": [
+        "i7-12700F"
+      ],
+      "requiresConfirmation": false,
+      "timingMs": {
+        "total": 6082
+      }
+    },
+    {
+      "mode": "repeat",
+      "elapsedMs": 13,
+      "success": true,
+      "answer": "這是「i7-12700F」。照片上的完整型號與尾碼已通過文字核對。",
+      "status": "verified",
+      "model": "i7-12700F",
+      "candidates": [
+        "i7-12700F"
+      ],
+      "requiresConfirmation": false,
+      "timingMs": {
+        "total": 0,
+        "cached": true,
+        "originalTotal": 6082
+      }
+    },
+    {
+      "mode": "blurred",
+      "elapsedMs": 1197,
+      "success": true,
+      "answer": "照片初步辨識為「i7-8700K」。文字尚未完成核對，這是待確認候選。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i7-8700K"
+      ],
+      "requiresConfirmation": true,
+      "timingMs": {
+        "total": 1180
+      }
+    }
+  ],
+  "baseline": {
+    "description": "Legacy sequential dialogue topology with current stricter OCR policy; timing diagnostic only",
+    "elapsedMs": 6482,
+    "llmCalls": 2,
+    "status": "verified",
+    "model": "i7-12700F",
+    "observation": "Category: CPU\nModel: Intel Core i7-12700F\nEvidence: INTEL® CORE™ i7\ni7-12700F\nConfidence: high"
+  },
+  "browserErrors": []
+}

@@ -117,6 +117,7 @@ const server = http.createServer(async(req, res) => {
     const baseURL = `http://${req.headers.host}`;
     const parsedUrl = new URL(req.url, baseURL);
     const pathname = parsedUrl.pathname;
+    if (require('../src/services/cpu-library').handleCpuReferenceRequest(req, res, parsedUrl)) return;
 
     // 處理 CORS 預檢請求
     if (req.method === 'OPTIONS') {
@@ -149,7 +150,7 @@ const server = http.createServer(async(req, res) => {
         if (pathname === '/api/cpu-data') {
             database.all('SELECT * FROM "CPU_Power_Supply_Data_2010_TO_2026"', [], (err, rows) => {
                 if (err) sendJson(res, 500, { error: err.message });
-                else sendJson(res, 200, rows);
+                else sendJson(res, 200, require('../src/data/cpu-power-supplements').supplementCpuPower(rows));
                 database.close();
             });
             return;
@@ -172,11 +173,14 @@ const server = http.createServer(async(req, res) => {
         setCorsHeaders(res);
         try {
             const options = await parseJsonBody(req);
-            if (!['desktop', 'laptop'].includes(options.productType)) {
+            if (!['desktop', 'laptop', 'component'].includes(options.productType)) {
                 return sendJson(res, 400, {
                     success: false,
-                    message: '商品種類僅支援套裝主機或筆記型電腦'
+                    message: '商品種類僅支援套裝主機、筆記型電腦、CPU 或顯卡'
                 });
+            }
+            if (options.productType === 'component' && !['cpu', 'gpu'].includes(options.componentType)) {
+                return sendJson(res, 400, { success: false, message: 'componentType 必須明確指定 cpu 或 gpu' });
             }
             if (options.condition !== undefined && !['new', 'used'].includes(options.condition)) {
                 return sendJson(res, 400, { success: false, message: '商品狀況僅支援全新或二手' });
@@ -280,6 +284,7 @@ const server = http.createServer(async(req, res) => {
                 brand,
                 model: payload.model,
                 modelId: payload.modelId,
+                strictModelMatch: payload.strictModelMatch === true,
                 elapsedMonths,
                 extensionRegistered
             });

@@ -86,7 +86,7 @@ test('AI 聊天服務依賴宣告與備援載入應可被正確驗證', async ()
   const aiService = require(path.join(projectRoot, 'public/AiService.js'));
   assert.deepEqual(
     aiService.TOOLS.map(tool => tool.function.name),
-    ['estimate_used_value', 'search_market_prices', 'recommend_hardware', 'calculate_psu_wattage']
+    ['start_feature_flow', 'start_valuation_flow', 'estimate_used_value', 'search_market_prices', 'recommend_hardware', 'calculate_psu_wattage']
   );
   const power = await aiService.calculatePsu({ cpuWatts: 125, gpuWatts: 220, driveCount: 2 });
   assert.equal(power.totalWatts, 405);
@@ -170,7 +170,6 @@ test('聊天歷史限於目前分頁，市價連結可帶入最近產品型號',
   assert.match(widget, /const pricedMatch = candidates\.find\(item => catalogReferencePrice\(item\)\)/);
   assert.match(widget, /\.ai-chat-user-group \{ display: flex; width: 100%/);
   assert.match(styles, /\.ai-chat-message\.user\s*\{[^}]*width:\s*100%/);
-  assert.match(widget, /if \(label === '二手估價'\)/);
   assert.match(widget, /valuation\/model-options\?category=/);
   assert.match(widget, /function chooseValuationCategory\(category/);
   assert.match(widget, /function handleValuationText\(text\)/);
@@ -188,7 +187,7 @@ test('聊天歷史限於目前分頁，市價連結可帶入最近產品型號',
   for (const label of ['CPU', '記憶體', '顯卡', '主機板']) assert.ok(widget.includes(`['${label === '記憶體' ? 'ram' : label === '顯卡' ? 'gpu' : label === '主機板' ? 'motherboard' : 'cpu'}', '${label}']`));
   assert.match(widget, /messages\.querySelectorAll\('\.ai-chat-reopen-suggestions'\)/);
   for (const label of ['二手估價', '市價查詢', '智慧推薦', '瓦數計算']) {
-    assert.ok(widget.includes(`['${label}',`), `每次展開助手都要提供「${label}」快捷功能`);
+    assert.ok(Object.values(require('../public/hardware-context').features).includes(label), `共同入口要提供「${label}」功能`);
   }
 });
 

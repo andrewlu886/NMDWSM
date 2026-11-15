@@ -1,0 +1,7102 @@
+{
+  "date": "2026-10-15",
+  "complete": true,
+  "knownSource": true,
+  "independentEvaluation": false,
+  "libraryVersion": "df38f4b998522b4f",
+  "comparison": "Same browser-upload pixels and Gemma observation, with previous OCR baseline versus separate-region OCR/fusion. Not an independent accuracy result.",
+  "totalModels": 104,
+  "before": {
+    "samples": 104,
+    "adopted": 34,
+    "correct": 34,
+    "wrong": 0,
+    "coverage": 0.3269230769230769,
+    "precision": 1,
+    "confirmationRate": 0.6730769230769231,
+    "unreadable": 3,
+    "conflicts": 5
+  },
+  "after": {
+    "samples": 104,
+    "adopted": 69,
+    "correct": 69,
+    "wrong": 0,
+    "coverage": 0.6634615384615384,
+    "precision": 1,
+    "confirmationRate": 0.33653846153846156,
+    "unreadable": 3,
+    "conflicts": 5
+  },
+  "latencyMs": {
+    "median": 5226,
+    "p95": 8920,
+    "max": 12797
+  },
+  "actualRephotoRate": null,
+  "rephotoNote": "Single upload per model; actual user rephoto behaviour was not measured. confirmationRate records cases requiring a follow-up.",
+  "localWorkerEvidence": ".cache/cpu-library/coverage-worker-evidence.json",
+  "browserErrors": [],
+  "results": [
+    {
+      "id": "76fa37f6dce02cf6f39a",
+      "truth": "i3-12100",
+      "kind": "bare",
+      "relative": "i3-12100\\散片\\i3-12100_散片_038.jpg",
+      "elapsedMs": 8483,
+      "success": true,
+      "answer": "這是「i3-12100」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i3-12100"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i3-12100",
+        "candidates": [
+          "i3-12100"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i3-12100",
+        "models": [
+          "i3-12100"
+        ],
+        "observation": "Category: CPU\nModel: i3-12100\nEvidence: i3-12100\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            220,
+            182,
+            436,
+            263
+          ],
+          "model": null,
+          "ocrModels": [
+            "i3-12100"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 20
+        }
+      ],
+      "ocrText": [
+        "INTEL@R) CORETM I3",
+        "I3-12100",
+        "SRL62",
+        "X2381634",
+        "033",
+        "INTEL(R",
+        "CORETM I3",
+        "I3-12100"
+      ]
+    },
+    {
+      "id": "c7ab38ce8bb8cedc92d5",
+      "truth": "i3-13100",
+      "kind": "bare",
+      "relative": "i3-13100\\散片\\i3-13100_散片_053.jpg",
+      "elapsedMs": 5469,
+      "success": true,
+      "answer": "這是「i3-13100」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i3-13100"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i3-13100",
+        "candidates": [
+          "i3-13100"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i3-13100",
+        "models": [
+          "i3-13100"
+        ],
+        "observation": "Category: CPU\nModel: i3-13100\nEvidence: i3-13100 SRMBU X322L922 e4\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            380,
+            361,
+            688,
+            464
+          ],
+          "model": null,
+          "ocrModels": [
+            "i3-13100"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "[NTEL",
+        "[3-13100",
+        "SRMBU",
+        "X322L922",
+        "[NTEL(R)",
+        "I3-13100"
+      ]
+    },
+    {
+      "id": "8f3a01cd0f214490e2dd",
+      "truth": "i3-13100F",
+      "kind": "bare",
+      "relative": "i3-13100F\\散片\\i3-13100F_散片_006.jpg",
+      "elapsedMs": 3943,
+      "success": true,
+      "answer": "這是「i3-13100F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i3-13100F",
+        "candidates": [
+          "i3-13100F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i3-13100F",
+        "candidates": [
+          "i3-13100F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i3-13100F",
+        "models": [
+          "i3-13100F"
+        ],
+        "observation": "Category: CPU\nModel: i3-13100F\nEvidence: i3-13100F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            398,
+            429,
+            665,
+            524
+          ],
+          "model": "i3-13100F",
+          "ocrModels": [
+            "i3-13100F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 28
+        }
+      ],
+      "ocrText": [
+        "I3-13100F",
+        "SRMBV",
+        "X309K328"
+      ]
+    },
+    {
+      "id": "e59b69ab2560435f3536",
+      "truth": "i3-14100",
+      "kind": "bare",
+      "relative": "i3-14100\\散片\\i3-14100_散片_024.jpg",
+      "elapsedMs": 5418,
+      "success": true,
+      "answer": "這是「i3-14100」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i3-14100"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i3-14100",
+        "candidates": [
+          "i3-14100"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i3-14100",
+        "models": [
+          "i3-14100"
+        ],
+        "observation": "Category: CPU\nModel: Intel(R) Core(TM) i3-14100\nEvidence: i3-14100\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            1157,
+            483,
+            1715,
+            691
+          ],
+          "model": null,
+          "ocrModels": [
+            "i3-14100"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 69.99
+        }
+      ],
+      "ocrText": [
+        "INTELR)",
+        "CORETM I3",
+        "I3-14100",
+        "SRN26",
+        "X327F365",
+        "[NTEL(R",
+        "CORETM 13",
+        "13-14100"
+      ]
+    },
+    {
+      "id": "016d591927d66667cd66",
+      "truth": "i5-12400",
+      "kind": "bare",
+      "relative": "i5-12400\\散片\\i5-12400_散片_022.png",
+      "elapsedMs": 4118,
+      "success": true,
+      "answer": "這是「i5-12400」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-12400"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-12400",
+        "candidates": [
+          "i5-12400"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-12400",
+        "models": [
+          "i5-12400"
+        ],
+        "observation": "Category: CPU\nModel: i5-12400\nEvidence: i5-12400\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            221,
+            281,
+            484,
+            376
+          ],
+          "model": "i5-12400",
+          "ocrModels": [
+            "i5-12400"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 28
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            221,
+            281,
+            370,
+            458
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-12400"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "CORETM I5",
+        "I5-12400",
+        "SRLSY",
+        "XZIP628",
+        "CORETM I5",
+        "I5-12400",
+        "INTEL (R",
+        "I5-12400",
+        "SRLSY",
+        "XZ1SP6ZB"
+      ]
+    },
+    {
+      "id": "e7dfb4c14f2dfe5c1c5c",
+      "truth": "i5-12400F",
+      "kind": "boxed",
+      "relative": "i5-12400F\\盒裝\\i5-12400F_盒裝_031.jpg",
+      "elapsedMs": 5551,
+      "success": true,
+      "answer": "這是「i5-12400F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-12400F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-12400F",
+        "candidates": [
+          "i5-12400F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-12400F",
+        "models": [
+          "i5-12400F"
+        ],
+        "observation": "Category: CPU\nModel: i5-12400F\nEvidence: i5-12400F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            694,
+            996,
+            938,
+            1074
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-12400F"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 54
+        }
+      ],
+      "ocrText": [
+        "I5",
+        "12TH GEN",
+        "INTEL",
+        "CORE",
+        "I5-12400F",
+        "LGA1ZOO",
+        "I5-12400F"
+      ]
+    },
+    {
+      "id": "82345dbd05b3fb42cd20",
+      "truth": "i5-12500",
+      "kind": "bare",
+      "relative": "i5-12500\\散片\\i5-12500_散片_005.jpg",
+      "elapsedMs": 2988,
+      "success": true,
+      "answer": "這是「i5-12500」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-12500"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-12500",
+        "candidates": [
+          "i5-12500"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-12500",
+        "models": [
+          "i5-12500"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i5-12500\nEvidence: i5-12500\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            202,
+            188,
+            498,
+            286
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-12500"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "3",
+        "INTEL(R)",
+        "CORETM I5",
+        "I5-12500",
+        "SRLSV",
+        "V140I433",
+        "INTEL(R",
+        "CORET I5",
+        "J5-12500"
+      ]
+    },
+    {
+      "id": "d4e7fa9b4f3b5659fb59",
+      "truth": "i5-12600K",
+      "kind": "boxed",
+      "relative": "i5-12600K\\盒裝\\i5-12600K_盒裝_018.jpg",
+      "elapsedMs": 3951,
+      "success": true,
+      "answer": "照片初步辨識為「i5-12600K」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-12600K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-12600K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "i5-12600K",
+        "models": [
+          "i5-12600K"
+        ],
+        "observation": "Category: CPU\nModel: i5-12600K\nEvidence: i5-12600K\nConfidence: high"
+      },
+      "regions": [],
+      "ocrText": [
+        "I5",
+        "12TH GEN",
+        "INTEL:",
+        "CORE",
+        "U N L 0 € K E D",
+        "65-12600K",
+        "LGA17O0"
+      ]
+    },
+    {
+      "id": "ae0035365aeaf825836a",
+      "truth": "i5-12600KF",
+      "kind": "bare",
+      "relative": "i5-12600KF\\散片\\i5-12600KF_散片_007.jpg",
+      "elapsedMs": 1608,
+      "success": true,
+      "answer": "照片初步辨識為「i5-12600KF」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-12600KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-12600KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i5-12600KF",
+        "models": [
+          "i5-12600KF"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i5-12600KF\nEvidence: Intel Core i5-12600KF\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            148,
+            146,
+            318,
+            217
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 21
+        }
+      ],
+      "ocrText": [
+        "15-12600KF",
+        "X203NG86",
+        "INTEL",
+        "NTEL",
+        "15-12600KP"
+      ]
+    },
+    {
+      "id": "e31f2f3ee26c8576574e",
+      "truth": "i5-13400",
+      "kind": "boxed",
+      "relative": "i5-13400\\盒裝\\i5-13400_盒裝_005.jpg",
+      "elapsedMs": 6513,
+      "success": true,
+      "answer": "這是「i5-13400」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i5-13400",
+        "candidates": [
+          "i5-13400"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-13400",
+        "candidates": [
+          "i5-13400"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-13400",
+        "models": [
+          "i5-13400"
+        ],
+        "observation": "Category: CPU\nModel: i5-13400\nEvidence: i5-13400\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            725,
+            923,
+            909,
+            991
+          ],
+          "model": "i5-13400",
+          "ocrModels": [
+            "i5-13400"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 44
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            454,
+            200,
+            624,
+            269
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 18
+        }
+      ],
+      "ocrText": [
+        "I5",
+        "15-13400",
+        "L245F164",
+        "INLEZ",
+        "CORE",
+        "13TH GEN",
+        "I5-13400",
+        "LGA17OO",
+        "I5-13400",
+        "15-13400"
+      ]
+    },
+    {
+      "id": "27f45916c3780d93a315",
+      "truth": "i5-13400F",
+      "kind": "bare",
+      "relative": "i5-13400F\\散片\\i5-13400F_散片_008.jpg",
+      "elapsedMs": 5432,
+      "success": true,
+      "answer": "照片初步辨識為「i5-13400F」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-13400F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-13400F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i5-13400F",
+        "models": [
+          "i5-13400F"
+        ],
+        "observation": "Category: CPU\nModel: Intel(R) Core(TM) i5-13400F\nEvidence: i5-13400F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            225,
+            297,
+            663,
+            433
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-13400F"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 42
+        }
+      ],
+      "ocrText": [
+        "8",
+        "INTEL",
+        "R",
+        "CORETM J5",
+        "15-13400F",
+        "SRMBN",
+        "V416F988",
+        "INTEL",
+        "~R",
+        "I5-13400F"
+      ]
+    },
+    {
+      "id": "e6807e7c5f69cd78bd5b",
+      "truth": "i5-13500",
+      "kind": "bare",
+      "relative": "i5-13500\\散片\\i5-13500_散片_005.jpg",
+      "elapsedMs": 2795,
+      "success": true,
+      "answer": "照片初步辨識為「i5-13500」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-13500"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-13500"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "i5-13500",
+        "models": [
+          "i5-13500"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i5-13500\nEvidence: Intel Core i5-13500\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            373,
+            275,
+            496,
+            337
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 18
+        }
+      ],
+      "ocrText": [
+        "15-13500",
+        "SRMBM",
+        "V4321499",
+        "I5",
+        "15-13500",
+        "SRMBU"
+      ]
+    },
+    {
+      "id": "fc594ee812f6571c5382",
+      "truth": "i5-13600K",
+      "kind": "boxed",
+      "relative": "i5-13600K\\盒裝\\i5-13600K_盒裝_008.jpg",
+      "elapsedMs": 1658,
+      "success": true,
+      "answer": "這是「i5-13600K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-13600K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-13600K",
+        "candidates": [
+          "i5-13600K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-13600K",
+        "models": [
+          "i5-13600K"
+        ],
+        "observation": "Category: CPU\nModel: i5-13600K\nEvidence: i5-13600K LGA1700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            262,
+            416,
+            372,
+            464
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-13600K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "I5",
+        "IRITEL:",
+        "CORE",
+        "U N L 0 € K E D",
+        "13TH GEN",
+        "I5-13600K",
+        "LGA1ZOO",
+        "4VF 2",
+        "15-13600K"
+      ]
+    },
+    {
+      "id": "a6326df8fc5382815a4e",
+      "truth": "i5-13600KF",
+      "kind": "bare",
+      "relative": "i5-13600KF\\散片\\i5-13600KF_散片_003.jpg",
+      "elapsedMs": 1880,
+      "success": true,
+      "answer": "照片初步辨識為「i5-13600KF」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-13600KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-13600KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "i5-13600KF",
+        "models": [
+          "i5-13600KF"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i5-13600KF\nEvidence: i5-13600KF SRMBE X413H335\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            194,
+            189,
+            305,
+            286
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 21
+        }
+      ],
+      "ocrText": [
+        "INTEL@",
+        "7413N335 @",
+        "0",
+        "INTEL@)",
+        "741311335"
+      ]
+    },
+    {
+      "id": "aaf992b9e29e40e400c7",
+      "truth": "i5-14400",
+      "kind": "bare",
+      "relative": "i5-14400\\散片\\i5-14400_散片_002.jpg",
+      "elapsedMs": 1409,
+      "success": true,
+      "answer": "這是「i5-14400」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i5-14400",
+        "candidates": [
+          "i5-14400"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-14400",
+        "candidates": [
+          "i5-14400"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-14400",
+        "models": [
+          "i5-14400"
+        ],
+        "observation": "Category: CPU\nModel: i5-14400\nEvidence: i5-14400\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            120,
+            106,
+            294,
+            177
+          ],
+          "model": "i5-14400",
+          "ocrModels": [
+            "i5-14400"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 20
+        }
+      ],
+      "ocrText": [
+        "INTELQ) CORETM I5",
+        "I5-14400",
+        "SRN46",
+        "L410F052"
+      ]
+    },
+    {
+      "id": "014dc7ad7d3a5299dc01",
+      "truth": "i5-14400F",
+      "kind": "bare",
+      "relative": "i5-14400F\\散片\\i5-14400F_散片_001.jpg",
+      "elapsedMs": 3709,
+      "success": true,
+      "answer": "這是「i5-14400F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i5-14400F",
+        "candidates": [
+          "i5-14400F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-14400F",
+        "candidates": [
+          "i5-14400F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-14400F",
+        "models": [
+          "i5-14400F"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i5-14400F\nEvidence: i5-14400F SRN45 X336F168 (e4)\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            438,
+            243,
+            777,
+            358
+          ],
+          "model": "i5-14400F",
+          "ocrModels": [
+            "i5-14400F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 40
+        }
+      ],
+      "ocrText": [
+        "INTEL(R)",
+        "CORETN I5",
+        "I5-14400F",
+        "SRN45",
+        "X336F168"
+      ]
+    },
+    {
+      "id": "fa334ce1899d2c050d28",
+      "truth": "i5-14500",
+      "kind": "bare",
+      "relative": "i5-14500\\散片\\i5-14500_散片_001.jpg",
+      "elapsedMs": 1892,
+      "success": true,
+      "answer": "這是「i5-14500」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-14500"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-14500",
+        "candidates": [
+          "i5-14500"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-14500",
+        "models": [
+          "i5-14500"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i5-14500\nEvidence: i5-14500\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            155,
+            142,
+            342,
+            219
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-14500"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 27
+        }
+      ],
+      "ocrText": [
+        "INTELO CORET I5",
+        "I5-14500",
+        "SRN38",
+        "X329L230",
+        "INTELR",
+        "15-14500"
+      ]
+    },
+    {
+      "id": "92d03ea9abc80d3171a8",
+      "truth": "i5-14600K",
+      "kind": "bare",
+      "relative": "i5-14600K\\散片\\i5-14600K_散片_004.jpg",
+      "elapsedMs": 6557,
+      "success": true,
+      "answer": "這是「i5-14600K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-14600K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i5-14600K",
+        "candidates": [
+          "i5-14600K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i5-14600K",
+        "models": [
+          "i5-14600K"
+        ],
+        "observation": "Category: CPU\nModel: i5-14600K\nEvidence: i5-14600K\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            277,
+            246,
+            752,
+            399
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-14600K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 50
+        }
+      ],
+      "ocrText": [
+        "1",
+        "8783",
+        "0",
+        "INTEL",
+        "X334P191",
+        "#",
+        "INTEL(R",
+        "CORE",
+        "TM",
+        "15",
+        "15-14600K"
+      ]
+    },
+    {
+      "id": "0a923c9121bdcdf49451",
+      "truth": "i5-14600KF",
+      "kind": "bare",
+      "relative": "i5-14600KF\\散片\\i5-14600KF_散片_002.jpg",
+      "elapsedMs": 6205,
+      "success": true,
+      "answer": "照片初步辨識為「i5-14600KF」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-14600KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-14600KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i5-14600KF",
+        "models": [
+          "i5-14600KF"
+        ],
+        "observation": "Category: CPU\nModel: i5-14600KF\nEvidence: i5-14600KF\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            440,
+            412,
+            632,
+            510
+          ],
+          "model": null,
+          "ocrModels": [
+            "i5-14600KF"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "INTEL",
+        "SRN42",
+        "X340L019",
+        "INTEL(R)",
+        "COI",
+        "I5-14600KF"
+      ]
+    },
+    {
+      "id": "0102c8cd873e377156cb",
+      "truth": "i7-12700",
+      "kind": "bare",
+      "relative": "i7-12700\\散片\\i7-12700_散片_006.jpg",
+      "elapsedMs": 6065,
+      "success": true,
+      "answer": "這是「i7-12700」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i7-12700",
+        "candidates": [
+          "i7-12700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-12700",
+        "candidates": [
+          "i7-12700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-12700",
+        "models": [
+          "i7-12700"
+        ],
+        "observation": "Category: CPU\nModel: i7-12700\nEvidence: i7-12700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            639,
+            585,
+            1213,
+            751
+          ],
+          "model": "i7-12700",
+          "ocrModels": [
+            "i7-12700"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 51.3
+        }
+      ],
+      "ocrText": [
+        "INTEL",
+        "R",
+        "CORETM 17",
+        "I7-12700",
+        "SRL4Q",
+        "V221H685"
+      ]
+    },
+    {
+      "id": "787136f76053da12dea1",
+      "truth": "i7-12700F",
+      "kind": "bare",
+      "relative": "i7-12700F\\散片\\i7-12700F_散片_002.jpg",
+      "elapsedMs": 2908,
+      "success": true,
+      "answer": "這是「i7-12700F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i7-12700F",
+        "candidates": [
+          "i7-12700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-12700F",
+        "candidates": [
+          "i7-12700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-12700F",
+        "models": [
+          "i7-12700F"
+        ],
+        "observation": "Category: CPU\nModel: Intel® Core™ i7-12700F\nEvidence: Intel® Core™ i7-12700F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            358,
+            200,
+            660,
+            302
+          ],
+          "model": "i7-12700F",
+          "ocrModels": [
+            "i7-12700F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "INTEL(R)",
+        "I7-12700F"
+      ]
+    },
+    {
+      "id": "e6e20e69ed11d5575d6a",
+      "truth": "i7-12700K",
+      "kind": "bare",
+      "relative": "i7-12700K\\散片\\i7-12700K_散片_001.jpg",
+      "elapsedMs": 4847,
+      "success": true,
+      "answer": "這是「i7-12700K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-12700K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-12700K",
+        "candidates": [
+          "i7-12700K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-12700K",
+        "models": [
+          "i7-12700K"
+        ],
+        "observation": "Category: CPU\nModel: i7-12700K\nEvidence: i7-12700K\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            217,
+            251,
+            649,
+            385
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-12700K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 42
+        }
+      ],
+      "ocrText": [
+        "INTEL",
+        "I7-12700K",
+        "SRL4N",
+        "X2071423",
+        "CORETM I7",
+        "I7-12700K"
+      ]
+    },
+    {
+      "id": "27d7967cc9b4e98626b2",
+      "truth": "i7-12700KF",
+      "kind": "bare",
+      "relative": "i7-12700KF\\散片\\i7-12700KF_散片_002.jpg",
+      "elapsedMs": 7072,
+      "success": true,
+      "answer": "照片初步辨識為「i7-12700KF」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-12700KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-12700KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i7-12700KF",
+        "models": [
+          "i7-12700KF"
+        ],
+        "observation": "Category: CPU\nModel: i7-12700KF\nEvidence: i7-12700KF\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            532,
+            913,
+            960,
+            1062
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-12700KF"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 41.6
+        }
+      ],
+      "ocrText": [
+        "INTEL@)",
+        "67-12700KF",
+        "SRLAP",
+        "X223P117",
+        "INTEL(R",
+        "I7-12700KF"
+      ]
+    },
+    {
+      "id": "68a107079131a9e70756",
+      "truth": "i7-13700",
+      "kind": "bare",
+      "relative": "i7-13700\\散片\\i7-13700_散片_006.jpg",
+      "elapsedMs": 3151,
+      "success": true,
+      "answer": "照片初步辨識為「i7-13700」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-13700"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-13700"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i7-13700",
+        "models": [
+          "i7-13700"
+        ],
+        "observation": "Category: CPU\nModel: i7-13700\nEvidence: i7-13700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            298,
+            137,
+            450,
+            302
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-13700"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 58.21
+        }
+      ],
+      "ocrText": [
+        "0O",
+        "0",
+        "CORETK [",
+        "INTEL@",
+        "I7-13700",
+        "SRMBA",
+        "X2451331",
+        "67",
+        "INTELR",
+        "I7-13700",
+        "SRMBA",
+        "X2451331"
+      ]
+    },
+    {
+      "id": "c65f03950caf03c9f694",
+      "truth": "i7-13700F",
+      "kind": "bare",
+      "relative": "i7-13700F\\散片\\i7-13700F_散片_001.jpg",
+      "elapsedMs": 4371,
+      "success": true,
+      "answer": "這是「i7-13700F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i7-13700F",
+        "candidates": [
+          "i7-13700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-13700F",
+        "candidates": [
+          "i7-13700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-13700F",
+        "models": [
+          "i7-13700F"
+        ],
+        "observation": "Category: CPU\nModel: i7-13700F\nEvidence: i7-13700F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            271,
+            285,
+            677,
+            421
+          ],
+          "model": "i7-13700F",
+          "ocrModels": [
+            "i7-13700F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 44
+        }
+      ],
+      "ocrText": [
+        "8",
+        "INTELR",
+        "CORET I7",
+        "I7-13700F",
+        "SRMBB",
+        "X3016143",
+        "0"
+      ]
+    },
+    {
+      "id": "4c01c6da2f455d4fe0fb",
+      "truth": "i7-13700K",
+      "kind": "bare",
+      "relative": "i7-13700K\\散片\\i7-13700K_散片_003.jpg",
+      "elapsedMs": 3489,
+      "success": true,
+      "answer": "這是「i7-13700K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-13700K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-13700K",
+        "candidates": [
+          "i7-13700K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-13700K",
+        "models": [
+          "i7-13700K"
+        ],
+        "observation": "Category: CPU\nModel: i7-13700K\nEvidence: i7-13700K\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            250,
+            240,
+            558,
+            342
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-13700K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "INTEL(R",
+        "I7-13700K",
+        "SRMB8",
+        "X244G785",
+        "INTEL(R",
+        "I7-13700K"
+      ]
+    },
+    {
+      "id": "82301de34a0be1a5614c",
+      "truth": "i7-13700KF",
+      "kind": "bare",
+      "relative": "i7-13700KF\\散片\\i7-13700KF_散片_004.jpg",
+      "elapsedMs": 6112,
+      "success": true,
+      "answer": "照片初步辨識為「i7-13700KF」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-13700KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-13700KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "i7-13700KF",
+        "models": [
+          "i7-13700KF"
+        ],
+        "observation": "Category: CPU\nModel: Intel® Core™ i7-13700KF\nEvidence: Intel® Core™ i7-13700KF SRMB9 X325N574\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            228,
+            377,
+            726,
+            539
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 51.78
+        }
+      ],
+      "ocrText": [
+        "INTELQ",
+        "67-IJ700KF",
+        "SRMB9",
+        "X32SN574",
+        "INTELQ-",
+        "67-1J700KF",
+        "17"
+      ]
+    },
+    {
+      "id": "4f7a241d7f8659841282",
+      "truth": "i7-14700",
+      "kind": "bare",
+      "relative": "i7-14700\\散片\\i7-14700_散片_004.jpg",
+      "elapsedMs": 2952,
+      "success": true,
+      "answer": "這是「i7-14700」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i7-14700",
+        "candidates": [
+          "i7-14700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-14700",
+        "candidates": [
+          "i7-14700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-14700",
+        "models": [
+          "i7-14700"
+        ],
+        "observation": "Category: CPU\nModel: i7-14700\nEvidence: i7-14700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            194,
+            186,
+            502,
+            288
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-14700"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "CORETM I7",
+        "I7-14700",
+        "SRN3Z",
+        "L347E937",
+        "INTEL(R",
+        "CORETM I7",
+        "I7-14700"
+      ]
+    },
+    {
+      "id": "ac26c6893ac922d54852",
+      "truth": "i7-14700F",
+      "kind": "bare",
+      "relative": "i7-14700F\\散片\\i7-14700F_散片_004.jpg",
+      "elapsedMs": 6532,
+      "success": true,
+      "answer": "這是「i7-14700F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i7-14700F",
+        "candidates": [
+          "i7-14700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-14700F",
+        "candidates": [
+          "i7-14700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-14700F",
+        "models": [
+          "i7-14700F"
+        ],
+        "observation": "Category: CPU\nModel: i7-14700F\nEvidence: i7-14700F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            440,
+            496,
+            704,
+            589
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-14700F"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 26
+        }
+      ],
+      "ocrText": [
+        "INTEL(R) CORETM I7",
+        "I7-14700F",
+        "SRN3Z",
+        "X346N090",
+        "INTEL(R",
+        "CORETM I7",
+        "I7-14700F"
+      ]
+    },
+    {
+      "id": "9c2fc221ed3febbfe349",
+      "truth": "i7-14700K",
+      "kind": "bare",
+      "relative": "i7-14700K\\散片\\i7-14700K_散片_004.jpg",
+      "elapsedMs": 1463,
+      "success": true,
+      "answer": "這是「i7-14700K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i7-14700K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i7-14700K",
+        "candidates": [
+          "i7-14700K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-14700K",
+        "models": [
+          "i7-14700K"
+        ],
+        "observation": "Category: CPU\nModel: i7-14700K\nEvidence: i7-14700K\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            92,
+            80,
+            248,
+            147
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-14700K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 16
+        }
+      ],
+      "ocrText": [
+        "I7-14700K",
+        "SRN3X",
+        "L333E316",
+        "INTEL",
+        "CORET\" I7",
+        "I7-14700K"
+      ]
+    },
+    {
+      "id": "52c973f057644ebf724c",
+      "truth": "i7-14700KF",
+      "kind": "bare",
+      "relative": "i7-14700KF\\散片\\i7-14700KF_散片_001.jpg",
+      "elapsedMs": 5866,
+      "success": true,
+      "answer": "照片初步辨識為「i7-14700KF」或「i7-1470KF」。判讀有分歧，請核對數字與尾碼。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "i7-14700KF",
+          "i7-1470KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "i7-14700KF",
+          "i7-1470KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i7-14700KF",
+        "models": [
+          "i7-14700KF"
+        ],
+        "observation": "Category: CPU\nModel: i7-14700KF\nEvidence: i7-14700KF\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            205,
+            253,
+            613,
+            385
+          ],
+          "model": null,
+          "ocrModels": [
+            "i7-14700KF"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 42
+        }
+      ],
+      "ocrText": [
+        "2222222222222222",
+        "INTEL(R",
+        "CORETM I7",
+        "I7-14700KF",
+        "SRN3Y",
+        "X3380431",
+        "INTEL(R",
+        "CORETM I7",
+        "I7-1470KF"
+      ]
+    },
+    {
+      "id": "f31e234e239f9957d1dd",
+      "truth": "i9-12900",
+      "kind": "bare",
+      "relative": "i9-12900\\散片\\i9-12900_散片_006.jpg",
+      "elapsedMs": 4849,
+      "success": true,
+      "answer": "照片初步辨識為「i9-12900」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-12900"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-12900"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i9-12900",
+        "models": [
+          "i9-12900"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i9-12900\nEvidence: i9-12900\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            330,
+            405,
+            574,
+            490
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-12900"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "3",
+        "CORETM I9",
+        "19-12900",
+        "SRL4K",
+        "V218K093",
+        "R",
+        "CORETM I9",
+        "[9-12908"
+      ]
+    },
+    {
+      "id": "33ff7b0b2fa2e26fe9f5",
+      "truth": "i9-12900F",
+      "kind": "boxed",
+      "relative": "i9-12900F\\盒裝\\i9-12900F_盒裝_001.jpg",
+      "elapsedMs": 3986,
+      "success": true,
+      "answer": "這是「i9-12900F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i9-12900F",
+        "candidates": [
+          "i9-12900F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-12900F",
+        "candidates": [
+          "i9-12900F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-12900F",
+        "models": [
+          "i9-12900F"
+        ],
+        "observation": "Category: CPU\nModel: i9-12900F\nEvidence: i9-12900F LGA1700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            657,
+            959,
+            821,
+            1021
+          ],
+          "model": "i9-12900F",
+          "ocrModels": [
+            "i9-12900F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 38
+        }
+      ],
+      "ocrText": [
+        "I9",
+        "INTEL",
+        "CORE",
+        "I9-12900F",
+        "DISCRETE",
+        "GRAPHICS",
+        "LGA17O0",
+        "REQUIRED"
+      ]
+    },
+    {
+      "id": "5458a1c9833b53aa7893",
+      "truth": "i9-12900K",
+      "kind": "bare",
+      "relative": "i9-12900K\\散片\\i9-12900K_散片_003.jpg",
+      "elapsedMs": 1438,
+      "success": true,
+      "answer": "這是「i9-12900K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i9-12900K",
+        "candidates": [
+          "i9-12900K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-12900K",
+        "candidates": [
+          "i9-12900K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-12900K",
+        "models": [
+          "i9-12900K"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i9-12900K\nEvidence: i9-12900K\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            154,
+            126,
+            360,
+            204
+          ],
+          "model": "i9-12900K",
+          "ocrModels": [
+            "i9-12900K"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "INTELQ0) CORETH I9",
+        "I9-12900K",
+        "SRL4H",
+        "V1351198"
+      ]
+    },
+    {
+      "id": "745677377eb050c665b7",
+      "truth": "i9-12900KF",
+      "kind": "bare",
+      "relative": "i9-12900KF\\散片\\i9-12900KF_散片_004.jpg",
+      "elapsedMs": 5802,
+      "success": true,
+      "answer": "這是「i9-12900KF」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-12900KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-12900KF",
+        "candidates": [
+          "i9-12900KF"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-12900KF",
+        "models": [
+          "i9-12900KF"
+        ],
+        "observation": "Category: CPU\nModel: i9-12900KF\nEvidence: i9-12900KF SRL4 J X140K883 64\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            627,
+            1571,
+            1421,
+            1866
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-12900KF"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 93.75
+        }
+      ],
+      "ocrText": [
+        "INTELR) CORETM I9",
+        "19-12900KF",
+        "SRL4]",
+        "X140K883",
+        "INTEL(R)"
+      ]
+    },
+    {
+      "id": "10a4da9f76ef962c930b",
+      "truth": "i9-12900KS",
+      "kind": "bare",
+      "relative": "i9-12900KS\\散片\\i9-12900KS_散片_005.jpg",
+      "elapsedMs": 5503,
+      "success": true,
+      "answer": "照片初步辨識為「i9-12900KS」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-12900KS"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-12900KS"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i9-12900KS",
+        "models": [
+          "i9-12900KS"
+        ],
+        "observation": "Category: CPU\nModel: Intel® Core™ i9-12900KS\nEvidence: Intel® Core™ i9-12900KS\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            430,
+            235,
+            754,
+            336
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-12900KS"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 32
+        }
+      ],
+      "ocrText": [
+        "INTEL(R",
+        "CORETM I9",
+        "I9-12900KS",
+        "SRLDD",
+        "V204F559",
+        "INTEL(R)",
+        "CORETM I9",
+        "I9-12900KS"
+      ]
+    },
+    {
+      "id": "84bb2177417b691e93ac",
+      "truth": "i9-13900",
+      "kind": "boxed",
+      "relative": "i9-13900\\盒裝\\i9-13900_盒裝_001.jpg",
+      "elapsedMs": 6497,
+      "success": true,
+      "answer": "這是「i9-13900」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-13900"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-13900",
+        "candidates": [
+          "i9-13900"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-13900",
+        "models": [
+          "i9-13900"
+        ],
+        "observation": "Category: CPU\nModel: i9-13900\nEvidence: i9-13900 LGA1700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            833,
+            1223,
+            1082,
+            1361
+          ],
+          "model": "i9-13900",
+          "ocrModels": [
+            "i9-13900"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 62.5
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            483,
+            676,
+            671,
+            754
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 20
+        }
+      ],
+      "ocrText": [
+        "I9",
+        "LKEL",
+        "49-[3900",
+        "13TH GEN",
+        "I9-13900",
+        "LGA1700",
+        "I9-13900",
+        "LGA1700",
+        "CORET19"
+      ]
+    },
+    {
+      "id": "c60a28057bc5968656af",
+      "truth": "i9-13900F",
+      "kind": "bare",
+      "relative": "i9-13900F\\散片\\i9-13900F_散片_005.jpg",
+      "elapsedMs": 4777,
+      "success": true,
+      "answer": "這是「i9-13900F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i9-13900F",
+        "candidates": [
+          "i9-13900F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-13900F",
+        "candidates": [
+          "i9-13900F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-13900F",
+        "models": [
+          "i9-13900F"
+        ],
+        "observation": "Category: CPU\nModel: i9-13900F\nEvidence: i9-13900F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            584,
+            555,
+            1122,
+            734
+          ],
+          "model": "i9-13900F",
+          "ocrModels": [
+            "i9-13900F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 57.6
+        }
+      ],
+      "ocrText": [
+        "INTEL(R",
+        "CORETM J9",
+        "I9-13900F",
+        "SRMB7",
+        "X249L246"
+      ]
+    },
+    {
+      "id": "1c4fe30c179fed7e0936",
+      "truth": "i9-13900K",
+      "kind": "bare",
+      "relative": "i9-13900K\\散片\\i9-13900K_散片_004.jpg",
+      "elapsedMs": 6790,
+      "success": true,
+      "answer": "這是「i9-13900K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-13900K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-13900K",
+        "candidates": [
+          "i9-13900K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-13900K",
+        "models": [
+          "i9-13900K"
+        ],
+        "observation": "Category: CPU\nModel: Intel® Core™ i9-13900K\nEvidence: Intel® Core™ i9-13900K SRMBH\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            472,
+            835,
+            933,
+            995
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-13900K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 44.8
+        }
+      ],
+      "ocrText": [
+        "I9-13900K",
+        "SRMBH",
+        "INTEL(R",
+        "CORETM I9",
+        "I9-13900K"
+      ]
+    },
+    {
+      "id": "720d15a2880b51db073c",
+      "truth": "i9-13900KF",
+      "kind": "boxed",
+      "relative": "i9-13900KF\\盒裝\\i9-13900KF_盒裝_006.jpg",
+      "elapsedMs": 5424,
+      "success": true,
+      "answer": "這是「i9-13900KF」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-13900KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-13900KF",
+        "candidates": [
+          "i9-13900KF"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-13900KF",
+        "models": [
+          "i9-13900KF"
+        ],
+        "observation": "Category: CPU\nModel: i9-13900KF\nEvidence: i9-13900KF\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            616,
+            942,
+            868,
+            1016
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-13900KF"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 50
+        }
+      ],
+      "ocrText": [
+        "I9",
+        "INTEL",
+        "CORE",
+        "13TH GEN",
+        "I9-13900KF",
+        "DISCRETE GRAPHICS REQUIRED",
+        "LGA17OO",
+        "I9-13900KF"
+      ]
+    },
+    {
+      "id": "9426dcb0373ddfb56f6a",
+      "truth": "i9-13900KS",
+      "kind": "bare",
+      "relative": "i9-13900KS\\散片\\i9-13900KS_散片_001.jpg",
+      "elapsedMs": 2223,
+      "success": true,
+      "answer": "這是「i9-13900KS」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-13900KS"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-13900KS",
+        "candidates": [
+          "i9-13900KS"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-13900KS",
+        "models": [
+          "i9-13900KS"
+        ],
+        "observation": "Category: CPU\nModel: i9-13900KS\nEvidence: i9-13900KS\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            238,
+            122,
+            488,
+            208
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-13900KS"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 26
+        }
+      ],
+      "ocrText": [
+        "I9-13900KS",
+        "SRMBX",
+        "L306E034",
+        "I9-13900KS"
+      ]
+    },
+    {
+      "id": "5f0d0fbddad8b3932845",
+      "truth": "i9-14900K",
+      "kind": "bare",
+      "relative": "i9-14900K\\散片\\i9-14900K_散片_004.jpg",
+      "elapsedMs": 3337,
+      "success": true,
+      "answer": "這是「i9-14900K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-14900K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-14900K",
+        "candidates": [
+          "i9-14900K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-14900K",
+        "models": [
+          "i9-14900K"
+        ],
+        "observation": "Category: CPU\nModel: i9-14900K\nEvidence: i9-14900K\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            272,
+            224,
+            522,
+            312
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-14900K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 26
+        }
+      ],
+      "ocrText": [
+        "INTELR) CORETM I9",
+        "I9-14900K",
+        "SRN48",
+        "L336E312",
+        "INTEL(R",
+        "CORETM I9",
+        "I9-14900K"
+      ]
+    },
+    {
+      "id": "3cbfe43baba6a28a6bf7",
+      "truth": "i9-14900KF",
+      "kind": "bare",
+      "relative": "i9-14900KF\\散片\\i9-14900KF_散片_008.jpg",
+      "elapsedMs": 5965,
+      "success": true,
+      "answer": "這是「i9-14900KF」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "i9-14900KF",
+        "candidates": [
+          "i9-14900KF"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "i9-14900KF",
+        "candidates": [
+          "i9-14900KF"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "i9-14900KF",
+        "models": [
+          "i9-14900KF"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i9-14900KF\nEvidence: Intel Core i9-14900KF SRN49 X338Q171 (E4)\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            587,
+            1004,
+            934,
+            1128
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-14900KF"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 38.4
+        }
+      ],
+      "ocrText": [
+        "INTELR) CORET I9",
+        "I9-14900KF",
+        "SRN49",
+        "X3380171",
+        "INTEL(R)",
+        "CORET I9",
+        "I9-14900KF"
+      ]
+    },
+    {
+      "id": "59601050716c3311aabb",
+      "truth": "i9-14900KS",
+      "kind": "bare",
+      "relative": "i9-14900KS\\散片\\i9-14900KS_散片_001.jpg",
+      "elapsedMs": 5663,
+      "success": true,
+      "answer": "照片初步辨識為「i9-14900KS」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-14900KS"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i9-14900KS"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "i9-14900KS",
+        "models": [
+          "i9-14900KS"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i9-14900KS\nEvidence: Intel Core i9-14900KS SRN7R L346F489\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            366,
+            275,
+            703,
+            404
+          ],
+          "model": null,
+          "ocrModels": [
+            "i9-14900KS"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 54
+        }
+      ],
+      "ocrText": [
+        "3",
+        "CORETM I9",
+        "I9-14900KS",
+        "SRNTR",
+        "L346F489",
+        "INTEL(R",
+        "CORETM J9",
+        "INTELR",
+        "69-14900KS"
+      ]
+    },
+    {
+      "id": "2f96179474ad2b2b054d",
+      "truth": "Ryzen 3 3200G",
+      "kind": "bare",
+      "relative": "R3-3200G\\散片\\R3-3200G_散片_005.jpg",
+      "elapsedMs": 1824,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 3 3200G」。型號文字太小，請靠近補拍或裁切 CPU／盒裝標籤。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 3 3200G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 3 3200G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "Ryzen 3 3200G",
+        "models": [
+          "Ryzen 3 3200G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 3 3200G\nEvidence: AMD Ryzen 3 3200G\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            205,
+            217,
+            337,
+            257
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 3 3200G"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 14
+        }
+      ],
+      "ocrText": [
+        "1",
+        "AMD RYIEN",
+        "3200G",
+        "AMD 4",
+        "RYZEN",
+        "AMD RYZCN 3 32006"
+      ]
+    },
+    {
+      "id": "ad437966e0bef3abcb51",
+      "truth": "Ryzen 3 4100",
+      "kind": "bare",
+      "relative": "R3-4100\\散片\\R3-4100_散片_007.jpg",
+      "elapsedMs": 5159,
+      "success": true,
+      "answer": "這是「Ryzen 3 4100」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 3 4100",
+        "candidates": [
+          "Ryzen 3 4100"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 3 4100",
+        "candidates": [
+          "Ryzen 3 4100"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 3 4100",
+        "models": [
+          "Ryzen 3 4100"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 3 4100\nEvidence: AMD Ryzen 3 4100\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            280,
+            251,
+            658,
+            335
+          ],
+          "model": "Ryzen 3 4100",
+          "ocrModels": [
+            "Ryzen 3 4100"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 60
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 3 4100",
+        "AMD 4",
+        "RYZEN",
+        "JC C",
+        "; :"
+      ]
+    },
+    {
+      "id": "f4dc68a891d122b6299c",
+      "truth": "Ryzen 3 4350G PRO",
+      "kind": "bare",
+      "relative": "R3-4350G-PRO\\散片\\R3-4350G-PRO_散片_007.jpg",
+      "elapsedMs": 7774,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 3 4350G PRO」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 3 4350G PRO"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 3 4350G PRO"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ryzen 3 4350G PRO",
+        "models": [
+          "Ryzen 3 4350G PRO"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 3 PRO 4350G\nEvidence: AMD Ryzen 3 PRO 4350G\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            497,
+            468,
+            1216,
+            563
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 59.85
+        }
+      ],
+      "ocrText": [
+        "AMD",
+        "RYZEN",
+        "0000 0014 8",
+        "AFID RYZEN } PRO 4359G"
+      ]
+    },
+    {
+      "id": "2c2333784b8849e6f398",
+      "truth": "Ryzen 5 3400G",
+      "kind": "bare",
+      "relative": "R5-3400G\\散片\\R5-3400G_散片_005.jpg",
+      "elapsedMs": 6005,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 3400G」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 3400G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 3400G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "Ryzen 5 3400G",
+        "models": [
+          "Ryzen 5 3400G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 3400G\nEvidence: YD3400C5M4MFH\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            151,
+            125,
+            633,
+            218
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 3400G"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 69
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            188,
+            844,
+            364,
+            898
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 3400G",
+        "AMD 9",
+        "RYZEN",
+        "AX",
+        "1917 SUS",
+        "9 HL5861P 9026 9",
+        "DIFF USED",
+        "IN",
+        "USA",
+        "MADE",
+        "IN",
+        "CHINA"
+      ]
+    },
+    {
+      "id": "6c872e11f78293c39f47",
+      "truth": "Ryzen 5 3600",
+      "kind": "bare",
+      "relative": "R5-3600\\散片\\R5-3600_散片_003.jpg",
+      "elapsedMs": 4722,
+      "success": true,
+      "answer": "這是「Ryzen 5 3600」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 3600"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 3600",
+        "candidates": [
+          "Ryzen 5 3600"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 3600",
+        "models": [
+          "Ryzen 5 3600"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 3600\nEvidence: AMD RYZEN 5 3600\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            316,
+            261,
+            579,
+            324
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 3600"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 39
+        }
+      ],
+      "ocrText": [
+        "8",
+        "AMD",
+        "RYZEN $ 3600",
+        "RYZEN",
+        "E",
+        "AMD",
+        "53600",
+        "RYZEN"
+      ]
+    },
+    {
+      "id": "88233bc276aa9fd34736",
+      "truth": "Ryzen 5 4500",
+      "kind": "bare",
+      "relative": "R5-4500\\散片\\R5-4500_散片_004.jpg",
+      "elapsedMs": 6904,
+      "success": true,
+      "answer": "這是「Ryzen 5 4500」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 5 4500",
+        "candidates": [
+          "Ryzen 5 4500"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 4500",
+        "candidates": [
+          "Ryzen 5 4500"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 4500",
+        "models": [
+          "Ryzen 5 4500"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 4500\nEvidence: AMD Ryzen 5 4500\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            468,
+            372,
+            1193,
+            515
+          ],
+          "model": "Ryzen 5 4500",
+          "ocrModels": [
+            "Ryzen 5 4500"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 104
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            518,
+            1436,
+            777,
+            1523
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 48
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 4500",
+        "AMD A",
+        "RYZEN",
+        "100-00000064 4",
+        "ED",
+        "2222SU3",
+        "91J9573R20391",
+        "DIFFUSED",
+        "IN",
+        "TAIWAN",
+        "MADE",
+        "IN"
+      ]
+    },
+    {
+      "id": "87b5e514c7370122ed32",
+      "truth": "Ryzen 5 4600G",
+      "kind": "bare",
+      "relative": "R5-4600G\\散片\\R5-4600G_散片_003.jpg",
+      "elapsedMs": 4834,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 4600G」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 4600G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 4600G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ryzen 5 4600G",
+        "models": [
+          "Ryzen 5 4600G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 4600G\nEvidence: AMD Ryzen 5 4600G\nConfidence: high"
+      },
+      "regions": [],
+      "ocrText": [
+        "U",
+        "IU",
+        "AMDA",
+        "RYZEN",
+        "20 9"
+      ]
+    },
+    {
+      "id": "689de014f67ad3228297",
+      "truth": "Ryzen 5 5500",
+      "kind": "boxed",
+      "relative": "R5-5500\\盒裝\\R5-5500_盒裝_006.jpg",
+      "elapsedMs": 7296,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 5600」或「Ryzen 5 5500」。判讀有分歧，請核對數字與尾碼。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600",
+          "Ryzen 5 5500"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600",
+          "Ryzen 5 5500"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 5600",
+        "models": [
+          "Ryzen 5 5600"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5600\nEvidence: AMD Ryzen 5 5600\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            479,
+            987,
+            703,
+            1134
+          ],
+          "model": "Ryzen 5 5500",
+          "ocrModels": [
+            "Ryzen 5 5500"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 33.96
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            849,
+            1166,
+            1038,
+            1353
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 31.35
+        }
+      ],
+      "ocrText": [
+        "7",
+        "AMDA",
+        "1",
+        "5 5500",
+        "5000",
+        "YZE",
+        "1",
+        "AMD",
+        "RYZEN",
+        "AMD",
+        "RYZEN",
+        "RYZEN"
+      ]
+    },
+    {
+      "id": "3e30ec6f9b2c5f03e827",
+      "truth": "Ryzen 5 5500GT",
+      "kind": "bare",
+      "relative": "R5-5500GT\\散片\\R5-5500GT_散片_001.jpg",
+      "elapsedMs": 2261,
+      "success": true,
+      "answer": "這是「Ryzen 5 5500GT」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5500GT"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 5500GT",
+        "candidates": [
+          "Ryzen 5 5500GT"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 5500GT",
+        "models": [
+          "Ryzen 5 5500GT"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5500GT\nEvidence: AMD Ryzen 5 5500GT\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            134,
+            108,
+            400,
+            162
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 5500GT"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 5500GT",
+        "AMD 9",
+        "RYZEN",
+        "2020"
+      ]
+    },
+    {
+      "id": "90697857f8d75b7fd17b",
+      "truth": "Ryzen 5 5500X3D",
+      "kind": "bare",
+      "relative": "R5-5500X3D\\散片\\R5-5500X3D_散片_001.jpg",
+      "elapsedMs": 6192,
+      "success": true,
+      "answer": "這是「Ryzen 5 5500X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 5 5500X3D",
+        "candidates": [
+          "Ryzen 5 5500X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 5500X3D",
+        "candidates": [
+          "Ryzen 5 5500X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 5500X3D",
+        "models": [
+          "Ryzen 5 5500X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5500X3D\nEvidence: AMD Ryzen 5 5500X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            359,
+            61,
+            747,
+            127
+          ],
+          "model": "Ryzen 5 5500X3D",
+          "ocrModels": [
+            "Ryzen 5 5500X3D"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 42
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            385,
+            209,
+            815,
+            436
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 5500X3D",
+        "AMDA",
+        "RYZEN",
+        "2",
+        "RYZEN"
+      ]
+    },
+    {
+      "id": "56a97ea6c92e6b2ec90a",
+      "truth": "Ryzen 5 5600",
+      "kind": "bare",
+      "relative": "R5-5600\\散片\\R5-5600_散片_001.jpg",
+      "elapsedMs": 8123,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 6600」或「Ryzen 5 5600」。判讀有分歧，請核對數字與尾碼。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 6600",
+          "Ryzen 5 5600"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 6600",
+          "Ryzen 5 5600"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 6600",
+        "models": [
+          "Ryzen 5 6600"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 6600\nEvidence: AMD Ryzen 5 6600\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            1071,
+            1902,
+            1682,
+            2066
+          ],
+          "model": "Ryzen 5 5600",
+          "ocrModels": [
+            "Ryzen 5 5600"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 88.2
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            1452,
+            2768,
+            1710,
+            2882
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 37.8
+        }
+      ],
+      "ocrText": [
+        "M",
+        "8",
+        "AMD RYZER 5 5600",
+        "AMD 4",
+        "100",
+        "0J0000927",
+        "2209PG $",
+        "9K13673020162",
+        "DIFFUSED",
+        "US A",
+        "DIFFUSED",
+        "JAIW?M"
+      ]
+    },
+    {
+      "id": "096bea671b1c4635a1b9",
+      "truth": "Ryzen 5 5600G",
+      "kind": "bare",
+      "relative": "R5-5600G\\散片\\R5-5600G_散片_007.jpg",
+      "elapsedMs": 3779,
+      "success": true,
+      "answer": "這是「Ryzen 5 5600G」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 5600G",
+        "candidates": [
+          "Ryzen 5 5600G"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 5600G",
+        "models": [
+          "Ryzen 5 5600G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5600G\nEvidence: AMD Ryzen 5 5600G\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            162,
+            86,
+            382,
+            140
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 5600G"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 30
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            164,
+            176,
+            443,
+            357
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 19
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 5600G",
+        "AMD 9",
+        "RYZEN",
+        "100-000000252",
+        "DIFFUSED",
+        "IN MALAYSIA",
+        "2020",
+        "AMD",
+        "5 560OG",
+        "RYZEN",
+        "AMD 9",
+        "RYZEN"
+      ]
+    },
+    {
+      "id": "a46ab2d4a01946e4d936",
+      "truth": "Ryzen 5 5600GT",
+      "kind": "bare",
+      "relative": "R5-5600GT\\散片\\R5-5600GT_散片_001.jpg",
+      "elapsedMs": 2037,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 5600G」或「Ryzen 5 5600GT」。判讀有分歧，請核對數字與尾碼。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600G",
+          "Ryzen 5 5600GT"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600G",
+          "Ryzen 5 5600GT"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "Ryzen 5 5600G",
+        "models": [
+          "Ryzen 5 5600G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5600G\nEvidence: AMD Ryzen 5 5600G\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            116,
+            64,
+            332,
+            112
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 5600GT"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 24
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            131,
+            301,
+            211,
+            337
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 12
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 5600GT",
+        "AMD 9",
+        "RYZEN",
+        "000000457",
+        "2211SU$",
+        "91C5032020151",
+        "DIFFUSED",
+        "MADE",
+        "CINA",
+        "7070",
+        "AMD",
+        "AMD RYZEN 5 S600GT"
+      ]
+    },
+    {
+      "id": "143626052e1cd9262636",
+      "truth": "Ryzen 5 5600X",
+      "kind": "bare",
+      "relative": "R5-5600X\\散片\\R5-5600X_散片_002.jpg",
+      "elapsedMs": 7478,
+      "success": true,
+      "answer": "這是「Ryzen 5 5600X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600X"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 5600X",
+        "candidates": [
+          "Ryzen 5 5600X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 5600X",
+        "models": [
+          "Ryzen 5 5600X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5600X\nEvidence: AMD Ryzen 5 5600X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            320,
+            748,
+            582,
+            812
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 5600X"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 35.77
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            333,
+            856,
+            662,
+            1049
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 18.46
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 5600X",
+        "AMD A",
+        "RYZEN",
+        "2020",
+        "AMD RYZEN 5 5600X",
+        "RYZEN"
+      ]
+    },
+    {
+      "id": "eb15ae918cfe3d0debe9",
+      "truth": "Ryzen 5 5600XT",
+      "kind": "bare",
+      "relative": "R5-5600XT\\散片\\R5-5600XT_散片_001.jpg",
+      "elapsedMs": 5396,
+      "success": true,
+      "answer": "這是「Ryzen 5 5600XT」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 5 5600XT",
+        "candidates": [
+          "Ryzen 5 5600XT"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 5600XT",
+        "candidates": [
+          "Ryzen 5 5600XT"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 5600XT",
+        "models": [
+          "Ryzen 5 5600XT"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5600XT\nEvidence: AMD Ryzen 5 5600XT\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            185,
+            139,
+            728,
+            232
+          ],
+          "model": "Ryzen 5 5600XT",
+          "ocrModels": [
+            "Ryzen 5 5600XT"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 69
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            472,
+            806,
+            640,
+            860
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 30
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 5 5600XT",
+        "AMD 9",
+        "RYZEN",
+        "100=00000 15 8 5",
+        "B 6",
+        "MADE",
+        "IN",
+        "MALA YSI A",
+        "8",
+        "2020",
+        "AMD",
+        "AMD RYZEN 5 5600XT"
+      ]
+    },
+    {
+      "id": "e156f234206cd0213956",
+      "truth": "Ryzen 5 7500F",
+      "kind": "bare",
+      "relative": "R5-7500F\\散片\\R5-7500F_散片_001.jpg",
+      "elapsedMs": 11213,
+      "success": true,
+      "answer": "這是「Ryzen 5 7500F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 5 7500F",
+        "candidates": [
+          "Ryzen 5 7500F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 7500F",
+        "candidates": [
+          "Ryzen 5 7500F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 7500F",
+        "models": [
+          "Ryzen 5 7500F"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 7500F\nEvidence: AMD Ryzen 5 7500F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            634,
+            1144,
+            1119,
+            1336
+          ],
+          "model": "Ryzen 5 7500F",
+          "ocrModels": [
+            "Ryzen 5 7500F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 61.88
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            622,
+            912,
+            1158,
+            1253
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 7500F"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 61.88
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 5 7500F",
+        "100-000000597",
+        "B Q",
+        "2405PGE",
+        "9MA6178N40045",
+        "MADE",
+        "IN",
+        "MALAYSIA",
+        "2022",
+        "AMD"
+      ]
+    },
+    {
+      "id": "dca791c831421ff620fb",
+      "truth": "Ryzen 5 7600",
+      "kind": "bare",
+      "relative": "R5-7600\\散片\\R5-7600_散片_003.jpg",
+      "elapsedMs": 4416,
+      "success": true,
+      "answer": "這是「Ryzen 5 7600」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 5 7600",
+        "candidates": [
+          "Ryzen 5 7600"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 7600",
+        "candidates": [
+          "Ryzen 5 7600"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 7600",
+        "models": [
+          "Ryzen 5 7600"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 7600\nEvidence: AMD Ryzen 5 7600\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            254,
+            225,
+            722,
+            527
+          ],
+          "model": "Ryzen 5 7600",
+          "ocrModels": [
+            "Ryzen 5 7600"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 57
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            258,
+            446,
+            678,
+            598
+          ],
+          "model": "Ryzen 5 7600",
+          "ocrModels": [
+            "Ryzen 5 7600"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 57
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 5 7600",
+        "100-000001015",
+        "B Q",
+        "2226PG Y",
+        "Y981056020094",
+        "DIFFUSED",
+        "IN",
+        "TAIWAN",
+        "MADE",
+        "IN"
+      ]
+    },
+    {
+      "id": "114cc0543a6e6d31951e",
+      "truth": "Ryzen 5 7600X",
+      "kind": "bare",
+      "relative": "R5-7600X\\散片\\R5-7600X_散片_003.jpg",
+      "elapsedMs": 10300,
+      "success": true,
+      "answer": "這是「Ryzen 5 7600X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 7600X"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 7600X",
+        "candidates": [
+          "Ryzen 5 7600X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 7600X",
+        "models": [
+          "Ryzen 5 7600X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 7600X\nEvidence: AMD Ryzen 5 7600X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            796,
+            171,
+            1263,
+            678
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 7600X"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 112.37
+        }
+      ],
+      "ocrText": [
+        "5",
+        "0 P",
+        "AMDA",
+        "RYZEN",
+        "AMD",
+        "RYZEN",
+        "'7600X",
+        "-00000059",
+        "'820059",
+        "0 2 1",
+        "AL A",
+        "A MD"
+      ]
+    },
+    {
+      "id": "2a7e049e7c46093b30c1",
+      "truth": "Ryzen 5 8400F",
+      "kind": "bare",
+      "relative": "R5-8400F\\散片\\R5-8400F_散片_005.jpg",
+      "elapsedMs": 3706,
+      "success": true,
+      "answer": "這是「Ryzen 5 8400F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 8400F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 8400F",
+        "candidates": [
+          "Ryzen 5 8400F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 8400F",
+        "models": [
+          "Ryzen 5 8400F"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 8400F\nEvidence: AMD Ryzen 5 8400F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            180,
+            262,
+            375,
+            343
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 8400F"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 24
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            177,
+            158,
+            382,
+            310
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 8400F"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 5 8400F",
+        "000001591",
+        "ADE",
+        "2022",
+        "AMD RYZEN 5 8400F",
+        "100-000004591",
+        "EJ",
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 5 8400F"
+      ]
+    },
+    {
+      "id": "57467f86e87234a556b3",
+      "truth": "Ryzen 5 8500G",
+      "kind": "boxed",
+      "relative": "R5-8500G\\盒裝\\R5-8500G_盒裝_001.jpg",
+      "elapsedMs": 5226,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 8600G」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 8600G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 8600G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ryzen 5 8600G",
+        "models": [
+          "Ryzen 5 8600G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 8600G\nEvidence: AMD RYZON 8000 SERIES PROCESSOR WITH AMD RADEON™ GRAPHICS BUILT-IN\nConfidence: high"
+      },
+      "regions": [],
+      "ocrText": [
+        "AMDA",
+        "AMDA",
+        "RYZEN",
+        "5"
+      ]
+    },
+    {
+      "id": "56b9d9bea1a2bdbf617a",
+      "truth": "Ryzen 5 8600G",
+      "kind": "bare",
+      "relative": "R5-8600G\\散片\\R5-8600G_散片_001.jpg",
+      "elapsedMs": 3227,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 8600G」。型號文字太小，請靠近補拍或裁切 CPU／盒裝標籤。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 8600G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 8600G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ryzen 5 8600G",
+        "models": [
+          "Ryzen 5 8600G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 8600G\nEvidence: AMD Ryzen 5 8600G\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            197,
+            131,
+            323,
+            207
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 14
+        }
+      ],
+      "ocrText": [
+        "30/28",
+        "UP TO 3OPPM MONO",
+        "26PPM COLOUR\" (ECO MODE)",
+        "AMDE",
+        "RYZEN",
+        "8000 SERIES",
+        "AMDA",
+        "ZEN",
+        "JOLAILS . VISIT WWW BROTHE:",
+        "EXTRAPOLATED",
+        "RYZEN",
+        "8000 SERJES"
+      ]
+    },
+    {
+      "id": "e5f50538bcf81c1df26d",
+      "truth": "Ryzen 5 9500F",
+      "kind": "bare",
+      "relative": "R5-9500F\\散片\\R5-9500F_散片_002.jpg",
+      "elapsedMs": 5623,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 5 5600F」或「Ryzen 5 9500F」。判讀有分歧，請核對數字與尾碼。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600F",
+          "Ryzen 5 9500F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "conflict",
+        "model": null,
+        "candidates": [
+          "Ryzen 5 5600F",
+          "Ryzen 5 9500F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "Ryzen 5 5600F",
+        "models": [
+          "Ryzen 5 5600F"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 5600F\nEvidence: AMD Ryzen 5 5600F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            1035,
+            750,
+            1277,
+            936
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 5 9500F"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 22.51
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN",
+        "9500F",
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 5 9500F"
+      ]
+    },
+    {
+      "id": "5dc7e437e53763d2ebe0",
+      "truth": "Ryzen 5 9600",
+      "kind": "bare",
+      "relative": "R5-9600\\散片\\R5-9600_散片_003.jpg",
+      "elapsedMs": 1608,
+      "success": true,
+      "answer": "這是「Ryzen 5 9600」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 5 9600",
+        "candidates": [
+          "Ryzen 5 9600"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 9600",
+        "candidates": [
+          "Ryzen 5 9600"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 9600",
+        "models": [
+          "Ryzen 5 9600"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 9600\nEvidence: AMD Ryzen 5 9600\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            228,
+            279,
+            376,
+            393
+          ],
+          "model": "Ryzen 5 9600",
+          "ocrModels": [
+            "Ryzen 5 9600"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 12
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AND RYZEN",
+        "9600"
+      ]
+    },
+    {
+      "id": "cf790c49522e25f58b78",
+      "truth": "Ryzen 5 9600X",
+      "kind": "bare",
+      "relative": "R5-9600X\\散片\\R5-9600X_散片_004.jpg",
+      "elapsedMs": 3528,
+      "success": true,
+      "answer": "這是「Ryzen 5 9600X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 5 9600X",
+        "candidates": [
+          "Ryzen 5 9600X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 5 9600X",
+        "candidates": [
+          "Ryzen 5 9600X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 5 9600X",
+        "models": [
+          "Ryzen 5 9600X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 5 9600X\nEvidence: AMD Ryzen 5 9600X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            172,
+            462,
+            534,
+            594
+          ],
+          "model": "Ryzen 5 9600X",
+          "ocrModels": [
+            "Ryzen 5 9600X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 51
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            165,
+            262,
+            530,
+            537
+          ],
+          "model": "Ryzen 5 9600X",
+          "ocrModels": [
+            "Ryzen 5 9600X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 51
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 5 9600X",
+        "100-000001405",
+        "B Y",
+        "2520SUY",
+        "9 AMK065050439",
+        "MADE",
+        "IN",
+        "CHINA",
+        "2023",
+        "AMD"
+      ]
+    },
+    {
+      "id": "a60b7365e9c0f573ee56",
+      "truth": "Ryzen 7 4750G PRO",
+      "kind": "bare",
+      "relative": "R7-4750G-PRO\\散片\\R7-4750G-PRO_散片_002.jpg",
+      "elapsedMs": 6140,
+      "success": true,
+      "answer": "這是「Ryzen 7 4750G PRO」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 4750G PRO"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 4750G PRO",
+        "candidates": [
+          "Ryzen 7 4750G PRO"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 4750G PRO",
+        "models": [
+          "Ryzen 7 4750G PRO"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 PRO 4750G\nEvidence: AMD Ryzen 7 PRO 4750G\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            636,
+            1205,
+            1305,
+            1328
+          ],
+          "model": "Ryzen 7 4750G PRO",
+          "ocrModels": [
+            "Ryzen 7 4750G PRO"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 58.7
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN",
+        "7 PRO 4750G",
+        "AMD 9",
+        "RYZEM",
+        "100-000000 145 $",
+        "ED",
+        "2120PG5",
+        "9KE2435010077",
+        "DIFF USED",
+        "MADE",
+        "IN",
+        "2019"
+      ]
+    },
+    {
+      "id": "d5c7a6433c5b3416400f",
+      "truth": "Ryzen 7 5700",
+      "kind": "bare",
+      "relative": "R7-5700\\散片\\R7-5700_散片_001.jpg",
+      "elapsedMs": 6165,
+      "success": true,
+      "answer": "這是「Ryzen 7 5700」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 7 5700",
+        "candidates": [
+          "Ryzen 7 5700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 5700",
+        "candidates": [
+          "Ryzen 7 5700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 5700",
+        "models": [
+          "Ryzen 7 5700"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 5700\nEvidence: AMD Ryzen 7 5700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            228,
+            179,
+            741,
+            283
+          ],
+          "model": "Ryzen 7 5700",
+          "ocrModels": [
+            "Ryzen 7 5700"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 80
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            550,
+            940,
+            734,
+            996
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 32
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 7 5700",
+        "AMD9",
+        "RYZEN",
+        "100-000000926",
+        "B G",
+        "2212SUS",
+        "E",
+        "IN",
+        "USA",
+        "DIFFUSED",
+        "IN",
+        "TAIVAN"
+      ]
+    },
+    {
+      "id": "31e4b623a3cfa7136d14",
+      "truth": "Ryzen 7 5700G",
+      "kind": "bare",
+      "relative": "R7-5700G\\散片\\R7-5700G_散片_002.jpg",
+      "elapsedMs": 8689,
+      "success": true,
+      "answer": "這是「Ryzen 7 5700G」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 5700G"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 5700G",
+        "candidates": [
+          "Ryzen 7 5700G"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 5700G",
+        "models": [
+          "Ryzen 7 5700G"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 5700G\nEvidence: AMD Ryzen 7 5700G\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            386,
+            711,
+            945,
+            1018
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 5700G"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 99.9
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            389,
+            1450,
+            601,
+            1542
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 41.62
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 7 5700G",
+        "RYZEN",
+        "100-000000263",
+        "EF  2133SUS",
+        "9J07738710217",
+        "DIFFUSED",
+        "IN",
+        "TAIWAN",
+        "MADE",
+        "IN",
+        "2020",
+        "AMD"
+      ]
+    },
+    {
+      "id": "59e6789fec6eebfab2b6",
+      "truth": "Ryzen 7 5700X",
+      "kind": "bare",
+      "relative": "R7-5700X\\散片\\R7-5700X_散片_002.jpg",
+      "elapsedMs": 7826,
+      "success": true,
+      "answer": "這是「Ryzen 7 5700X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 5700X"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 5700X",
+        "candidates": [
+          "Ryzen 7 5700X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 5700X",
+        "models": [
+          "Ryzen 7 5700X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 5700X\nEvidence: AMD Ryzen 7 5700X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            298,
+            462,
+            548,
+            518
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 5700X"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 32
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            307,
+            567,
+            616,
+            747
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 19
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 7 5700X",
+        "AMD 9",
+        "RYZEN",
+        "70 0 -",
+        "000O00920",
+        "2320",
+        "AMD",
+        "7 5700X",
+        "RYZEN",
+        "RYZEN"
+      ]
+    },
+    {
+      "id": "7ca0c29686243b49c959",
+      "truth": "Ryzen 7 5700X3D",
+      "kind": "bare",
+      "relative": "R7-5700X3D\\散片\\R7-5700X3D_散片_002.jpg",
+      "elapsedMs": 6562,
+      "success": true,
+      "answer": "這是「Ryzen 7 5700X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 5700X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 5700X3D",
+        "candidates": [
+          "Ryzen 7 5700X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 5700X3D",
+        "models": [
+          "Ryzen 7 5700X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 5700X3D\nEvidence: AMD Ryzen 7 5700X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            490,
+            240,
+            978,
+            331
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 5700X3D"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 61.25
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            741,
+            811,
+            889,
+            866
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 25
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 7 5700X3D",
+        "AMD",
+        "RYZEN",
+        "100-000001503",
+        "BR",
+        "2349PG $",
+        "9K28957M40136",
+        "AADE",
+        "IN",
+        "MALA YSIA",
+        "2021:AMD",
+        "AMD RYZEN 7 5700X3D"
+      ]
+    },
+    {
+      "id": "b945f1c830b69c2acb88",
+      "truth": "Ryzen 7 5800X",
+      "kind": "bare",
+      "relative": "R7-5800X\\散片\\R7-5800X_散片_002.jpg",
+      "elapsedMs": 3988,
+      "success": true,
+      "answer": "這是「Ryzen 7 5800X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 7 5800X",
+        "candidates": [
+          "Ryzen 7 5800X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 5800X",
+        "candidates": [
+          "Ryzen 7 5800X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 5800X",
+        "models": [
+          "Ryzen 7 5800X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 5800X\nEvidence: AMD Ryzen 7 5800X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            336,
+            295,
+            635,
+            359
+          ],
+          "model": "Ryzen 7 5800X",
+          "ocrModels": [
+            "Ryzen 7 5800X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 40
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 7 5800X",
+        "AMD 9",
+        "RYZEN",
+        "100-000000063",
+        "B G",
+        "2036SUS",
+        "9JD860200027 6",
+        "DIFFUSED",
+        "IN",
+        "USA",
+        "DIFFUSED",
+        "IN"
+      ]
+    },
+    {
+      "id": "5e18f68dfaac38797656",
+      "truth": "Ryzen 7 5800X3D",
+      "kind": "bare",
+      "relative": "R7-5800X3D\\散片\\R7-5800X3D_散片_003.jpg",
+      "elapsedMs": 5757,
+      "success": true,
+      "answer": "這是「Ryzen 7 5800X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 5800X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 5800X3D",
+        "candidates": [
+          "Ryzen 7 5800X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 5800X3D",
+        "models": [
+          "Ryzen 7 5800X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 5800X3D\nEvidence: AMD Ryzen 7 5800X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            240,
+            204,
+            676,
+            278
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 5800X3D"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 50
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            466,
+            728,
+            596,
+            776
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 7 5800X3D",
+        "AMD 9",
+        "RYZEN",
+        "100-000000651",
+        "BR",
+        "2214PG5",
+        "9K19262P20110",
+        "DIFFUSED",
+        "IN",
+        "USA",
+        "DIFFUSED",
+        "IN"
+      ]
+    },
+    {
+      "id": "fc02451a799225bf9423",
+      "truth": "Ryzen 7 5800XT",
+      "kind": "bare",
+      "relative": "R7-5800XT\\散片\\R7-5800XT_散片_001.jpg",
+      "elapsedMs": 4948,
+      "success": true,
+      "answer": "這是「Ryzen 7 5800XT」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 5800XT"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 5800XT",
+        "candidates": [
+          "Ryzen 7 5800XT"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 5800XT",
+        "models": [
+          "Ryzen 7 5800XT"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 5800XT\nEvidence: AMD Ryzen 7 5800XT\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            144,
+            151,
+            683,
+            242
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 5800XT"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 67
+        }
+      ],
+      "ocrText": [
+        "AMD RYZEN 7 5800XT",
+        "AMD 9",
+        "RYZEN",
+        "10 0",
+        "0000015 8 2",
+        "2 L 2 1P G $",
+        "AMD RYZEN 7 5800XT"
+      ]
+    },
+    {
+      "id": "fcdc6fd031c2f14fbc00",
+      "truth": "Ryzen 7 7700",
+      "kind": "bare",
+      "relative": "R7-7700\\散片\\R7-7700_散片_002.jpg",
+      "elapsedMs": 5017,
+      "success": true,
+      "answer": "這是「Ryzen 7 7700」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 7 7700",
+        "candidates": [
+          "Ryzen 7 7700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 7700",
+        "candidates": [
+          "Ryzen 7 7700"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 7700",
+        "models": [
+          "Ryzen 7 7700"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 7700\nEvidence: AMD Ryzen 7 7700\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            582,
+            1098,
+            944,
+            1328
+          ],
+          "model": "Ryzen 7 7700",
+          "ocrModels": [
+            "Ryzen 7 7700"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 40.62
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 7 7700",
+        "10 0",
+        "CC 000 0 5 9 2",
+        "202 2",
+        "SZOOOO-ZIZ NLD OWV"
+      ]
+    },
+    {
+      "id": "eaf98b911884a2ba0583",
+      "truth": "Ryzen 7 7700X",
+      "kind": "bare",
+      "relative": "R7-7700X\\散片\\R7-7700X_散片_005.jpg",
+      "elapsedMs": 9357,
+      "success": true,
+      "answer": "這是「Ryzen 7 7700X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 7 7700X",
+        "candidates": [
+          "Ryzen 7 7700X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 7700X",
+        "candidates": [
+          "Ryzen 7 7700X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 7700X",
+        "models": [
+          "Ryzen 7 7700X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 7700X\nEvidence: AMD Ryzen 7 7700X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            380,
+            375,
+            1057,
+            812
+          ],
+          "model": "Ryzen 7 7700X",
+          "ocrModels": [
+            "Ryzen 7 7700X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 107.62
+        }
+      ],
+      "ocrText": [
+        "RYZEN",
+        "RYZEN",
+        "AMD RYZEN 7 7700X",
+        "10 (",
+        "L, (",
+        ".",
+        "AMS",
+        "RYZEN",
+        "AMD RYZEN 7 7700X"
+      ]
+    },
+    {
+      "id": "72247c486cbe7bbfd24a",
+      "truth": "Ryzen 7 7800X3D",
+      "kind": "bare",
+      "relative": "R7-7800X3D\\散片\\R7-7800X3D_散片_007.jpg",
+      "elapsedMs": 2431,
+      "success": true,
+      "answer": "這是「Ryzen 7 7800X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 7 7800X3D",
+        "candidates": [
+          "Ryzen 7 7800X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 7800X3D",
+        "candidates": [
+          "Ryzen 7 7800X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 7800X3D",
+        "models": [
+          "Ryzen 7 7800X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 7800X3D\nEvidence: AMD Ryzen 7 7800X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            173,
+            335,
+            559,
+            460
+          ],
+          "model": "Ryzen 7 7800X3D",
+          "ocrModels": [
+            "Ryzen 7 7800X3D"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 40
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            167,
+            156,
+            559,
+            399
+          ],
+          "model": "Ryzen 7 7800X3D",
+          "ocrModels": [
+            "Ryzen 7 7800X3D"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 40
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 7 7800X3D",
+        "100-000000910",
+        "B $",
+        "2305PG Y",
+        "F402015N30191",
+        "MADE",
+        "IN",
+        "MALA YSIA",
+        "2022",
+        "AMD"
+      ]
+    },
+    {
+      "id": "0b384215f760cb07a9a7",
+      "truth": "Ryzen 7 8700F",
+      "kind": "bare",
+      "relative": "R7-8700F\\散片\\R7-8700F_散片_006.jpg",
+      "elapsedMs": 5384,
+      "success": true,
+      "answer": "這是「Ryzen 7 8700F」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 7 8700F",
+        "candidates": [
+          "Ryzen 7 8700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 8700F",
+        "candidates": [
+          "Ryzen 7 8700F"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 8700F",
+        "models": [
+          "Ryzen 7 8700F"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 8700F\nEvidence: AMD Ryzen 7 8700F\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            280,
+            306,
+            742,
+            652
+          ],
+          "model": "Ryzen 7 8700F",
+          "ocrModels": [
+            "Ryzen 7 8700F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 56
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            290,
+            572,
+            726,
+            768
+          ],
+          "model": "Ryzen 7 8700F",
+          "ocrModels": [
+            "Ryzen 7 8700F"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 56
+        }
+      ],
+      "ocrText": [
+        "RYZEN",
+        "AMD RYZEN 7 8700F",
+        "100-000001590",
+        "EJ",
+        "2410SUY",
+        "9MC1450040271",
+        "MADE",
+        "IN",
+        "CHINA",
+        "202 2"
+      ]
+    },
+    {
+      "id": "ad4df256b7c3d2f7ef84",
+      "truth": "Ryzen 7 9700X",
+      "kind": "bare",
+      "relative": "R7-9700X\\散片\\R7-9700X_散片_005.jpg",
+      "elapsedMs": 1748,
+      "success": true,
+      "answer": "這是「Ryzen 7 9700X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 9700X"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 9700X",
+        "candidates": [
+          "Ryzen 7 9700X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 9700X",
+        "models": [
+          "Ryzen 7 9700X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 9700X\nEvidence: AMD Ryzen 7 9700X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            133,
+            197,
+            281,
+            305
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 9700X"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 17
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "RYZON",
+        "9700X",
+        "AHD",
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 7 9700X"
+      ]
+    },
+    {
+      "id": "ba17dc32f1129636fb3c",
+      "truth": "Ryzen 7 9800X3D",
+      "kind": "bare",
+      "relative": "R7-9800X3D\\散片\\R7-9800X3D_散片_005.jpg",
+      "elapsedMs": 7170,
+      "success": true,
+      "answer": "這是「Ryzen 7 9800X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 9800X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 7 9800X3D",
+        "candidates": [
+          "Ryzen 7 9800X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 7 9800X3D",
+        "models": [
+          "Ryzen 7 9800X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 9800X3D\nEvidence: AMD Ryzen 7 9800X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            140,
+            319,
+            515,
+            446
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 9800X3D"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 48
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            136,
+            123,
+            515,
+            391
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 7 9800X3D"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 48
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 7 9800X3D",
+        "100-00000106 4",
+        "CF",
+        "2428P G Y",
+        "F411260U4006 /",
+        "MADE",
+        "202 4",
+        "AND",
+        "AMD RYZEN 7 9800X3D",
+        "100-0000010&4"
+      ]
+    },
+    {
+      "id": "051c79596ffb171a8680",
+      "truth": "Ryzen 7 9850X3D",
+      "kind": "bare",
+      "relative": "R7-9850X3D\\散片\\R7-9850X3D_散片_003.jpg",
+      "elapsedMs": 4634,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 7 9850X3D」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 9850X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 7 9850X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ryzen 7 9850X3D",
+        "models": [
+          "Ryzen 7 9850X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 7 9850X3D\nEvidence: AMD Ryzen 7 9850X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            128,
+            104,
+            403,
+            296
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 30
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            131,
+            242,
+            403,
+            355
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 16
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 7 9850XJD",
+        "CF",
+        "MADL",
+        "AMD",
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 7 9850XJD",
+        "AMD RYZEN 7 9850XJD",
+        "CF"
+      ]
+    },
+    {
+      "id": "334dc3cd2374c6f9b69b",
+      "truth": "Ryzen 9 5900X",
+      "kind": "bare",
+      "relative": "R9-5900X\\散片\\R9-5900X_散片_007.jpg",
+      "elapsedMs": 3938,
+      "success": true,
+      "answer": "這是「Ryzen 9 5900X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 9 5900X",
+        "candidates": [
+          "Ryzen 9 5900X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 5900X",
+        "candidates": [
+          "Ryzen 9 5900X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 5900X",
+        "models": [
+          "Ryzen 9 5900X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 5900X\nEvidence: AMD Ryzen 9 5900X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            164,
+            187,
+            703,
+            570
+          ],
+          "model": "Ryzen 9 5900X",
+          "ocrModels": [
+            "Ryzen 9 5900X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 75.04
+        }
+      ],
+      "ocrText": [
+        "9",
+        "86",
+        "I0",
+        "5900X",
+        "RYZEN",
+        "AMD",
+        "RYZEN",
+        "AMD 9",
+        "000000061",
+        "2035SUS",
+        "JE2222000157",
+        "100"
+      ]
+    },
+    {
+      "id": "6f0010487589ac2a1a8e",
+      "truth": "Ryzen 9 7900",
+      "kind": "bare",
+      "relative": "R9-7900\\散片\\R9-7900_散片_003.jpg",
+      "elapsedMs": 3102,
+      "success": true,
+      "answer": "這是「Ryzen 9 7900」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 9 7900",
+        "candidates": [
+          "Ryzen 9 7900"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 7900",
+        "candidates": [
+          "Ryzen 9 7900"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 7900",
+        "models": [
+          "Ryzen 9 7900"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 7900\nEvidence: AMD Ryzen 9 7900\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            308,
+            366,
+            680,
+            500
+          ],
+          "model": "Ryzen 9 7900",
+          "ocrModels": [
+            "Ryzen 9 7900"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 51
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            303,
+            176,
+            717,
+            441
+          ],
+          "model": "Ryzen 9 7900",
+          "ocrModels": [
+            "Ryzen 9 7900"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 51
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 9 7900",
+        "100-000000590",
+        "BQ",
+        "2350SUE",
+        "9 ADC133P4013 9",
+        "MADE",
+        "IN",
+        "CHINA",
+        "2022",
+        "AMD"
+      ]
+    },
+    {
+      "id": "3521d05d804748106d70",
+      "truth": "Ryzen 9 7900X",
+      "kind": "bare",
+      "relative": "R9-7900X\\散片\\R9-7900X_散片_002.jpg",
+      "elapsedMs": 5817,
+      "success": true,
+      "answer": "這是「Ryzen 9 7900X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 9 7900X",
+        "candidates": [
+          "Ryzen 9 7900X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 7900X",
+        "candidates": [
+          "Ryzen 9 7900X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 7900X",
+        "models": [
+          "Ryzen 9 7900X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 7900X\nEvidence: AMD Ryzen 9 7900X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            535,
+            751,
+            948,
+            1009
+          ],
+          "model": "Ryzen 9 7900X",
+          "ocrModels": [
+            "Ryzen 9 7900X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 40.62
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            543,
+            931,
+            914,
+            1077
+          ],
+          "model": "Ryzen 9 7900X",
+          "ocrModels": [
+            "Ryzen 9 7900X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 40.62
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "ZEN",
+        "700Q SERIES",
+        "4440",
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 9 7900X",
+        "100-000000589",
+        "80",
+        "66 87787020086",
+        "DIFFUSE D",
+        "IN"
+      ]
+    },
+    {
+      "id": "74e9705d5b56c733df80",
+      "truth": "Ryzen 9 7900X3D",
+      "kind": "bare",
+      "relative": "R9-7900X3D\\散片\\R9-7900X3D_散片_004.jpg",
+      "elapsedMs": 2144,
+      "success": true,
+      "answer": "這是「Ryzen 9 7900X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 9 7900X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 7900X3D",
+        "candidates": [
+          "Ryzen 9 7900X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 7900X3D",
+        "models": [
+          "Ryzen 9 7900X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 7900X3D\nEvidence: AMD Ryzen 9 7900X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            143,
+            151,
+            339,
+            280
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 9 7900X3D"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 18
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN",
+        "'7900X3D",
+        "MADE",
+        "MALAYSIA",
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 9 7900X3D"
+      ]
+    },
+    {
+      "id": "aa87cce9193fe35287a0",
+      "truth": "Ryzen 9 7950X",
+      "kind": "bare",
+      "relative": "R9-7950X\\散片\\R9-7950X_散片_008.jpg",
+      "elapsedMs": 1389,
+      "success": true,
+      "answer": "這是「Ryzen 9 7950X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 9 7950X",
+        "candidates": [
+          "Ryzen 9 7950X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 7950X",
+        "candidates": [
+          "Ryzen 9 7950X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 7950X",
+        "models": [
+          "Ryzen 9 7950X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 7950X\nEvidence: AMD Ryzen 9 7950X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            99,
+            19,
+            341,
+            144
+          ],
+          "model": "Ryzen 9 7950X",
+          "ocrModels": [
+            "Ryzen 9 7950X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 24
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            100,
+            96,
+            327,
+            201
+          ],
+          "model": "Ryzen 9 7950X",
+          "ocrModels": [
+            "Ryzen 9 7950X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "AMDE",
+        "RYZEN",
+        "AMD RYZEN 9 7950X",
+        "0000005 1 4",
+        "22 26P GY",
+        "KN1300520015",
+        "DIF FUSED",
+        "AD E",
+        "MALA YSI A",
+        "2 0 2",
+        "R MD"
+      ]
+    },
+    {
+      "id": "fc6d85dc29b092ddf917",
+      "truth": "Ryzen 9 7950X3D",
+      "kind": "bare",
+      "relative": "R9-7950X3D\\散片\\R9-7950X3D_散片_007.jpg",
+      "elapsedMs": 10365,
+      "success": true,
+      "answer": "照片初步辨識為「Ryzen 9 7950X3D」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 9 7950X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 9 7950X3D"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ryzen 9 7950X3D",
+        "models": [
+          "Ryzen 9 7950X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 7950X3D\nEvidence: AMD Ryzen 9 7950X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            809,
+            2050,
+            1994,
+            2813
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 119.7
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            1203,
+            3011,
+            1852,
+            3163
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 75.6
+        }
+      ],
+      "ocrText": [
+        "RYZEK",
+        "AMD RYZEN 9 7930K1",
+        "KADE",
+        "14-",
+        "2022",
+        "AMDZ",
+        "AMD RYZEN 9 7930KL"
+      ]
+    },
+    {
+      "id": "662b71b5d5b6a2b8ebbb",
+      "truth": "Ryzen 9 9900X",
+      "kind": "bare",
+      "relative": "R9-9900X\\散片\\R9-9900X_散片_005.jpg",
+      "elapsedMs": 12797,
+      "success": true,
+      "answer": "這是「Ryzen 9 9900X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 9 9900X",
+        "candidates": [
+          "Ryzen 9 9900X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 9900X",
+        "candidates": [
+          "Ryzen 9 9900X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 9900X",
+        "models": [
+          "Ryzen 9 9900X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 9900X\nEvidence: AMD Ryzen 9 9900X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            239,
+            610,
+            871,
+            821
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 9 9900X"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 84
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            237,
+            242,
+            886,
+            718
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ryzen 9 9900X"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 84
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 9 9900X",
+        "100-00000066 2",
+        "B Y",
+        "24L5SUE",
+        "9AFY01944005 6",
+        "MADE",
+        "IN",
+        "CHINA",
+        "2023",
+        "AMD"
+      ]
+    },
+    {
+      "id": "ff2e679128365b4d611e",
+      "truth": "Ryzen 9 9900X3D",
+      "kind": "bare",
+      "relative": "R9-9900X3D\\散片\\R9-9900X3D_散片_007.jpg",
+      "elapsedMs": 4201,
+      "success": true,
+      "answer": "這是「Ryzen 9 9900X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 9 9900X3D",
+        "candidates": [
+          "Ryzen 9 9900X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 9900X3D",
+        "candidates": [
+          "Ryzen 9 9900X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 9900X3D",
+        "models": [
+          "Ryzen 9 9900X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 9900X3D\nEvidence: AMD Ryzen 9 9900X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            292,
+            471,
+            592,
+            668
+          ],
+          "model": "Ryzen 9 9900X3D",
+          "ocrModels": [
+            "Ryzen 9 9900X3D"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 31
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            298,
+            613,
+            592,
+            709
+          ],
+          "model": "Ryzen 9 9900X3D",
+          "ocrModels": [
+            "Ryzen 9 9900X3D"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 31
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 9 9900X3D",
+        "100-000001368",
+        "BY",
+        "2534SUY",
+        "MADE",
+        "IN",
+        "CHINA",
+        "2024",
+        "AMD"
+      ]
+    },
+    {
+      "id": "e6478df5183c64d5a686",
+      "truth": "Ryzen 9 9950X",
+      "kind": "bare",
+      "relative": "R9-9950X\\散片\\R9-9950X_散片_006.jpg",
+      "elapsedMs": 8920,
+      "success": true,
+      "answer": "這是「Ryzen 9 9950X」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ryzen 9 9950X"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 9950X",
+        "candidates": [
+          "Ryzen 9 9950X"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 9950X",
+        "models": [
+          "Ryzen 9 9950X"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 9950X\nEvidence: AMD Ryzen 9 9950X\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            293,
+            279,
+            615,
+            539
+          ],
+          "model": "Ryzen 9 9950X",
+          "ocrModels": [
+            "Ryzen 9 9950X"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 60.76
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "9950X",
+        "RYZON",
+        "1808040001",
+        "AMD",
+        "1",
+        "AMDA",
+        "RYZEN",
+        "AMD",
+        "RYZEN",
+        "9"
+      ]
+    },
+    {
+      "id": "1364a3809b780cc0902c",
+      "truth": "Ryzen 9 9950X3D",
+      "kind": "bare",
+      "relative": "R9-9950X3D\\散片\\R9-9950X3D_散片_002.jpg",
+      "elapsedMs": 5619,
+      "success": true,
+      "answer": "這是「Ryzen 9 9950X3D」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "verified",
+        "model": "Ryzen 9 9950X3D",
+        "candidates": [
+          "Ryzen 9 9950X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ryzen 9 9950X3D",
+        "candidates": [
+          "Ryzen 9 9950X3D"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "strict_ocr_and_visual_policy",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ryzen 9 9950X3D",
+        "models": [
+          "Ryzen 9 9950X3D"
+        ],
+        "observation": "Category: CPU\nModel: AMD Ryzen 9 9950X3D\nEvidence: AMD Ryzen 9 9950X3D\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            297,
+            295,
+            848,
+            674
+          ],
+          "model": "Ryzen 9 9950X3D",
+          "ocrModels": [
+            "Ryzen 9 9950X3D"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 66
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            303,
+            584,
+            848,
+            758
+          ],
+          "model": "Ryzen 9 9950X3D",
+          "ocrModels": [
+            "Ryzen 9 9950X3D"
+          ],
+          "accepted": true,
+          "fusionEligible": true,
+          "nativeTextHeight": 66
+        }
+      ],
+      "ocrText": [
+        "AMDA",
+        "RYZEN",
+        "AMD RYZEN 9 9950X3D",
+        "100-000000719",
+        "CF",
+        "2444PG Y",
+        "F411549X40085",
+        "MADE",
+        "IN",
+        "MALAYSIA",
+        "0",
+        "202 4"
+      ]
+    },
+    {
+      "id": "9ad0b16b085d9a1f9886",
+      "truth": "Ultra 5 225",
+      "kind": "boxed",
+      "relative": "Ultra 5 225\\盒裝\\Ultra 5 225_盒裝_001.jpg",
+      "elapsedMs": 4332,
+      "success": true,
+      "answer": "我認出這是 CPU，但目前讀不到完整型號。請靠近拍攝 CPU 表面或盒裝型號標籤，避開反光並保留完整尾碼，也可以直接輸入型號。",
+      "before": {
+        "status": "unreadable",
+        "model": null,
+        "candidates": [],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "unreadable",
+        "model": null,
+        "candidates": [],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": null,
+        "models": [],
+        "observation": "Category: CPU\nModel: Intel Core Ultra 5\nEvidence: Intel Core Ultra 5\nConfidence: high"
+      },
+      "regions": [],
+      "ocrText": [
+        "4",
+        "9",
+        "8",
+        "3",
+        "1"
+      ]
+    },
+    {
+      "id": "dfd42503c6bcd62c6872",
+      "truth": "Ultra 5 225F",
+      "kind": "bare",
+      "relative": "Ultra 5 225F\\散片\\Ultra 5 225F_散片_005.jpg",
+      "elapsedMs": 3073,
+      "success": true,
+      "answer": "照片初步辨識為「Ultra 5 225F」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 5 225F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 5 225F"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "Ultra 5 225F",
+        "models": [
+          "Ultra 5 225F"
+        ],
+        "observation": "Category: CPU\nModel: INTEL CORE ULTRA 5 225F\nEvidence: INTEL CORE ULTRA 5 225F SRQDJ L443E553 (4)\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            444,
+            189,
+            671,
+            276
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ultra 5 225F"
+          ],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 24
+        }
+      ],
+      "ocrText": [
+        "INTEL CORE ULTRA 5",
+        "225F",
+        "SRQDZ",
+        "L443E553",
+        "INTEL CORE ULTRA 5",
+        "225F"
+      ]
+    },
+    {
+      "id": "bce758265b637e2841b9",
+      "truth": "Ultra 5 235",
+      "kind": "bare",
+      "relative": "Ultra 5 235\\散片\\Ultra 5 235_散片_003.jpg",
+      "elapsedMs": 7761,
+      "success": true,
+      "answer": "照片初步辨識為「Ultra 5 235」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 5 235"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 5 235"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ultra 5 235",
+        "models": [
+          "Ultra 5 235"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core Ultra 5 235\nEvidence: Intel Core Ultra 5 235 SRQAS V449H637\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            768,
+            502,
+            1138,
+            699
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 52.58
+        }
+      ],
+      "ocrText": [
+        "ULTRA",
+        "INTEL",
+        "235",
+        "SRQAS",
+        "V449H637",
+        "INTEL CORAUU",
+        "235"
+      ]
+    },
+    {
+      "id": "74074456ae32ad305680",
+      "truth": "Ultra 5 245K",
+      "kind": "bare",
+      "relative": "Ultra 5 245K\\散片\\Ultra 5 245K_散片_001.jpg",
+      "elapsedMs": 5579,
+      "success": true,
+      "answer": "這是「Ultra 5 245K」。照片上的完整型號與尾碼已通過文字核對。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 5 245K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "verified",
+        "model": "Ultra 5 245K",
+        "candidates": [
+          "Ultra 5 245K"
+        ],
+        "requiresConfirmation": false,
+        "verificationMethod": "gemma_quote_and_region_ocr",
+        "failureReason": null
+      },
+      "gemma": {
+        "model": "Ultra 5 245K",
+        "models": [
+          "Ultra 5 245K"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core Ultra 5 245K\nEvidence: Intel Core Ultra 5 245K SRQCT L452F801 (e4)\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            257,
+            387,
+            635,
+            503
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ultra 5 245K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 36
+        }
+      ],
+      "ocrText": [
+        "8",
+        "INTEL CORE ULTRA 5",
+        "245K",
+        "SRQCT",
+        "L452F801",
+        "INTEL",
+        "CORE ULTRA",
+        "5",
+        "245K"
+      ]
+    },
+    {
+      "id": "bf33051fc91ecf2b80fe",
+      "truth": "Ultra 5 245KF",
+      "kind": "boxed",
+      "relative": "Ultra 5 245KF\\盒裝\\Ultra 5 245KF_盒裝_001.jpg",
+      "elapsedMs": 4528,
+      "success": true,
+      "answer": "照片初步辨識為「i5-6600K」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-6600K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "i5-6600K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "i5-6600K",
+        "models": [
+          "i5-6600K"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core i5-6600K\nEvidence: Intel Core i5-6600K UNLOCKED SERIES 2 ULTRA 245KF LGA1851\nConfidence: high"
+      },
+      "regions": [],
+      "ocrText": [
+        "1",
+        "83",
+        "1",
+        "01"
+      ]
+    },
+    {
+      "id": "10a2fb36b957cdd8cb51",
+      "truth": "Ultra 5 250K Plus",
+      "kind": "bare",
+      "relative": "Ultra 5 250K Plus\\散片\\Ultra 5 250K Plus_散片_003.jpg",
+      "elapsedMs": 6201,
+      "success": true,
+      "answer": "照片初步辨識為「Ultra 5 250K Plus」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 5 250K Plus"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 5 250K Plus"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": "Ultra 5 250K Plus",
+        "models": [
+          "Ultra 5 250K Plus"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core Ultra 5 250K Plus\nEvidence: Intel Core Ultra 5 250K Plus\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            197,
+            475,
+            496,
+            543
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 44
+        },
+        {
+          "id": "label-1",
+          "boxInOriginalUpload": [
+            199,
+            269,
+            629,
+            405
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 44
+        }
+      ],
+      "ocrText": [
+        "8",
+        "INTEL CORE ULTRA",
+        "5",
+        "250K PLUS",
+        "SA4UZ",
+        "L5476159",
+        "E4",
+        "L5476159",
+        "9",
+        "INTEL",
+        "CORE",
+        "ULTRA"
+      ]
+    },
+    {
+      "id": "81c0ef1f0b4095396354",
+      "truth": "Ultra 5 250KF Plus",
+      "kind": "bare",
+      "relative": "Ultra 5 250KF Plus\\散片\\Ultra 5 250KF Plus_散片_003.jpg",
+      "elapsedMs": 7313,
+      "success": true,
+      "answer": "我認出這是 CPU，但目前讀不到完整型號。請靠近拍攝 CPU 表面或盒裝型號標籤，避開反光並保留完整尾碼，也可以直接輸入型號。",
+      "before": {
+        "status": "unreadable",
+        "model": null,
+        "candidates": [],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "unreadable",
+        "model": null,
+        "candidates": [],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": null,
+        "models": [],
+        "observation": "Category: CPU\nModel: Intel Core Ultra 5-185H\nEvidence: Intel Core Ultra 5-185H\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            858,
+            381,
+            1140,
+            562
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 100.43
+        }
+      ],
+      "ocrText": [
+        "9",
+        "912",
+        "CORE",
+        "SA4UZ",
+        "PLUS",
+        "V5S2G556",
+        "8",
+        "~NAYB",
+        "5",
+        "CORE",
+        "UL",
+        "TRA"
+      ]
+    },
+    {
+      "id": "2bcf49656f1fe8014545",
+      "truth": "Ultra 7 265K",
+      "kind": "bare",
+      "relative": "Ultra 7 265K\\散片\\Ultra 7 265K_散片_006.jpg",
+      "elapsedMs": 7519,
+      "success": true,
+      "answer": "照片初步辨識為「Ultra 7 265K」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 7 265K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 7 265K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": null,
+        "models": [],
+        "observation": "Category: CPU\nModel: INTEL CORE ULTRA 7\nEvidence: INTEL CORE ULTRA 7\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            452,
+            520,
+            1276,
+            775
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 84.38
+        }
+      ],
+      "ocrText": [
+        "8",
+        "INTEL CORE ULTRA",
+        "7",
+        "265K",
+        "SRQCW",
+        "L4346465",
+        "INTEL",
+        "CORE",
+        "ULTRA",
+        "265K"
+      ]
+    },
+    {
+      "id": "496a8724a78c7da22713",
+      "truth": "Ultra 7 265KF",
+      "kind": "bare",
+      "relative": "Ultra 7 265KF\\散片\\Ultra 7 265KF_散片_005.jpg",
+      "elapsedMs": 8591,
+      "success": true,
+      "answer": "照片初步辨識為「Ultra 7 265KF」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 7 265KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 7 265KF"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": "Ultra 7 265KF",
+        "models": [
+          "Ultra 7 265KF"
+        ],
+        "observation": "Category: CPU\nModel: Intel Core Ultra 7 265KF\nEvidence: Intel Core Ultra 7 265KF\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            702,
+            521,
+            1142,
+            803
+          ],
+          "model": null,
+          "ocrModels": [],
+          "accepted": false,
+          "fusionEligible": false,
+          "nativeTextHeight": 51.21
+        }
+      ],
+      "ocrText": [
+        "INTEL CORE ULTRA",
+        "265KF",
+        "SRQCU",
+        "L548F981",
+        "WEA",
+        "INTEL",
+        "CORE",
+        "ULTRA",
+        "265KF",
+        "SRQCU",
+        "L548F981"
+      ]
+    },
+    {
+      "id": "0c01ac8ee166aaebde43",
+      "truth": "Ultra 7 270K Plus",
+      "kind": "boxed",
+      "relative": "Ultra 7 270K Plus\\盒裝\\Ultra 7 270K Plus_盒裝_001.jpg",
+      "elapsedMs": 3507,
+      "success": true,
+      "answer": "我認出這是 CPU，但目前讀不到完整型號。請靠近拍攝 CPU 表面或盒裝型號標籤，避開反光並保留完整尾碼，也可以直接輸入型號。",
+      "before": {
+        "status": "unreadable",
+        "model": null,
+        "candidates": [],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "after": {
+        "status": "unreadable",
+        "model": null,
+        "candidates": [],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "unreadable_or_conflicting"
+      },
+      "gemma": {
+        "model": null,
+        "models": [],
+        "observation": "Category: CPU\nModel: Intel Core 270K Plus\nEvidence: Intel Core 270K Plus\nConfidence: high"
+      },
+      "regions": [],
+      "ocrText": [
+        "7",
+        "INTEL",
+        "CORE",
+        "ULTRA",
+        "UNLOCKED",
+        "SERIES 2",
+        "270K PLUS",
+        "LGA1851"
+      ]
+    },
+    {
+      "id": "6a60e18efabb3ba2be9b",
+      "truth": "Ultra 9 285K",
+      "kind": "bare",
+      "relative": "Ultra 9 285K\\散片\\Ultra 9 285K_散片_003.jpg",
+      "elapsedMs": 3891,
+      "success": true,
+      "answer": "照片初步辨識為「Ultra 9 285K」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "before": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 9 285K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "after": {
+        "status": "candidate",
+        "model": null,
+        "candidates": [
+          "Ultra 9 285K"
+        ],
+        "requiresConfirmation": true,
+        "verificationMethod": null,
+        "failureReason": "ocr_text_not_clear"
+      },
+      "gemma": {
+        "model": null,
+        "models": [],
+        "observation": "Category: CPU\nModel: INTEL CORE ULTRA 9\nEvidence: INTEL CORE ULTRA 9\nConfidence: high"
+      },
+      "regions": [
+        {
+          "id": "label-0",
+          "boxInOriginalUpload": [
+            225,
+            213,
+            581,
+            322
+          ],
+          "model": null,
+          "ocrModels": [
+            "Ultra 9 285K"
+          ],
+          "accepted": false,
+          "fusionEligible": true,
+          "nativeTextHeight": 32
+        }
+      ],
+      "ocrText": [
+        "8",
+        "INTEL CORE ULTRA 9",
+        "285K",
+        "SRQD5",
+        "X433N158",
+        "INTEL",
+        "CORE ULTRA",
+        "9",
+        "285K"
+      ]
+    }
+  ],
+  "postSweepValidation": {
+    "change": "Retain actual uploaded Intel/Core context for far-away box labels; no SKU digits or thresholds changed.",
+    "recordedEvidenceReplay": "context-replay-evaluation.json",
+    "liveBrowserRegression": "browser-evaluation-i5-13500-scene218.json",
+    "note": "The 104-upload timing table predates this final context correction; recorded evidence replay retains all 69 correct adoptions."
+  }
+}

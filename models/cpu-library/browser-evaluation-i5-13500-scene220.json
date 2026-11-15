@@ -1,0 +1,1942 @@
+{
+  "date": "2026-10-15",
+  "knownSource": true,
+  "independentEvaluation": false,
+  "sku": "i5-13500",
+  "sceneIndex": 220,
+  "relative": "i5-13500\\盒裝\\i5-13500_盒裝_003.jpg",
+  "libraryVersion": "df38f4b998522b4f",
+  "results": [
+    {
+      "mode": "original",
+      "elapsedMs": 9586,
+      "success": true,
+      "answer": "照片初步辨識為「i5-13500」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-13500"
+      ],
+      "requiresConfirmation": true,
+      "verificationMethod": null,
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [
+          "I5",
+          "INTEL",
+          "CORE",
+          "15-.13500",
+          "LGA1700",
+          "INTEL",
+          "INTEL\" PROCESSOR",
+          "CORE",
+          "INTEL"
+        ],
+        "cpuModel": null,
+        "textVerified": false,
+        "failureReason": "unreadable_or_conflicting",
+        "anomalies": [],
+        "verificationMethod": null,
+        "fusionEvidence": [],
+        "regions": [],
+        "selectedRegionId": null,
+        "readings": [
+          {
+            "text": "i5",
+            "confidence": 0.9001737995003622,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                829,
+                77
+              ],
+              [
+                875,
+                77
+              ],
+              [
+                875,
+                113
+              ],
+              [
+                829,
+                113
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.998721214773994,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                634,
+                152
+              ],
+              [
+                698,
+                152
+              ],
+              [
+                698,
+                178
+              ],
+              [
+                634,
+                178
+              ]
+            ]
+          },
+          {
+            "text": "CORe",
+            "confidence": 0.9915163516998291,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                635,
+                179
+              ],
+              [
+                881,
+                179
+              ],
+              [
+                881,
+                243
+              ],
+              [
+                635,
+                243
+              ]
+            ]
+          },
+          {
+            "text": "H3th GeN",
+            "confidence": 0.11186461066120831,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                641,
+                279
+              ],
+              [
+                703,
+                279
+              ],
+              [
+                703,
+                291
+              ],
+              [
+                641,
+                291
+              ]
+            ]
+          },
+          {
+            "text": "15-.13500",
+            "confidence": 0.8045974913352663,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                833,
+                305
+              ],
+              [
+                897,
+                305
+              ],
+              [
+                897,
+                321
+              ],
+              [
+                833,
+                321
+              ]
+            ]
+          },
+          {
+            "text": "LGA1700",
+            "confidence": 0.5080315158644191,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                837,
+                321
+              ],
+              [
+                901,
+                321
+              ],
+              [
+                901,
+                337
+              ],
+              [
+                837,
+                337
+              ]
+            ]
+          },
+          {
+            "text": "C€",
+            "confidence": 0.11954122070082666,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                643,
+                413
+              ],
+              [
+                675,
+                413
+              ],
+              [
+                675,
+                427
+              ],
+              [
+                643,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "Z3",
+            "confidence": 0.18016407817530228,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                681,
+                413
+              ],
+              [
+                707,
+                413
+              ],
+              [
+                707,
+                427
+              ],
+              [
+                681,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "",
+            "confidence": 0,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                713,
+                413
+              ],
+              [
+                735,
+                413
+              ],
+              [
+                735,
+                429
+              ],
+              [
+                713,
+                429
+              ]
+            ]
+          },
+          {
+            "text": "3",
+            "confidence": 0.1680403494356284,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                741,
+                413
+              ],
+              [
+                767,
+                413
+              ],
+              [
+                767,
+                427
+              ],
+              [
+                741,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "2",
+            "confidence": 0.15957740115028685,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                805,
+                413
+              ],
+              [
+                829,
+                413
+              ],
+              [
+                829,
+                427
+              ],
+              [
+                805,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "T",
+            "confidence": 0.04171465699386889,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                833,
+                413
+              ],
+              [
+                857,
+                413
+              ],
+              [
+                857,
+                425
+              ],
+              [
+                833,
+                425
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9998537638807304,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                792,
+                508
+              ],
+              [
+                842,
+                508
+              ],
+              [
+                842,
+                532
+              ],
+              [
+                792,
+                532
+              ]
+            ]
+          },
+          {
+            "text": "Intel\" Processor",
+            "confidence": 0.9936286776868297,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                672,
+                571
+              ],
+              [
+                812,
+                571
+              ],
+              [
+                812,
+                599
+              ],
+              [
+                672,
+                599
+              ]
+            ]
+          },
+          {
+            "text": "Intal",
+            "confidence": 0.20291438075253856,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                729,
+                653
+              ],
+              [
+                755,
+                653
+              ],
+              [
+                755,
+                665
+              ],
+              [
+                729,
+                665
+              ]
+            ]
+          },
+          {
+            "text": "CORe",
+            "confidence": 0.5640019774436951,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                731,
+                667
+              ],
+              [
+                779,
+                667
+              ],
+              [
+                779,
+                685
+              ],
+              [
+                731,
+                685
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9993361860904216,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                355.7230723179238,
+                228.7061506225467
+              ],
+              [
+                432.1876185381081,
+                208.58357949530517
+              ],
+              [
+                440.2769276820762,
+                240.2938493774533
+              ],
+              [
+                363.8123814618919,
+                260.4164205046948
+              ]
+            ]
+          }
+        ],
+        "gemma": {
+          "model": "i5-13500",
+          "models": [
+            "i5-13500"
+          ],
+          "observation": "Category: CPU\nModel: i5-13500\nEvidence: i5-13500 LGA1700\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "timingMs": {
+        "total": 9533
+      }
+    },
+    {
+      "mode": "repeat",
+      "elapsedMs": 647,
+      "success": true,
+      "answer": "照片初步辨識為「i5-13500」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-13500"
+      ],
+      "requiresConfirmation": true,
+      "verificationMethod": null,
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [
+          "I5",
+          "INTEL",
+          "CORE",
+          "15-.13500",
+          "LGA1700",
+          "INTEL",
+          "INTEL\" PROCESSOR",
+          "CORE",
+          "INTEL"
+        ],
+        "cpuModel": null,
+        "textVerified": false,
+        "failureReason": "unreadable_or_conflicting",
+        "anomalies": [],
+        "verificationMethod": null,
+        "fusionEvidence": [],
+        "regions": [],
+        "selectedRegionId": null,
+        "readings": [
+          {
+            "text": "i5",
+            "confidence": 0.9001737995003622,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                829,
+                77
+              ],
+              [
+                875,
+                77
+              ],
+              [
+                875,
+                113
+              ],
+              [
+                829,
+                113
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.998721214773994,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                634,
+                152
+              ],
+              [
+                698,
+                152
+              ],
+              [
+                698,
+                178
+              ],
+              [
+                634,
+                178
+              ]
+            ]
+          },
+          {
+            "text": "CORe",
+            "confidence": 0.9915163516998291,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                635,
+                179
+              ],
+              [
+                881,
+                179
+              ],
+              [
+                881,
+                243
+              ],
+              [
+                635,
+                243
+              ]
+            ]
+          },
+          {
+            "text": "H3th GeN",
+            "confidence": 0.11186461066120831,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                641,
+                279
+              ],
+              [
+                703,
+                279
+              ],
+              [
+                703,
+                291
+              ],
+              [
+                641,
+                291
+              ]
+            ]
+          },
+          {
+            "text": "15-.13500",
+            "confidence": 0.8045974913352663,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                833,
+                305
+              ],
+              [
+                897,
+                305
+              ],
+              [
+                897,
+                321
+              ],
+              [
+                833,
+                321
+              ]
+            ]
+          },
+          {
+            "text": "LGA1700",
+            "confidence": 0.5080315158644191,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                837,
+                321
+              ],
+              [
+                901,
+                321
+              ],
+              [
+                901,
+                337
+              ],
+              [
+                837,
+                337
+              ]
+            ]
+          },
+          {
+            "text": "C€",
+            "confidence": 0.11954122070082666,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                643,
+                413
+              ],
+              [
+                675,
+                413
+              ],
+              [
+                675,
+                427
+              ],
+              [
+                643,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "Z3",
+            "confidence": 0.18016407817530228,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                681,
+                413
+              ],
+              [
+                707,
+                413
+              ],
+              [
+                707,
+                427
+              ],
+              [
+                681,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "",
+            "confidence": 0,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                713,
+                413
+              ],
+              [
+                735,
+                413
+              ],
+              [
+                735,
+                429
+              ],
+              [
+                713,
+                429
+              ]
+            ]
+          },
+          {
+            "text": "3",
+            "confidence": 0.1680403494356284,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                741,
+                413
+              ],
+              [
+                767,
+                413
+              ],
+              [
+                767,
+                427
+              ],
+              [
+                741,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "2",
+            "confidence": 0.15957740115028685,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                805,
+                413
+              ],
+              [
+                829,
+                413
+              ],
+              [
+                829,
+                427
+              ],
+              [
+                805,
+                427
+              ]
+            ]
+          },
+          {
+            "text": "T",
+            "confidence": 0.04171465699386889,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                833,
+                413
+              ],
+              [
+                857,
+                413
+              ],
+              [
+                857,
+                425
+              ],
+              [
+                833,
+                425
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9998537638807304,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                792,
+                508
+              ],
+              [
+                842,
+                508
+              ],
+              [
+                842,
+                532
+              ],
+              [
+                792,
+                532
+              ]
+            ]
+          },
+          {
+            "text": "Intel\" Processor",
+            "confidence": 0.9936286776868297,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                672,
+                571
+              ],
+              [
+                812,
+                571
+              ],
+              [
+                812,
+                599
+              ],
+              [
+                672,
+                599
+              ]
+            ]
+          },
+          {
+            "text": "Intal",
+            "confidence": 0.20291438075253856,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                729,
+                653
+              ],
+              [
+                755,
+                653
+              ],
+              [
+                755,
+                665
+              ],
+              [
+                729,
+                665
+              ]
+            ]
+          },
+          {
+            "text": "CORe",
+            "confidence": 0.5640019774436951,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                731,
+                667
+              ],
+              [
+                779,
+                667
+              ],
+              [
+                779,
+                685
+              ],
+              [
+                731,
+                685
+              ]
+            ]
+          },
+          {
+            "text": "intel",
+            "confidence": 0.9993361860904216,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              904
+            ],
+            "box": [
+              [
+                355.7230723179238,
+                228.7061506225467
+              ],
+              [
+                432.1876185381081,
+                208.58357949530517
+              ],
+              [
+                440.2769276820762,
+                240.2938493774533
+              ],
+              [
+                363.8123814618919,
+                260.4164205046948
+              ]
+            ]
+          }
+        ],
+        "gemma": {
+          "model": "i5-13500",
+          "models": [
+            "i5-13500"
+          ],
+          "observation": "Category: CPU\nModel: i5-13500\nEvidence: i5-13500 LGA1700\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "timingMs": {
+        "total": 621
+      }
+    },
+    {
+      "mode": "cropped_label",
+      "elapsedMs": 1360,
+      "success": true,
+      "answer": "照片初步辨識為「i5-13500」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i5-13500"
+      ],
+      "requiresConfirmation": true,
+      "verificationMethod": null,
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [
+          "I5",
+          "TEL",
+          "CORE",
+          "15-13500",
+          "LGA17O0",
+          "15.13500",
+          "LGA1700"
+        ],
+        "cpuModel": null,
+        "textVerified": false,
+        "failureReason": "ocr_text_not_clear",
+        "anomalies": [],
+        "verificationMethod": null,
+        "fusionEvidence": [],
+        "regions": [
+          {
+            "id": "label-0",
+            "boxInOriginalUpload": [
+              163,
+              293,
+              249,
+              333
+            ],
+            "model": null,
+            "ocrModels": [],
+            "accepted": false,
+            "fusionEligible": false,
+            "nativeTextHeight": 16
+          }
+        ],
+        "selectedRegionId": null,
+        "readings": [
+          {
+            "text": "i5",
+            "confidence": 0.9087323119626249,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              444,
+              407
+            ],
+            "box": [
+              [
+                169,
+                77
+              ],
+              [
+                215,
+                77
+              ],
+              [
+                215,
+                113
+              ],
+              [
+                169,
+                113
+              ]
+            ]
+          },
+          {
+            "text": "tel",
+            "confidence": 0.9994860291481018,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              444,
+              407
+            ],
+            "box": [
+              [
+                0,
+                152
+              ],
+              [
+                38,
+                152
+              ],
+              [
+                38,
+                178
+              ],
+              [
+                0,
+                178
+              ]
+            ]
+          },
+          {
+            "text": "CORe",
+            "confidence": 0.4849100112915039,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              444,
+              407
+            ],
+            "box": [
+              [
+                0,
+                176
+              ],
+              [
+                220,
+                176
+              ],
+              [
+                220,
+                244
+              ],
+              [
+                0,
+                244
+              ]
+            ]
+          },
+          {
+            "text": "TAGen",
+            "confidence": 0.153131859906103,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              444,
+              407
+            ],
+            "box": [
+              [
+                0,
+                279
+              ],
+              [
+                43,
+                279
+              ],
+              [
+                43,
+                291
+              ],
+              [
+                0,
+                291
+              ]
+            ]
+          },
+          {
+            "text": "15-13500",
+            "confidence": 0.7845793482638956,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              444,
+              407
+            ],
+            "box": [
+              [
+                175,
+                305
+              ],
+              [
+                237,
+                305
+              ],
+              [
+                237,
+                321
+              ],
+              [
+                175,
+                321
+              ]
+            ],
+            "regionId": "label-0"
+          },
+          {
+            "text": "LGA17O0",
+            "confidence": 0.5368249014951257,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              444,
+              407
+            ],
+            "box": [
+              [
+                177,
+                321
+              ],
+              [
+                241,
+                321
+              ],
+              [
+                241,
+                337
+              ],
+              [
+                177,
+                337
+              ]
+            ]
+          },
+          {
+            "text": "15.13500",
+            "confidence": 0.5707989984881344,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              258,
+              120
+            ],
+            "box": [
+              [
+                35,
+                39
+              ],
+              [
+                219,
+                39
+              ],
+              [
+                219,
+                81
+              ],
+              [
+                35,
+                81
+              ]
+            ],
+            "cropInResizedUpload": [
+              163,
+              293,
+              249,
+              333
+            ],
+            "cropInOriginalUpload": [
+              163,
+              293,
+              249,
+              333
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-0"
+          },
+          {
+            "text": "LGA1700",
+            "confidence": 0.4775448624746608,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              258,
+              120
+            ],
+            "box": [
+              [
+                41,
+                83
+              ],
+              [
+                229,
+                83
+              ],
+              [
+                229,
+                120
+              ],
+              [
+                41,
+                120
+              ]
+            ],
+            "cropInResizedUpload": [
+              163,
+              293,
+              249,
+              333
+            ],
+            "cropInOriginalUpload": [
+              163,
+              293,
+              249,
+              333
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-0"
+          }
+        ],
+        "gemma": {
+          "model": "i5-13500",
+          "models": [
+            "i5-13500"
+          ],
+          "observation": "Category: CPU\nModel: i5-13500\nEvidence: i5-13500\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "timingMs": {
+        "total": 1340
+      }
+    },
+    {
+      "mode": "blurred",
+      "elapsedMs": 1411,
+      "success": true,
+      "answer": "照片初步辨識為「i7-12700K」。完整型號尚未通過文字核對，可裁切 CPU／盒裝標籤再讀一次。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "candidate",
+      "model": null,
+      "candidates": [
+        "i7-12700K"
+      ],
+      "requiresConfirmation": true,
+      "verificationMethod": null,
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [],
+        "cpuModel": null,
+        "textVerified": false,
+        "failureReason": "unreadable_or_conflicting",
+        "anomalies": [],
+        "verificationMethod": null,
+        "fusionEvidence": [],
+        "regions": [],
+        "selectedRegionId": null,
+        "readings": [],
+        "gemma": {
+          "model": "i7-12700K",
+          "models": [
+            "i7-12700K"
+          ],
+          "observation": "Category: CPU\nModel: Intel Core i7-12700K\nEvidence: Intel Core i7-12700K\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "timingMs": {
+        "total": 1388
+      }
+    },
+    {
+      "mode": "conflicting_labels",
+      "elapsedMs": 3532,
+      "success": true,
+      "answer": "照片初步辨識為「i5-14400」或「i5-14400F」。判讀有分歧，請核對數字與尾碼。請確認完整型號，確認後再繼續查價、估價或計算瓦數。",
+      "status": "conflict",
+      "model": null,
+      "candidates": [
+        "i5-14400",
+        "i5-14400F"
+      ],
+      "requiresConfirmation": true,
+      "verificationMethod": null,
+      "evidence": {
+        "source": "uploaded_image",
+        "text": [
+          "8",
+          "I5-14400",
+          "SRN46",
+          "L410F052",
+          "I5-14400F",
+          "SRN45",
+          "X336F168",
+          "INTEL(R",
+          "I5-14400F"
+        ],
+        "cpuModel": null,
+        "textVerified": false,
+        "failureReason": "unreadable_or_conflicting",
+        "anomalies": [],
+        "verificationMethod": null,
+        "fusionEvidence": [],
+        "regions": [
+          {
+            "id": "label-0",
+            "boxInOriginalUpload": [
+              204,
+              202,
+              378,
+              271
+            ],
+            "model": "i5-14400",
+            "ocrModels": [
+              "i5-14400"
+            ],
+            "accepted": true,
+            "fusionEligible": true,
+            "nativeTextHeight": 16
+          },
+          {
+            "id": "label-1",
+            "boxInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "model": "i5-14400F",
+            "ocrModels": [
+              "i5-14400F"
+            ],
+            "accepted": true,
+            "fusionEligible": true,
+            "nativeTextHeight": 26
+          }
+        ],
+        "selectedRegionId": null,
+        "readings": [
+          {
+            "text": "8",
+            "confidence": 0.9366033083914296,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                737,
+                193
+              ],
+              [
+                753,
+                193
+              ],
+              [
+                753,
+                223
+              ],
+              [
+                737,
+                223
+              ]
+            ]
+          },
+          {
+            "text": "INTEL@) COREtM i5",
+            "confidence": 0.18706192795455018,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                216,
+                214
+              ],
+              [
+                366,
+                214
+              ],
+              [
+                366,
+                238
+              ],
+              [
+                216,
+                238
+              ]
+            ],
+            "regionId": "label-0"
+          },
+          {
+            "text": "i5-14400",
+            "confidence": 0.9631066144197828,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                219,
+                243
+              ],
+              [
+                293,
+                243
+              ],
+              [
+                293,
+                259
+              ],
+              [
+                219,
+                259
+              ]
+            ],
+            "regionId": "label-0"
+          },
+          {
+            "text": "SRN46",
+            "confidence": 0.9203668921658894,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                217,
+                265
+              ],
+              [
+                271,
+                265
+              ],
+              [
+                271,
+                285
+              ],
+              [
+                217,
+                285
+              ]
+            ]
+          },
+          {
+            "text": "L410F052",
+            "confidence": 0.9885418906775904,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                217,
+                289
+              ],
+              [
+                293,
+                289
+              ],
+              [
+                293,
+                309
+              ],
+              [
+                217,
+                309
+              ]
+            ]
+          },
+          {
+            "text": "INTELR) CORETr i5",
+            "confidence": 0.2325795779027557,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                818,
+                278
+              ],
+              [
+                992,
+                278
+              ],
+              [
+                992,
+                304
+              ],
+              [
+                818,
+                304
+              ]
+            ],
+            "regionId": "label-1"
+          },
+          {
+            "text": "Et",
+            "confidence": 0.07595486975827738,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                216,
+                314
+              ],
+              [
+                278,
+                314
+              ],
+              [
+                278,
+                338
+              ],
+              [
+                216,
+                338
+              ]
+            ]
+          },
+          {
+            "text": "i5-14400F",
+            "confidence": 0.7404932196170669,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                813,
+                305
+              ],
+              [
+                914,
+                305
+              ],
+              [
+                914,
+                331
+              ],
+              [
+                813,
+                331
+              ]
+            ],
+            "regionId": "label-1"
+          },
+          {
+            "text": "SRN45",
+            "confidence": 0.9859494877558194,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                817,
+                337
+              ],
+              [
+                879,
+                337
+              ],
+              [
+                879,
+                357
+              ],
+              [
+                817,
+                357
+              ]
+            ]
+          },
+          {
+            "text": "X336F168",
+            "confidence": 0.9972408806421236,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                818,
+                363
+              ],
+              [
+                906,
+                363
+              ],
+              [
+                906,
+                387
+              ],
+              [
+                818,
+                387
+              ]
+            ]
+          },
+          {
+            "text": "EZ",
+            "confidence": 0.13380907040500797,
+            "stage": "resized-upload",
+            "coordinateSpace": "resized-upload",
+            "imageSize": [
+              1200,
+              600
+            ],
+            "box": [
+              [
+                814,
+                394
+              ],
+              [
+                888,
+                394
+              ],
+              [
+                888,
+                418
+              ],
+              [
+                814,
+                418
+              ]
+            ]
+          },
+          {
+            "text": "INTEL(R",
+            "confidence": 0.9260385187103252,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              609,
+              231
+            ],
+            "box": [
+              [
+                51,
+                38
+              ],
+              [
+                271,
+                38
+              ],
+              [
+                271,
+                101
+              ],
+              [
+                51,
+                101
+              ]
+            ],
+            "cropInResizedUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "cropInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-1"
+          },
+          {
+            "text": "CORETR i5",
+            "confidence": 0.2846344729203993,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              609,
+              231
+            ],
+            "box": [
+              [
+                304,
+                48
+              ],
+              [
+                568,
+                48
+              ],
+              [
+                568,
+                104
+              ],
+              [
+                304,
+                104
+              ]
+            ],
+            "cropInResizedUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "cropInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-1"
+          },
+          {
+            "text": "i5-14400F",
+            "confidence": 0.9510006072255203,
+            "stage": "deskewed-upload-crop",
+            "coordinateSpace": "deskewed-upload-crop",
+            "imageSize": [
+              609,
+              231
+            ],
+            "box": [
+              [
+                46,
+                126
+              ],
+              [
+                339,
+                126
+              ],
+              [
+                339,
+                189
+              ],
+              [
+                46,
+                189
+              ]
+            ],
+            "cropInResizedUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "cropInOriginalUpload": [
+              801,
+              266,
+              1004,
+              343
+            ],
+            "rotationDegrees": 0,
+            "resizeScale": 3,
+            "preprocessing": "grayscale_contrast_2",
+            "regionId": "label-1"
+          }
+        ],
+        "gemma": {
+          "model": "i5-14400",
+          "models": [
+            "i5-14400"
+          ],
+          "observation": "Category: CPU\nModel: Intel Core i5-14400\nEvidence: i5-14400\nConfidence: high"
+        },
+        "recheck": null
+      },
+      "timingMs": {
+        "total": 3512
+      }
+    }
+  ],
+  "baseline": null,
+  "browserErrors": []
+}

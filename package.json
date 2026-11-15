@@ -10,12 +10,16 @@
     "model:train": "node train.js",
     "model:evaluate": "node scripts/evaluate-market-classifier.js",
     "model:cpu:train": "node scripts/train-cpu-vision.js",
+    "test:cpu": "node --test test/cpu-vision.test.js test/cpu-recognition-contract.test.js test/cpu-image-ui.test.js test/chat-feature-command.test.js",
+    "test:chat-context": "node --test test/hardware-context.test.js test/valuation-context-api.test.js test/valuation-context-ui.test.js test/strict-valuation-model.test.js test/cpu-recognition-contract.test.js test/cpu-image-ui.test.js test/chat-feature-command.test.js test/feature-routing.test.js test/image-feature-api.test.js test/feature-routing-ui.test.js",
+    "model:cpu:browser": "node scripts/evaluate-cpu-browser.js",
+    "model:image:consistency": "node scripts/evaluate-image-consistency.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "ai:setup": "node scripts/setup-ai-gateway.js",
     "ai:gateway": "node scripts/ai-gateway.js",
-    "test:ai": "node --test test/ollama-remote.test.js"
+    "test:ai": "node --test test/ollama-remote.test.js test/stage-budget.test.js test/image-feature-api.test.js"
   },
   "dependencies": {
     "axios": "^1.16.1",

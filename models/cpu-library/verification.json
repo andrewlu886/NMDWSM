@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-15",
+  "sourceImages": 1402,
+  "sourceHashesUnchanged": true,
+  "models": 104,
+  "curatedReferences": 104,
+  "privateDerivatives": 2802,
+  "exifRemoved": true,
+  "noUpscaling": true,
+  "uploadLimitsRespected": true,
+  "reviewCounts": {
+    "pending": 1156,
+    "quarantined": 130,
+    "approved": 104,
+    "excluded": 12
+  },
+  "independentEvaluation": false
+}
