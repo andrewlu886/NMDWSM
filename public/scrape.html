@@ -877,15 +877,15 @@ const precisionToggle = document.getElementById('precision-toggle');
                     }
                 }
 
-                if (Object.keys(result.meta?.sourceStatus || {}).length) {
+                const sourceWarnings = Object.values(result.meta?.sourceStatus || {})
+                    .filter(source => source.status === 'partial' || source.status === 'unavailable');
+                if (sourceWarnings.length) {
                     const notice = document.createElement('p');
                     notice.className = 'source-status';
                     notice.setAttribute('role', 'status');
-                    notice.textContent = Object.values(result.meta.sourceStatus).map(source => {
+                    notice.textContent = sourceWarnings.map(source => {
                         const count = Number(source.count) || 0;
-                        if (source.status === 'ok') return `${source.name}：${count} 筆`;
                         if (source.status === 'partial') return `${source.name}：${count} 筆（${source.message}）`;
-                        if (source.status === 'empty') return `${source.name}：0 筆（${source.message}）`;
                         return `${source.name}：${source.message || '暫時無法讀取'}`;
                     }).join('；');
                     container.appendChild(notice);
