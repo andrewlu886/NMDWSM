@@ -21,12 +21,46 @@ test('only explicit stock and an unambiguous matching offer are admitted', () =>
 });
 
 test('HTTP removal, temporary failures and unsafe redirects remain distinct', async () => {
-  assert.equal((await checkProduct(item, { request: async () => ({ status: 404 }) })).availability, 'unavailable');
-  assert.equal((await checkProduct(item, { request: async () => ({ status: 429 }) })).reason, 'rate_limited');
-  assert.equal((await checkProduct(item, { request: async () => { throw Error('offline'); } })).availability, 'unknown');
+  const page = { ...item, platform: 'Yahoo購物', url: 'https://tw.buy.yahoo.com/gdsale/TEST-1.html' };
+  assert.equal((await checkProduct(page, { request: async () => ({ status: 404 }) })).availability, 'unavailable');
+  assert.equal((await checkProduct(page, { request: async () => ({ status: 429 }) })).reason, 'rate_limited');
+  assert.equal((await checkProduct(page, { request: async () => { throw Error('offline'); } })).availability, 'unknown');
   let calls = 0;
-  assert.equal((await checkProduct(item, { request: async () => { calls++; return { status: 302, headers: { location: 'http://127.0.0.1/' } }; } })).availability, 'unknown');
+  assert.equal((await checkProduct(page, { request: async () => { calls++; return { status: 302, headers: { location: 'http://127.0.0.1/' } }; } })).availability, 'unknown');
   assert.equal(calls, 1);
+});
+
+test('PChome uses the product button states for every variant', async () => {
+  const pchome = { ...item, url: 'https://24h.pchome.com.tw/prod/DRAD1Q-A900I1OSV' };
+  const row = (ButtonType, P = 8900, suffix = '000') => ({ Id: `DRAD1Q-A900I1OSV-${suffix}`, Price: { P }, ButtonType, SaleStatus: ButtonType === 'ForSale' ? 1 : 0 });
+  const check = data => checkProduct(pchome, { request: async () => ({ data }) });
+  assert.deepEqual(await check([row('ForSale')]), { availability: 'available', reason: 'product_api', price: 8900, currency: 'TWD' });
+  assert.equal((await check([row('ForSale'), row('ForSale', 9900, '001')])).price, undefined);
+  for (const state of ['OrderRefill', 'NotReady', 'SoldOut']) assert.equal((await check([row(state)])).availability, 'unavailable');
+  assert.equal((await check([row('Coming')])).availability, 'unknown');
+  assert.equal((await check([{ ...row('ForSale'), Id: 'OTHER-1-000' }])).availability, 'unknown');
+});
+
+test('Momo, Sinya and Ruten sold-out or removed listings are recognised', async () => {
+  const momo = { ...item, platform: 'Momo', url: 'https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=1' };
+  const meta = (stock, price = '8,900') => `<meta name="product:availability" content="${stock}"><meta name="product:price:amount" content="${price}">`;
+  assert.deepEqual(parseAvailability(meta('in stock'), momo), { availability: 'available', reason: 'product_meta', price: 8900, currency: 'TWD' });
+  assert.equal(parseAvailability(meta('out of stock'), momo).availability, 'unavailable');
+  assert.equal(parseAvailability('<title>momo購物網 -- Mobile管理訊息</title><main>此商品目前已熱銷一空</main>', momo).availability, 'unavailable');
+  assert.equal(parseAvailability('<title>momo購物網 -- Mobile管理訊息</title><main>很抱歉！網頁無法顯示。可能的原因是：商品目前無展售</main>', momo).availability, 'unavailable');
+  assert.equal(parseAvailability('<title>商品</title>', momo).availability, 'unknown');
+  const yahoo = { ...item, platform: 'Yahoo購物', url: 'https://tw.buy.yahoo.com/gdsale/TEST-1.html' };
+  assert.equal(parseAvailability(html('InStock').replace(item.name, `${item.name} | RTX 5090 | Yahoo購物中心`), yahoo).availability, 'available');
+  const sinya = { ...item, platform: '欣亞', url: 'https://www.sinya.com.tw/prod/212583' };
+  assert.equal(parseAvailability('<button class="btn btnCart addToCart" data-pid="212583">加入購物車</button>', sinya).availability, 'available');
+  assert.equal(parseAvailability('<button class="btn btnNoStock">貨到通知我</button><button class="addToCart" data-pid="1">加價購</button>', sinya).availability, 'unavailable');
+  assert.equal(parseAvailability('<button class="addToCart" data-pid="1">加價購</button>', sinya).availability, 'unknown');
+  assert.equal((await checkProduct(sinya, { request: async () => ({ status: 500, data: '很抱歉，此產品不存在或已經下架2。' }) })).reason, 'removed');
+  assert.equal((await checkProduct(sinya, { request: async () => ({ status: 500, data: 'Database error' }) })).availability, 'unknown');
+  const ruten = { ...item, platform: '露天', url: 'https://www.ruten.com.tw/item/show?22000000000001' };
+  assert.equal((await checkProduct(ruten, { request: async () => ({ data: [] }) })).reason, 'removed');
+  assert.equal((await checkProduct(ruten, { request: async () => ({ data: [null] }) })).reason, 'removed');
+  assert.equal((await checkProduct(ruten, { request: async () => ({ data: { error: 1 } }) })).availability, 'unknown');
 });
 
 test('expired status hides sold products, marks unknown ones, and the same URL can recover', async () => {
