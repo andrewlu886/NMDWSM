@@ -135,7 +135,7 @@
             font-weight: 500;
             font-size: 0.95rem;
             position: relative;
-            padding: 6px 0; /* 增加留白，讓加粗的底線有足夠空間顯示 */
+            padding: 6px 0;
             transition: color 0.3s ease;
         }
 
@@ -143,14 +143,14 @@
         .main-nav a::after {
             content: '';
             position: absolute;
-            bottom: 0; /* 對齊至 padding 底部 */
+            bottom: 0;
             left: 50%;
-            width: 0;  /* 預設為 0，透過 hover 觸發展開特效 */
-            height: 4px; /* 特效加粗為 4px */
+            width: 0;
+            height: 4px;
             background: #ffffff;
             transition: all 0.3s ease;
             transform: translateX(-50%);
-            border-radius: 4px; /* 圓潤效果 */
+            border-radius: 4px;
         }
         
         .main-nav a:hover {
@@ -160,11 +160,11 @@
         
         .main-nav a:hover::after,
         .main-nav a.active::after {
-            width: 100%; /* 滑鼠移入或處於當前頁面時底線展開 */
+            width: 100%;
         }
 
         .main-nav a.active {
-            color: #ffffff !important; /* 確保白色文字 */
+            color: #ffffff !important;
             text-shadow: 0 0 8px rgba(255,255,255,0.4);
             font-weight: 700;
         }
@@ -359,6 +359,35 @@
             box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
 
+        /* --- 底部問卷區塊樣式 --- */
+        .survey-section {
+            margin-top: 2rem;
+        }
+
+        .survey-iframe {
+            width: 100%;
+            min-height: 760px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .survey-fallback {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .survey-fallback a {
+            color: var(--primary-color);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .survey-fallback a:hover {
+            text-decoration: underline;
+        }
     </style>
     <link rel="stylesheet" href="./site-theme.css?v=20261003-png">
 </head>
@@ -390,6 +419,26 @@
                 <p>學會用壓力測試與跑分數據，判讀硬體的實際效能與穩定度。</p>
                 <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;">照著教學測試 CPU 與顯卡，用數據講話，買硬體不當冤大頭。</p>
                 <a class="btn-action" href="/benchmark-instructions.html" style="text-decoration:none;">📖 查看跑分教學</a>
+            </div>
+        </section>
+
+        <section id="survey" class="survey-section">
+            <div class="card">
+                <h3>使用者意見回饋問卷</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">花 1 分鐘告訴我們你的使用體驗與想增加的功能，幫助「一次估夠」變得更好用！</p>
+                <!-- 請將下方 src 替換成 Google 表單「傳送 -> < >」取得的嵌入網址（結尾通常帶有 ?embedded=true） -->
+                <iframe
+                    class="survey-iframe"
+                    src="你的Google表單嵌入網址"
+                    frameborder="0"
+                    marginheight="0"
+                    marginwidth="0"
+                    loading="lazy"
+                    title="使用者意見回饋問卷">載入中…</iframe>
+                <p class="survey-fallback">
+                    若表單無法正常顯示，可改用
+                    <a href="https://forms.gle/ewSLP3pkpUZRYGbJ7" target="_blank" rel="noopener noreferrer">在新分頁開啟問卷</a>。
+                </p>
             </div>
         </section>
     </div>
