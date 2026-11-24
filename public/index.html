@@ -7,6 +7,7 @@
     <title>一次估夠 | 電腦硬體選購助手</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css?v=20261001-docked-launcher">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
         :root {
             --primary-color: #2563eb;     /* 皇家藍 */
@@ -363,6 +364,208 @@
         .survey-section {
             margin-top: 2rem;
         }
+
+        /* --- 資料庫硬體視覺化圖表區塊樣式 --- */
+        .charts-dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .chart-card {
+            transform: none !important;
+        }
+
+        .chart-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-header h3 {
+            margin-bottom: 0.35rem;
+        }
+
+        .chart-subtitle {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .chart-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-toggle-group {
+            display: inline-flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            gap: 4px;
+        }
+
+        .chart-toggle-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-toggle-btn.active {
+            background: linear-gradient(135deg, #1d4ed8, #0284c7);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.28);
+        }
+
+        .chart-select {
+            padding: 8px 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            background: #ffffff;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            max-width: 320px;
+        }
+
+        .chart-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .chart-switch-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #991b1b;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 7px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .chart-switch-label input {
+            accent-color: #dc2626;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .discount-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+            margin: 0.75rem 0 1.25rem;
+        }
+
+        .discount-kpi-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .discount-kpi-card.highlight {
+            background: #fff7ed;
+            border-color: #fed7aa;
+        }
+
+        .discount-kpi-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .discount-kpi-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .discount-kpi-card.highlight .discount-kpi-value {
+            color: #b91c1c;
+        }
+
+        .discount-kpi-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 460px;
+        }
+
+        .chart-status {
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .chart-status.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .chart-retry-btn {
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .chart-footnote {
+            margin: 10px 0 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .chart-canvas {
+                height: 400px;
+            }
+            .chart-select {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
     </style>
     <link rel="stylesheet" href="./site-theme.css?v=20261003-png">
 </head>
@@ -388,6 +591,86 @@
             <p>查即時市價、看跑分數據，在預算之內選出最適合的電腦配備。</p>
         </section>
 
+        <!-- 新增：從 nmdwsm.db 讀取資料繪製的兩張互動圖表 -->
+        <section id="hardware-charts" class="charts-dashboard" aria-label="硬體價格資料庫視覺化分析">
+            <div id="db-chart-status" class="chart-status">
+                <span>正在從資料庫讀取硬體參考價格與折舊規則…</span>
+            </div>
+
+            <!-- 圖表一：散點＋箱型圖 與 橫向區間帶＋品牌散點圖 自由切換 -->
+            <div class="card chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3>硬體參考價格分佈總覽</h3>
+                        <p id="dist-chart-subtitle" class="chart-subtitle">資料來源：nmdwsm.db（hardware_reference_prices），支援自由切換兩種分析視角</p>
+                    </div>
+                    <div class="chart-toolbar">
+                        <div class="chart-toggle-group" role="tablist" aria-label="圖表模式切換">
+                            <button type="button" id="btn-mode-box" class="chart-toggle-btn active" role="tab" aria-selected="true">散點 ＋ 箱型圖</button>
+                            <button type="button" id="btn-mode-range" class="chart-toggle-btn" role="tab" aria-selected="false">橫向區間帶 ＋ 品牌散點</button>
+                        </div>
+                        <select id="dist-category-select" class="chart-select" aria-label="篩選硬體品類" hidden>
+                            <option value="gpu">顯示卡 (GPU)</option>
+                            <option value="ram">記憶體 (RAM)</option>
+                            <option value="motherboard">主機板 (Motherboard)</option>
+                            <option value="cpu">處理器 (CPU)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="chart-distribution" class="chart-canvas" role="img" aria-label="硬體參考價格分佈互動圖表"></div>
+                <p id="dist-chart-footnote" class="chart-footnote">提示：滑鼠移至任意散點可查看完整型號、來源檔案與匯入日期；切換「橫向區間帶＋品牌散點」可點擊圖例開關特定品牌。</p>
+            </div>
+
+            <!-- 圖表二：二手價格 vs. 新品發售價折價幅度分析 -->
+            <div class="card chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3>二手價 vs. 新品發售價折價幅度分析</h3>
+                        <p id="discount-chart-subtitle" class="chart-subtitle">以資料庫新品參考價搭配折舊公式，直觀比較持有 1～36 個月後的二手打折與現省金額</p>
+                    </div>
+                    <div class="chart-toolbar">
+                        <select id="discount-category-select" class="chart-select" aria-label="選擇硬體品類">
+                            <option value="gpu">顯示卡 (GPU)</option>
+                            <option value="cpu">處理器 (CPU)</option>
+                            <option value="ram">記憶體 (RAM)</option>
+                            <option value="motherboard">主機板 (Motherboard)</option>
+                        </select>
+                        <select id="discount-model-select" class="chart-select" aria-label="選擇硬體型號"></select>
+                        <label class="chart-switch-label">
+                            <input type="checkbox" id="toggle-msrp-compare" checked>
+                            <span>顯示新品發售價對比</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="discount-kpi-grid" id="discount-kpi-grid">
+                    <div class="discount-kpi-card">
+                        <div class="discount-kpi-label">新品發售／參考價（100%）</div>
+                        <div class="discount-kpi-value" id="kpi-msrp">—</div>
+                        <div class="discount-kpi-sub" id="kpi-source">來源載入中</div>
+                    </div>
+                    <div class="discount-kpi-card highlight">
+                        <div class="discount-kpi-label">持有 12 個月二手估價</div>
+                        <div class="discount-kpi-value" id="kpi-12m">—</div>
+                        <div class="discount-kpi-sub" id="kpi-12m-sub">—</div>
+                    </div>
+                    <div class="discount-kpi-card highlight">
+                        <div class="discount-kpi-label">持有 36 個月二手估價</div>
+                        <div class="discount-kpi-value" id="kpi-36m">—</div>
+                        <div class="discount-kpi-sub" id="kpi-36m-sub">—</div>
+                    </div>
+                    <div class="discount-kpi-card">
+                        <div class="discount-kpi-label">採用資料庫折舊模型</div>
+                        <div class="discount-kpi-value" id="kpi-rule-name" style="font-size:1rem;">—</div>
+                        <div class="discount-kpi-sub" id="kpi-rule-detail">—</div>
+                    </div>
+                </div>
+
+                <div id="chart-discount" class="chart-canvas" role="img" aria-label="二手價與新品發售價折價幅度圖表"></div>
+                <p class="chart-footnote">紅虛線代表新品參考價（100%），紅色陰影區間即為買二手省下的折價空間；右側座標軸同步顯示殘值折數百分比。</p>
+            </div>
+        </section>
+
         <section id="recommend" class="features">
             <div class="card">
                 <h3>硬體跑分與檢測指南</h3>
@@ -405,6 +688,825 @@
             </div>
         </section>
     </div>
+
+    <script>
+    (function initHardwareDbCharts() {
+        const API_URL = '/api/charts/hardware-prices';
+        const statusEl = document.getElementById('db-chart-status');
+        const distChartDom = document.getElementById('chart-distribution');
+        const discountChartDom = document.getElementById('chart-discount');
+        const btnModeBox = document.getElementById('btn-mode-box');
+        const btnModeRange = document.getElementById('btn-mode-range');
+        const distCategorySelect = document.getElementById('dist-category-select');
+        const distSubtitle = document.getElementById('dist-chart-subtitle');
+        const discountCategorySelect = document.getElementById('discount-category-select');
+        const discountModelSelect = document.getElementById('discount-model-select');
+        const toggleMsrpCompare = document.getElementById('toggle-msrp-compare');
+
+        const CAT_NAMES = {
+            gpu: '顯示卡 GPU',
+            cpu: '處理器 CPU',
+            ram: '記憶體 RAM',
+            motherboard: '主機板'
+        };
+
+        const BRAND_COLORS = {
+            ASUS: '#e45756',
+            GIGABYTE: '#2563eb',
+            MSI: '#f59e0b',
+            ZOTAC: '#10b981',
+            INNO3D: '#8b5cf6',
+            EVGA: '#06b6d4',
+            ASRock: '#ec4899',
+            Acer: '#14b8a6',
+            PowerColor: '#f97316',
+            SAPPHIRE: '#0284c7',
+            AMD: '#dc2626',
+            ADATA: '#2563eb',
+            Kingston: '#e45756',
+            KLEVV: '#10b981',
+            Crucial: '#f59e0b',
+            Corsair: '#8b5cf6',
+            'G.SKILL': '#06b6d4'
+        };
+
+        const FALLBACK_PALETTE = ['#2563eb', '#e45756', '#f59e0b', '#10b981', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'];
+
+        let dbReferencePrices = [];
+        let dbValuationRules = {};
+        let currentDistMode = 'boxplot'; // 'boxplot' | 'range'
+        let distChart = null;
+        let discountChart = null;
+
+        function fmtNtd(val) {
+            return 'NT$' + Math.round(Number(val) || 0).toLocaleString('zh-TW');
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // 穩定雜湊抖動（避免重繪時散點亂跳）
+        function deterministicJitter(seed, range) {
+            const x = Math.sin(seed * 9301 + 49297) * 233280;
+            const frac = x - Math.floor(x);
+            return (frac * 2 - 1) * range;
+        }
+
+        function calcQuantiles(sortedNums) {
+            const n = sortedNums.length;
+            if (!n) return [0, 0, 0, 0, 0];
+            const q = (p) => {
+                const pos = (n - 1) * p;
+                const base = Math.floor(pos);
+                const rest = pos - base;
+                if (sortedNums[base + 1] !== undefined) {
+                    return sortedNums[base] + rest * (sortedNums[base + 1] - sortedNums[base]);
+                }
+                return sortedNums[base];
+            };
+            return [sortedNums[0], q(0.25), q(0.5), q(0.75), sortedNums[n - 1]];
+        }
+
+        // 依品類提取規格分組鍵（供橫向區間帶使用）
+        function extractSpecGroup(row) {
+            const model = String(row.model || '');
+            const compact = model.toUpperCase().replace(/\s+/g, '');
+            const dateTag = row.imported_at ? ` (${row.imported_at.slice(5)})` : '';
+
+            if (row.category === 'gpu') {
+                const patterns = [
+                    ['RTX5090', 'RTX 5090'],
+                    ['RTX5080', 'RTX 5080'],
+                    ['RTX5070TI', 'RTX 5070 Ti'],
+                    ['RTX5070', 'RTX 5070'],
+                    ['RTX5060TI', 'RTX 5060 Ti'],
+                    ['RTX5060', 'RTX 5060'],
+                    ['RTX3090TI', 'RTX 3090 Ti'],
+                    ['RTX3090', 'RTX 3090'],
+                    ['RTX3080TI', 'RTX 3080 Ti'],
+                    ['RTX3080', 'RTX 3080'],
+                    ['RX9070XT', 'RX 9070 XT'],
+                    ['RX9070', 'RX 9070'],
+                    ['RX9060XT', 'RX 9060 XT']
+                ];
+                for (const [pat, label] of patterns) {
+                    if (compact.includes(pat)) return label + dateTag;
+                }
+                return '其他 GPU' + dateTag;
+            }
+
+            if (row.category === 'motherboard') {
+                for (const chip of ['Z790', 'B760', 'H810', 'H610', 'X870', 'X670', 'B850', 'B650', 'B550', 'A520']) {
+                    if (compact.includes(chip)) return chip + ' 晶片組' + dateTag;
+                }
+                return '其他主機板' + dateTag;
+            }
+
+            if (row.category === 'ram') {
+                for (const cap of ['128GB', '96GB', '64GB', '32GB', '16GB', '8GB']) {
+                    if (compact.includes(cap)) return 'DDR5 ' + cap + dateTag;
+                }
+                return '其他容量' + dateTag;
+            }
+
+            if (row.category === 'cpu') {
+                const offerLabel = row.offer_type === 'motherboard_bundle' ? '搭板' : '單買';
+                if (compact.includes('RYZEN9')) return `Ryzen 9 (${offerLabel})`;
+                if (compact.includes('RYZEN7')) return `Ryzen 7 (${offerLabel})`;
+                if (compact.includes('RYZEN5')) return `Ryzen 5 (${offerLabel})`;
+                return `${row.brand} CPU (${offerLabel})`;
+            }
+
+            return row.category;
+        }
+
+        // ======================================================================
+        // 圖表一模式 A：散點 ＋ 箱型圖（各匯入日期 × 品類）
+        // ======================================================================
+        function renderDistributionBoxplot() {
+            if (!distChart) return;
+            const groupMap = new Map();
+
+            for (const row of dbReferencePrices) {
+                const key = `${row.imported_at}__${row.category}`;
+                if (!groupMap.has(key)) {
+                    groupMap.set(key, {
+                        key,
+                        date: row.imported_at || '',
+                        category: row.category,
+                        rows: []
+                    });
+                }
+                groupMap.get(key).rows.push(row);
+            }
+
+            const groups = Array.from(groupMap.values()).sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.category.localeCompare(b.category);
+            });
+
+            const xLabels = groups.map(g => {
+                const shortDate = g.date ? g.date.slice(5) : '';
+                const catName = CAT_NAMES[g.category] || g.category;
+                return `${shortDate}\n${catName}\n(n=${g.rows.length})`;
+            });
+
+            const boxData = [];
+            const scatterData = [];
+            const boxColors = ['#2563eb', '#e45756', '#f59e0b', '#10b981', '#8b5cf6', '#06b6d4'];
+
+            groups.forEach((g, idx) => {
+                const prices = g.rows.map(r => Number(r.price_ntd)).sort((a, b) => a - b);
+                const stats = calcQuantiles(prices);
+                const color = boxColors[idx % boxColors.length];
+
+                boxData.push({
+                    value: stats,
+                    itemStyle: {
+                        color: color + '33',
+                        borderColor: color,
+                        borderWidth: 2
+                    }
+                });
+
+                g.rows.forEach((r, rIdx) => {
+                    const jitterPx = Math.round(deterministicJitter(idx * 1000 + rIdx, 26));
+                    scatterData.push({
+                        value: [idx, Number(r.price_ntd)],
+                        symbolOffset: [jitterPx, 0],
+                        itemStyle: {
+                            color,
+                            opacity: 0.72,
+                            borderColor: '#ffffff',
+                            borderWidth: 0.8
+                        },
+                        meta: r
+                    });
+                });
+            });
+
+            distSubtitle.textContent = `模式 A：各匯入時間批次 × 硬體品類價格分佈（共 ${dbReferencePrices.length} 筆，箱型圖呈現四分位數與中位數，散點保留每筆原始報價）`;
+
+            distChart.clear();
+            distChart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(15, 23, 42, 0.94)',
+                    borderWidth: 0,
+                    textStyle: { color: '#f8fafc', fontSize: 12.5, fontFamily: 'Noto Sans TC, sans-serif' },
+                    formatter(params) {
+                        if (params.seriesType === 'boxplot') {
+                            const v = params.value;
+                            const o = v.length === 6 ? 1 : 0;
+                            return [
+                                `<strong>${escapeHtml(params.name.replace(/\n/g, ' '))}</strong>`,
+                                `最高價：${fmtNtd(v[o + 4])}`,
+                                `Q3（75%）：${fmtNtd(v[o + 3])}`,
+                                `<strong>中位數：${fmtNtd(v[o + 2])}</strong>`,
+                                `Q1（25%）：${fmtNtd(v[o + 1])}`,
+                                `最低價：${fmtNtd(v[o])}`
+                            ].join('<br>');
+                        }
+                        const r = params.data?.meta;
+                        if (!r) return '';
+                        const offer = r.offer_type === 'motherboard_bundle' ? '搭主機板價' : '單買參考價';
+                        return [
+                            `<strong>${escapeHtml(r.brand)} ${escapeHtml(r.model)}</strong>`,
+                            `參考價格：<span style="color:#38bdf8;font-weight:700;">${fmtNtd(r.price_ntd)}</span>（${offer}）`,
+                            `匯入日期：${escapeHtml(r.imported_at)}`,
+                            `來源檔案：${escapeHtml(r.source_file)}`
+                        ].join('<br>');
+                    }
+                },
+                grid: { left: 82, right: 28, top: 34, bottom: 72 },
+                xAxis: {
+                    type: 'category',
+                    data: xLabels,
+                    axisLine: { lineStyle: { color: '#cbd5e1' } },
+                    axisLabel: { color: '#334155', fontSize: 12, lineHeight: 17, interval: 0 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '參考價格（NTD）',
+                    nameTextStyle: { color: '#475569', padding: [0, 0, 0, 20] },
+                    axisLabel: { color: '#475569', formatter: v => 'NT$' + Number(v).toLocaleString('zh-TW') },
+                    splitLine: { lineStyle: { type: 'dashed', color: '#e2e8f0' } }
+                },
+                series: [
+                    {
+                        name: '箱型分佈',
+                        type: 'boxplot',
+                        data: boxData,
+                        boxWidth: [26, 54],
+                        z: 2
+                    },
+                    {
+                        name: '個別硬體報價',
+                        type: 'scatter',
+                        data: scatterData,
+                        symbolSize: 7,
+                        z: 4
+                    }
+                ]
+            });
+        }
+
+        // ======================================================================
+        // 圖表一模式 B：橫向區間帶 ＋ 品牌散點圖
+        // ======================================================================
+        function renderDistributionRangeBrand() {
+            if (!distChart) return;
+            const selectedCat = distCategorySelect.value;
+            const filtered = dbReferencePrices.filter(r => r.category === selectedCat);
+
+            const specMap = new Map();
+            for (const row of filtered) {
+                const grp = extractSpecGroup(row);
+                if (!specMap.has(grp)) specMap.set(grp, []);
+                specMap.get(grp).push(row);
+            }
+
+            const specStats = Array.from(specMap.entries()).map(([label, rows]) => {
+                const prices = rows.map(r => Number(r.price_ntd)).sort((a, b) => a - b);
+                const [minP, , medP, , maxP] = calcQuantiles(prices);
+                return { label, rows, minP, medP, maxP, count: rows.length };
+            }).sort((a, b) => a.medP - b.medP);
+
+            const yLabels = specStats.map(s => s.label);
+            const yIndexByLabel = new Map(yLabels.map((l, i) => [l, i]));
+
+            const rangeData = specStats.map((s, idx) => [idx, s.minP, s.medP, s.maxP, s.count, s.label]);
+
+            const brandMap = new Map();
+            filtered.forEach((row, idx) => {
+                const brand = row.brand || '其他';
+                if (!brandMap.has(brand)) brandMap.set(brand, []);
+                const grpLabel = extractSpecGroup(row);
+                const yIdx = yIndexByLabel.get(grpLabel);
+                const jitterY = deterministicJitter(idx * 37 + yIdx * 11, 0.22);
+                brandMap.get(brand).push({
+                    value: [Number(row.price_ntd), yIdx + jitterY],
+                    meta: row
+                });
+            });
+
+            const brandNames = Array.from(brandMap.keys()).sort((a, b) => brandMap.get(b).length - brandMap.get(a).length);
+            const brandSeries = brandNames.map((brand, bIdx) => {
+                const color = BRAND_COLORS[brand] || FALLBACK_PALETTE[bIdx % FALLBACK_PALETTE.length];
+                return {
+                    name: brand,
+                    type: 'scatter',
+                    data: brandMap.get(brand),
+                    symbolSize: 9,
+                    itemStyle: {
+                        color,
+                        opacity: 0.88,
+                        borderColor: '#ffffff',
+                        borderWidth: 1
+                    },
+                    z: 4
+                };
+            });
+
+            const maxOverall = Math.max(...filtered.map(r => Number(r.price_ntd)), 10000);
+            const minOverall = Math.min(...filtered.map(r => Number(r.price_ntd)), 0);
+
+            distSubtitle.textContent = `模式 B：${CAT_NAMES[selectedCat] || selectedCat} 橫向價格區間帶 × 品牌散點（共 ${filtered.length} 筆｜灰帶＝最低至最高價、黑豎線＝中位數）`;
+
+            distChart.clear();
+            distChart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(15, 23, 42, 0.94)',
+                    borderWidth: 0,
+                    textStyle: { color: '#f8fafc', fontSize: 12.5, fontFamily: 'Noto Sans TC, sans-serif' },
+                    formatter(params) {
+                        if (params.seriesType === 'custom') {
+                            const v = params.value;
+                            return [
+                                `<strong>${escapeHtml(v[5])}</strong>（n = ${v[4]}）`,
+                                `價格區間：${fmtNtd(v[1])} ～ ${fmtNtd(v[3])}`,
+                                `<strong>中位數：${fmtNtd(v[2])}</strong>`
+                            ].join('<br>');
+                        }
+                        const r = params.data?.meta;
+                        if (!r) return '';
+                        return [
+                            `<strong>${escapeHtml(r.brand)} ${escapeHtml(r.model)}</strong>`,
+                            `參考價格：<span style="color:#38bdf8;font-weight:700;">${fmtNtd(r.price_ntd)}</span>`,
+                            `匯入日期：${escapeHtml(r.imported_at)}`,
+                            `來源檔案：${escapeHtml(r.source_file)}`
+                        ].join('<br>');
+                    }
+                },
+                legend: {
+                    type: 'scroll',
+                    bottom: 4,
+                    data: brandNames,
+                    textStyle: { color: '#334155', fontSize: 12 }
+                },
+                grid: { left: 150, right: 78, top: 24, bottom: 58 },
+                xAxis: {
+                    type: 'value',
+                    name: '參考價格（NTD）',
+                    nameLocation: 'middle',
+                    nameGap: 30,
+                    min: Math.max(0, Math.floor((minOverall * 0.88) / 1000) * 1000),
+                    max: Math.ceil((maxOverall * 1.12) / 1000) * 1000,
+                    axisLabel: { color: '#475569', formatter: v => 'NT$' + Number(v).toLocaleString('zh-TW') },
+                    splitLine: { lineStyle: { type: 'dashed', color: '#e2e8f0' } }
+                },
+                yAxis: {
+                    type: 'value',
+                    min: -0.6,
+                    max: Math.max(0.6, yLabels.length - 0.4),
+                    interval: 1,
+                    axisTick: { show: false },
+                    axisLine: { lineStyle: { color: '#cbd5e1' } },
+                    splitLine: { show: false },
+                    axisLabel: {
+                        color: '#1e293b',
+                        fontWeight: 600,
+                        fontSize: 11.5,
+                        formatter(val) {
+                            return Number.isInteger(val) && yLabels[val] ? yLabels[val] : '';
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '價格區間帶',
+                        type: 'custom',
+                        z: 2,
+                        renderItem(params, api) {
+                            const yVal = api.value(0);
+                            const minX = api.coord([api.value(1), yVal]);
+                            const medX = api.coord([api.value(2), yVal]);
+                            const maxX = api.coord([api.value(3), yVal]);
+                            const count = api.value(4);
+                            const barHeight = 12;
+                            return {
+                                type: 'group',
+                                children: [
+                                    {
+                                        type: 'rect',
+                                        shape: {
+                                            x: minX[0],
+                                            y: minX[1] - barHeight / 2,
+                                            width: Math.max(4, maxX[0] - minX[0]),
+                                            height: barHeight,
+                                            r: 6
+                                        },
+                                        style: { fill: 'rgba(148, 163, 184, 0.35)' }
+                                    },
+                                    {
+                                        type: 'line',
+                                        shape: {
+                                            x1: medX[0],
+                                            y1: medX[1] - 11,
+                                            x2: medX[0],
+                                            y2: medX[1] + 11
+                                        },
+                                        style: { stroke: '#0f172a', lineWidth: 2.6 }
+                                    },
+                                    {
+                                        type: 'text',
+                                        style: {
+                                            text: `n=${count}`,
+                                            x: maxX[0] + 8,
+                                            y: maxX[1],
+                                            fill: '#64748b',
+                                            font: '500 11px "Noto Sans TC", sans-serif',
+                                            textVerticalAlign: 'middle'
+                                        }
+                                    }
+                                ]
+                            };
+                        },
+                        data: rangeData
+                    },
+                    ...brandSeries
+                ]
+            });
+        }
+
+        function renderDistributionChart() {
+            if (currentDistMode === 'boxplot') {
+                distCategorySelect.hidden = true;
+                renderDistributionBoxplot();
+            } else {
+                distCategorySelect.hidden = false;
+                renderDistributionRangeBrand();
+            }
+        }
+
+        // ======================================================================
+        // 圖表二：二手價 vs. 新品發售價折價幅度分析（讀取 valuation_formula_rules）
+        // ======================================================================
+        function computeUsedCurve(row) {
+            const msrp = Number(row.price_ntd);
+            const months = Array.from({ length: 36 }, (_, i) => i + 1);
+            const modelUp = String(row.model || '').toUpperCase().replace(/\s+/g, '');
+
+            if (row.category === 'gpu') {
+                // AMD GPU 規則
+                if (modelUp.includes('RX')) {
+                    const cfg = dbValuationRules.amdGpu?.config || { baseMonthlyDecayRate: 0.02, vramFactor: -0.0006 };
+                    const vramMatch = modelUp.match(/(\d+)G/);
+                    const vramGb = vramMatch ? Number(vramMatch[1]) : 12;
+                    const monthlyRate = Math.max(0.006, (cfg.baseMonthlyDecayRate || 0.02) + (cfg.vramFactor || -0.0006) * vramGb);
+                    return {
+                        months,
+                        usedPrices: months.map(m => Math.round(msrp * Math.max(0.25, Math.pow(1 - monthlyRate, m)))),
+                        ruleName: 'AMD GPU 動態折舊',
+                        ruleDetail: `月衰減率 ${(monthlyRate * 100).toFixed(2)}%（${vramGb}GB VRAM 修正）`
+                    };
+                }
+
+                // NVIDIA GPU 規則（對應資料庫 nvidiaGpu JSON）
+                const nvCfg = dbValuationRules.nvidiaGpu?.config || {};
+                const nvKeys = ['5090', '5080', '5070Ti', '5070', '5060Ti', '5060', '5050'];
+                let matchedKey = null;
+                for (const key of nvKeys) {
+                    if (modelUp.includes(key.toUpperCase())) {
+                        matchedKey = key;
+                        break;
+                    }
+                }
+                if (matchedKey && nvCfg[matchedKey]) {
+                    const k = Number(nvCfg[matchedKey].k);
+                    const wr = Number(nvCfg[matchedKey].warrantyRates?.['36'] ?? 0.012);
+                    return {
+                        months,
+                        usedPrices: months.map(m => Math.round(msrp * Math.exp(-k - wr * m))),
+                        ruleName: `NVIDIA RTX ${matchedKey} 公式`,
+                        ruleDetail: `落地係數 k=${k}，36月保固月衰減 ${(wr * 100).toFixed(1)}%`
+                    };
+                }
+                // RTX 30 系列或未列型號採用平滑指數折舊
+                return {
+                    months,
+                    usedPrices: months.map(m => Math.round(msrp * Math.exp(-0.14 - 0.012 * m))),
+                    ruleName: 'GPU 標準指數折舊',
+                    ruleDetail: '落地係數 k=0.14，月衰減 1.2%'
+                };
+            }
+
+            if (row.category === 'ram') {
+                const rate = Number(dbValuationRules.ram?.config?.monthlyDecayRate ?? -0.11);
+                let harmSum = 0;
+                const usedPrices = months.map(m => {
+                    harmSum += 1 / m;
+                    return Math.round(msrp * Math.exp(rate * harmSum));
+                });
+                return {
+                    months,
+                    usedPrices,
+                    ruleName: 'RAM 調和折舊公式',
+                    ruleDetail: `原價 × exp(Σ ${rate}/t)`
+                };
+            }
+
+            if (row.category === 'motherboard') {
+                const rate = Number(dbValuationRules.motherboard?.config?.monthlyDecayRate ?? 0.02);
+                return {
+                    months,
+                    usedPrices: months.map(m => Math.round(msrp * Math.pow(1 - rate, m))),
+                    ruleName: '主機板月折舊模型',
+                    ruleDetail: `每月複利折舊 ${(rate * 100).toFixed(1)}%`
+                };
+            }
+
+            // CPU（採用 generic 月折舊公式）
+            const genCfg = dbValuationRules.generic?.config || { monthlyAgeRate: 0.008, minimumAgeFactor: 0.2 };
+            const ageRate = Number(genCfg.monthlyAgeRate ?? 0.008);
+            const floorFactor = Number(genCfg.minimumAgeFactor ?? 0.2);
+            return {
+                months,
+                usedPrices: months.map(m => Math.round(msrp * Math.max(floorFactor, 1 - ageRate * m))),
+                ruleName: 'CPU 通用月折舊模型',
+                ruleDetail: `每月線性折舊 ${(ageRate * 100).toFixed(1)}%（保底 ${Math.round(floorFactor * 100)}%）`
+            };
+        }
+
+        function populateDiscountModels() {
+            const cat = discountCategorySelect.value;
+            const candidates = dbReferencePrices
+                .filter(r => r.category === cat && r.offer_type === 'standalone')
+                .sort((a, b) => Number(b.price_ntd) - Number(a.price_ntd));
+
+            discountModelSelect.replaceChildren();
+            candidates.forEach((r, idx) => {
+                const opt = document.createElement('option');
+                opt.value = String(idx);
+                opt.textContent = `${r.brand} ${r.model} (${fmtNtd(r.price_ntd)})`;
+                opt._row = r;
+                discountModelSelect.appendChild(opt);
+            });
+
+            // 預設挑選代表型號
+            const preferredKeywords = {
+                gpu: 'PRIME-RTX5070-12G',
+                cpu: '9800X3D',
+                ram: 'DDR5-6000 CL30',
+                motherboard: 'Z790-P WIFI'
+            };
+            const pref = preferredKeywords[cat];
+            if (pref) {
+                const foundIdx = candidates.findIndex(r => String(r.model).includes(pref));
+                if (foundIdx >= 0) discountModelSelect.selectedIndex = foundIdx;
+            }
+            renderDiscountChart();
+        }
+
+        function renderDiscountChart() {
+            if (!discountChart) return;
+            const selectedOption = discountModelSelect.options[discountModelSelect.selectedIndex];
+            if (!selectedOption || !selectedOption._row) return;
+
+            const row = selectedOption._row;
+            const msrp = Number(row.price_ntd);
+            const showMsrp = toggleMsrpCompare.checked;
+            const { months, usedPrices, ruleName, ruleDetail } = computeUsedCurve(row);
+
+            const p12 = usedPrices[11];
+            const save12 = msrp - p12;
+            const zhe12 = (p12 / msrp) * 10;
+
+            const p36 = usedPrices[35];
+            const save36 = msrp - p36;
+            const zhe36 = (p36 / msrp) * 10;
+
+            // 更新 4 張 KPI 卡片
+            document.getElementById('kpi-msrp').textContent = fmtNtd(msrp);
+            document.getElementById('kpi-source').textContent = `${row.imported_at} · ${row.source_file}`;
+            document.getElementById('kpi-12m').textContent = `${fmtNtd(p12)}（${zhe12.toFixed(1)} 折）`;
+            document.getElementById('kpi-12m-sub').textContent = `比新品現省 ${fmtNtd(save12)}（-${(100 - zhe12 * 10).toFixed(1)}%）`;
+            document.getElementById('kpi-36m').textContent = `${fmtNtd(p36)}（${zhe36.toFixed(1)} 折）`;
+            document.getElementById('kpi-36m-sub').textContent = `比新品現省 ${fmtNtd(save36)}（-${(100 - zhe36 * 10).toFixed(1)}%）`;
+            document.getElementById('kpi-rule-name').textContent = ruleName;
+            document.getElementById('kpi-rule-detail').textContent = ruleDetail;
+
+            const minUsed = Math.min(...usedPrices);
+            const maxUsed = Math.max(...usedPrices);
+            const yMin = showMsrp
+                ? Math.floor(Math.min(minUsed * 0.82, msrp * 0.40) / 500) * 500
+                : Math.floor((minUsed * 0.92) / 200) * 200;
+            const yMax = showMsrp
+                ? Math.ceil((msrp * 1.12) / 500) * 500
+                : Math.ceil((maxUsed * 1.08) / 200) * 200;
+
+            const gapSeriesData = usedPrices.map(u => Math.max(0, msrp - u));
+            const series = [];
+
+            if (showMsrp) {
+                // 使用堆疊線條精準繪製「二手價 ～ 新品發售價」之間的紅色折價陰影帶
+                series.push({
+                    name: '_base',
+                    type: 'line',
+                    stack: 'discountGap',
+                    data: usedPrices,
+                    smooth: true,
+                    symbol: 'none',
+                    lineStyle: { opacity: 0 },
+                    silent: true,
+                    tooltip: { show: false }
+                });
+                series.push({
+                    name: '二手折價空間（省下金額）',
+                    type: 'line',
+                    stack: 'discountGap',
+                    data: gapSeriesData,
+                    smooth: true,
+                    symbol: 'none',
+                    lineStyle: { opacity: 0 },
+                    areaStyle: { color: 'rgba(239, 68, 68, 0.14)' },
+                    silent: true,
+                    tooltip: { show: false }
+                });
+            }
+
+            series.push({
+                name: '二手估價走勢',
+                type: 'line',
+                data: usedPrices,
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 6,
+                showSymbol: false,
+                lineStyle: { width: 3.2, color: '#2563eb' },
+                itemStyle: { color: '#2563eb', borderColor: '#ffffff', borderWidth: 2 },
+                areaStyle: showMsrp ? undefined : {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(37, 99, 235, 0.22)' },
+                        { offset: 1, color: 'rgba(37, 99, 235, 0.02)' }
+                    ])
+                },
+                markPoint: {
+                    symbol: 'pin',
+                    symbolSize: 56,
+                    itemStyle: { color: showMsrp ? '#dc2626' : '#1d4ed8' },
+                    label: { fontSize: 10.5, fontWeight: 700, color: '#ffffff' },
+                    data: [
+                        { name: '12M', coord: ['12M', p12], value: `${zhe12.toFixed(1)}折` },
+                        { name: '36M', coord: ['36M', p36], value: `${zhe36.toFixed(1)}折` }
+                    ]
+                },
+                markLine: showMsrp ? {
+                    symbol: ['none', 'none'],
+                    silent: true,
+                    lineStyle: { color: '#dc2626', type: 'dashed', width: 2.2 },
+                    label: {
+                        show: true,
+                        position: 'insideStartTop',
+                        formatter: `新品發售／參考價（100%）：${fmtNtd(msrp)}`,
+                        color: '#b91c1c',
+                        fontWeight: 700,
+                        backgroundColor: '#fef2f2',
+                        borderColor: '#fca5a5',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        padding: [4, 8]
+                    },
+                    data: [{ yAxis: msrp }]
+                } : undefined
+            });
+
+            const yAxes = [
+                {
+                    type: 'value',
+                    name: '價格（NTD）',
+                    min: yMin,
+                    max: yMax,
+                    axisLabel: { color: '#475569', formatter: v => 'NT$' + Number(v).toLocaleString('zh-TW') },
+                    splitLine: { lineStyle: { type: 'dashed', color: '#e2e8f0' } }
+                }
+            ];
+
+            if (showMsrp) {
+                yAxes.push({
+                    type: 'value',
+                    name: '相對原價 (%)',
+                    min: (yMin / msrp) * 100,
+                    max: (yMax / msrp) * 100,
+                    axisLabel: { color: '#991b1b', formatter: v => Math.round(v) + '%' },
+                    nameTextStyle: { color: '#991b1b' },
+                    splitLine: { show: false }
+                });
+            }
+
+            discountChart.clear();
+            discountChart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(15, 23, 42, 0.94)',
+                    borderWidth: 0,
+                    textStyle: { color: '#f8fafc', fontSize: 12.5, fontFamily: 'Noto Sans TC, sans-serif' },
+                    formatter(params) {
+                        const target = params.find(p => p.seriesName === '二手估價走勢');
+                        if (!target) return '';
+                        const u = Number(target.value);
+                        const save = msrp - u;
+                        const pct = (u / msrp) * 100;
+                        const zhe = pct / 10;
+                        return [
+                            `<strong>${escapeHtml(row.brand)} ${escapeHtml(row.model)}（持有 ${target.axisValue}）</strong>`,
+                            `新品參考價：${fmtNtd(msrp)}`,
+                            `二手估價：<span style="color:#38bdf8;font-weight:700;">${fmtNtd(u)}</span>`,
+                            `折數：<span style="color:#fb923c;font-weight:700;">${zhe.toFixed(1)} 折（原價 ${pct.toFixed(1)}%）</span>`,
+                            `買二手現省：<span style="color:#4ade80;font-weight:700;">${fmtNtd(save)}</span>`
+                        ].join('<br>');
+                    }
+                },
+                grid: { left: 82, right: showMsrp ? 68 : 28, top: 44, bottom: 44 },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: months.map(m => `${m}M`),
+                    axisLine: { lineStyle: { color: '#cbd5e1' } },
+                    axisLabel: { color: '#475569' }
+                },
+                yAxis: yAxes,
+                series
+            });
+        }
+
+        // 事件綁定
+        btnModeBox.addEventListener('click', () => {
+            currentDistMode = 'boxplot';
+            btnModeBox.classList.add('active');
+            btnModeBox.setAttribute('aria-selected', 'true');
+            btnModeRange.classList.remove('active');
+            btnModeRange.setAttribute('aria-selected', 'false');
+            renderDistributionChart();
+        });
+
+        btnModeRange.addEventListener('click', () => {
+            currentDistMode = 'range';
+            btnModeRange.classList.add('active');
+            btnModeRange.setAttribute('aria-selected', 'true');
+            btnModeBox.classList.remove('active');
+            btnModeBox.setAttribute('aria-selected', 'false');
+            renderDistributionChart();
+        });
+
+        distCategorySelect.addEventListener('change', renderDistributionChart);
+        discountCategorySelect.addEventListener('change', populateDiscountModels);
+        discountModelSelect.addEventListener('change', renderDiscountChart);
+        toggleMsrpCompare.addEventListener('change', renderDiscountChart);
+
+        async function loadHardwareChartData() {
+            statusEl.className = 'chart-status';
+            statusEl.innerHTML = '<span>正在從資料庫讀取硬體參考價格與折舊規則…</span>';
+
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const payload = await res.json();
+                if (!payload.success || !Array.isArray(payload.referencePrices) || !payload.referencePrices.length) {
+                    throw new Error(payload.message || '資料庫回傳空資料');
+                }
+
+                dbReferencePrices = payload.referencePrices;
+                dbValuationRules = payload.valuationRules || {};
+
+                statusEl.style.display = 'none';
+
+                if (!distChart) distChart = echarts.init(distChartDom);
+                if (!discountChart) discountChart = echarts.init(discountChartDom);
+
+                renderDistributionChart();
+                populateDiscountModels();
+            } catch (err) {
+                console.error('[index charts] 載入失敗:', err);
+                statusEl.style.display = 'flex';
+                statusEl.className = 'chart-status error';
+                statusEl.innerHTML = `
+                    <span>無法連線至 <code>${API_URL}</code>（${escapeHtml(err.message)}）。請確認 <code>server.js</code> 已新增 <code>/api/charts/hardware-prices</code> 路由並重新啟動伺服器。</span>
+                    <button type="button" class="chart-retry-btn" id="btn-chart-retry">重新載入</button>
+                `;
+                document.getElementById('btn-chart-retry')?.addEventListener('click', loadHardwareChartData);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            distChart?.resize();
+            discountChart?.resize();
+        });
+
+        if (typeof echarts !== 'undefined') {
+            loadHardwareChartData();
+        } else {
+            statusEl.className = 'chart-status error';
+            statusEl.innerHTML = '<span>ECharts 圖表套件載入失敗，請檢查網路連線。</span>';
+        }
+    })();
+    </script>
 
 <script src="./chat-widget.js?v=20261004-recommend-chat-condition"></script>
 </body>
