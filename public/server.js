@@ -165,6 +165,56 @@ const server = http.createServer(async(req, res) => {
             });
             return;
         }
+        // 4. 首頁視覺化圖表資料 API
+        if (pathname === '/api/charts/hardware-prices' || pathname === '/api/charts/overview') {
+            const queryAll = (sql) => new Promise((resolve, reject) => {
+                database.all(sql, [], (err, rows) => (err ? reject(err) : resolve(rows || [])));
+            });
+            try {
+                const [referencePrices, ruleRows] = await Promise.all([
+                    queryAll(`
+                        SELECT category, brand, model, price_ntd, offer_type, notes, source_file, imported_at
+                        FROM hardware_reference_prices
+                        WHERE price_ntd > 0
+                        ORDER BY imported_at ASC, category ASC, price_ntd ASC
+                    `),
+                    queryAll(`
+                        SELECT formula_key, category, config_json, source_name, updated_at
+                        FROM valuation_formula_rules
+                    `)
+                ]);
+
+                const valuationRules = {};
+                const formulas = {};
+                for (const row of ruleRows) {
+                    try {
+                        const parsed = JSON.parse(row.config_json);
+                        formulas[row.formula_key] = parsed;
+                        valuationRules[row.formula_key] = {
+                            category: row.category,
+                            config: parsed,
+                            sourceName: row.source_name,
+                            updatedAt: row.updated_at
+                        };
+                    } catch (_) {
+                        // 略過無法解析的 JSON
+                    }
+                }
+
+                sendJson(res, 200, {
+                    success: true,
+                    referencePrices,
+                    valuationRules,
+                    data: { referencePrices, formulas }
+                });
+            } catch (err) {
+                console.error('❌ 圖表資料讀取失敗:', err);
+                sendJson(res, 500, { success: false, message: '無法讀取硬體參考價格資料庫' });
+            } finally {
+                database.close();
+            }
+            return;
+        }
         // 若找不到上述路徑，記得要關閉資料庫連線避免佔用
         database.close();
     }
